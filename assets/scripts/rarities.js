@@ -54,6 +54,7 @@ const rarities = [
   { name: 'Trauma', chance: 1 / 900000, code: `
     loop {
       pulse (0, 0.2, 0.5): #8B0000
+      wait: 0.2
     }
   ` },
   
