@@ -125,43 +125,16 @@ el.textContent="";
 })();
 </script>
 
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-
-<div id="turnstile"></div>
-
 <script>
-  let widgetId;
-
-  window.onload = () => {
-    widgetId = turnstile.render('#turnstile', {
-      sitekey: '0x4AAAAAACw7cZX4pJ-LwP66',
-      size: 'invisible',
-      callback: (token) => {
-        console.log("token:", token);
-
-        fetch('/api/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token })
-        });
-      }
-    });
-
-    turnstile.execute(widgetId);
-  };
-</script>
-
-<script>
-
 // ccu heartbeat
 const _sid = Math.random().toString(36).slice(2);
 const _hb = () => fetch("/api/ccu?sid=" + _sid, { method: "POST" });
 _hb(); // ping immediately on load
 setInterval(_hb, 60_000); // then every 60 sec and stuff
-
 </script>
+
   <img src="https://librecounter.org/counter.svg" referrerPolicy="unsafe-url" width="0" loading="lazy"/>
-  
+
 <script>
 if (navigator.userAgent.includes("Screenjesus")) {
   const img = document.createElement("img");
