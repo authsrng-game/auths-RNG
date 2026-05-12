@@ -1243,6 +1243,7 @@
 
   // ── Init ──────────────────────────────────────────────────────────────
   async function init() {
+    console.log("[settings] initializing...");
     createPendingBar();
     bindSettings();
     bindCustomMusicUpload();
@@ -1300,6 +1301,7 @@
     applyVisuals(savedSettings);
     applyMusic(savedSettings); // called ONCE on load — sets _activeMusicKey
     syncUIToSettings(savedSettings);
+    console.log("[settings] initialized.");
   }
 
   if (document.readyState === 'loading') {

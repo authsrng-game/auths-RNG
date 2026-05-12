@@ -164,6 +164,8 @@
       case 'loop':
         while (!signal.aborted) {
           await runCommands(el, cmd.body, signal, state);
+          // safety yield to prevent synchronous infinite loops from hanging the thread
+          await sleep(10);
         }
         break;
     }

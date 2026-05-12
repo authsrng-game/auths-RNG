@@ -167,7 +167,6 @@ const rarities = [
   ` },
   { name: 'francium', chance: 1 / 1100000, style: `
     color: #39FF14
-    }
   ` },
   { name: 'Impossible...', chance: 1 / 1000000, style: `
     color: #FFD700
@@ -278,7 +277,8 @@ const rarities = [
   { name: 'rare rarity :3', chance: 1 / 30000, style: `
     loop {
       color: #FFD1DC
-  }
+      wait: 1
+    }
   ` },
   { name: 'Galactic', chance: 1 / 28000 },
   { name: 'Eventide', chance: 1 / 25000 },

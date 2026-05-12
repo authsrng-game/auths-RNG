@@ -972,6 +972,7 @@ function saveAllData() {
 }
 
 function loadAllData() {
+  console.log("[main] loading all data...");
   const sr = localStorage.getItem(TOTAL_ROLLS_KEY);
   if (sr !== null) {
     totalRolls = parseInt(sr, 10);
@@ -1011,6 +1012,7 @@ function loadAllData() {
   const saAnomUsed = localStorage.getItem(ANOMALIES_USED_KEY);
   if (saAnomUsed !== null) anomaliesUsed = parseInt(saAnomUsed, 10) || 0;
   recalcLuckMultiplier();
+  console.log("[main] all data loaded.");
 }
 
 function updateTotalRolls() {
