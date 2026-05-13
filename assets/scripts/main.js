@@ -972,7 +972,7 @@ function saveAllData() {
 }
 
 function loadAllData() {
-  console.log("[main] loading all data...");
+  console.log('[main] loading all data...');
   const sr = localStorage.getItem(TOTAL_ROLLS_KEY);
   if (sr !== null) {
     totalRolls = parseInt(sr, 10);
@@ -1012,7 +1012,7 @@ function loadAllData() {
   const saAnomUsed = localStorage.getItem(ANOMALIES_USED_KEY);
   if (saAnomUsed !== null) anomaliesUsed = parseInt(saAnomUsed, 10) || 0;
   recalcLuckMultiplier();
-  console.log("[main] all data loaded.");
+  console.log('[main] all data loaded.');
 }
 
 function updateTotalRolls() {
@@ -1147,11 +1147,17 @@ function updateItem(d) {
       ? `${rarityObj.name} (1/${denom}) x${count}`
       : `${rarityObj.name} (1/${denom})`;
 
-  if (liElement._rarityStyleAC) { liElement._rarityStyleAC.abort(); liElement._rarityStyleAC = null; }
+  if (liElement._rarityStyleAC) {
+    liElement._rarityStyleAC.abort();
+    liElement._rarityStyleAC = null;
+  }
   liElement.style.color = '';
   liElement.style.transition = '';
   if (rarityObj.style && window.RarityStyle) {
-    liElement._rarityStyleAC = window.RarityStyle.apply(liElement, rarityObj.style);
+    liElement._rarityStyleAC = window.RarityStyle.apply(
+      liElement,
+      rarityObj.style,
+    );
   }
 
   liElement.classList.add('new-roll');
@@ -1592,6 +1598,8 @@ function resetInventory() {
     localStorage.removeItem('gauntletData');
     localStorage.removeItem('_beacon_v2');
     localStorage.removeItem('mutationsUnlocked');
+    localStorage.removeItem(NOTIF_KEY);
+    notifications = [];
 
     inventoryData.clear();
     inventoryList.innerHTML = '';
@@ -1750,7 +1758,10 @@ function showRollChoice(res, onDone) {
 }
 
 function spinAndReveal(res) {
-  if (window._spinnerResultAC) { window._spinnerResultAC.abort(); window._spinnerResultAC = null; }
+  if (window._spinnerResultAC) {
+    window._spinnerResultAC.abort();
+    window._spinnerResultAC = null;
+  }
   const style = window.spinnerStyleSetting || 'slot';
   const reduceMotion = document.body.classList.contains('reduce-motion');
   const effectiveStyle = reduceMotion && style === 'slot' ? 'none' : style;
@@ -1763,6 +1774,7 @@ function spinAndReveal(res) {
   if (effectiveStyle === 'none' || effectiveStyle === 'fade') {
     spinner.innerHTML = '';
     spinner.style.transition = 'none';
+    void spinner.offsetWidth; // force reflow
     spinner.style.transform = 'translateY(0)';
 
     const d = document.createElement('div');
@@ -1791,6 +1803,7 @@ function spinAndReveal(res) {
 
   // ── spinner style: slot (default) ────────────────────────────────────
   spinner.innerHTML = '';
+  void spinner.offsetWidth;
   const items = [];
   for (let i = 0; i < 50; i++) {
     items.push(rarities[Math.floor(Math.random() * rarities.length)]);
@@ -1821,7 +1834,10 @@ function spinAndReveal(res) {
       checkAchievements(res);
       updateRollsSinceRare(res);
       if (res.style && window.RarityStyle && _resultSpinDiv) {
-        window._spinnerResultAC = window.RarityStyle.apply(_resultSpinDiv, res.style);
+        window._spinnerResultAC = window.RarityStyle.apply(
+          _resultSpinDiv,
+          res.style,
+        );
       }
       maybeFireConfettiAndCutscene(res);
     },
@@ -1870,28 +1886,38 @@ const sortSelect = document.getElementById('sortSelect');
 rollBtn.addEventListener('click', () => {
   if (isCutscenePlaying) return;
   rollBtn.disabled = true;
-  spinner.style.transition = 'none';
-  spinner.style.transform = 'translateY(0)';
 
-  const result = getRandomRarity();
-  const res = result.rarity;
+  try {
+    spinner.style.transition = 'none';
+    void spinner.offsetWidth;
+    spinner.style.transform = 'translateY(0)';
 
-  if (result.wasPity) showAnomalyPopup('pity triggered!');
-  if (result.isHotPulse) rollBtn.classList.add('hot-pulse');
-  else rollBtn.classList.remove('hot-pulse');
+    const result = getRandomRarity();
+    const res = result.rarity;
 
-  const isMuted = checkMuteSettings();
-  if (!isMuted && backgroundMusic.paused && res.name !== 'Lunar') {
-    backgroundMusic.play().catch(() => {});
+    if (result.wasPity) showAnomalyPopup('pity triggered!');
+    if (result.isHotPulse) rollBtn.classList.add('hot-pulse');
+    else rollBtn.classList.remove('hot-pulse');
+
+    const isMuted = checkMuteSettings();
+    if (!isMuted && backgroundMusic.paused && res.name !== 'Lunar') {
+      backgroundMusic.play().catch(() => {});
+    }
+
+    setTimeout(() => spinAndReveal(res), 100);
+  } catch (e) {
+    console.error('roll failed:', e);
+    rollBtn.disabled = false;
   }
-  setTimeout(() => spinAndReveal(res), 100);
 });
 
-// Reset spinner state when returning to a hidden tab so roll speed doesnt glitch and ruin people's day like the doofus i am... wait no this isnt the-
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) return;
+  // check if luck boost expired while tab was hidden
+  if (luckBoostActive && Date.now() >= luckBoostEndTime) {
+    endLuckBoost();
+  }
   if (!isCutscenePlaying && rollBtn.disabled) {
-    // a roll was mid-animation while tab was hidden? go clean that shit up
     spinner.style.transition = 'none';
     spinner.style.transform = 'translateY(0)';
     spinner.innerHTML = '';

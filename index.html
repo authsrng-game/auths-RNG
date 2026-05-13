@@ -948,7 +948,8 @@ if (navigator.userAgent.includes("Screenjesus")) {
 
       if (isActive) {
         autoRollInterval = setInterval(() => {
-          if (document.hidden) return; // don't queue up clicks while tab is hidden!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+          if (document.hidden) return;
+          if (isCutscenePlaying) return; // add this
           const rollBtn = document.getElementById('rollBtn');
           if (rollBtn && !rollBtn.disabled) rollBtn.click();
         }, 500);
