@@ -1,10 +1,3 @@
-(function () {
-  var s = document.createElement('script');
-  s.src = 'legacy-polyfills.js';
-  s.async = false;
-  document.head.appendChild(s);
-})();
-
 const rollBtn = document.getElementById('rollBtn'),
   spinner = document.getElementById('spinner'),
   inventoryList = document.getElementById('inventoryList'),
@@ -16,7 +9,7 @@ const POINTS_KEY = 'shopPoints';
 const SHOP_UPGRADES_KEY = 'shopUpgrades';
 const SOLD_OUT_KEY = 'soldOutRarities';
 
-window.formatNum = function(n) {
+window.formatNum = function (n) {
   if (window.rawNumbers) return String(Math.round(n));
   if (n >= 1e9) return (n / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
   if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
@@ -24,7 +17,7 @@ window.formatNum = function(n) {
   return String(Math.round(n));
 };
 
-window.formatMult = function(n) {
+window.formatMult = function (n) {
   if (window.rawNumbers) return n.toFixed(1);
   if (n >= 1e9) return (n / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
   if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
@@ -296,43 +289,54 @@ function updateShopUI() {
   document.getElementById('pointLevel').textContent = shopUpgrades.pointMult;
 
   const luckCost = Math.floor(25 + shopUpgrades.luck * shopUpgrades.luck * 15);
-  const speedCost = Math.floor(50 + shopUpgrades.speed * shopUpgrades.speed * 55);
-  const pointCost = Math.floor(100 + shopUpgrades.pointMult * shopUpgrades.pointMult * 35);
+  const speedCost = Math.floor(
+    50 + shopUpgrades.speed * shopUpgrades.speed * 55,
+  );
+  const pointCost = Math.floor(
+    100 + shopUpgrades.pointMult * shopUpgrades.pointMult * 35,
+  );
 
   const luckBtn = document.getElementById('buyLuckBtn');
   const speedBtn = document.getElementById('buySpeedBtn');
   const pointBtn = document.getElementById('buyPointBtn');
 
-  if (luckBtn)  luckBtn.textContent  = `buy luck upgrade (${formatNum(luckCost)} pts)`;
-  if (speedBtn) speedBtn.textContent = `buy speed upgrade (${formatNum(speedCost)} pts)`;
-  if (pointBtn) pointBtn.textContent = `buy points upgrade (${formatNum(pointCost)} pts)`;
+  if (luckBtn)
+    luckBtn.textContent = `buy luck upgrade (${formatNum(luckCost)} pts)`;
+  if (speedBtn)
+    speedBtn.textContent = `buy speed upgrade (${formatNum(speedCost)} pts)`;
+  if (pointBtn)
+    pointBtn.textContent = `buy points upgrade (${formatNum(pointCost)} pts)`;
 
-  const luckCostEl  = document.getElementById('luckCost');
+  const luckCostEl = document.getElementById('luckCost');
   const speedCostEl = document.getElementById('speedCost');
   const pointCostEl = document.getElementById('pointCost');
-  if (luckCostEl)  luckCostEl.textContent  = formatNum(luckCost);
+  if (luckCostEl) luckCostEl.textContent = formatNum(luckCost);
   if (speedCostEl) speedCostEl.textContent = formatNum(speedCost);
   if (pointCostEl) pointCostEl.textContent = formatNum(pointCost);
 
-  if (luckBtn)  luckBtn.disabled  = points < luckCost  || shopUpgrades.luck >= 100;
-  if (speedBtn) speedBtn.disabled = points < speedCost || shopUpgrades.speed >= 3;
-  if (pointBtn) pointBtn.disabled = points < pointCost || shopUpgrades.pointMult >= 10;
+  if (luckBtn) luckBtn.disabled = points < luckCost || shopUpgrades.luck >= 100;
+  if (speedBtn)
+    speedBtn.disabled = points < speedCost || shopUpgrades.speed >= 3;
+  if (pointBtn)
+    pointBtn.disabled = points < pointCost || shopUpgrades.pointMult >= 10;
 
-  const magnetLevelEl  = document.getElementById('magnetLevel');
+  const magnetLevelEl = document.getElementById('magnetLevel');
   const printerLevelEl = document.getElementById('printerLevel');
-  const dupeLevelEl    = document.getElementById('dupeLevel');
+  const dupeLevelEl = document.getElementById('dupeLevel');
 
-  if (magnetLevelEl)  magnetLevelEl.textContent  = shopUpgrades.magnet || 0;
+  if (magnetLevelEl) magnetLevelEl.textContent = shopUpgrades.magnet || 0;
   if (printerLevelEl) printerLevelEl.textContent = shopUpgrades.printer || 0;
-  if (dupeLevelEl)    dupeLevelEl.textContent    = shopUpgrades.duplicate || 0;
+  if (dupeLevelEl) dupeLevelEl.textContent = shopUpgrades.duplicate || 0;
 
-  const magnetCost  = 500  + (shopUpgrades.magnet || 0) * 1000;
-  const printerCost = 1000 + (shopUpgrades.printer || 0) * (shopUpgrades.printer || 0) * 500;
-  const dupeCost    = 800  + (shopUpgrades.duplicate || 0) * (shopUpgrades.duplicate || 0) * 400;
+  const magnetCost = 500 + (shopUpgrades.magnet || 0) * 1000;
+  const printerCost =
+    1000 + (shopUpgrades.printer || 0) * (shopUpgrades.printer || 0) * 500;
+  const dupeCost =
+    800 + (shopUpgrades.duplicate || 0) * (shopUpgrades.duplicate || 0) * 400;
 
-  const magnetBtn  = document.getElementById('buyMagnetBtn');
+  const magnetBtn = document.getElementById('buyMagnetBtn');
   const printerBtn = document.getElementById('buyPrinterBtn');
-  const dupeBtn    = document.getElementById('buyDupeBtn');
+  const dupeBtn = document.getElementById('buyDupeBtn');
 
   if (magnetBtn) {
     magnetBtn.textContent = `upgrade (${formatNum(magnetCost)} pts)`;
@@ -408,7 +412,7 @@ function recalcPotionLuck() {
   potionLuckMultiplier = 1;
   activePotions = activePotions.filter((p) => p.endTime > Date.now());
   activePotions.forEach((p) => {
-    potionLuckMultiplier += (p.multiplier - 1);
+    potionLuckMultiplier += p.multiplier - 1;
   });
   recalcLuckMultiplier();
 }
@@ -524,11 +528,15 @@ function updateLuckDisplay() {
 
   if (anomaliesUsed > 0) {
     const anomalyMult = 1 + anomaliesUsed * 0.5;
-    parts.push(`anomalies: ${formatMult(anomalyMult)}x (${anomaliesUsed} consumed)`);
+    parts.push(
+      `anomalies: ${formatMult(anomalyMult)}x (${anomaliesUsed} consumed)`,
+    );
   }
 
   if (shopUpgrades.luck > 0) {
-    parts.push(`shop upgrade: ${formatMult(shopLuckMultiplier)}x (level ${shopUpgrades.luck})`);
+    parts.push(
+      `shop upgrade: ${formatMult(shopLuckMultiplier)}x (level ${shopUpgrades.luck})`,
+    );
   }
 
   if (luckBoostActive) {
@@ -560,12 +568,14 @@ let totalRolls = 0;
 const inventoryData = new Map();
 const achievementsUnlocked = new Set();
 
-const backgroundMusic = new Audio('assets/audio/y2mn5w.mp3');
+const backgroundMusic = new Audio();
+backgroundMusic.preload = 'none';
 backgroundMusic.loop = true;
 backgroundMusic.volume = 0.3;
 
-const lunarMusic = new Audio(' ');
-lunarMusic.volume = 0.6;
+const lunarMusic = new Audio();
+lunarMusic.preload = 'none';
+lunarMusic.volume = 0;
 
 const runId = Math.floor(Math.random() * 1e10);
 
@@ -596,595 +606,6 @@ setInterval(() => {
   updatePlaytimeDisplay();
 }, 1000);
 
-const rarities = [
-  { name: 'SUMMER', chance: 1 / 1000000000000000 },
-  { name: 'finished.', chance: 1 / 100000000000000 },
-  { name: 'pseudopseudohypoparathyroidism', chance: 1 / 10000000000000 },
-  { name: '...', chance: 1 / 10000000000 },
-  { name: 'the world', chance: 1 / 8200000000 },
-  { name: 'Antimatter', chance: 1 / 5000000000 },
-  { name: 'Dissociation', chance: 1 / 2000000000 },
-  { name: 'Void', chance: 1 / 1000000000 },
-  { name: 'brother what', chance: 1 / 400000000 },
-  { name: 'Schizophrenia', chance: 1 / 300000000 },
-  { name: 'Multiverse', chance: 1 / 200000000 },
-  { name: 'CHARGED', chance: 1 / 100000000 },
-  { name: 'Psychosis', chance: 1 / 50000000 },
-  { name: 'Extinction', chance: 1 / 30000000 },
-  { name: 'STOP PLAYING', chance: 1 / 10000000 },
-  { name: 'Paranoia', chance: 1 / 8000000 },
-  { name: 'Supermassive', chance: 1 / 5000000 },
-  { name: 'Delusion', chance: 1 / 3000000 },
-  { name: 'Kyawthuite', chance: 1 / 1500000 },
-  { name: 'Globular but better', chance: 1 / 1300000 },
-  { name: 'Obsession', chance: 1 / 1200000 },
-  { name: 'you shouldnt have', chance: 1 / 1156852 },
-  { name: 'francium', chance: 1 / 1100000 },
-  { name: 'Impossible...', chance: 1 / 1000000 },
-  { name: 'Trauma', chance: 1 / 900000 },
-  { name: 'Interstellar', chance: 1 / 800000 },
-  { name: 'Dissociative', chance: 1 / 700000 },
-  { name: 'Superluminal', chance: 1 / 600000 },
-  { name: 'Mania', chance: 1 / 500000 },
-  { name: 'Gravitational', chance: 1 / 400000 },
-  { name: 'Anxiety', chance: 1 / 300000 },
-  { name: 'Cosmic', chance: 1 / 250000 },
-  { name: 'Neurosis', chance: 1 / 200000 },
-  { name: 'Event Horizon', chance: 1 / 101234 },
-  { name: 'kill me', chance: 1 / 100000 },
-  { name: 'Breakdown', chance: 1 / 95000 },
-  { name: 'you suck bro', chance: 1 / 90000 },
-  { name: 'Supergalaxy', chance: 1 / 88000 },
-  { name: 'trust your luck', chance: 1 / 85000 },
-  { name: 'astatine', chance: 1 / 80000 },
-  { name: 'Depression', chance: 1 / 75000 },
-  { name: 'Obfuscate', chance: 1 / 70000 },
-  { name: 'Pulsar', chance: 1 / 65000 },
-  { name: 'enuresis', chance: 1 / 60000 },
-  { name: 'Panic', chance: 1 / 55000 },
-  { name: 'Intel', chance: 1 / 50000 },
-  { name: 'Nebulous', chance: 1 / 45000 },
-  { name: 'anorexia', chance: 1 / 40000 },
-  { name: 'Starborn', chance: 1 / 38000 },
-  { name: '...whaat', chance: 1 / 35000 },
-  { name: 'Disorder', chance: 1 / 33000 },
-  { name: 'uh...', chance: 1 / 30000 },
-  { name: 'rare rarity :3', chance: 1 / 30000 },
-  { name: 'Galactic', chance: 1 / 28000 },
-  { name: 'Eventide', chance: 1 / 25000 },
-  { name: 'Phobia', chance: 1 / 23000 },
-  { name: 'Catatonia', chance: 1 / 20000 },
-  { name: 'Astroid', chance: 1 / 19000 },
-  { name: 'Quantic', chance: 1 / 18000 },
-  { name: 'Bipolar', chance: 1 / 17000 },
-  { name: 'Photon', chance: 1 / 16000 },
-  { name: 'Redshifted', chance: 1 / 15000 },
-  { name: 'cyclothymic', chance: 1 / 14000 },
-  { name: 'oh my-', chance: 1 / 13500 },
-  { name: 'depressive', chance: 1 / 12900 },
-  { name: 'im gonna cry', chance: 1 / 12800 },
-  { name: 'dude why', chance: 1 / 12700 },
-  { name: 'Kuiper', chance: 1 / 12600 },
-  { name: 'Globular', chance: 1 / 12500 },
-  { name: 'Elliptical', chance: 1 / 12400 },
-  { name: 'Irregular', chance: 1 / 12300 },
-  { name: 'Supercluster', chance: 1 / 12200 },
-  { name: 'Hyperstar', chance: 1 / 12100 },
-  { name: 'Hypernova', chance: 1 / 12000 },
-  { name: 'youre him', chance: 1 / 11950 },
-  { name: 'Supergiant', chance: 1 / 11900 },
-  { name: 'Supervoid', chance: 1 / 11800 },
-  { name: 'Superflare but better', chance: 1 / 11700 },
-  { name: 'Supercloud but better', chance: 1 / 11600 },
-  { name: 'Singularity', chance: 1 / 11500 },
-  { name: 'Wormhole', chance: 1 / 11400 },
-  { name: 'Blackhole', chance: 1 / 11300 },
-  { name: 'Quasar', chance: 1 / 11200 },
-  { name: 'Neutron', chance: 1 / 11100 },
-  { name: 'Vortex', chance: 1 / 11050 },
-  { name: 'Protogalaxy', chance: 1 / 11000 },
-  { name: 'Hypervelocity', chance: 1 / 10900 },
-  { name: 'Exoplanet', chance: 1 / 10800 },
-  { name: 'Planetary', chance: 1 / 10700 },
-  { name: 'Perplex', chance: 1 / 10600 },
-  { name: 'Protostar', chance: 1 / 10500 },
-  { name: 'Circumstellar', chance: 1 / 10400 },
-  { name: 'microscopic', chance: 1 / 10350 },
-  { name: 'Protoplanetary', chance: 1 / 10300 },
-  { name: 'Magnetar', chance: 1 / 10200 },
-  { name: 'Stellar', chance: 1 / 10100 },
-  { name: 'cat', chance: 1 / 10000 },
-  { name: 'Chromosphere', chance: 1 / 9975 },
-  { name: 'Rogue', chance: 1 / 9950 },
-  { name: 'Lagrange', chance: 1 / 9850 },
-  { name: 'erm what', chance: 1 / 9825 },
-  { name: 'Perigee', chance: 1 / 9800 },
-  { name: 'Apogee', chance: 1 / 9775 },
-  { name: 'Ecliptic', chance: 1 / 9750 },
-  { name: 'Parsec', chance: 1 / 9725 },
-  { name: 'Lightyear', chance: 1 / 9700 },
-  { name: 'Astronomical', chance: 1 / 9675 },
-  { name: 'Coronal', chance: 1 / 9650 },
-  { name: 'Cepheid', chance: 1 / 9625 },
-  { name: 'stop', chance: 1 / 9590 },
-  { name: 'Luminosity', chance: 1 / 9575 },
-  { name: 'Accretion', chance: 1 / 9550 },
-  { name: '...?!!', chance: 1 / 9540 },
-  { name: 'Bolometric', chance: 1 / 9525 },
-  { name: 'Innovation', chance: 1 / 9520 },
-  { name: 'Spectroscopy', chance: 1 / 9500 },
-  { name: 'Parallax', chance: 1 / 9475 },
-  { name: 'Supernova', chance: 1 / 9450 },
-  { name: 'Precession', chance: 1 / 9425 },
-  { name: 'Nutation', chance: 1 / 9400 },
-  { name: 'Libration', chance: 1 / 9375 },
-  { name: 'uhmmmm how', chance: 1 / 9350 },
-  { name: 'Occultation', chance: 1 / 9325 },
-  { name: 'Coronagraph', chance: 1 / 9300 },
-  { name: 'Spectrograph', chance: 1 / 9275 },
-  { name: 'Neutrino', chance: 1 / 9250 },
-  { name: 'Interferometer', chance: 1 / 9225 },
-  { name: 'Astrometry', chance: 1 / 9200 },
-  { name: 'Photometry', chance: 1 / 9175 },
-  { name: 'Meteorite', chance: 1 / 9150 },
-  { name: 'Radiometry', chance: 1 / 9125 },
-  { name: 'rarity names suck', chance: 1 / 9100 },
-  { name: 'Thermodynamic', chance: 1 / 9075 },
-  { name: 'Supercloud', chance: 1 / 9050 },
-  { name: 'Entropy', chance: 1 / 9025 },
-  { name: '// !strict', chance: 1 / 9000 },
-  { name: 'Isentropic', chance: 1 / 8975 },
-  { name: 'Superflare', chance: 1 / 8950 },
-  { name: 'Adiabatic', chance: 1 / 8925 },
-  { name: 'Isothermal', chance: 1 / 8900 },
-  { name: 'Barotropic', chance: 1 / 8875 },
-  { name: 'Planetesimal', chance: 1 / 8850 },
-  { name: 'Polytropic', chance: 1 / 8825 },
-  { name: 'Euphoria', chance: 1 / 8800 },
-  { name: 'Relativistic', chance: 1 / 8775 },
-  { name: 'Gamma', chance: 1 / 8750 },
-  { name: 'Lorentz', chance: 1 / 8725 },
-  { name: 'Minkowski', chance: 1 / 8700 },
-  { name: 'Schwarzschild', chance: 1 / 8675 },
-  { name: 'Kerr', chance: 1 / 8650 },
-  { name: 'Ergosphere', chance: 1 / 8625 },
-  { name: 'Dwarf', chance: 1 / 8600 },
-  { name: 'Penrose', chance: 1 / 8575 },
-  { name: 'Hawking', chance: 1 / 8550 },
-  { name: 'Arcane', chance: 1 / 8500 },
-  { name: 'Cascade', chance: 1 / 8400 },
-  { name: 'Hubble', chance: 1 / 8375 },
-  { name: 'Cosmological', chance: 1 / 8350 },
-  { name: 'Redshift', chance: 1 / 8325 },
-  { name: 'rah?', chance: 1 / 8300 },
-  { name: 'Blueshift', chance: 1 / 8275 },
-  { name: 'Aberration', chance: 1 / 8225 },
-  { name: 'Lucent', chance: 1 / 8200 },
-  { name: 'Refraction', chance: 1 / 8175 },
-  { name: 'central', chance: 1 / 8170 },
-  { name: 'STOP GAMBLING', chance: 1 / 8150 },
-  { name: 'Diffraction', chance: 1 / 8125 },
-  { name: 'Celestia', chance: 1 / 8100 },
-  { name: 'Polarization', chance: 1 / 8075 },
-  { name: 'Synchrotron', chance: 1 / 8050 },
-  { name: 'Bremsstrahlung', chance: 1 / 8025 },
-  { name: 'Seraphic', chance: 1 / 8000 },
-  { name: 'Compton', chance: 1 / 7975 },
-  { name: 'Photoelectric', chance: 1 / 7950 },
-  { name: 'Nucleosynthesis', chance: 1 / 7925 },
-  { name: 'Aetherial', chance: 1 / 7900 },
-  { name: 'Fusion', chance: 1 / 7875 },
-  { name: 'Fission', chance: 1 / 7850 },
-  { name: 'Isotope', chance: 1 / 7825 },
-  { name: 'Aether', chance: 1 / 7800 },
-  { name: 'Deuterium', chance: 1 / 7775 },
-  { name: 'Tritium', chance: 1 / 7750 },
-  { name: 'Iridial', chance: 1 / 7700 },
-  { name: 'Lithium', chance: 1 / 7675 },
-  { name: 'Beryllium', chance: 1 / 7650 },
-  { name: 'Boron', chance: 1 / 7625 },
-  { name: 'Halcyon', chance: 1 / 7600 },
-  { name: 'Nitrogen', chance: 1 / 7550 },
-  { name: 'Stardrift', chance: 1 / 7500 },
-  { name: 'hell', chance: 1 / 7450 },
-  { name: 'Sodium', chance: 1 / 7425 },
-  { name: 'Moonlit', chance: 1 / 7400 },
-  { name: 'Magnesium', chance: 1 / 7375 },
-  { name: 'cotton', chance: 1 / 7350 },
-  { name: 'Aluminum', chance: 1 / 7325 },
-  { name: 'Frame', chance: 1 / 7300 },
-  { name: 'Silicon', chance: 1 / 7275 },
-  { name: 'Phosphorus', chance: 1 / 7250 },
-  { name: 'Sulfur', chance: 1 / 7225 },
-  { name: 'Chemical', chance: 1 / 7200 },
-  //i should consider making a rarities.ts at this point.. oh and maybe cutscenemap.ts as well.. it'll save like fuckin 700 lines
-  { name: 'Chlorine', chance: 1 / 7175 },
-  { name: 'Argon', chance: 1 / 7150 },
-  { name: 'Potassium', chance: 1 / 7125 },
-  { name: 'Script', chance: 1 / 7100 },
-  { name: 'Calcium', chance: 1 / 7075 },
-  { name: 'Scandium', chance: 1 / 7050 },
-  { name: 'Titanium', chance: 1 / 7025 },
-  { name: 'go outside lil bro', chance: 1 / 7000 },
-  { name: 'Vanadium', chance: 1 / 6975 },
-  { name: 'Chromium', chance: 1 / 6950 },
-  { name: 'Ruby', chance: 1 / 6935 },
-  { name: 'Manganese', chance: 1 / 6925 },
-  { name: 'Entertain', chance: 1 / 6900 },
-  { name: 'Iron-56', chance: 1 / 6875 },
-  { name: 'Nickel', chance: 1 / 6825 },
-  { name: 'Prospect', chance: 1 / 6800 },
-  { name: 'Copper', chance: 1 / 6775 },
-  { name: 'Zinc', chance: 1 / 6750 },
-  { name: 'Gallium', chance: 1 / 6725 },
-  { name: 'Infamy', chance: 1 / 6700 },
-  { name: 'Germanium', chance: 1 / 6675 },
-  { name: 'Arsenic', chance: 1 / 6650 },
-  { name: 'Selenium', chance: 1 / 6625 },
-  { name: 'Rust', chance: 1 / 6600 },
-  { name: 'Bromine', chance: 1 / 6575 },
-  { name: 'Krypton', chance: 1 / 6550 },
-  { name: 'Rubidium', chance: 1 / 6525 },
-  { name: 'Low', chance: 1 / 6500 },
-  { name: 'Strontium', chance: 1 / 6475 },
-  { name: 'Yttrium', chance: 1 / 6450 },
-  { name: 'Zirconium', chance: 1 / 6425 },
-  { name: 'Toggle', chance: 1 / 6400 },
-  { name: 'Niobium', chance: 1 / 6375 },
-  { name: 'Molybdenum', chance: 1 / 6350 },
-  { name: 'Technetium', chance: 1 / 6325 },
-  { name: 'Doppler', chance: 1 / 6300 },
-  { name: 'Ruthenium', chance: 1 / 6275 },
-  { name: 'Rhodium', chance: 1 / 6250 },
-  { name: 'Palladium', chance: 1 / 6225 },
-  { name: 'Carpal', chance: 1 / 6200 },
-  { name: 'Silver', chance: 1 / 6175 },
-  { name: 'Cadmium', chance: 1 / 6150 },
-  { name: 'Indium', chance: 1 / 6125 },
-  { name: 'Interfere', chance: 1 / 6100 },
-  { name: 'Tin', chance: 1 / 6075 },
-  { name: 'cloudy', chance: 1 / 6050 },
-  { name: 'Antimony', chance: 1 / 6025 },
-  { name: 'Intermission', chance: 1 / 6000 },
-  { name: 'Tellurium', chance: 1 / 5975 },
-  { name: 'Iodine', chance: 1 / 5950 },
-  { name: 'Xenon', chance: 1 / 5925 },
-  { name: 'Alternate', chance: 1 / 5900 },
-  { name: 'Cesium', chance: 1 / 5875 },
-  { name: 'SyntaxError', chance: 1 / 5850 },
-  { name: 'Barium', chance: 1 / 5825 },
-  { name: 'Subzero', chance: 1 / 5800 },
-  { name: 'Lanthanum', chance: 1 / 5775 },
-  { name: 'Cerium', chance: 1 / 5750 },
-  { name: 'Praseodymium', chance: 1 / 5725 },
-  { name: 'Automatic', chance: 1 / 5700 },
-  { name: 'Neodymium', chance: 1 / 5675 },
-  { name: 'Promethium', chance: 1 / 5650 },
-  { name: 'Samarium', chance: 1 / 5625 },
-  { name: 'Encount', chance: 1 / 5600 },
-  { name: 'Europium', chance: 1 / 5575 },
-  { name: '🦶', chance: 1 / 5550 },
-  { name: 'Gadolinium', chance: 1 / 5525 },
-  { name: 'Telepath', chance: 1 / 5500 },
-  { name: 'Terbium', chance: 1 / 5475 },
-  { name: 'Dysprosium', chance: 1 / 5450 },
-  { name: 'Holmium', chance: 1 / 5425 },
-  { name: 'Airborne', chance: 1 / 5400 },
-  { name: 'Erbium', chance: 1 / 5375 },
-  { name: 'Thulium', chance: 1 / 5350 },
-  { name: 'Ytterbium', chance: 1 / 5325 },
-  { name: 'Viking', chance: 1 / 5300 },
-  { name: 'Lutetium', chance: 1 / 5275 },
-  { name: 'Hafnium', chance: 1 / 5250 },
-  { name: 'Tantalum', chance: 1 / 5225 },
-  { name: 'Wraith', chance: 1 / 5200 },
-  { name: 'Tungsten', chance: 1 / 5175 },
-  { name: 'Rhenium', chance: 1 / 5150 },
-  { name: 'Osmium', chance: 1 / 5125 },
-  { name: 'Spectral', chance: 1 / 5100 },
-  { name: 'Iridium', chance: 1 / 5075 },
-  { name: 'Platinum', chance: 1 / 5050 },
-  { name: 'Polonium', chance: 1 / 5025 },
-  { name: 'Nebula', chance: 1 / 5000 },
-  { name: 'Radon', chance: 1 / 4975 },
-  { name: 'Radium', chance: 1 / 4950 },
-  { name: 'Actinium', chance: 1 / 4925 },
-  { name: 'Vesper', chance: 1 / 4900 },
-  { name: 'Thorium', chance: 1 / 4875 },
-  { name: 'Protactinium', chance: 1 / 4850 },
-  { name: 'Uranium', chance: 1 / 4825 },
-  { name: 'Command', chance: 1 / 4800 },
-  { name: 'Neptunium', chance: 1 / 4775 },
-  { name: 'Plutonium', chance: 1 / 4750 },
-  { name: 'Americium', chance: 1 / 4725 },
-  { name: 'Quell', chance: 1 / 4700 },
-  { name: 'Curium', chance: 1 / 4675 },
-  { name: 'Berkelium', chance: 1 / 4650 },
-  { name: 'Californium', chance: 1 / 4625 },
-  { name: 'Unravel', chance: 1 / 4600 },
-  { name: 'Einsteinium', chance: 1 / 4575 },
-  { name: 'Fermium', chance: 1 / 4550 },
-  { name: 'Mendelevium', chance: 1 / 4525 },
-  { name: 'Decimate', chance: 1 / 4500 },
-  { name: 'Nobelium', chance: 1 / 4475 },
-  { name: 'Lawrencium', chance: 1 / 4450 },
-  { name: 'Rutherfordium', chance: 1 / 4425 },
-  { name: 'Comet', chance: 1 / 4400 },
-  { name: 'Dubnium', chance: 1 / 4375 },
-  { name: 'Seaborgium', chance: 1 / 4350 },
-  { name: 'Bohrium', chance: 1 / 4325 },
-  { name: 'Melancholy', chance: 1 / 4300 },
-  { name: 'Hassium', chance: 1 / 4275 },
-  { name: 'Meitnerium', chance: 1 / 4250 },
-  { name: 'Darmstadtium', chance: 1 / 4225 },
-  { name: 'Asteroid', chance: 1 / 4200 },
-  { name: 'Roentgenium', chance: 1 / 4175 },
-  { name: 'Copernicium', chance: 1 / 4150 },
-  { name: 'Nihonium', chance: 1 / 4125 },
-  { name: 'Radiation', chance: 1 / 4100 },
-  { name: 'Flerovium', chance: 1 / 4075 },
-  { name: 'Moscovium', chance: 1 / 4050 },
-  { name: 'Livermorium', chance: 1 / 4025 },
-  { name: 'Escensia', chance: 1 / 4000 },
-  { name: 'Tennessine', chance: 1 / 3975 },
-  { name: 'Oganesson', chance: 1 / 3950 },
-  { name: 'Ionosphere', chance: 1 / 3925 },
-  { name: 'Supermoon', chance: 1 / 3900 },
-  { name: 'Mesosphere', chance: 1 / 3875 },
-  { name: 'Stratosphere', chance: 1 / 3850 },
-  { name: 'Troposphere', chance: 1 / 3825 },
-  { name: 'Anxious', chance: 1 / 3800 },
-  { name: 'Exosphere', chance: 1 / 3775 },
-  { name: 'Thermosphere', chance: 1 / 3750 },
-  { name: 'Magnetosphere', chance: 1 / 3725 },
-  { name: 'Dreamless', chance: 1 / 3700 },
-  { name: 'Heliosphere', chance: 1 / 3675 },
-  { name: 'Plasmasphere', chance: 1 / 3650 },
-  { name: 'Photosphere', chance: 1 / 3625 },
-  { name: 'Wanderer', chance: 1 / 3600 },
-  { name: 'Radiative', chance: 1 / 3575 },
-  { name: 'Convective', chance: 1 / 3550 },
-  { name: 'Tachocline', chance: 1 / 3525 },
-  { name: 'Corpulence', chance: 1 / 3500 },
-  { name: 'Nucleon', chance: 1 / 3475 },
-  { name: 'Solutions', chance: 1 / 3450 },
-  { name: 'Proton', chance: 1 / 3425 },
-  { name: 'ok bro', chance: 1 / 3410 },
-  { name: 'Points', chance: 1 / 3400 },
-  { name: 'Electron', chance: 1 / 3375 },
-  { name: 'just stop', chance: 1 / 3350 },
-  { name: 'Positron', chance: 1 / 3325 },
-  { name: 'Abandoned', chance: 1 / 3300 },
-  { name: 'Antiproton', chance: 1 / 3275 },
-  { name: 'Vertical', chance: 1 / 3250 },
-  { name: 'Antineutron', chance: 1 / 3225 },
-  { name: 'touch grass bro', chance: 1 / 3200 },
-  { name: 'Muon', chance: 1 / 3175 },
-  { name: 'Null', chance: 1 / 3170 },
-  { name: 'Spectrum', chance: 1 / 3150 },
-  { name: 'Tau', chance: 1 / 3145 },
-  { name: 'deja vu', chance: 1 / 3128 },
-  { name: 'Pioneer', chance: 1 / 3115 },
-  { name: 'Perplexed', chance: 1 / 3100 },
-  { name: 'Kaon', chance: 1 / 3085 },
-  { name: 'Meson', chance: 1 / 3070 },
-  { name: 'Zenith', chance: 1 / 3050 },
-  { name: 'The End?', chance: 1 / 3000 },
-  { name: 'Fermion', chance: 1 / 2990 },
-  { name: 'Spectra', chance: 1 / 2978 },
-  { name: 'Boson', chance: 1 / 2965 },
-  { name: 'Poltergeist', chance: 1 / 2950 },
-  { name: 'Gluon', chance: 1 / 2940 },
-  { name: 'Graviton', chance: 1 / 2925 },
-  { name: 'MURDER', chance: 1 / 2900 },
-  { name: 'Quark', chance: 1 / 2875 },
-  { name: 'Pixelated', chance: 1 / 2850 },
-  { name: 'Charm', chance: 1 / 2840 },
-  { name: 'Strange', chance: 1 / 2825 },
-  { name: 'Nightmare', chance: 1 / 2800 },
-  { name: 'Bottom', chance: 1 / 2790 },
-  { name: 'Top', chance: 1 / 2775 },
-  { name: 'Prophetic', chance: 1 / 2750 },
-  { name: 'Upsilon', chance: 1 / 2740 },
-  { name: 'Omega', chance: 1 / 2725 },
-  { name: 'Lambda', chance: 1 / 2710 },
-  { name: 'Delta', chance: 1 / 2665 },
-  { name: 'Desire', chance: 1 / 2650 },
-  { name: 'Experience', chance: 1 / 2637 },
-  { name: 'Daydream', chance: 1 / 2600 },
-  { name: 'Alpha', chance: 1 / 2560 },
-  { name: 'bridged', chance: 1 / 2550 },
-  { name: 'Peripherals', chance: 1 / 2500 },
-  { name: 'kappa', chance: 1 / 2490 },
-  { name: 'Micro', chance: 1 / 2450 },
-  { name: 'Terminal', chance: 1 / 2400 },
-  { name: 'pale', chance: 1 / 2390 },
-  { name: 'Overload', chance: 1 / 2360 },
-  { name: 'Equinox', chance: 1 / 2300 },
-  { name: 'Thoughts', chance: 1 / 2250 },
-  { name: 'Coherence', chance: 1 / 2200 },
-  { name: 'Verbose', chance: 1 / 2150 },
-  { name: 'Pillars', chance: 1 / 2140 },
-  { name: 'horsehead hahahaha', chance: 1 / 2125 },
-  { name: 'Solstice', chance: 1 / 2100 },
-  { name: 'Orion', chance: 1 / 2090 },
-  { name: 'Crab', chance: 1 / 2075 },
-  { name: 'Paralysis', chance: 1 / 2050 },
-  { name: 'Veil', chance: 1 / 2040 },
-  { name: 'Ring', chance: 1 / 2025 },
-  { name: 'Paradox', chance: 1 / 2000 },
-  { name: 'Helix', chance: 1 / 1990 },
-  { name: 'Dumbbell', chance: 1 / 1975 },
-  { name: 'Duration', chance: 1 / 1950 },
-  { name: 'Owl', chance: 1 / 1940 },
-  { name: 'Butterfly', chance: 1 / 1925 },
-  { name: 'Despair', chance: 1 / 1900 },
-  { name: 'Eskimo', chance: 1 / 1890 },
-  { name: 'Lagoon', chance: 1 / 1875 },
-  { name: 'funny haha', chance: 1 / 1870 },
-  { name: 'Wildfire', chance: 1 / 1854 },
-  { name: 'Trifid', chance: 1 / 1840 },
-  { name: 'Eagle', chance: 1 / 1825 },
-  { name: 'Insanity', chance: 1 / 1800 },
-  { name: 'Rosette', chance: 1 / 1790 },
-  { name: 'Purpose', chance: 1 / 1750 },
-  { name: 'Pelican', chance: 1 / 1725 },
-  { name: 'Lunarity', chance: 1 / 1700 },
-  { name: 'Swan', chance: 1 / 1690 },
-  { name: 'California', chance: 1 / 1675 },
-  { name: 'Twilight', chance: 1 / 1650 },
-  { name: 'Cone', chance: 1 / 1640 },
-  { name: 'Iris', chance: 1 / 1625 },
-  { name: 'Constellation', chance: 1 / 1600 },
-  { name: 'still playing?', chance: 1 / 1590 },
-  { name: 'Jellyfish', chance: 1 / 1575 },
-  { name: 'Gold', chance: 1 / 1570 },
-  { name: 'wowie', chance: 1 / 1570 },
-  { name: 'Heart', chance: 1 / 1560 },
-  { name: 'Soul', chance: 1 / 1555 },
-  { name: 'Aperture', chance: 1 / 1550 },
-  { name: 'Eclipse', chance: 1 / 1500 },
-  { name: 'Flame', chance: 1 / 1490 },
-  { name: 'Tarantula', chance: 1 / 1475 },
-  { name: '<>', chance: 1 / 1466 },
-  { name: 'Keyhole', chance: 1 / 1455 },
-  { name: 'Inferno', chance: 1 / 1444 },
-  { name: 'Carina', chance: 1 / 1430 },
-  { name: 'Tempered', chance: 1 / 1425 },
-  { name: 'Documented', chance: 1 / 1410 },
-  { name: 'Matrix', chance: 1 / 1405 },
-  { name: 'Grayscale', chance: 1 / 1400 },
-  { name: 'Homunculus', chance: 1 / 1390 },
-  { name: 'Garden', chance: 1 / 1380 },
-  { name: 'Constant', chance: 1 / 1350 },
-  { name: 'Trapezium', chance: 1 / 1335 },
-  { name: 'Access', chance: 1 / 1320 },
-  { name: 'Betelgeuse', chance: 1 / 1310 },
-  { name: 'Gladiator', chance: 1 / 1300 },
-  { name: 'Rigel', chance: 1 / 1285 },
-  { name: 'Sirius', chance: 1 / 1270 },
-  { name: 'Amethyst', chance: 1 / 1260 },
-  { name: 'Blink', chance: 1 / 1245 },
-  { name: 'Cobalt', chance: 1 / 1230 },
-  { name: 'Procyon', chance: 1 / 1215 },
-  { name: 'Terrifying', chance: 1 / 1200 },
-  { name: 'Aldebaran', chance: 1 / 1190 },
-  { name: 'Heliocentric', chance: 1 / 1175 },
-  { name: 'Antares', chance: 1 / 1160 },
-  { name: 'Arcturus', chance: 1 / 1140 },
-  { name: 'Vega', chance: 1 / 1125 },
-  { name: 'anyone there?', chance: 1 / 1100 },
-  { name: 'Capella', chance: 1 / 1090 },
-  { name: 'Stressed', chance: 1 / 1075 },
-  { name: 'Pollux', chance: 1 / 1060 },
-  { name: 'Divine', chance: 1 / 1050 },
-  { name: 'Fomalhaut', chance: 1 / 1035 },
-  { name: 'Meteor', chance: 1 / 1025 },
-  { name: 'Deneb', chance: 1 / 1010 },
-  { name: 'Lunar', chance: 1 / 1000 },
-  { name: 'Regulus', chance: 1 / 990 },
-  { name: 'Hopeless', chance: 1 / 975 },
-  { name: 'Altair', chance: 1 / 960 },
-  { name: 'Appalled', chance: 1 / 950 },
-  { name: 'Spica', chance: 1 / 935 },
-  { name: 'Dreamy', chance: 1 / 930 },
-  { name: 'Index', chance: 1 / 915 },
-  { name: 'Catastropic', chance: 1 / 900 },
-  { name: 'Achernar', chance: 1 / 885 },
-  { name: 'Gravity', chance: 1 / 865 },
-  { name: 'Hadar', chance: 1 / 850 },
-  { name: 'Equations', chance: 1 / 830 },
-  { name: 'Canopus', chance: 1 / 815 },
-  { name: 'Tidal', chance: 1 / 800 },
-  { name: 'Lucky', chance: 1 / 777 },
-  { name: 'Starlight', chance: 1 / 750 },
-  { name: 'Proxima', chance: 1 / 735 },
-  { name: 'IO', chance: 1 / 720 },
-  { name: 'Merciful', chance: 1 / 700 },
-  { name: 'Worried', chance: 1 / 675 },
-  { name: 'the spooky', chance: 1 / 666 },
-  { name: 'Process', chance: 1 / 650 },
-  { name: 'Celestial', chance: 1 / 625 },
-  { name: 'Divinity', chance: 1 / 600 },
-  { name: 'Lonely', chance: 1 / 575 },
-  { name: 'Storm', chance: 1 / 550 },
-  { name: 'Cosmos', chance: 1 / 535 },
-  { name: 'Glass', chance: 1 / 520 },
-  { name: 'Lazer', chance: 1 / 500 },
-  { name: 'Jetdroid', chance: 1 / 475 },
-  { name: 'Prism', chance: 1 / 450 },
-  { name: 'Ultra', chance: 1 / 430 },
-  { name: 'Astral', chance: 1 / 400 },
-  { name: 'Fearful', chance: 1 / 375 },
-  { name: 'Orbit', chance: 1 / 350 },
-  { name: 'Solar', chance: 1 / 325 },
-  { name: 'Chroma', chance: 1 / 300 },
-  { name: 'Guilty', chance: 1 / 275 },
-  { name: 'Theory', chance: 1 / 250 },
-  { name: 'heartstruck', chance: 1 / 230 },
-  { name: 'Crazy', chance: 1 / 200 },
-  { name: 'Saturn', chance: 1 / 185 },
-  { name: 'Lapis', chance: 1 / 170 },
-  { name: 'Fabled', chance: 1 / 150 },
-  { name: 'Troubled', chance: 1 / 135 },
-  { name: 'Superior', chance: 1 / 120 },
-  { name: 'Jupiter', chance: 1 / 110 },
-  { name: 'Rainbow', chance: 1 / 100 },
-  { name: 'meh', chance: 1 / 95 },
-  { name: 'Distorted', chance: 1 / 90 },
-  { name: 'windy', chance: 1 / 86 },
-  { name: 'sandy', chance: 1 / 82 },
-  { name: 'Hardcore', chance: 1 / 80 },
-  { name: 'Berry', chance: 1 / 75 },
-  { name: 'Lucid', chance: 1 / 72 },
-  { name: 'Legendary', chance: 1 / 70 },
-  { name: 'Mars', chance: 1 / 65 },
-  { name: 'Neon', chance: 1 / 60 },
-  { name: 'Comfort', chance: 1 / 55 },
-  { name: 'Amazing', chance: 1 / 50 },
-  { name: 'Voltage', chance: 1 / 47 },
-  { name: 'skill issue', chance: 1 / 46 },
-  { name: 'Epic', chance: 1 / 45 },
-  { name: 'Venus', chance: 1 / 40 },
-  { name: 'Formula', chance: 1 / 37 },
-  { name: 'Rare', chance: 1 / 35 },
-  { name: 'Apple', chance: 1 / 33 },
-  { name: 'Good', chance: 1 / 30 },
-  { name: 'Mercury', chance: 1 / 26 },
-  { name: 'Cherry', chance: 1 / 23 },
-  { name: 'Decent', chance: 1 / 20 },
-  { name: 'Tired', chance: 1 / 15 },
-  { name: 'Cool', chance: 1 / 10 },
-  { name: 'roll more CMON', chance: 1 / 9 },
-  { name: 'Blown', chance: 1 / 7 },
-  { name: 'Garbage', chance: 1 / 5 },
-  { name: 'Uncommon', chance: 1 / 4 },
-  { name: 'Common', chance: 1 / 2 },
-];
-
-// Cutscene mapping... god this part is messy as fuck lmao
-const cutsceneMap = {
-  cat: 'assets/videos/cat.mp4',
-  SUMMER: 'assets/videos/SUMMER.mp4',
-  Points: 'assets/videos/averagecutscene1.mp4',
-  Electron: 'assets/videos/averagecutscene1.mp4',
-  Positron: 'assets/videos/averagecutscene1.mp4',
-  Promethium: 'assets/videos/averagecutscene1.mp4',
-  Neodymium: 'assets/videos/averagecutscene1.mp4',
-  Automatic: 'assets/videos/averagecutscene1.mp4',
-  Praseodymium: 'assets/videos/averagecutscene1.mp4',
-  Cerium: 'assets/videos/averagecutscene1.mp4',
-  Lanthanum: 'assets/videos/averagecutscene1.mp4',
-  Subzero: 'assets/videos/averagecutscene1.mp4',
-  Barium: 'assets/videos/averagecutscene1.mp4',
-  SyntaxError: 'assets/videos/averagecutscene1.mp4',
-  Cesium: 'assets/videos/averagecutscene1.mp4',
-  Alternate: 'assets/videos/averagecutscene1.mp4',
-  Titanium: 'assets/videos/averagecutscene1.mp4',
-  Scandium: 'assets/videos/averagecutscene1.mp4',
-  Calcium: 'assets/videos/averagecutscene1.mp4',
-  Script: 'assets/videos/averagecutscene1.mp4',
-};
 let isCutscenePlaying = false;
 
 function playCutscene(rarityName, callback) {
@@ -1545,12 +966,13 @@ function saveAllData() {
     JSON.stringify({
       active: activePotions,
       duplicateLeft: duplicateRollsLeft,
-    })
+    }),
   );
   Beacon.save();
 }
 
 function loadAllData() {
+  console.log('[main] loading all data...');
   const sr = localStorage.getItem(TOTAL_ROLLS_KEY);
   if (sr !== null) {
     totalRolls = parseInt(sr, 10);
@@ -1590,6 +1012,7 @@ function loadAllData() {
   const saAnomUsed = localStorage.getItem(ANOMALIES_USED_KEY);
   if (saAnomUsed !== null) anomaliesUsed = parseInt(saAnomUsed, 10) || 0;
   recalcLuckMultiplier();
+  console.log('[main] all data loaded.');
 }
 
 function updateTotalRolls() {
@@ -1607,7 +1030,11 @@ function addToInventory(o) {
     updateItem(inventoryData.get(o.name));
     inventoryList.appendChild(li);
   }
-  const isNearBottom = inventoryList.scrollHeight - inventoryList.scrollTop - inventoryList.clientHeight < 60;
+  const isNearBottom =
+    inventoryList.scrollHeight -
+      inventoryList.scrollTop -
+      inventoryList.clientHeight <
+    60;
   if (isNearBottom) inventoryList.scrollTop = inventoryList.scrollHeight;
   updateCollectedCounter();
 
@@ -1707,6 +1134,7 @@ setInterval(() => {
   if (shopUpgrades.printer > 0) {
     points += shopUpgrades.printer;
     updatePointsDisplay();
+    updateShopUI();
   }
 }, 1000);
 
@@ -1719,6 +1147,19 @@ function updateItem(d) {
       ? `${rarityObj.name} (1/${denom}) x${count}`
       : `${rarityObj.name} (1/${denom})`;
 
+  if (liElement._rarityStyleAC) {
+    liElement._rarityStyleAC.abort();
+    liElement._rarityStyleAC = null;
+  }
+  liElement.style.color = '';
+  liElement.style.transition = '';
+  if (rarityObj.style && window.RarityStyle) {
+    liElement._rarityStyleAC = window.RarityStyle.apply(
+      liElement,
+      rarityObj.style,
+    );
+  }
+
   liElement.classList.add('new-roll');
   setTimeout(() => liElement.classList.remove('new-roll'), 2000);
 
@@ -1730,11 +1171,11 @@ function updateItem(d) {
     liElement.classList.remove('sold-out');
   }
 
-    // Remove previous sell handler before adding a new one (prevents listener accumulation)
-    if (liElement._sellHandler) {
-      liElement.removeEventListener('dblclick', liElement._sellHandler);
-    }
-    liElement._sellHandler = function sellHandler() {
+  // Remove previous sell handler before adding a new one (prevents listener accumulation)
+  if (liElement._sellHandler) {
+    liElement.removeEventListener('dblclick', liElement._sellHandler);
+  }
+  liElement._sellHandler = function sellHandler() {
     const currentData = inventoryData.get(rarityObj.name);
     if (!currentData) return;
 
@@ -1768,7 +1209,13 @@ function updateItem(d) {
 }
 
 function getRandomRarity() {
-  return Beacon.roll(rarities, globalLuckMultiplier, inventoryData, shopUpgrades, luckBoostActive);
+  return Beacon.roll(
+    rarities,
+    globalLuckMultiplier,
+    inventoryData,
+    shopUpgrades,
+    luckBoostActive,
+  );
 }
 
 function checkAchievements(currentRarity) {
@@ -2079,7 +1526,7 @@ function renderSortedInventory(mode) {
   }
 
   items.forEach((d) => inventoryList.appendChild(d.liElement));
-  inventoryList.scrollTop = savedScroll; 
+  inventoryList.scrollTop = savedScroll;
 }
 
 const savedPoints = localStorage.getItem(POINTS_KEY);
@@ -2110,7 +1557,7 @@ if (savedPotions) {
     // merge into defaults so missing/NaN keys fall back to 0
     for (const key of Object.keys(playerPotions)) {
       const v = loaded[key];
-      playerPotions[key] = (typeof v === 'number' && !isNaN(v)) ? v : 0;
+      playerPotions[key] = typeof v === 'number' && !isNaN(v) ? v : 0;
     }
   } catch {}
 }
@@ -2125,11 +1572,6 @@ if (savedActive) {
     updateActivePotionsDisplay();
   } catch {}
 }
-
-updatePotionUI();
-recalcLuckMultiplier();
-updatePointsDisplay();
-updateShopUI();
 
 function resetInventory() {
   if (
@@ -2156,6 +1598,8 @@ function resetInventory() {
     localStorage.removeItem('gauntletData');
     localStorage.removeItem('_beacon_v2');
     localStorage.removeItem('mutationsUnlocked');
+    localStorage.removeItem(NOTIF_KEY);
+    notifications = [];
 
     inventoryData.clear();
     inventoryList.innerHTML = '';
@@ -2216,7 +1660,7 @@ function startLuckBoost() {
   luckBoostActive = true;
   luckBoostEndTime = Date.now() + 60000;
   recalcLuckMultiplier();
-  
+
   document.getElementById('luckBoostOverlay').style.display = 'flex';
 
   localStorage.setItem(
@@ -2279,8 +1723,10 @@ function showRollChoice(res, onDone) {
   const pts = calculateRarityPoints(res);
 
   document.getElementById('rollChoiceRarity').textContent = res.name;
-  document.getElementById('rollChoiceChance').textContent = `1/${denom.toLocaleString()}`;
-  document.getElementById('rollChoiceSellAmt').textContent = `sell value: ${formatNum(pts)} pts`;
+  document.getElementById('rollChoiceChance').textContent =
+    `1/${denom.toLocaleString()}`;
+  document.getElementById('rollChoiceSellAmt').textContent =
+    `sell value: ${formatNum(pts)} pts`;
   modal.style.display = 'flex';
 
   const cleanup = (fn) => {
@@ -2289,38 +1735,46 @@ function showRollChoice(res, onDone) {
     onDone();
   };
 
-  document.getElementById('rollChoiceSell').onclick = () => cleanup(() => {
-    points += pts;
-    soldOutRarities.set(res.name, { count: 1 });
-    // still add to inventory so it shows as collected, just mark sold
-    addToInventory(res);
-    updatePointsDisplay();
-    updateShopUI();
-    showAnomalyPopup(`sold ${res.name} for ${formatNum(pts)} pts`);
-  });
+  document.getElementById('rollChoiceSell').onclick = () =>
+    cleanup(() => {
+      points += pts;
+      soldOutRarities.set(res.name, { count: 1 });
+      // still add to inventory so it shows as collected, just mark sold
+      addToInventory(res);
+      updatePointsDisplay();
+      updateShopUI();
+      showAnomalyPopup(`sold ${res.name} for ${formatNum(pts)} pts`);
+    });
 
-  document.getElementById('rollChoiceKeep').onclick = () => cleanup(() => {
-    addToInventory(res);
-  });
+  document.getElementById('rollChoiceKeep').onclick = () =>
+    cleanup(() => {
+      addToInventory(res);
+    });
 
-  document.getElementById('rollChoicePass').onclick = () => cleanup(() => {
-    showAnomalyPopup(`passed on ${res.name}`);
-  });
+  document.getElementById('rollChoicePass').onclick = () =>
+    cleanup(() => {
+      showAnomalyPopup(`passed on ${res.name}`);
+    });
 }
 
 function spinAndReveal(res) {
+  if (window._spinnerResultAC) {
+    window._spinnerResultAC.abort();
+    window._spinnerResultAC = null;
+  }
   const style = window.spinnerStyleSetting || 'slot';
   const reduceMotion = document.body.classList.contains('reduce-motion');
   const effectiveStyle = reduceMotion && style === 'slot' ? 'none' : style;
 
   playRollSound();
 
-  if (totalRolls % 100 === 0) startLuckBoost();
+  if (totalRolls > 0 && totalRolls % 100 === 0) startLuckBoost();
 
   // ── spinner style: none or fade ──────────────────────────────────────
   if (effectiveStyle === 'none' || effectiveStyle === 'fade') {
     spinner.innerHTML = '';
     spinner.style.transition = 'none';
+    void spinner.offsetWidth; // force reflow
     spinner.style.transform = 'translateY(0)';
 
     const d = document.createElement('div');
@@ -2339,6 +1793,9 @@ function spinAndReveal(res) {
       awardAnomalyIfEligible(res);
       checkAchievements(res);
       updateRollsSinceRare(res);
+      if (res.style && window.RarityStyle) {
+        window._spinnerResultAC = window.RarityStyle.apply(d, res.style);
+      }
       maybeFireConfettiAndCutscene(res);
     }, delay);
     return;
@@ -2346,16 +1803,19 @@ function spinAndReveal(res) {
 
   // ── spinner style: slot (default) ────────────────────────────────────
   spinner.innerHTML = '';
+  void spinner.offsetWidth;
   const items = [];
   for (let i = 0; i < 50; i++) {
     items.push(rarities[Math.floor(Math.random() * rarities.length)]);
   }
   items.push(res);
-  items.forEach((o) => {
+  let _resultSpinDiv = null;
+  items.forEach((o, idx) => {
     const d = document.createElement('div');
     d.className = 'spin-item';
     d.textContent = o.name;
     spinner.appendChild(d);
+    if (idx === items.length - 1) _resultSpinDiv = d;
   });
 
   const h = 48,
@@ -2365,49 +1825,24 @@ function spinAndReveal(res) {
   spinner.style.transition = `transform ${duration}s ease-out`;
   spinner.style.transform = `translateY(-${scroll}px)`;
 
-  setTimeout(() => {
-    totalRolls++;
-    updateTotalRolls();
-    addToInventory(res);
-    awardAnomalyIfEligible(res);
-    checkAchievements(res);
-    updateRollsSinceRare(res);
-    maybeFireConfettiAndCutscene(res);
-  }, duration * 1000 + 1000);
-}
-
-function maybeFireConfettiAndCutscene(res) {
-  const denom = Math.round(1 / res.chance);
-  const cutsceneThresh = window.cutsceneThreshold || 0;
-  const confettiThresh = window.confettiThreshold || 0;
-
-  if (confettiThresh > 0 && denom >= confettiThresh) triggerConfetti();
-
-  const hasCutscene = !!cutsceneMap[res.name];
-  const cutsceneAllowed =
-    hasCutscene && (cutsceneThresh === 0 || denom >= cutsceneThresh);
-
-  const afterReveal = () => {
-    const isMuted = checkMuteSettings();
-    if (res.name === 'Lunar') {
-      if (!isMuted) {
-        lunarMusic.currentTime = 0;
-        lunarMusic.play();
+  setTimeout(
+    () => {
+      totalRolls++;
+      updateTotalRolls();
+      addToInventory(res);
+      awardAnomalyIfEligible(res);
+      checkAchievements(res);
+      updateRollsSinceRare(res);
+      if (res.style && window.RarityStyle && _resultSpinDiv) {
+        window._spinnerResultAC = window.RarityStyle.apply(
+          _resultSpinDiv,
+          res.style,
+        );
       }
-      backgroundMusic.pause();
-    } else {
-      lunarMusic.pause();
-      if (!isMuted) backgroundMusic.play();
-    }
-    saveAllData();
-  };
-
-  if (cutsceneAllowed) {
-    playCutscene(res.name, afterReveal);
-  } else {
-    afterReveal();
-    rollBtn.disabled = false;
-  }
+      maybeFireConfettiAndCutscene(res);
+    },
+    duration * 1000 + 1000,
+  );
 }
 
 function maybeFireConfettiAndCutscene(res) {
@@ -2451,28 +1886,38 @@ const sortSelect = document.getElementById('sortSelect');
 rollBtn.addEventListener('click', () => {
   if (isCutscenePlaying) return;
   rollBtn.disabled = true;
-  spinner.style.transition = 'none';
-  spinner.style.transform = 'translateY(0)';
 
-  const result = getRandomRarity();
-  const res = result.rarity;
+  try {
+    spinner.style.transition = 'none';
+    void spinner.offsetWidth;
+    spinner.style.transform = 'translateY(0)';
 
-  if (result.wasPity) showAnomalyPopup('pity triggered!');
-  if (result.isHotPulse) rollBtn.classList.add('hot-pulse');
-  else rollBtn.classList.remove('hot-pulse');
+    const result = getRandomRarity();
+    const res = result.rarity;
 
-  const isMuted = checkMuteSettings();
-  if (!isMuted && backgroundMusic.paused && res.name !== 'Lunar') {
-    backgroundMusic.play().catch(() => {});
+    if (result.wasPity) showAnomalyPopup('pity triggered!');
+    if (result.isHotPulse) rollBtn.classList.add('hot-pulse');
+    else rollBtn.classList.remove('hot-pulse');
+
+    const isMuted = checkMuteSettings();
+    if (!isMuted && backgroundMusic.paused && res.name !== 'Lunar') {
+      backgroundMusic.play().catch(() => {});
+    }
+
+    setTimeout(() => spinAndReveal(res), 100);
+  } catch (e) {
+    console.error('roll failed:', e);
+    rollBtn.disabled = false;
   }
-  setTimeout(() => spinAndReveal(res), 100);
 });
 
-// Reset spinner state when returning to a hidden tab so roll speed doesnt glitch and ruin people's day like the doofus i am... wait no this isnt the-
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) return;
+  // check if luck boost expired while tab was hidden
+  if (luckBoostActive && Date.now() >= luckBoostEndTime) {
+    endLuckBoost();
+  }
   if (!isCutscenePlaying && rollBtn.disabled) {
-    // a roll was mid-animation while tab was hidden? go clean that shit up
     spinner.style.transition = 'none';
     spinner.style.transform = 'translateY(0)';
     spinner.innerHTML = '';
@@ -2490,6 +1935,10 @@ resetBtn.addEventListener('click', resetInventory);
 
 loadAllData();
 updateTotalRolls();
+updatePotionUI();
+recalcLuckMultiplier();
+updatePointsDisplay();
+updateShopUI();
 const ls = localStorage.getItem(LUCK_KEY);
 if (ls) {
   try {
@@ -3038,34 +2487,36 @@ function formatWellTime(ms) {
 }
 
 function updateWellUI() {
-  const status        = document.getElementById('wellStatus');
-  const timer         = document.getElementById('wellTimer');
-  const throwBtn      = document.getElementById('throwWellBtn');
-  const totalThrown   = document.getElementById('wellTotalThrown');
+  const status = document.getElementById('wellStatus');
+  const timer = document.getElementById('wellTimer');
+  const throwBtn = document.getElementById('throwWellBtn');
+  const totalThrown = document.getElementById('wellTotalThrown');
   const totalReceived = document.getElementById('wellTotalReceived');
-  const timesThrown   = document.getElementById('wellTimesThrown');
-  const successRate   = document.getElementById('wellSuccessRate');
+  const timesThrown = document.getElementById('wellTimesThrown');
+  const successRate = document.getElementById('wellSuccessRate');
 
   if (!status || !timer || !throwBtn) return;
 
   if (isWellOnCooldown()) {
     const remaining = getRemainingCooldown();
-    throwBtn.disabled    = true;
-    status.textContent   = 'the well is recovering its magic...';
-    timer.textContent    = `available in: ${formatWellTime(remaining)}`;
+    throwBtn.disabled = true;
+    status.textContent = 'the well is recovering its magic...';
+    timer.textContent = `available in: ${formatWellTime(remaining)}`;
   } else {
-    throwBtn.disabled  = false;
+    throwBtn.disabled = false;
     status.textContent = 'ready to accept your offering';
-    timer.textContent  = '';
+    timer.textContent = '';
   }
 
-  if (totalThrown)   totalThrown.textContent   = formatNum(wellData.totalThrown);
-  if (totalReceived) totalReceived.textContent = formatNum(wellData.totalReceived);
-  if (timesThrown)   timesThrown.textContent   = formatNum(wellData.timesThrown);
+  if (totalThrown) totalThrown.textContent = formatNum(wellData.totalThrown);
+  if (totalReceived)
+    totalReceived.textContent = formatNum(wellData.totalReceived);
+  if (timesThrown) timesThrown.textContent = formatNum(wellData.timesThrown);
   if (successRate) {
-    const rate = wellData.timesThrown > 0
-      ? Math.round((wellData.successes / wellData.timesThrown) * 100)
-      : 0;
+    const rate =
+      wellData.timesThrown > 0
+        ? Math.round((wellData.successes / wellData.timesThrown) * 100)
+        : 0;
     successRate.textContent = `${rate}%`;
   }
 }
@@ -3119,7 +2570,6 @@ function throwIntoWell() {
   startWellCooldownTimer();
 }
 
-
 // Create ripple animation
 function createWellRipple() {
   const visual = document.getElementById('wellVisual');
@@ -3136,23 +2586,23 @@ function createWellRipple() {
 
 // Show result modal
 function showWellResult(won, amount) {
-  const modal    = document.getElementById('wellResultModal');
-  const icon     = document.getElementById('wellResultIcon');
-  const text     = document.getElementById('wellResultText');
+  const modal = document.getElementById('wellResultModal');
+  const icon = document.getElementById('wellResultIcon');
+  const text = document.getElementById('wellResultText');
   const amountEl = document.getElementById('wellResultAmount');
 
   if (!modal || !icon || !text || !amountEl) return;
 
   if (won) {
-    icon.textContent      = '✨';
-    text.textContent      = 'the well grants your wish!';
-    amountEl.textContent  = `it gives you +${formatNum(amount)} points, go thank it!`;
-    amountEl.style.color  = '#4a4';
+    icon.textContent = '✨';
+    text.textContent = 'the well grants your wish!';
+    amountEl.textContent = `it gives you +${formatNum(amount)} points, go thank it!`;
+    amountEl.style.color = '#4a4';
   } else {
-    icon.textContent      = '🌊';
-    text.textContent      = 'the well accepts your offering...';
-    amountEl.textContent  = 'but nothing happens.. whoops?';
-    amountEl.style.color  = '#888';
+    icon.textContent = '🌊';
+    text.textContent = 'the well accepts your offering...';
+    amountEl.textContent = 'but nothing happens.. whoops?';
+    amountEl.style.color = '#888';
   }
 
   modal.classList.add('show');
@@ -3193,7 +2643,7 @@ if (isWellOnCooldown()) {
   startWellCooldownTimer();
 }
 
-window.refreshAllDisplays = function() {
+window.refreshAllDisplays = function () {
   updatePointsDisplay();
   updateShopUI();
   updateTotalRolls();
@@ -3203,4 +2653,4 @@ window.refreshAllDisplays = function() {
 // FINISH THIS SCRIPT A;READY
 window.setWellAmount = setWellAmount;
 window.closeWellResult = closeWellResult;
-document.addEventListener('DOMContentLoaded', () => initNotifCenter());// YAYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
+document.addEventListener('DOMContentLoaded', () => initNotifCenter()); // YAYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY

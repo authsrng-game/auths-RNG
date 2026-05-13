@@ -3,8 +3,8 @@
   'use strict';
   const GAUNTLET_KEY = 'gauntletData';
 
-  // global rotating pool — medium/hard range (~1/750–~1/2100)
   const GLOBAL_POOL = [
+    // --- the main entries ---
     'Lunar',
     'Deneb',
     'Regulus',
@@ -36,6 +36,126 @@
     'Eskimo',
     'Lagoon',
     'Trifid',
+    'Solstice',
+    'Orion',
+    'Crab',
+    'Paralysis',
+    'Veil',
+    'Dumbbell',
+    'Owl',
+    'Butterfly',
+    'funny haha',
+    'Purpose',
+    'Pelican',
+    'Swan',
+    'California',
+    'Cone',
+    'Iris',
+    'still playing?',
+    'wowie',
+    'Heart',
+    'Soul',
+    'Aperture',
+    'Flame',
+    '<>',
+    'Keyhole',
+    'Inferno',
+    'Tempered',
+    'Documented',
+    'Matrix',
+    'Grayscale',
+    'Homunculus',
+    'Garden',
+    'Constant',
+    'Trapezium',
+    'Access',
+    'Betelgeuse',
+    'Gladiator',
+    'Rigel',
+    'Sirius',
+    'Amethyst',
+    'Blink',
+    'Cobalt',
+    'Procyon',
+    'Terrifying',
+    'Aldebaran',
+    'Heliocentric',
+    'Antares',
+    'Arcturus',
+    'Vega',
+    'anyone there?',
+    'Capella',
+    'Stressed',
+    'Pollux',
+    'Divine',
+    'Fomalhaut',
+    'Meteor',
+    'Appalled',
+    'Dreamy',
+    'Index',
+    'Catastropic',
+    'Gravity',
+    'Equations',
+    'Tidal',
+    'Lucky',
+    'IO',
+    'Merciful',
+    'Worried',
+    'the spooky',
+    'Process',
+    'Celestial',
+
+    // --- easier end (~1/500–~1/749) ---
+    'Divinity',
+    'Lonely',
+    'Storm',
+    'Cosmos',
+    'Glass',
+    'Lazer',
+    'Jetdroid',
+    'Prism',
+    'Ultra',
+    'Astral',
+    'Fearful',
+
+    // --- harder end (~1/2101–~1/3000) ---
+    'horsehead hahahaha',
+    'Pillars',
+    'Verbose',
+    'Coherence',
+    'Thoughts',
+    'Equinox',
+    'Overload',
+    'pale',
+    'Terminal',
+    'Micro',
+    'kappa',
+    'Peripherals',
+    'bridged',
+    'Alpha',
+    'Daydream',
+    'Experience',
+    'Desire',
+    'Delta',
+    'Lambda',
+    'Omega',
+    'Upsilon',
+    'Prophetic',
+    'Top',
+    'Bottom',
+    'Nightmare',
+    'Strange',
+    'Charm',
+    'Pixelated',
+    'Quark',
+    'MURDER',
+    'Graviton',
+    'Gluon',
+    'Poltergeist',
+    'Boson',
+    'Spectra',
+    'Fermion',
+    'The End?',
   ];
 
   // This is where you make the fucking gauntlets... it's like making a new rarity except if it took 5x longer to make one
@@ -152,7 +272,17 @@
 
   // pre-register gauntlet luck keys in potionData so main.js never
   // crashes on a page-reload while a gauntlet luck is still active and shit
-  ['global', 'easy', 'medium', 'hard', 'insane', 'godlike', 'inferno', 'snowy', 'eon'].forEach((id) => {
+  [
+    'global',
+    'easy',
+    'medium',
+    'hard',
+    'insane',
+    'godlike',
+    'inferno',
+    'snowy',
+    'eon',
+  ].forEach((id) => {
     if (typeof potionData !== 'undefined') {
       potionData['_g_' + id] = {
         name: id + ' luck',
@@ -164,7 +294,8 @@
   });
 
   function formatWellTime(ms) {
-    if (typeof window.formatWellTime === 'function') return window.formatWellTime(ms);
+    if (typeof window.formatWellTime === 'function')
+      return window.formatWellTime(ms);
     // local fallback
     const h = Math.floor(ms / 3600000);
     const m = Math.floor((ms % 3600000) / 60000);
@@ -173,7 +304,7 @@
     if (m > 0) return m + 'm ' + s + 's';
     return s + 's';
   }
-  
+
   // ── helpers ──────────────────────────────────────────────────────────
   function loadData() {
     try {
@@ -255,7 +386,7 @@
   }
 
   // ── reward application ───────────────────────────rfvgbhgvfcdfvgbvfc────────────────────
-function applyReward(rew, tierId) {
+  function applyReward(rew, tierId) {
     if (rew.type === 'points') {
       points += rew.amount;
       updatePointsDisplay();
@@ -304,7 +435,8 @@ function applyReward(rew, tierId) {
     const rew = tier.rewards[rewIdx];
     if (!rew) return;
 
-    if (tier.isGlobal) d.global = Object.assign({}, d.global || {}, { lastRot: rotIdx() });
+    if (tier.isGlobal)
+      d.global = Object.assign({}, d.global || {}, { lastRot: rotIdx() });
     else d[tier.id] = { lastClaim: Date.now() };
     saveData(d);
     applyReward(rew, tierId);

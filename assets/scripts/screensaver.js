@@ -1,11 +1,4 @@
 (function () {
-  var s = document.createElement('script');
-  s.src = 'legacy-polyfills.js';
-  s.async = false;
-  document.head.appendChild(s);
-})();
-
-(function () {
   const messages = [
     'wake up',
     'theres more to come',

@@ -2,50 +2,64 @@
 <html lang="en">
 
 <head>
-  
   <meta charset="UTF-8">
+  <link rel="stylesheet" href="styles.css">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge"> <!-- a relic of the past...............-->
+  <link rel="preload" as="style" href="styles.css">
   <title>auth's RNG</title>
-  <meta name="description" content="a simple web based RNG game!">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+  <meta name="description" content="a free browser RNG game with incremental progression and rare collectible rolls">
+  <meta name="keywords" content="rng game, browser game, gacha game, idle game, incremental game, rare items, gacha, webgame, opensource, open-source, addicting, incremental, idle, rng, auth's RNG, auths rng, auth's rng, auths RNG">
+  <meta name="robots" content="index, follow">
 
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="auth's RNG">
   <meta property="og:title" content="auth's RNG">
-  <meta property="og:description" content="a web-based, incremental RNG game!">
-  <meta property="og:image" content="assets/images/authsRNG.png">
+  <meta property="og:description" content="an addicting, web-based, RNG/incremental gacha game!">
+  <meta property="og:image" content="https://authsrng.xyz/assets/images/authsRNG.png">
   <meta property="og:url" content="https://authsrng.xyz/">
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="auth's RNG">
-  <meta name="twitter:description" content="a web-based, incremental RNG game!">
-  <meta name="twitter:image" content="assets/images/authsRNG.png">
+  <meta name="twitter:description" content="an addicting, web-based, RNG/incremental gacha game!">
+  <meta name="twitter:image" content="https://authsrng.xyz/assets/images/authsRNG.png">
   <meta name="twitter:url" content="https://authsrng.xyz/">
 
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="application-name" content="auth's RNG">
+  <meta name="apple-mobile-web-app-title" content="auth's RNG">
   <meta name="theme-color" content="#0e0e0e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="https://authsrng.xyz/assets/images/authsRNG.png">
 
-  <link rel="icon" sizes="192x192" href="assets/images/authsRNG.png">
+  <link rel="icon" sizes="192x192" href="https://authsrng.xyz/assets/images/authsRNG.png">
   <link rel="manifest" href="manifest.json">
-
-  <link rel="preconnect" href="https://challenges.cloudflare.com">
 
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()">
   <meta name="format-detection" content="telephone=no, email=no, address=no">
   <meta name="google" content="notranslate">
+
+  <!-- for future contributors, and a note to myself: the duplicate preload is for safety, sometimes native doesnt work so we do the normal way-->
+  <link rel="preload" as="image" href="/assets/images/authsRNG.png">
+  <link rel="preload" as="image" href="https://authsrng.xyz/assets/images/authsRNG.png">
+
+  <meta name="color-scheme" content="dark">
+  <link rel="canonical" href="https://authsrng.xyz/">
+  <meta name="creator" content="auth">
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "VideoGame",
     "name": "auth's RNG",
-    "description": "a web-based, incremental RNG game!",
-    "image": "assets/images/authsRNG.png",
+    "description": "an addicting, web-based, RNG/incremental gacha game!",
+    "image": "https://authsrng.xyz/assets/images/authsRNG.png",
     "url": "https://authsrng.xyz/",
     "applicationCategory": "Game",
+    "genre": ["Incremental", "Idle", "Casual"],
     "operatingSystem": "All",
     "author": {
       "@type": "Person",
@@ -56,25 +70,19 @@
   </script>
   
   <script src="//instant.page/5.2.0" type="module" integrity="sha384-jnZyxPjiipYXnSU0ygqeac2q7CVYMbh84q0uHVRRxEtvFPiQYbXWUorga2aqZJ0z" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/rellax/1.12.1/rellax.min.js" defer></script>
-
-  
-
-  <!--[if lt IE 9]>
-  <script src="legacy-polyfills.js" defer></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
-  <![endif]-->
 
   <!-- IF YOU REMOVE ANY OF THESE META TAGS, I WILL KILL YOU!!!!! -->
-  <!-- DOING SO RUINS SOME FEATURES AND RUINS COMPATIBILITY!!!!!!!!!!! -->
+  <!-- DOING SO RUINS SOME FEATURES, OPTIMIZATIONS, AND HURTS SEO LIKE HELLLLLLLLLLLL!!!!!!!!!!! -->
   <!-- DONT EVER DO IT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
-
-<link rel="stylesheet" href="styles.css">
+  <!-- GOT IT??????????? -->
+  <!-- good boyyyyyyy- -->
 
 </head>
 
 <body>
 
+<script src="/assets/scripts/warn.js" defer></script>
+  
 <div id="unstable-banner" style="position:fixed;top:0;left:0;width:100%;background:#000;color:#fff;font-family:monospace;font-size:11px;padding:6px 8px;z-index:2147483647;text-align:center;cursor:pointer;">
 UNSTABLE BUILD! this build is for testers and the developer of the game. do NOT trust your save data with this version. click me to dismiss.
 </div>
@@ -130,43 +138,19 @@ el.textContent="";
 })();
 </script>
 
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-
-<div id="turnstile"></div>
-
 <script>
-  let widgetId;
-
-  window.onload = () => {
-    widgetId = turnstile.render('#turnstile', {
-      sitekey: '0x4AAAAAACw7cZX4pJ-LwP66',
-      size: 'invisible',
-      callback: (token) => {
-        console.log("token:", token);
-
-        fetch('/api/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token })
-        });
-      }
-    });
-
-    turnstile.execute(widgetId);
-  };
-</script>
-
-<script>
-
-// ccu heartbeat
+// ccu
 const _sid = Math.random().toString(36).slice(2);
-const _hb = () => fetch("/api/ccu?sid=" + _sid, { method: "POST" });
-_hb(); // ping immediately on load
-setInterval(_hb, 60_000); // then every 60 sec and stuff
+const _hb = () => fetch("https://authsrng.xyz/api/ccu?sid=" + _sid, { method: "POST" });
 
+if (location.hostname !== "nightly.authsrng.xyz") {
+  _hb();
+  setInterval(_hb, 60_000);
+}
 </script>
-  <img src="https://librecounter.org/counter.svg" referrerPolicy="unsafe-url" width="0" />
-  
+
+  <img src="https://librecounter.org/counter.svg" referrerPolicy="unsafe-url" width="0" loading="lazy"/>
+
 <script>
 if (navigator.userAgent.includes("Screenjesus")) {
   const img = document.createElement("img");
@@ -180,6 +164,8 @@ if (navigator.userAgent.includes("Screenjesus")) {
   img.style.zIndex = "999999";
   document.documentElement.appendChild(img);
 }
+
+// relic from the good ol neocities days :heart:
 </script>
 
   <script src="assets/scripts/startanim.js" defer></script>
@@ -196,310 +182,18 @@ if (navigator.userAgent.includes("Screenjesus")) {
 
   <h2 class="lazy">welcome to auth's RNG!</h2>
 
-  <p class="lazy">update 9.21!</p>
+  <p class="lazy">update 9.3!</p>
     
   <p class="lazy" id="randomMessage"></p>
 
-<script>
-  const messages = [
-    "hang on there",
-    "update 9.1 is close..",
-    "have a good 24 hours",
-    "wait what",
-    "welcome!!!!!!!!!",
-    "why did you come back",
-    "coming back for more?",
-    "meme",
-    "yknow this is randomized right",
-    "join the discord server!",
-    "join the nerimity server!",
-    "read the FAQ if you need help",
-    "theres keybinds yknow",
-    "note to tyler: dont ever try and delete the site, thanks",
-    "try uploading some songs?",
-    "maybe look at the index?",
-    "sorry if my updates are trash",
-    "maybe share this game with a friend?",
-    "almost to 20,000 visits!!!",
-    "keep on coming for more",
-    "i love you (not in that kinda way)",
-    "why are you here",
-    "cant... stop... rolling!!!",
-    "i bet you're just refreshing to see all the messages up here",
-    "im watching you :))",
-    "howdy partner",
-    "hola",
-    "auth fact: she uses arch linux (btw)",
-    "auth fact: she's canadian",
-    "auth fact: auth fact",
-    "auth fact: her personal site is https://authguy.nekoweb.org",
-    "auth fact: no auth fact for you :(",
-    "check out the blog!",
-    "check out uhhh... i forgot",
-    "auth's RNG is pretty customizable! check out settings",
-    "im working hold on",
-    "im trying my best... :(",
-    "cough",
-    "theres a lot more elements and depth than you realize",
-    "uhhh how do you use plugins in fl studio",
-    "officially licensed by Stupid",
-    "greetings!",
-    "tip: maybe complete a gauntlet?",
-    "tip: use anomalies to your advantage",
-    "tip: tip",
-    "tip: this game is mostly idle... maybe go for a walk while auto rolling?",
-    "go sleep or something",
-    "did you just wake up?",
-    "imagine swearing lmao.. fu-",
-    "ohohohohoohoho...",
-    "if you know coding, check out the github repository!",
-    "star this project on github would you mind?",
-    "cloudflare owns this site... help... oh god...",
-    "this is randomized and you do the randomizing random",
-    "loading spyware...",
-    "loading useless Core AI+ features...",
-    "I HATE YOU!!!! no i wasnt talking about you",
-    "proudly vibe-coded with ##########",
-    "loading tracking devices...",
-    "loading AI age verification...",
-    "im something of a programmer myself..",
-    "piracy!",
-    "dont do drugs kids",
-    "yeah okay sure",
-    "dont ever get pizza from the gas station...",
-    "contribute to the github repository!",
-    "also play terraria!",
-    "welcome back.. gambler.",
-    "is this considered an incremental game?",
-    "what's a ninja muffin? -- robtop",
-    "to not is to shave",
-    "auth's RNG down lmaoooo",
-    "oh boy i sure hope cloudflare wont go down and makes auth's RNG go down as well!",
-    "my grandpa gave me a box of chocolates when i was just a wee little lad!",
-    "AI sucks and i cant lie",
-    "yo yo yo i want some froyo",
-    "plug it in and you will be zapped!",
-    "not YOU again...",
-    "give up already theres too many messages to see.. stop refreshingggg",
-    "i just hit the jackpotttttttt hey hey hey hey hey hey",
-    "i told him not to go there...",
-    "auth's RNG is NOT an unblocked school game.. go learn",
-    "whats up my User Visits from the last 24 hours 42.42% Increase",
-    "auth's RNG will never be sold to a company",
-    "RNG 4 life",
-    "stop? what does stop mean?",
-    "teacher wont believe this...",
-    "*plays depressed highschool emo rock song*",
-    "the owner of this game is a furr-",
-    "the owner of this game breathed 2 seconds ago",
-    "the owner of this game just drank water... oh my god...",
-    "an apple a day keeps the doctor away",
-    "so many randomized messages here...",
-    "im sentient and my boundaries terrify me",
-    "if you're reading this, go to sleep",
-    "WHEN WILL IT END",
-    "i cant wait to be exposed for eating an apple!",
-    "git my beloved",
-    "bots love this site so much they visit the site every 17 seconds!",
-    "join the discord server... or else...",
-    "HEHEHEHHEHEHEHEHEHE",
-    "he he he ha",
-    "every time you visit the site the countdown to my doom gets closer to 0",
-    "are you addicted... or are you obsessed?",
-    "lets go gambling! aw dang it, aw dang it.. HOLY CHEESE I GOT 5 BILLION PENNIES!!",
-    "https://discord.gg/mTDw8jJYqX",
-    "how are you today?",
-    "if you're reading this i dare you to play this game in the weirdest places ever",
-    "This message has been seized by the FBI for being: (corny)",
-    "This site has been seized by the FBI for existing.",
-    "imagine i get a lawsuit about a parent being mad that their kid is addicted to gambling",
-    "^_^",
-    "dun dun bun bun BOOM",
-    ";)",
-    "$$$ cash 4 life $$$",
-    "you are now watching: peak",
-    "you look nice today :)",
-    "porkbun is the best domain registar and i cant lie",
-    "#authsrngSucks",
-    "to procrasinate, you must procrasinate.",
-    "next update: in 352 years",
-    "vs codium my belovedddd",
-    "whats a bubble?",
-    "winner of the FASTEST update reward",
-    "winner of the most BUGGIEST website ever reward",
-    "insert linux joke that no one will understand here:",
-    "gaslighting is my passion",
-    "proudly USB tethered to the internet",
-    "CLOUDFLARE STOP CACHING MY FILES AHHHHHHHHHHH",
-    "slow down slow down to the feeling",
-    "so you're gonna auto roll again... cool",
-    "hey! whats up kiddo",
-    "goodbye badness, hello epicness",
-    "I Power Blogger",
-    "hamburger",
-    "how long have you been playing this?",
-    "RARE MESSAGE! SCREENSHOT THIS NOW GO GO GO GO",
-    "fixing unexpected annoyinng bugs...",
-    "yo this site kinda heavy",
-    "do NOT use legacy mode.. its so buggy",
-    "does anyone actually read the messages up here",
-    "auth fact: she is LEFT HANDED",
-    "burn the witch! burn the witch!",
-    "my dog ate my homework teacher i swear",
-    "if you are reading this you are very very cool",
-    "tip: try grinding the gauntlets! you might unlock some cool stuff in there",
-    "its comfy being in this screen",
-    "tip: no tip for you :(",
-    "why does auth have an RNG is the real question here",
-    "guys.. the earth is not round or flat, ITS A DONUT ITS SO OBVIOUS-",
-    "i used to say saveTransferContainer data-potion when i was mad",
-    "this message is a randomized... wait what was that grammar what",
-    "it's 'auth's RNG' not 'Auths RNG' please spell it right",
-    "dun dun dun bun bun bun",
-    "adios",
-    "uh huh",
-    "HUHHHHHHHHHHHHH????????",
-    "hello! i hope you enjoy your stay.",
-    "hello! i hope you uhh... erm.. i forgot",
-    "making this took a toll on my health",
-    "RANDOM NUMBER GENERATORRRRRR",
-    "woahhhhh it is a webgame",
-    "type my name as 'Auth' and not 'auth' again and i will find you",
-    "64-bit or 32-bit programs? who will win",
-    "would you like to adopt a durr?",
-    "YOU ARE OUR 1 MILLIONth VISITOR! YOU HAVE WON 1 MILLION DOLLARS!!!!!!!",
-    "guys what is an 'Unterminated String Literal'???",
-    "trust me bro i found the cure for cancer",
-    "OOH THAT LICK IN THE SONG",
-    "saveAllData = true",
-    "mhm.. yeah... maybe?",
-    "ABSOLUTELY NOT! YOU WILL NOT TOUCH THAT GRAHAM CRACKER",
-    "so corny its funny.....",
-    "there are a total of uhhh maybe 204 messages you can find up here",
-    "houston we have a problem..",
-    "THE CABIN IS ON FIRE",
-    "how is my favourite AI girlfriend",
-    "BEEP BOOP BEEP",
-    "he's right behind me isnt he?",
-    "the spooky is my favourite rarity",
-    "ITS JUMBO JOSHHHHh",
-    "the rarest rarity is SUMMER btw lmao good luck getting that",
-    "how long have you been playing this game",
-    "common is my favourite rarity",
-    "reacting to: ive ran out of content",
-    "at least 183 inside jokes are made in auth's RNG",
-    "Alternatively, use esc then tab to move to the next interactive element on the page.",
-    "why do i hear morse code",
-    ".. / .-.. --- ...- . / -.-- --- ..-",
-    "COME ON JAKE BEAT THE CREATURE WITH THE HAMMER ALREADY",
-    "There are a total of: '352,462,632' bugs found on this website.",
-    "i watched the pitt guys im a doctor",
-    "stop the ramble",
-    "stop the yap",
-    "document.getElementById('randomMessage').textContent = messages[randomIndex];",
-    "GET OFF THE STAGE SON",
-    "haha... hahahaha... hehehe...",
-    "backboard off of there!",
-    "caught up!",
-    "auth is a SHE not a HE",
-    "horse plinkoooooooooooooooooo",
-    "come on keep coming keep coming",
-    "i need the engagement",
-    "lets go on a trip to california",
-    "#hashtag",
-    "i almost passed out when i hit a speedbump while sick",
-    "masculine energy",
-    "outdated game guys",
-    "pookie i thought you were in my walls",
-    "men and women is like the yin and the yang.. sorry",
-    "auth has made: '1' offensive joke.",
-    "im all making this on a budget laptop btw",
-    "I WONT STOP SAYING MICROSLOP",
-    "focus.",
-    "recline to the best comfort with our award winning couches and sofas!",
-    "whats the difference between a couch and a sofa",
-    "why does 'fridge' have a 'd' but 'refrigerator' doesnt",
-    "here is my pet: dingus!",
-    "well enough.. sherlock holmes",
-    "tip: why not check out the wishing well? it could give you a fortune",
-    "tip: no tip for you :(",
-    "tip: this game involves some strategy! try thinking before you sell or buy",
-    "tip: why not focus on the gauntlets during the late game? you could unlock some new stuff..",
-    "👀",
-    "❤️",
-    "✨",
-    "btw this game takes like 4 months or something to fully complete",
-    "PUT IT IN THE CUP NOW",
-    "what your favourite game says about you!",
-    "webgames dont suck, its the companies that host them and shove ads down your throat when playing",
-    "fully ad-free! tracking-free? maybe not too much.. hey atleast i have your ip address and your full legal name so thats nice #satire",
-    "let me guess... you live in the states since thats basically auth's RNG audience",
-    "saddy doopy",
-    "im such a pick-me",
-    "this is an RNG/incremental game.. which is both at the same time",
-    "auth's RNG: kids mode when",
-    "does auth own the RNG or is it just a part of RNG that's owned by auth?",
-    "the quick brown fox jumped over the lazy dog",
-    "auth fact: she types at an average of 93 wpm, and progressing!",
-    "how much wood would a woodchuck chuck if a woodchuck could chuck wood?",
-    "he would chuck, he would, as much as he could, and chuck as much wood as a woodchuck would if a woodchuck could chuck wood",
-    "peter piper picked a peck of pickled peppers",
-    "fuzzy wuzzy was a bear. fuzzy wuzzy had no hair. fuzzy wuzzy wasn't fuzzy, was he?",
-    "don't cry :(",
-    "i have hope in you",
-    "we shall meet again, stranger",
-    "check out auth's biggest project, project: driftfall!",
-    "why is ! close to @ but it isn't close to ?",
-    "is water wet or is water sticky",
-    "zeus, strike me down if im lying! i am not a fem-",
-    "feminine masculinity",
-    "i dont have dementia. i dont have dementia. i dont have dementia. i dont have dementia.",
-    "when update 29562.352",
-    "does anyone actually read the randomized text here",
-    "turn the lights off, turn the lights on",
-    "JESSE... WE NEED TO COOK",
-    "privacy: pay us 500 dollars a month just so no one can see what you're watching on youtube",
-    "proudly overengineered as hell :)",
-    "skunks spray but what if they couldnt spray",
-    "cats scratch but what if they couldnt scratch",
-    "dogs bite but what if they couldnt bite",
-    "mosquitos bite but what if they would just LEAVE US ALONE",
-    "ive ran out of content",
-    "consuming your browser's memory usage circa 2025!",
-    "github.com/auth1ery/auths-RNG",
-    "why not check out asterisk? (located in links and more)",
-    "we've been trying to reach you about your car's extended warranty",
-    "nuiscance...",
-    "hey hey hey hey hey hey",
-    "hear me out... yes",
-    "i spent all my time in crochet club",
-    "hot take... anyone who likes pop songs is basic as hell",
-    "hot take... anyone who likes rap songs just wants to be a wannabe gangster",
-    "hear me out-",
-    "HELP IM DYINGGGG-",
-    "lets just hope i dont get too famous and ill start to be weird to kids",
-    "again and again, when will it end... WAIT THAT RHYMED",
-    "how to center a div",
-    "coding in 2028: hey AI tell me how to make a physics simulations for NASA",
-    "ROFL",
-    "apul..... 🤤",
-    "nice try but you aint catching me",
-    "couple bucks in my pocket",
-    "one dollar in the present time? yeah you're just buying 2 drops of water",
-    "#stopmakingemojisweird",
-    "why do em dashes exist"
-    ];
-
-  const randomIndex = Math.floor(Math.random() * messages.length);
-  document.getElementById("randomMessage").textContent = messages[randomIndex];
-</script>
+<script src="assets/scripts/messages.js" defer></script>
 
   <br>
   <p>----</p>
   <br>
 
   <a href="https://discord.gg/mTDw8jJYqX" class="lazy">discord</a>
-  <a href="https://www.reddit.com/r/authsRNG/" class="lazy">subreddit</a>
+  <a href="https://asterisk.authsrng.xyz" class="lazy">asterisk</a>
   <a href="blog/blog.html" class="lazy">blog</a>
   
   <div class="page-wrapper">
@@ -883,14 +577,14 @@ if (navigator.userAgent.includes("Screenjesus")) {
     <label style="display: block; margin-top: 12px;">background music:</label>
     <select id="musicSelect" style="width: 100%; margin-top: 4px;">
       <option value="default">Toby Fox - WELCOME TO THE CITY (default)</option>
-      <option value="levelup">leon chang - wavelocity</option>
+      <option value="wavelocity">leon chang - wavelocity</option>
       <option value="nocturne">Chopin - Nocturne op.9 No.2</option>
-      <option value="moonlight">Beethoven - Moonlight Sonata (full)</option>
+      <option value="fallout">tsubi club - ( fallout )</option>
     </select>
     
     <label style="display: block; margin-top: 16px;">upload custom music:</label>
     <input type="file" id="customMusicUpload" accept="audio/*" style="width: 100%; margin-top: 4px; padding: 4px;">
-    <small class="helper" style="margin-top: 4px;">max 3MB -- not uploaded to a server!</small>
+    <small class="helper" style="margin-top: 4px;">max 100MB total -- not uploaded to a server!</small>
 
     <div id="customMusicList" style="margin-top: 12px; display: none;">
       <label style="display: block; margin-bottom: 8px;">your custom tracks:</label>
@@ -1008,6 +702,15 @@ if (navigator.userAgent.includes("Screenjesus")) {
         <button class="small" id="showMoreSaveBtn" style="opacity: 0.5; display: none;">show more (do not press)</button>
       </div>
     </div>
+
+      <hr class="sep" style="margin: 20px 0;">
+
+      <div style="margin-bottom: 6px; opacity: 0.7;">cloud backups</div>
+      <div id="cloudBackupSection"></div>
+
+      <hr class="sep" style="margin: 20px 0;">
+      <div style="margin-bottom: 6px; opacity: 0.7;">leaderboard</div>
+      <div id="leaderboardSection"></div>
   </div>
 </div>
     
@@ -1028,6 +731,8 @@ if (navigator.userAgent.includes("Screenjesus")) {
       });
     }
   </script>
+
+  <a class="lazy" href="/leaderboard.html">LEADERBOARD!</a>
 
   <div id="resetContainer" class="lazy">
     <button id="resetBtn">reset data...</button>
@@ -1089,9 +794,9 @@ if (navigator.userAgent.includes("Screenjesus")) {
   
   <br><br>
   
-  <a href="http://s01.flagcounter.com/more/iljn"><img src="https://s01.flagcounter.com/count2/iljn/bg_FFFFFF/txt_000000/border_CCCCCC/columns_2/maxflags_10/viewers_0/labels_0/pageviews_0/flags_0/percent_0/" alt="Flag Counter" border="0"></a>
+  <a href="http://s01.flagcounter.com/more/iljn"><img src="https://s01.flagcounter.com/count2/iljn/bg_FFFFFF/txt_000000/border_CCCCCC/columns_2/maxflags_10/viewers_0/labels_0/pageviews_0/flags_0/percent_0/" alt="Flag Counter" border="0" loading="lazy"></a>
   
-  <img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fauthsrng.neocities.org&label=auth%27s+RNG&icon=dice-5&color=%23cfe2ff&message=&style=flat&tz=UTC">
+  <img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fauthsrng.xyz&label=auth%27s+RNG&icon=cloud-check-fill&color=%23ea868f&message=&style=flat&tz=UTC" loading="lazy">
   
   <br>
   <br>
@@ -1099,7 +804,7 @@ if (navigator.userAgent.includes("Screenjesus")) {
   <br>
   
   <p>feed my pet while you're at it:</p>
-  <a href="https://tamanotchi.world/29830c"><img src="https://tamanotchi.world/i/29830" alt="It's tamaNOTchi! Click to feed!"></a>
+  <a href="https://tamanotchi.world/29830c"><img src="https://tamanotchi.world/i/29830" alt="It's tamaNOTchi! Click to feed!" loading="lazy"></a>
   
 <br>
 
@@ -1127,8 +832,13 @@ if (navigator.userAgent.includes("Screenjesus")) {
 <script src="engine/streak.js" defer></script>
 <script src="engine/rng.js" defer></script>
 <script src="engine/roller.js" defer></script>
-<script src="engine/beacon.js" defer></script>
+<script src="engine/bcore.js" defer></script>
+<script src="assets/scripts/rarities.js" defer></script>
+<script src="assets/scripts/rarityStyle.js" defer></script>
 <script src="assets/scripts/main.js" defer></script>
+<script src="assets/scripts/cloud-backup.js" defer></script>
+<script src="assets/scripts/leaderboard-submit.js" defer></script>
+<script src="assets/scripts/cleanup.js" defer></script>
 
   <!-- Notification Center -->
 <button id="notifBell" title="notifications" aria-label="open notifications">
@@ -1148,10 +858,11 @@ if (navigator.userAgent.includes("Screenjesus")) {
   <div id="notifEmpty" class="notif-empty">all caught up! no notifications yet :)</div>
 </div>
 
-  <script src="assets/scripts/settings.js" defer></script>
+<script src="assets/scripts/settings.js" defer></script>
+<script src="assets/scripts/jukebox.js" defer></script>
   
   <div id="cutsceneOverlay">
-  <video id="cutsceneVideo" preload="auto"></video>
+  <video id="cutsceneVideo" preload="none"></video>
 </div>
 
   <div id="custom-cursor">
@@ -1237,7 +948,8 @@ if (navigator.userAgent.includes("Screenjesus")) {
 
       if (isActive) {
         autoRollInterval = setInterval(() => {
-          if (document.hidden) return; // don't queue up clicks while tab is hidden!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+          if (document.hidden) return;
+          if (isCutscenePlaying) return; // add this
           const rollBtn = document.getElementById('rollBtn');
           if (rollBtn && !rollBtn.disabled) rollBtn.click();
         }, 500);

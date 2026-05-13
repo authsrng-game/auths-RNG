@@ -3,43 +3,62 @@
 
   const MUTATIONS_KEY = 'mutationsUnlocked';
   const MUTATION_HISTORY_KEY = 'mutationHistory';
-const MUTATION_HISTORY_MAX = 50;
+  const MUTATION_HISTORY_MAX = 50;
 
-function loadHistory() {
-  try { return JSON.parse(localStorage.getItem(MUTATION_HISTORY_KEY) || '[]'); } catch { return []; }
-}
-function saveHistory(h) {
-  try { localStorage.setItem(MUTATION_HISTORY_KEY, JSON.stringify(h)); } catch {}
-}
-function addToHistory(nameA, nameB, result, wasGood) {
-  const h = loadHistory();
-  h.unshift({ a: nameA, b: nameB, result: result.name, good: wasGood, ts: Date.now() });
-  if (h.length > MUTATION_HISTORY_MAX) h.pop();
-  saveHistory(h);
-}
-function renderHistory() {
-  const el = document.getElementById('mutationHistory');
-  if (!el) return;
-  const h = loadHistory();
-  if (h.length === 0) {
-    el.innerHTML = '<div style="opacity:0.35;text-align:center;padding:16px;font-size:0.8em;">no mutations yet</div>';
-    return;
+  function loadHistory() {
+    try {
+      return JSON.parse(localStorage.getItem(MUTATION_HISTORY_KEY) || '[]');
+    } catch {
+      return [];
+    }
   }
-  el.innerHTML = h.map(e => {
-    const d = new Date(e.ts);
-    const time = `${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
-    return `<div class="mutation-history-entry ${e.good ? 'mh-good' : 'mh-bad'}">
+  function saveHistory(h) {
+    try {
+      localStorage.setItem(MUTATION_HISTORY_KEY, JSON.stringify(h));
+    } catch {}
+  }
+  function addToHistory(nameA, nameB, result, wasGood) {
+    const h = loadHistory();
+    h.unshift({
+      a: nameA,
+      b: nameB,
+      result: result.name,
+      good: wasGood,
+      ts: Date.now(),
+    });
+    if (h.length > MUTATION_HISTORY_MAX) h.pop();
+    saveHistory(h);
+  }
+  function renderHistory() {
+    const el = document.getElementById('mutationHistory');
+    if (!el) return;
+    const h = loadHistory();
+    if (h.length === 0) {
+      el.innerHTML =
+        '<div style="opacity:0.35;text-align:center;padding:16px;font-size:0.8em;">no mutations yet</div>';
+      return;
+    }
+    el.innerHTML = h
+      .map((e) => {
+        const d = new Date(e.ts);
+        const time = `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+        return `<div class="mutation-history-entry ${e.good ? 'mh-good' : 'mh-bad'}">
       <div class="mh-formula">${e.a} + ${e.b}</div>
       <div class="mh-result">${e.good ? '✨' : '💀'} ${e.result}</div>
       <div class="mh-time">${time}</div>
     </div>`;
-  }).join('');
-}
+      })
+      .join('');
+  }
   const MUTATION_COOLDOWN = 30000;
 
   const EXCLUDED_NAMES = new Set([
-    'SUMMER', 'finished.', 'pseudopseudohypoparathyroidism',
-    '...', 'the world', 'Antimatter',
+    'SUMMER',
+    'finished.',
+    'pseudopseudohypoparathyroidism',
+    '...',
+    'the world',
+    'Antimatter',
   ]);
   const EXCLUDED_COUNT = 6;
 
@@ -52,21 +71,22 @@ function renderHistory() {
   function getInventoryRarities() {
     if (typeof inventoryData === 'undefined') return [];
     return Array.from(inventoryData.values())
-      .map(d => d.rarityObj)
-      .filter(r => !EXCLUDED_NAMES.has(r.name));
+      .map((d) => d.rarityObj)
+      .filter((r) => !EXCLUDED_NAMES.has(r.name));
   }
 
   function getRarityIndex(name) {
     if (typeof rarities === 'undefined') return -1;
-    return rarities.findIndex(r => r.name === name);
+    return rarities.findIndex((r) => r.name === name);
   }
 
   // deterministic pair bias — same two rarities always skew the same way
   function hashPair(nameA, nameB) {
     const s = [nameA, nameB].sort().join('|');
     let h = 0;
-    for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
-    return (h >>> 0) % 100 / 100; // 0–1 unique per pair
+    for (let i = 0; i < s.length; i++)
+      h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+    return ((h >>> 0) % 100) / 100; // 0–1 unique per pair
   }
 
   function rng() {
@@ -80,12 +100,12 @@ function renderHistory() {
     if (idxA === -1 || idxB === -1) return null;
 
     const betterIdx = Math.min(idxA, idxB);
-    const worseIdx  = Math.max(idxA, idxB);
+    const worseIdx = Math.max(idxA, idxB);
 
     // base 65% bad / 35% good; rarer inputs improve odds; pair bias ±8%
     const rarityBonus = Math.max(0, (400 - worseIdx) / 400) * 0.25;
-    const pairBias    = (hashPair(nameA, nameB) - 0.5) * 0.16; // ±8%
-    const goodChance  = Math.min(0.75, 0.35 + rarityBonus + pairBias);
+    const pairBias = (hashPair(nameA, nameB) - 0.5) * 0.16; // ±8%
+    const goodChance = Math.min(0.75, 0.35 + rarityBonus + pairBias);
 
     let targetIdx;
 
@@ -93,9 +113,10 @@ function renderHistory() {
       // bad: more common than worse input
       const minBad = worseIdx + 1;
       const maxBad = Math.min(rarities.length - 1, worseIdx + 45);
-      targetIdx = minBad > rarities.length - 1
-        ? rarities.length - 1
-        : minBad + Math.floor(rng() * (maxBad - minBad + 1));
+      targetIdx =
+        minBad > rarities.length - 1
+          ? rarities.length - 1
+          : minBad + Math.floor(rng() * (maxBad - minBad + 1));
     } else {
       // good: rarer than better input, capped above excluded tier
       const maxGood = Math.max(EXCLUDED_COUNT, betterIdx - 1);
@@ -109,7 +130,10 @@ function renderHistory() {
       }
     }
 
-    targetIdx = Math.max(EXCLUDED_COUNT, Math.min(rarities.length - 1, targetIdx));
+    targetIdx = Math.max(
+      EXCLUDED_COUNT,
+      Math.min(rarities.length - 1, targetIdx),
+    );
     return rarities[targetIdx];
   }
 
@@ -132,10 +156,12 @@ function renderHistory() {
       return;
     }
 
-    const options = invRarities.map(r => {
-      const d = Math.round(1 / r.chance);
-      return `<option value="${r.name}">${r.name} (1/${d.toLocaleString()})</option>`;
-    }).join('');
+    const options = invRarities
+      .map((r) => {
+        const d = Math.round(1 / r.chance);
+        return `<option value="${r.name}">${r.name} (1/${d.toLocaleString()})</option>`;
+      })
+      .join('');
 
     container.innerHTML = `
       <div class="mutation-panel">
@@ -183,7 +209,7 @@ function renderHistory() {
 
   function updateCooldownDisplay() {
     const cdEl = document.getElementById('mutationCooldown');
-    const btn  = document.getElementById('mutateBtn');
+    const btn = document.getElementById('mutateBtn');
     if (!cdEl || !btn) return;
     const rem = MUTATION_COOLDOWN - (Date.now() - lastMutationTime);
     if (rem > 0) {
@@ -196,59 +222,61 @@ function renderHistory() {
     }
   }
 
-function doMutation() {
-  const selA = document.getElementById('mutateSelectA');
-  const selB = document.getElementById('mutateSelectB');
-  if (!selA || !selB) return;
+  function doMutation() {
+    const selA = document.getElementById('mutateSelectA');
+    const selB = document.getElementById('mutateSelectB');
+    if (!selA || !selB) return;
 
-  const nameA = selA.value;
-  const nameB = selB.value;
+    const nameA = selA.value;
+    const nameB = selB.value;
 
-  if (nameA === nameB) {
-    if (typeof showAnomalyPopup === 'function') showAnomalyPopup('pick two different rarities!');
-    return;
-  }
+    if (nameA === nameB) {
+      if (typeof showAnomalyPopup === 'function')
+        showAnomalyPopup('pick two different rarities!');
+      return;
+    }
 
-  const result = mutate(nameA, nameB);
-  if (!result) return;
+    const result = mutate(nameA, nameB);
+    if (!result) return;
 
-  lastMutationTime = Date.now();
+    lastMutationTime = Date.now();
 
-  const idxA     = getRarityIndex(nameA);
-  const idxB     = getRarityIndex(nameB);
-  const resultIdx = getRarityIndex(result.name);
-  const wasGood  = resultIdx < Math.min(idxA, idxB);
+    const idxA = getRarityIndex(nameA);
+    const idxB = getRarityIndex(nameB);
+    const resultIdx = getRarityIndex(result.name);
+    const wasGood = resultIdx < Math.min(idxA, idxB);
 
-  const onDone = () => {
-    addToHistory(nameA, nameB, result, wasGood);
-    renderHistory();
-    updateCooldownDisplay();
-    if (typeof saveAllData === 'function') saveAllData();
-  };
+    const onDone = () => {
+      addToHistory(nameA, nameB, result, wasGood);
+      renderHistory();
+      updateCooldownDisplay();
+      if (typeof saveAllData === 'function') saveAllData();
+    };
 
-  if (typeof showRollChoice === 'function') {
-    showRollChoice(result, onDone);
-  } else {
-    if (typeof addToInventory === 'function') addToInventory(result);
-    onDone();
-  }
+    if (typeof showRollChoice === 'function') {
+      showRollChoice(result, onDone);
+    } else {
+      if (typeof addToInventory === 'function') addToInventory(result);
+      onDone();
+    }
 
-  const denom = Math.round(1 / result.chance);
-  const resultEl = document.getElementById('mutationResult');
-  if (resultEl) {
-    resultEl.innerHTML = `
+    const denom = Math.round(1 / result.chance);
+    const resultEl = document.getElementById('mutationResult');
+    if (resultEl) {
+      resultEl.innerHTML = `
       <div class="mutation-result ${wasGood ? 'result-good' : 'result-bad'}">
         <div class="mutation-result-quality">${wasGood ? '✨ better!' : '💀 worse...'}</div>
         <div class="mutation-result-name">${result.name}</div>
         <div class="mutation-result-chance">1/${denom.toLocaleString()}</div>
       </div>`;
+    }
   }
-}
 
   window.renderMutations = renderMutations;
 
   function tryInit(n) {
-    if (typeof inventoryData !== 'undefined' && inventoryData instanceof Map) renderMutations();
+    if (typeof inventoryData !== 'undefined' && inventoryData instanceof Map)
+      renderMutations();
     else if (n > 0) setTimeout(() => tryInit(n - 1), 100);
   }
   tryInit(30);

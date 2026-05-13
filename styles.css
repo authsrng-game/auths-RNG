@@ -400,6 +400,8 @@ select {
     opacity 0.2s,
     background 0.2s;
   color: var(--text-color);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 32px;
 }
 
 #inventoryList li:hover {
@@ -478,6 +480,8 @@ select {
   transition: all 0.3s;
   display: flex;
   flex-direction: column;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 52px; /* approx collapsed height */
 }
 
 .achievement.unlocked {
@@ -1377,6 +1381,8 @@ br + .image-column {
   justify-content: space-between;
   align-items: center;
   transition: all 0.2s;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 44px;
 }
 
 .index-item.locked {
@@ -1831,6 +1837,8 @@ body.legacy-mode #legacySettingsBtn {
   padding: 12px 14px;
   margin-bottom: 10px;
   transition: opacity 0.2s;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 160px;
 }
 .gauntlet-tier[data-tier='global'] {
   border-color: #1e2d50;
@@ -1878,10 +1886,18 @@ body.legacy-mode #legacySettingsBtn {
   border-color: #2a1a3a;
 }
 @keyframes eon-rgb {
-  0%   { color: #ff6666; }
-  33%  { color: #66ff66; }
-  66%  { color: #6666ff; }
-  100% { color: #ff6666; }
+  0% {
+    color: #ff6666;
+  }
+  33% {
+    color: #66ff66;
+  }
+  66% {
+    color: #6666ff;
+  }
+  100% {
+    color: #ff6666;
+  }
 }
 .gauntlet-tier[data-tier='eon'] .gauntlet-tier-name {
   color: unset;
@@ -2396,6 +2412,8 @@ body.high-contrast #inventoryList li.item-rare {
   transition: background 0.15s;
   cursor: pointer;
   position: relative;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 52px;
 }
 
 .notif-item:last-child {
@@ -2593,12 +2611,28 @@ body.high-contrast #inventoryList li.item-rare {
   padding: 7px 10px;
   border-bottom: 1px solid var(--border-color);
   font-size: 0.78em;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 36px;
 }
-.mutation-history-entry:last-child { border-bottom: none; }
-.mh-formula { opacity: 0.5; }
-.mh-result { font-weight: bold; }
-.mh-good .mh-result { color: #88cc88; }
-.mh-bad .mh-result { color: #cc6666; }
-.mh-time { opacity: 0.3; font-size: 0.9em; white-space: nowrap; }
+.mutation-history-entry:last-child {
+  border-bottom: none;
+}
+.mh-formula {
+  opacity: 0.5;
+}
+.mh-result {
+  font-weight: bold;
+}
+.mh-good .mh-result {
+  color: #88cc88;
+}
+.mh-bad .mh-result {
+  color: #cc6666;
+}
+.mh-time {
+  opacity: 0.3;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
 
 /* ouuuuuuuuuuu */

@@ -18,7 +18,12 @@
       seed !== undefined
         ? seed
         : BigInt(Date.now()) ^
-            BigInt(Math.floor((typeof performance !== 'undefined' ? performance.now() : 0) * 1e6))
+            BigInt(
+              Math.floor(
+                (typeof performance !== 'undefined' ? performance.now() : 0) *
+                  1e6,
+              ),
+            ),
     );
   }
 
@@ -28,7 +33,12 @@
       s = splitmix64(s);
       this._s[i] = s;
     }
-    if (this._s.every(function (v) { return v === 0n; })) this._s[0] = 1n;
+    if (
+      this._s.every(function (v) {
+        return v === 0n;
+      })
+    )
+      this._s[0] = 1n;
   };
 
   Xoshiro256SS.prototype.next = function () {
@@ -47,20 +57,30 @@
   Xoshiro256SS.prototype.nextFloat = function () {
     return Number(this.next() >> 11n) / 0x1fffffffffffff; // 2^53 - 1
   };
-  
+
   Xoshiro256SS.prototype.nextInt = function (min, max) {
     if (min >= max) throw new RangeError('min must be less than max');
     return min + Number(this.next() % BigInt(max - min));
   };
 
   Xoshiro256SS.prototype.getState = function () {
-    return this._s.map(function (v) { return v.toString(16).padStart(16, '0'); });
+    return this._s.map(function (v) {
+      return v.toString(16).padStart(16, '0');
+    });
   };
 
   Xoshiro256SS.prototype.setState = function (arr) {
-    if (arr.length !== 4) throw new RangeError('state must have exactly 4 elements');
-    this._s = arr.map(function (v) { return BigInt('0x' + v) & M64; });
-    if (this._s.every(function (v) { return v === 0n; })) this._s[0] = 1n;
+    if (arr.length !== 4)
+      throw new RangeError('state must have exactly 4 elements');
+    this._s = arr.map(function (v) {
+      return BigInt('0x' + v) & M64;
+    });
+    if (
+      this._s.every(function (v) {
+        return v === 0n;
+      })
+    )
+      this._s[0] = 1n;
   };
 
   Xoshiro256SS.prototype.jump = function () {
@@ -70,7 +90,10 @@
       0xa9582618e03fc9aan,
       0x39abdc4529b1661cn,
     ];
-    let s0 = 0n, s1 = 0n, s2 = 0n, s3 = 0n;
+    let s0 = 0n,
+      s1 = 0n,
+      s2 = 0n,
+      s3 = 0n;
     for (let i = 0; i < 4; i++) {
       for (let b = 0; b < 64; b++) {
         if ((JUMP[i] >> BigInt(b)) & 1n) {

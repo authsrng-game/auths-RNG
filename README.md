@@ -46,6 +46,12 @@ the earliest archive can be found on version `5.5`, which is exactly when auth's
 
 ---
 
+# starchart
+
+[![Stargazers over time](https://starchart.cc/auth1ery/auths-RNG.svg?variant=adaptive)](https://starchart.cc/auth1ery/auths-RNG)
+
+---
+
 # contributing notes
 
 the `.github/workflows` part should NOT be changed or else they break the development workflow, and just in general might break some already fragile webhook code. if you do, your PR will be rejected very fast, and you don't want that!

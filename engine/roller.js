@@ -18,7 +18,13 @@
     this.streak = new root.StreakTracker();
   }
 
-  BeaconRoller.prototype._buildWeightTable = function (rarities, luckMultiplier, inventoryData, shopUpgrades, luckBoostActive) {
+  BeaconRoller.prototype._buildWeightTable = function (
+    rarities,
+    luckMultiplier,
+    inventoryData,
+    shopUpgrades,
+    luckBoostActive,
+  ) {
     const weights = new Array(rarities.length);
     let totalWeight = 0n;
     const streakMult = this.streak.getLuckMultiplier();
@@ -38,13 +44,14 @@
 
       if (noticeable) {
         mult *= this.pity.getMultiplier(r);
-        mult *= this.streak.getDryRunMultiplier(r.name);
+        mult *= this.streak.getDryRunMultiplier(r.name, r.chance);
       }
 
       const multBig = BigInt(Math.round(mult * Number(MULT_PRECISION)));
       const denomBig = BigInt(denom);
       let w = (SCALE * multBig) / (denomBig * MULT_PRECISION);
-      if (w < MIN_WEIGHT) w = MIN_WEIGHT;
+      const minW = r.chance >= 0.01 ? 1n : 0n;
+      if (w < minW) w = minW;
 
       weights[i] = w;
       totalWeight += w;
@@ -53,8 +60,20 @@
     return { weights: weights, totalWeight: totalWeight };
   };
 
-  BeaconRoller.prototype.roll = function (rarities, luckMultiplier, inventoryData, shopUpgrades, luckBoostActive) {
-    const table = this._buildWeightTable(rarities, luckMultiplier, inventoryData, shopUpgrades, luckBoostActive);
+  BeaconRoller.prototype.roll = function (
+    rarities,
+    luckMultiplier,
+    inventoryData,
+    shopUpgrades,
+    luckBoostActive,
+  ) {
+    const table = this._buildWeightTable(
+      rarities,
+      luckMultiplier,
+      inventoryData,
+      shopUpgrades,
+      luckBoostActive,
+    );
     const weights = table.weights;
     const totalWeight = table.totalWeight;
 
@@ -83,7 +102,11 @@
       }
     }
 
-    this.streak.record(rarityTier(result), result.name, rarityTier(result) >= 3);
+    this.streak.record(
+      rarityTier(result),
+      result.name,
+      rarityTier(result) >= 3,
+    );
 
     return {
       rarity: result,
@@ -95,9 +118,24 @@
     };
   };
 
-  BeaconRoller.prototype.probabilityOf = function (rarity, rarities, luckMultiplier, inventoryData, shopUpgrades, luckBoostActive) {
-    const table = this._buildWeightTable(rarities, luckMultiplier, inventoryData, shopUpgrades, luckBoostActive);
-    const idx = rarities.findIndex(function (r) { return r.name === rarity.name; });
+  BeaconRoller.prototype.probabilityOf = function (
+    rarity,
+    rarities,
+    luckMultiplier,
+    inventoryData,
+    shopUpgrades,
+    luckBoostActive,
+  ) {
+    const table = this._buildWeightTable(
+      rarities,
+      luckMultiplier,
+      inventoryData,
+      shopUpgrades,
+      luckBoostActive,
+    );
+    const idx = rarities.findIndex(function (r) {
+      return r.name === rarity.name;
+    });
     if (idx === -1) return 0;
     return Number(table.weights[idx]) / Number(table.totalWeight);
   };

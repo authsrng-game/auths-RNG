@@ -240,8 +240,8 @@
         <div class="answer">
           go to the mutations tab, pick two different rarities from your
           inventory using the two dropdowns, and press mutate. after a result
-          appears you'll be asked whether to keep, sell, or pass on it — same
-          as any other roll. there's a 30 second cooldown between mutations.
+          appears you'll be asked whether to keep, sell, or pass on it — same as
+          any other roll. there's a 30 second cooldown between mutations.
         </div>
       </div>
 
@@ -252,8 +252,8 @@
           <strong>65% worse</strong>. two things improve your chances:
           <div class="example">
             rarity bonus: the rarer your worse input, the better your odds.<br />
-            inputs at the very top of the rarity list can push good-chance up
-            to ~60%.<br /><br />
+            inputs at the very top of the rarity list can push good-chance up to
+            ~60%.<br /><br />
             pair bias: each specific combination of two rarities has a fixed
             hidden bias of up to ±8%. the same pair always skews the same way,
             so experimenting and keeping a log helps.
@@ -266,7 +266,8 @@
         <div class="question">what counts as a "good" or "bad" result?</div>
         <div class="answer">
           <strong>good:</strong> the result is rarer than your rarer input.<br />
-          <strong>bad:</strong> the result is more common than your worse input.<br /><br />
+          <strong>bad:</strong> the result is more common than your worse
+          input.<br /><br />
           a bad result won't produce anything rarer than the top 6 excluded
           rarities (SUMMER, finished., etc.), and a good result won't produce
           one of those either — they are completely off the mutation table.
@@ -509,7 +510,8 @@
 
           now paste this into the console and press enter:<br /><br />
 
-          <strong><pre><code>copy(JSON.stringify(
+          <strong>
+            <pre><code>copy(JSON.stringify(
   Object.fromEntries(
     ['rarityInventory','totalRolls',
      'achievementsUnlocked','anomalies',
@@ -526,7 +528,8 @@
     .filter(k => localStorage.getItem(k) !== null)
     .map(k => [k, localStorage.getItem(k)])
   )
-));</code></pre></strong>
+));</code></pre>
+          </strong>
 
           your save data is now copied to your clipboard. now open the
           <strong>new site</strong>, open the console there (same steps as
@@ -534,13 +537,26 @@
           following, but replace <code>PASTE_HERE</code> with what you just
           copied:<br /><br />
 
-          <strong><pre><code>Object.entries(
+          <strong>
+            <pre><code>Object.entries(
   JSON.parse(`PASTE_HERE`)
 ).forEach(([k,v]) => localStorage.setItem(k,v));
-location.reload();</code></pre></strong>
+location.reload();</code></pre>
+          </strong>
 
           the page will reload and your save should be fully restored. if it
           still doesn't work, report it in the discord or nerimity server.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="question">
+          why is it that when i visit the site with a custom song saved from
+          last session, no song plays?
+        </div>
+        <div class="answer">
+          answer: your browser being really goofy. just go back to settings,
+          mute music, save, and then uncheck mute music.
         </div>
       </div>
 
@@ -549,7 +565,8 @@ location.reload();</code></pre></strong>
         <div class="answer">
           you found a bug. join the nerimity server linked in the "links and
           more" page and report in "bugs". or join the discord server and report
-          in #bugs or email hello@authsrng.xyz --- you can also open a github issue.
+          in #bugs or email hello@authsrng.xyz --- you can also open a github
+          issue.
         </div>
       </div>
 
