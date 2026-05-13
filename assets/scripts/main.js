@@ -1134,6 +1134,7 @@ setInterval(() => {
   if (shopUpgrades.printer > 0) {
     points += shopUpgrades.printer;
     updatePointsDisplay();
+    updateShopUI();
   }
 }, 1000);
 
@@ -1756,7 +1757,7 @@ function spinAndReveal(res) {
 
   playRollSound();
 
-  if (totalRolls % 100 === 0) startLuckBoost();
+  if (totalRolls > 0 && totalRolls % 100 === 0) startLuckBoost();
 
   // ── spinner style: none or fade ──────────────────────────────────────
   if (effectiveStyle === 'none' || effectiveStyle === 'fade') {
@@ -1826,40 +1827,6 @@ function spinAndReveal(res) {
     },
     duration * 1000 + 1000,
   );
-}
-
-function maybeFireConfettiAndCutscene(res) {
-  const denom = Math.round(1 / res.chance);
-  const cutsceneThresh = window.cutsceneThreshold || 0;
-  const confettiThresh = window.confettiThreshold || 0;
-
-  if (confettiThresh > 0 && denom >= confettiThresh) triggerConfetti();
-
-  const hasCutscene = !!cutsceneMap[res.name];
-  const cutsceneAllowed =
-    hasCutscene && (cutsceneThresh === 0 || denom >= cutsceneThresh);
-
-  const afterReveal = () => {
-    const isMuted = checkMuteSettings();
-    if (res.name === 'Lunar') {
-      if (!isMuted) {
-        lunarMusic.currentTime = 0;
-        lunarMusic.play();
-      }
-      backgroundMusic.pause();
-    } else {
-      lunarMusic.pause();
-      if (!isMuted) backgroundMusic.play();
-    }
-    saveAllData();
-  };
-
-  if (cutsceneAllowed) {
-    playCutscene(res.name, afterReveal);
-  } else {
-    afterReveal();
-    rollBtn.disabled = false;
-  }
 }
 
 function maybeFireConfettiAndCutscene(res) {
