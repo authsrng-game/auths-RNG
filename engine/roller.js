@@ -44,13 +44,14 @@
 
       if (noticeable) {
         mult *= this.pity.getMultiplier(r);
-        mult *= this.streak.getDryRunMultiplier(r.name);
+        mult *= this.streak.getDryRunMultiplier(r.name, r.chance);
       }
 
       const multBig = BigInt(Math.round(mult * Number(MULT_PRECISION)));
       const denomBig = BigInt(denom);
       let w = (SCALE * multBig) / (denomBig * MULT_PRECISION);
-      if (w < MIN_WEIGHT) w = MIN_WEIGHT;
+      const minW = r.chance >= 0.01 ? 1n : 0n;
+      if (w < minW) w = minW;
 
       weights[i] = w;
       totalWeight += w;

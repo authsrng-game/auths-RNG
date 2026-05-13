@@ -6,7 +6,7 @@
   function derivePityConfig(chance) {
     if (chance >= PITY_CHANCE_THRESHOLD) return null;
     const expected = Math.ceil(1 / chance);
-    const hard = Math.min(Math.ceil(expected * 3), 1500);
+    const hard = Math.ceil(expected * 1.5);
     const soft = Math.ceil(hard * SOFT_PITY_RATIO);
     return { hardPity: hard, softPityStart: soft };
   }

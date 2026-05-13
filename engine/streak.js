@@ -57,12 +57,12 @@
     return daily;
   };
 
-  StreakTracker.prototype.getDryRunMultiplier = function (name) {
+  StreakTracker.prototype.getDryRunMultiplier = function (name, chance) {
     const count = this._dryRuns.get(name) || 0;
     if (count <= DRY_THRESHOLD) return 1.0;
-    return (
-      1.0 + Math.min((count - DRY_THRESHOLD) * DRY_MULT_PER_STEP, DRY_MULT_CAP)
-    );
+    const denomFactor = chance ? Math.log10(Math.max(1 / chance, 10)) / 4 : 1;
+    const cap = Math.min(DRY_MULT_CAP * denomFactor, 4.0);
+    return 1.0 + Math.min((count - DRY_THRESHOLD) * DRY_MULT_PER_STEP, cap);
   };
 
   StreakTracker.prototype.isInHotPulse = function () {
