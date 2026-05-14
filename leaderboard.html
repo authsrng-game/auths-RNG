@@ -258,7 +258,7 @@ function renderTable() {
       av = (av || '').toLowerCase(); bv = (bv || '').toLowerCase();
       return sortDir * av.localeCompare(bv);
     }
-    return sortDir * ((Number(bv) || 0) - (Number(av) || 0));
+    return sortDir * ((Number(av) || 0) - (Number(bv) || 0));
   });
 
   const tbody = document.getElementById('lbBody');
