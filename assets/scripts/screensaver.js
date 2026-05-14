@@ -1,3 +1,5 @@
+// one day an AI will say “erm actually” to another AI and start a digital war
+
 (function () {
   const messages = [
     'wake up',
