@@ -345,6 +345,11 @@ async function applyBgStyle(settings, fallbackColor) {
       confettiThreshold: s.confettiThreshold,
       rareThreshold: s.rareThreshold,
       cutsceneThreshold: s.cutsceneThreshold
+      bgType: s.bgType,
+      bgGradientFrom: s.bgGradientFrom,
+      bgGradientTo: s.bgGradientTo,
+      bgGradientAngle: s.bgGradientAngle,
+      bgGradientType: s.bgGradientType,
     };
   }
 
