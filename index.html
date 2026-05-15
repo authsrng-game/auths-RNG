@@ -1533,6 +1533,23 @@ function handleSwipe() {
         <div style="font-size:0.75em;opacity:0.4;letter-spacing:0.06em;margin:16px 0 12px;">effects & accessibility</div>
 
         <label style="display:block;margin-top:6px;font-size:0.85em;opacity:0.7;"><input type="checkbox" id="te-blurPanels"> frosted glass panels</label>
+
+        <div id="te-blurControls" style="margin-top:10px;padding:10px;background:var(--overlay-bg);border:1px solid var(--border-color);border-radius:3px;">
+            <div style="font-size:0.75em;opacity:0.4;margin-bottom:8px;">blur settings</div>
+
+            <label style="display:block;margin-bottom:4px;font-size:0.8em;opacity:0.6;">blur intensity: <span id="te-blurIntensityVal">10</span>px</label>
+            <input type="range" id="te-blurIntensity" min="0" max="40" value="10" style="width:100%;margin-bottom:10px;">
+
+            <label style="display:block;margin-bottom:4px;font-size:0.8em;opacity:0.6;">saturation: <span id="te-blurSaturateVal">140</span>%</label>
+            <input type="range" id="te-blurSaturate" min="100" max="200" value="140" style="width:100%;margin-bottom:10px;">
+
+            <label style="display:block;margin-bottom:4px;font-size:0.8em;opacity:0.6;">panel opacity: <span id="te-blurPanelOpacityVal">55</span>%</label>
+            <input type="range" id="te-blurPanelOpacity" min="5" max="95" value="55" style="width:100%;margin-bottom:10px;">
+
+            <label style="display:block;margin-bottom:4px;font-size:0.8em;opacity:0.6;">border opacity: <span id="te-blurBorderOpacityVal">8</span>%</label>
+            <input type="range" id="te-blurBorderOpacity" min="0" max="40" value="8" style="width:100%;margin-bottom:4px;">
+        </div>
+        
         <label style="display:block;margin-top:6px;font-size:0.85em;opacity:0.7;"><input type="checkbox" id="te-compactMode"> compact mode</label>
         <label style="display:block;margin-top:6px;font-size:0.85em;opacity:0.7;"><input type="checkbox" id="te-hideCursor"> hide custom cursor</label>
         <label style="display:block;margin-top:6px;font-size:0.85em;opacity:0.7;"><input type="checkbox" id="te-hideLuckBreakdown"> hide luck breakdown</label>
@@ -1561,7 +1578,26 @@ function handleSwipe() {
 
   </div>
 </div>
-            
+
+<script>
+(function() {
+    function syncBlurControls() {
+        const cb = document.getElementById('te-blurPanels');
+        const panel = document.getElementById('te-blurControls');
+        if (!cb || !panel) return;
+        panel.style.display = cb.checked ? 'block' : 'none';
+    }
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.id === 'te-blurPanels') syncBlurControls();
+    });
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'openThemeEditorBtn') {
+            setTimeout(syncBlurControls, 50);
+        }
+    });
+})();
+</script>
+    
 </body>
 
 </html>
