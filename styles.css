@@ -2084,10 +2084,29 @@ body.blur-panels #inventoryList,
 body.blur-panels #luckDisplay,
 body.blur-panels #achievementsContainer,
 body.blur-panels .well-container,
-body.blur-panels #pointsDisplay {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.03) !important;
+body.blur-panels #pointsDisplay,
+body.blur-panels #dailyContainer,
+body.blur-panels #weeklyContainer,
+body.blur-panels .gauntlet-tier,
+body.blur-panels .potion-item,
+body.blur-panels .mutation-panel,
+body.blur-panels #notifPanel,
+body.blur-panels .page-dots,
+body.blur-panels .active-potions-display,
+body.blur-panels .index-content,
+body.blur-panels .modal-content,
+body.blur-panels .well-container {
+    backdrop-filter: blur(var(--blur-intensity, 10px)) saturate(var(--blur-saturate, 140%));
+    -webkit-backdrop-filter: blur(var(--blur-intensity, 10px)) saturate(var(--blur-saturate, 140%));
+    background: rgba(var(--panel-bg-rgb, 17,17,17), var(--blur-panel-opacity, 0.55)) !important;
+    border-color: rgba(255,255,255, var(--blur-border-opacity, 0.08)) !important;
+}
+
+body.blur-panels {
+    --blur-intensity: 10px;
+    --blur-saturate: 140%;
+    --blur-panel-opacity: 0.55;
+    --blur-border-opacity: 0.08;
 }
 
 /* ── compact mode ── */
