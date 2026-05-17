@@ -552,7 +552,7 @@
     TIERS.forEach((tier) => {
       const locked = isLocked(tier);
       const rarNames = getTierRarities(tier);
-      const complete = !locked && isComplete(tier);
+      const complete = !locked && isComplete(tier, d);
       const claimable = complete && canClaim(tier, d);
       const cdStr = !locked ? getCdStr(tier, d) : null;
       const got = locked
