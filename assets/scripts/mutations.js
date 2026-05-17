@@ -9,6 +9,26 @@
   const TRUST_OWNED_KEY = 'mutationTrustOwned';
   const TRUST_ACTIVE_KEY = 'mutationTrustActive';
 
+  document.addEventListener('click', (e) => {
+    const dot = e.target.closest('.page-dot[data-page="3"]');
+    const next = e.target.closest('#nextPage');
+    const prev = e.target.closest('#prevPage');
+    if (dot) {
+      setTimeout(renderMutations, 50);
+      return;
+    }
+    if (next || prev) {
+      setTimeout(() => {
+        if (
+          document
+            .querySelector('.page-dot[data-page="3"]')
+            ?.classList.contains('active')
+        )
+          renderMutations();
+      }, 80);
+    }
+  });
+
   function getTrust() {
     return parseInt(localStorage.getItem(TRUST_KEY) || '0');
   }
@@ -326,9 +346,13 @@
   window.renderMutations = renderMutations;
 
   function tryInit(n) {
-    if (typeof inventoryData !== 'undefined' && inventoryData instanceof Map)
+    if (
+      typeof inventoryData !== 'undefined' &&
+      inventoryData instanceof Map &&
+      inventoryData.size > 0
+    )
       renderMutations();
-    else if (n > 0) setTimeout(() => tryInit(n - 1), 100);
+    else if (n > 0) setTimeout(() => tryInit(n - 1), 200);
   }
-  tryInit(30);
+  tryInit(60);
 })();
