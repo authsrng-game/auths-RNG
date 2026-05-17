@@ -715,7 +715,7 @@ hr.sep {
   height: 24px;
   pointer-events: none;
   transform: translate(-50%, -50%);
-  z-index: 999999;
+  z-index: 2147483647;
   mix-blend-mode: difference;
   transition:
     transform 0.148s cubic-bezier(0.68, -0.55, 0.265, 1.55),
