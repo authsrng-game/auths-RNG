@@ -737,6 +737,7 @@ if (navigator.userAgent.includes("Screenjesus")) {
 <script src="engine/rng.js" defer></script>
 <script src="engine/roller.js" defer></script>
 <script src="engine/bcore.js" defer></script>
+<script src="assets/scripts/popup.js" defer></script>
 <script src="assets/scripts/rarities.js" defer></script>
 <script src="assets/scripts/rarityStyle.js" defer></script>
 <script src="assets/scripts/main.js" defer></script>
@@ -1122,7 +1123,7 @@ function handleSwipe() {
   }
 
   function copyToClipboard(text, label) {
-    navigator.clipboard.writeText(text).then(() => alert(label + ' copied!'))
+    navigator.clipboard.writeText(text).then(() => window.showAlert(label + ' copied!'))
       .catch(() => {
         const ta = document.createElement('textarea');
         ta.value = text;
@@ -1132,7 +1133,7 @@ function handleSwipe() {
         ta.select();
         document.execCommand('copy');
         document.body.removeChild(ta);
-        alert(label + ' copied!');
+        window.showAlert(label + ' copied!');
       });
   }
 
@@ -1168,7 +1169,7 @@ function handleSwipe() {
         if (type === 'save' || type === 'settings') refreshFunc?.();
         const codeEl = type === 'save' ? document.getElementById('saveTransferCode') : document.getElementById('settingsTransferCode');
         const text = codeEl.textContent;
-        if (text.includes('(no ')) { alert('no ' + type + ' data to export'); return; }
+        if (text.includes('(no ')) { window.showAlert('no ' + type + ' data to export'); return; }
         if (func === copyToClipboard) func(text, param);
         else if (func === downloadAsFile) func(text, param);
       });
@@ -1182,9 +1183,9 @@ function handleSwipe() {
     const input = prompt('paste your save data export:');
     if (!input?.trim()) return;
     const result = decode(input, 'save');
-    if (result.error) { alert(result.error); return; }
+    if (result.error) { window.showAlert(result.error); return; }
     Object.keys(result.bundle).forEach(k => localStorage.setItem(k, result.bundle[k]));
-    alert('save data imported! reloading...');
+    window.showAlert('save data imported! reloading...');
     setTimeout(() => location.reload(), 500);
   });
 
@@ -1192,12 +1193,12 @@ function handleSwipe() {
     const input = prompt('paste your settings export:');
     if (!input?.trim()) return;
     const result = decode(input, 'settings');
-    if (result.error) { alert(result.error); return; }
+    if (result.error) { window.showAlert(result.error); return; }
     if (result.bundle.userSettings) localStorage.setItem('userSettings', result.bundle.userSettings);
     if (typeof applySettings === 'function') {
       try { applySettings(JSON.parse(result.bundle.userSettings)); } catch(e) {}
     }
-    alert('settings imported! reloading...');
+    window.showAlert('settings imported! reloading...');
     setTimeout(() => location.reload(), 500);
   });
 
@@ -1257,7 +1258,7 @@ function handleSwipe() {
           ? document.getElementById('saveTransferCode')
           : document.getElementById('settingsTransferCode');
         const text = codeEl.textContent;
-        if (text.includes('(no ')) { alert('no ' + type + ' data to export'); return; }
+        if (text.includes('(no ')) { window.showAlert('no ' + type + ' data to export'); return; }
         if (func === copyToClipboard) func(text, param);
         else if (func === downloadAsFile) func(text, param);
       });
@@ -1288,7 +1289,7 @@ function handleSwipe() {
   if (erudaBtn) {
     erudaBtn.addEventListener('click', function() {
       if (erudaLoaded) {
-        alert('eruda is already loaded!!!');
+        window.showAlert('eruda is already loaded!!!');
         return;
       }
       
@@ -1299,10 +1300,10 @@ function handleSwipe() {
         erudaLoaded = true;
         erudaBtn.textContent = 'eruda loaded!';
         erudaBtn.disabled = true;
-        alert('eruda console loaded! check for a "cogwheel with hammer and screwdriver" button. should be at the middle bottom or bottom right.');
+        window.showAlert('eruda console loaded! check for a "cogwheel with hammer and screwdriver" button. should be at the middle bottom or bottom right.');
       };
       script.onerror = function() {
-        alert('failed to load eruda...');
+        window.showAlert('failed to load eruda...');
       };
       document.body.appendChild(script);
     });

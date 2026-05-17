@@ -26,7 +26,7 @@
     default: 'assets/audio/welcomecity.mp3',
     wavelocity: 'assets/audio/wavelocity.mp3',
     nocturne: 'assets/audio/nocturne.mp3',
-    fallout: 'assets/audio/fallout.mp3'
+    fallout: 'assets/audio/fallout.mp3',
   };
 
   // ── IndexedDB helpers ──────────────────────────────────────────────────
@@ -60,21 +60,24 @@
   }
 
   async function getAllTracksMeta() {
-  const db = await openMusicDB();
-  return new Promise((resolve, reject) => {
-    const results = [];
-    const req = db.transaction('tracks', 'readonly').objectStore('tracks').openCursor();
-    req.onsuccess = (e) => {
-      const cursor = e.target.result;
-      if (cursor) {
-        const { id, name, type, size } = cursor.value;
-        results.push({ id, name, type, size });
-        cursor.continue();
-      } else resolve(results);
-    };
-    req.onerror = () => reject(req.error);
-  });
-}
+    const db = await openMusicDB();
+    return new Promise((resolve, reject) => {
+      const results = [];
+      const req = db
+        .transaction('tracks', 'readonly')
+        .objectStore('tracks')
+        .openCursor();
+      req.onsuccess = (e) => {
+        const cursor = e.target.result;
+        if (cursor) {
+          const { id, name, type, size } = cursor.value;
+          results.push({ id, name, type, size });
+          cursor.continue();
+        } else resolve(results);
+      };
+      req.onerror = () => reject(req.error);
+    });
+  }
 
   async function getTrack(id) {
     const db = await openMusicDB();
@@ -89,17 +92,17 @@
   }
 
   async function addTrack(name, buffer, type) {
-  const db = await openMusicDB();
-  return new Promise((resolve, reject) => {
-    const req = db
-      .transaction('tracks', 'readwrite')
-      .objectStore('tracks')
-      .add({ name, buffer, type, size: buffer.byteLength });
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-  
+    const db = await openMusicDB();
+    return new Promise((resolve, reject) => {
+      const req = db
+        .transaction('tracks', 'readwrite')
+        .objectStore('tracks')
+        .add({ name, buffer, type, size: buffer.byteLength });
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
   async function deleteTrack(id) {
     const db = await openMusicDB();
     return new Promise((resolve, reject) => {
@@ -460,68 +463,136 @@
   }
 
   // ── applyVisuals ──────────────────────────────────────────────────────
-function applyVisuals(settings) {
-  document.body.classList.toggle('legacy-mode', !!settings.legacyMode);
+  function applyVisuals(settings) {
+    document.body.classList.toggle('legacy-mode', !!settings.legacyMode);
+    document.body.classList.toggle('blur-panels', !!settings.blurPanels);
+    document.body.classList.toggle('compact-mode', !!settings.compactMode);
+    document.body.classList.toggle('hide-cursor', !!settings.hideCursor);
+    document.body.classList.toggle('reduce-motion', !!settings.reduceMotion);
+    document.body.classList.toggle('high-contrast', !!settings.highContrast);
+    document.body.classList.toggle('large-targets', !!settings.largeTargets);
 
-  if (!localStorage.getItem('themeEditorActive')) {
-    if (settings.theme === 'white') {
-      document.body.setAttribute('data-theme', 'white');
-      document.body.style.removeProperty('--bg-color');
-    } else if (settings.theme === 'custom') {
-      document.body.removeAttribute('data-theme');
-      document.body.style.setProperty('--bg-color', settings.customHex || '#0e0e0e');
-      document.body.style.setProperty('--text-color', settings.customTextHex || '#dcdcdc');
-    } else {
-      document.body.removeAttribute('data-theme');
-      document.body.style.removeProperty('--bg-color');
+    if (!localStorage.getItem('themeEditorActive')) {
+      if (settings.theme === 'white') {
+        document.body.setAttribute('data-theme', 'white');
+        document.body.style.removeProperty('--bg-color');
+      } else if (settings.theme === 'custom') {
+        document.body.removeAttribute('data-theme');
+        document.body.style.setProperty(
+          '--bg-color',
+          settings.customHex || '#0e0e0e',
+        );
+        document.body.style.setProperty(
+          '--text-color',
+          settings.customTextHex || '#dcdcdc',
+        );
+      } else {
+        document.body.removeAttribute('data-theme');
+        document.body.style.removeProperty('--bg-color');
+      }
     }
+
+    if (settings.font) {
+      const fontMap = {
+        serif: 'serif',
+        mono: 'monospace',
+        dyslexic: 'OpenDyslexic, monospace',
+        default: 'monospace',
+      };
+      document.body.style.fontFamily = fontMap[settings.font] || 'monospace';
+    }
+
+    if (settings.textSize) {
+      document.documentElement.style.setProperty(
+        'font-size',
+        settings.textSize + 'px',
+      );
+    }
+
+    if (settings.accentColor) {
+      document.documentElement.style.setProperty(
+        '--accent-color',
+        settings.accentColor,
+      );
+    }
+
+    document.body.setAttribute(
+      'data-inv-style',
+      settings.inventoryStyle || 'compact',
+    );
+
+    window.spinnerStyleSetting = settings.spinnerStyle || 'slot';
+    window.confettiThreshold = settings.confettiThreshold || 0;
+    window.cutsceneThreshold = settings.cutsceneThreshold || 0;
+    window.rawNumbers = !!settings.rawNumbers;
+    window.rollSoundSetting = settings.rollSound || 'none';
+    window.rareThreshold = settings.rareThreshold ?? 1000;
+    window.autoSellThreshold = settings.autoSellThreshold || 0;
+
+    const luckBreak = el('luckBreakdown');
+    if (luckBreak)
+      luckBreak.style.display = settings.hideLuckBreakdown ? 'none' : '';
+
+    const rsrEl = el('rollsSinceRare');
+    if (rsrEl) rsrEl.style.display = settings.rareThreshold > 0 ? '' : 'none';
+
+    const rollBtn = el('rollBtn');
+    if (rollBtn) {
+      rollBtn.textContent = (settings.customRollText || '').trim() || 'roll';
+      const sizeMap = {
+        small: '8px 14px',
+        normal: '12px 24px',
+        large: '16px 32px',
+        huge: '24px 48px',
+      };
+      rollBtn.style.padding = sizeMap[settings.rollBtnSize || 'normal'];
+    }
+
+    if (settings.bgPattern !== undefined)
+      applyBackgroundPattern(settings.bgPattern);
+    if (settings.season !== undefined)
+      startSeasonalParticles(
+        settings.season,
+        settings.particleDensity || 'medium',
+      );
+
+    startDevOverlay(settings);
+
+    if (window.refreshAllDisplays) window.refreshAllDisplays();
   }
 
-  window.rawNumbers = !!settings.rawNumbers;
-
-  clearInterval(rgbInterval);
-  rgbInterval = null;
-  clearInterval(wackyInterval);
-  wackyInterval = null;
-
-  startDevOverlay(settings);
-
-  window.rollSoundSetting = settings.rollSound || 'none';
-  window.rareThreshold = settings.rareThreshold || 1000;
-  window.autoSellThreshold = settings.autoSellThreshold || 0;
-
-  const rsrEl = el('rollsSinceRare');
-  if (rsrEl) rsrEl.style.display = settings.rareThreshold > 0 ? '' : 'none';
-
-  if (window.refreshAllDisplays) window.refreshAllDisplays();
-}
-
   // ── syncUIToSettings ──────────────────────────────────────────────────
-function syncUIToSettings(settings) {
-  if (el('musicSelect')) el('musicSelect').value = settings.music || 'default';
-  if (el('muteMusic')) el('muteMusic').checked = !!settings.muted;
-  if (el('devOverlay')) el('devOverlay').checked = !!settings.dev;
-  if (el('legacyMode')) el('legacyMode').checked = !!settings.legacyMode;
-  if (el('rawNumbers')) el('rawNumbers').checked = !!settings.rawNumbers;
-  if (el('rollSound')) el('rollSound').value = settings.rollSound || 'none';
-  if (el('rareThreshold')) el('rareThreshold').value = settings.rareThreshold || 1000;
-  if (el('autoSellThreshold')) el('autoSellThreshold').value = settings.autoSellThreshold || 0;
-}
+  function syncUIToSettings(settings) {
+    if (el('musicSelect'))
+      el('musicSelect').value = settings.music || 'default';
+    if (el('muteMusic')) el('muteMusic').checked = !!settings.muted;
+    if (el('devOverlay')) el('devOverlay').checked = !!settings.dev;
+    if (el('legacyMode')) el('legacyMode').checked = !!settings.legacyMode;
+    if (el('rawNumbers')) el('rawNumbers').checked = !!settings.rawNumbers;
+    if (el('rollSound')) el('rollSound').value = settings.rollSound || 'none';
+    if (el('rareThreshold'))
+      el('rareThreshold').value = settings.rareThreshold || 1000;
+    if (el('autoSellThreshold'))
+      el('autoSellThreshold').value = settings.autoSellThreshold || 0;
+  }
   // blah!
 
   // ── getCurrentSettings ────────────────────────────────────────────────
-function getCurrentSettings() {
-  return {
-    music: (el('musicSelect') || {}).value || 'default',
-    muted: !!(el('muteMusic') || {}).checked,
-    dev: !!(el('devOverlay') || {}).checked,
-    legacyMode: !!(el('legacyMode') || {}).checked,
-    rawNumbers: !!(el('rawNumbers') || {}).checked,
-    rollSound: (el('rollSound') || {}).value || 'none',
-    rareThreshold: parseInt((el('rareThreshold') || {}).value || 1000, 10),
-    autoSellThreshold: parseInt((el('autoSellThreshold') || {}).value || 0, 10),
-  };
-}
+  function getCurrentSettings() {
+    return {
+      music: (el('musicSelect') || {}).value || 'default',
+      muted: !!(el('muteMusic') || {}).checked,
+      dev: !!(el('devOverlay') || {}).checked,
+      legacyMode: !!(el('legacyMode') || {}).checked,
+      rawNumbers: !!(el('rawNumbers') || {}).checked,
+      rollSound: (el('rollSound') || {}).value || 'none',
+      rareThreshold: parseInt((el('rareThreshold') || {}).value || 1000, 10),
+      autoSellThreshold: parseInt(
+        (el('autoSellThreshold') || {}).value || 0,
+        10,
+      ),
+    };
+  }
   // ── onChange — fires on every UI interaction ──────────────────────────
   // Only applies visuals (safe). Music is NOT touched until save. We will not make the stupid fucking bug once again.
   function onChange() {
@@ -530,23 +601,23 @@ function getCurrentSettings() {
   }
 
   // ── Event binding ─────────────────────────────────────────────────────
-function bindSettings() {
-  const ids = ['muteMusic', 'legacyMode', 'rawNumbers', 'devOverlay'];
-  ids.forEach(id => {
-    const n = el(id);
-    if (n) n.addEventListener('change', onChange);
-  });
+  function bindSettings() {
+    const ids = ['muteMusic', 'legacyMode', 'rawNumbers', 'devOverlay'];
+    ids.forEach((id) => {
+      const n = el(id);
+      if (n) n.addEventListener('change', onChange);
+    });
 
-  ['musicSelect', 'rollSound'].forEach(id => {
-    const n = el(id);
-    if (n) n.addEventListener('change', onChange);
-  });
+    ['musicSelect', 'rollSound'].forEach((id) => {
+      const n = el(id);
+      if (n) n.addEventListener('change', onChange);
+    });
 
-  ['rareThreshold', 'autoSellThreshold'].forEach(id => {
-    const n = el(id);
-    if (n) n.addEventListener('input', onChange);
-  });
-}
+    ['rareThreshold', 'autoSellThreshold'].forEach((id) => {
+      const n = el(id);
+      if (n) n.addEventListener('input', onChange);
+    });
+  }
 
   // ── Web Audio API (custom music) ──────────────────────────────────────
   // Now takes an ArrayBuffer (from IDB) + MIME type instead of a base64 data URL.
@@ -607,27 +678,28 @@ function bindSettings() {
 
   // ── Custom music upload UI ─────────────────────────────────────────────
   async function loadCustomMusicUI() {
-  const musicSel = el('musicSelect');
-  const listWrapper = el('customMusicList');
-  const listEl = el('customTracksList');
-  if (!musicSel) return;
-  try {
-    const tracks = await getAllTracksMeta();
-    Array.from(musicSel.options).forEach((o) => {
-      if (o.value.startsWith('custom_')) o.remove();
-    });
-    tracks.forEach((track) => {
-      const opt = document.createElement('option');
-      opt.value = 'custom_' + track.id;
-      opt.textContent = track.name + ' (custom)';
-      musicSel.appendChild(opt);
-    });
-    if (listWrapper) listWrapper.style.display = tracks.length ? 'block' : 'none';
-    if (listEl) renderCustomTracksList(tracks, listEl, musicSel);
-  } catch (e) {
-    console.error('custom music UI error:', e);
+    const musicSel = el('musicSelect');
+    const listWrapper = el('customMusicList');
+    const listEl = el('customTracksList');
+    if (!musicSel) return;
+    try {
+      const tracks = await getAllTracksMeta();
+      Array.from(musicSel.options).forEach((o) => {
+        if (o.value.startsWith('custom_')) o.remove();
+      });
+      tracks.forEach((track) => {
+        const opt = document.createElement('option');
+        opt.value = 'custom_' + track.id;
+        opt.textContent = track.name + ' (custom)';
+        musicSel.appendChild(opt);
+      });
+      if (listWrapper)
+        listWrapper.style.display = tracks.length ? 'block' : 'none';
+      if (listEl) renderCustomTracksList(tracks, listEl, musicSel);
+    } catch (e) {
+      console.error('custom music UI error:', e);
+    }
   }
-}
 
   function renderCustomTracksList(tracks, container, musicSel) {
     container.innerHTML = '';
@@ -675,12 +747,12 @@ function bindSettings() {
 
       // 100 MB limit — IndexedDB can handle it, localStorage couldn't
       if (file.size > 100 * 1024 * 1024) {
-        alert('file too large! max 100MB');
+        window.showAlert('file too large! max 100MB');
         upload.value = '';
         return;
       }
       if (!file.type.startsWith('audio/')) {
-        alert('please upload an audio file');
+        window.showAlert('please upload an audio file');
         upload.value = '';
         return;
       }
@@ -692,14 +764,14 @@ function bindSettings() {
           await addTrack(trackName, ev.target.result, file.type);
           await loadCustomMusicUI();
           upload.value = '';
-          alert('track uploaded!');
+          window.showAlert('track uploaded!');
         } catch (err) {
-          alert('error saving track: ' + err.message);
+          window.showAlert('error saving track: ' + err.message);
           upload.value = '';
         }
       };
       reader.onerror = () => {
-        alert('error reading file');
+        window.showAlert('error reading file');
         upload.value = '';
       };
       reader.readAsArrayBuffer(file); // ArrayBuffer, not data URL
@@ -782,7 +854,7 @@ function bindSettings() {
   function copyText(text, label) {
     navigator.clipboard
       .writeText(text)
-      .then(() => alert(label + ' copied!'))
+      .then(() => window.showAlert(label + ' copied!'))
       .catch(() => {
         const ta = Object.assign(document.createElement('textarea'), {
           value: text,
@@ -792,7 +864,7 @@ function bindSettings() {
         ta.select();
         document.execCommand('copy');
         document.body.removeChild(ta);
-        alert(label + ' copied!');
+        window.showAlert(label + ' copied!');
       });
   }
 
@@ -871,7 +943,7 @@ function bindSettings() {
           refreshSave();
           const t = getCodeText('saveTransferCode');
           if (!t.startsWith('(')) copyText(t, 'save data');
-          else alert('no save data');
+          else window.showAlert('no save data');
         },
       ],
       [
@@ -880,7 +952,7 @@ function bindSettings() {
           refreshSave();
           const t = getCodeText('saveTransferCode');
           if (!t.startsWith('(')) downloadText(t, 'authsrng_save.txt');
-          else alert('no save data');
+          else window.showAlert('no save data');
         },
       ],
       ['refreshSaveBtn', refreshSave],
@@ -891,13 +963,13 @@ function bindSettings() {
           if (!input?.trim()) return;
           const result = decode(input, 'save');
           if (result.error) {
-            alert(result.error);
+            window.showAlert(result.error);
             return;
           }
           Object.keys(result.bundle).forEach((k) =>
             localStorage.setItem(k, result.bundle[k]),
           );
-          alert('save imported! reloading...');
+          window.showAlert('save imported! reloading...');
           setTimeout(() => location.reload(), 500);
         },
       ],
@@ -907,7 +979,7 @@ function bindSettings() {
           refreshSettingsCode();
           const t = getCodeText('settingsTransferCode');
           if (!t.startsWith('(')) copyText(t, 'settings');
-          else alert('no settings');
+          else window.showAlert('no settings');
         },
       ],
       [
@@ -916,7 +988,7 @@ function bindSettings() {
           refreshSettingsCode();
           const t = getCodeText('settingsTransferCode');
           if (!t.startsWith('(')) downloadText(t, 'authsrng_settings.txt');
-          else alert('no settings');
+          else window.showAlert('no settings');
         },
       ],
       ['refreshSettingsBtn', refreshSettingsCode],
@@ -927,7 +999,7 @@ function bindSettings() {
           if (!input?.trim()) return;
           const result = decode(input, 'settings');
           if (result.error) {
-            alert(result.error);
+            window.showAlert(result.error);
             return;
           }
           if (result.bundle.userSettings)
@@ -939,7 +1011,7 @@ function bindSettings() {
             syncUIToSettings(s);
             savedSettings = s;
           } catch (_) {}
-          alert('settings imported! reloading...');
+          window.showAlert('settings imported! reloading...');
           setTimeout(() => location.reload(), 500);
         },
       ],
@@ -1034,17 +1106,14 @@ function bindSettings() {
 
   // ── Init ──────────────────────────────────────────────────────────────
   async function init() {
-    console.log("[settings] initializing...");
+    console.log('[settings] initializing...');
     createPendingBar();
     bindSettings();
     bindCustomMusicUpload();
     bindTransfer();
     bindLegacyMode();
 
-    // Migrate any old localStorage tracks → IDB (runs once, then removes the key)
     await migrateFromLocalStorage();
-
-    // Populate the music select with IDB tracks
     await loadCustomMusicUI();
 
     let loaded = {};
@@ -1055,6 +1124,7 @@ function bindSettings() {
     const defaults = {
       theme: 'black',
       customHex: '#0e0e0e',
+      customTextHex: '#dcdcdc',
       textSize: 16,
       rgb: false,
       wacky: false,
@@ -1085,14 +1155,13 @@ function bindSettings() {
       autoSellThreshold: 0,
       cutsceneThreshold: 0,
       rawNumbers: false,
-      customTextHex: '#dcdcdc',
     };
 
     savedSettings = { ...defaults, ...loaded };
     applyVisuals(savedSettings);
-    applyMusic(savedSettings); // called ONCE on load — sets _activeMusicKey
+    applyMusic(savedSettings);
     syncUIToSettings(savedSettings);
-    console.log("[settings] initialized.");
+    console.log('[settings] initialized.');
   }
 
   if (document.readyState === 'loading') {
@@ -1103,12 +1172,12 @@ function bindSettings() {
 
   // Expose globals
   window.applySettings = function (settings) {
-    applyVisuals(settings);
-    applyMusic(settings);
-    syncUIToSettings(settings);
-    savedSettings = settings;
+    savedSettings = { ...savedSettings, ...settings };
+    applyVisuals(savedSettings);
+    applyMusic(savedSettings);
+    syncUIToSettings(savedSettings);
     try {
-      localStorage.setItem('userSettings', JSON.stringify(settings));
+      localStorage.setItem('userSettings', JSON.stringify(savedSettings));
     } catch (_) {}
   };
   window.getCurrentSettings = getCurrentSettings;

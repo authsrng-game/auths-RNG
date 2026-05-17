@@ -176,53 +176,63 @@
   }
 
   function readEditor() {
+    function val(id) {
+      return el(id) ? el(id).value : '';
+    }
+    function intVal(id, def) {
+      return el(id) ? parseInt(el(id).value, 10) || def : def;
+    }
+    function checked(id) {
+      return el(id) ? el(id).checked : false;
+    }
+
     return {
       vars: {
-        bgColor: el('te-bgColor').value,
-        textColor: el('te-textColor').value,
-        panelBg: el('te-panelBg').value,
-        overlayBg: el('te-overlayBg').value,
-        borderColor: el('te-borderColor').value,
-        buttonBg: el('te-buttonBg').value,
-        accentColor: el('te-accentColor').value,
-        pointsColor: el('te-pointsColor').value,
-        achievementBg: el('te-achievementBg').value,
-        achievementBorder: el('te-achievementBorder').value,
+        bgColor: val('te-bgColor'),
+        textColor: val('te-textColor'),
+        panelBg: val('te-panelBg'),
+        overlayBg: val('te-overlayBg'),
+        borderColor: val('te-borderColor'),
+        buttonBg: val('te-buttonBg'),
+        accentColor: val('te-accentColor'),
+        pointsColor: val('te-pointsColor'),
+        achievementBg: val('te-achievementBg'),
+        achievementBorder: val('te-achievementBorder'),
       },
       settings: {
-        radius: parseInt(el('te-radius').value, 10),
-        borderWidth: parseInt(el('te-borderWidth').value, 10),
-        textSize: parseInt(el('te-textSize').value, 10),
-        font: el('te-font').value,
-        inventoryStyle: el('te-inventoryStyle').value,
-        spinnerStyle: el('te-spinnerStyle').value,
-        rollBtnSize: el('te-rollBtnSize').value,
-        customRollText: el('te-customRollText').value,
-        bgPattern: el('te-bgPattern').value,
-        season: el('te-season').value,
-        particleDensity: el('te-particleDensity').value,
-        blurPanels: el('te-blurPanels').checked,
-        blurIntensity: parseInt(el('te-blurIntensity').value, 10),
-        blurSaturate: parseInt(el('te-blurSaturate').value, 10),
-        blurPanelOpacity: parseInt(el('te-blurPanelOpacity').value, 10),
-        blurBorderOpacity: parseInt(el('te-blurBorderOpacity').value, 10),
-        compactMode: el('te-compactMode').checked,
-        hideCursor: el('te-hideCursor').checked,
-        hideLuckBreakdown: el('te-hideLuckBreakdown').checked,
-        reduceMotion: el('te-reduceMotion').checked,
-        highContrast: el('te-highContrast').checked,
-        largeTargets: el('te-largeTargets').checked,
-        rgb: el('te-rgbBg').checked,
-        wacky: el('te-wackyText').checked,
-        chaos: el('te-chaosMode').checked,
-        confettiThreshold: parseInt(el('te-confettiThreshold').value, 10) || 0,
-        rareThreshold: parseInt(el('te-rareThreshold').value, 10) || 1000,
-        cutsceneThreshold: parseInt(el('te-cutsceneThreshold').value, 10) || 0,
-        bgType: el('te-bgType').value,
-        bgGradientFrom: el('te-bgGradientFrom').value,
-        bgGradientTo: el('te-bgGradientTo').value,
-        bgGradientAngle: parseInt(el('te-bgGradientAngle').value, 10),
-        bgGradientType: el('te-bgGradientType').value,
+        radius: intVal('te-radius', 2),
+        borderWidth: intVal('te-borderWidth', 1),
+        textSize: intVal('te-textSize', 16),
+        font: val('te-font') || 'default',
+        inventoryStyle: val('te-inventoryStyle') || 'compact',
+        spinnerStyle: val('te-spinnerStyle') || 'slot',
+        rollBtnSize: val('te-rollBtnSize') || 'normal',
+        customRollText: val('te-customRollText'),
+        bgPattern: val('te-bgPattern') || 'none',
+        season: val('te-season') || 'none',
+        particleDensity: val('te-particleDensity') || 'medium',
+        blurPanels: checked('te-blurPanels'),
+        blurIntensity: intVal('te-blurIntensity', 10),
+        blurSaturate: intVal('te-blurSaturate', 140),
+        blurPanelOpacity: intVal('te-blurPanelOpacity', 55),
+        blurBorderOpacity: intVal('te-blurBorderOpacity', 8),
+        compactMode: checked('te-compactMode'),
+        hideCursor: checked('te-hideCursor'),
+        hideLuckBreakdown: checked('te-hideLuckBreakdown'),
+        reduceMotion: checked('te-reduceMotion'),
+        highContrast: checked('te-highContrast'),
+        largeTargets: checked('te-largeTargets'),
+        rgb: checked('te-rgbBg'),
+        wacky: checked('te-wackyText'),
+        chaos: checked('te-chaosMode'),
+        confettiThreshold: intVal('te-confettiThreshold', 0),
+        rareThreshold: intVal('te-rareThreshold', 1000),
+        cutsceneThreshold: intVal('te-cutsceneThreshold', 0),
+        bgType: val('te-bgType') || 'color',
+        bgGradientFrom: val('te-bgGradientFrom') || '#0e0e0e',
+        bgGradientTo: val('te-bgGradientTo') || '#1a1a2e',
+        bgGradientAngle: intVal('te-bgGradientAngle', 135),
+        bgGradientType: val('te-bgGradientType') || 'linear',
       },
     };
   }
@@ -474,10 +484,7 @@
 
     const patch = buildSettingsPatch(editorData);
     if (window.applySettings) {
-      const existing = window.getCurrentSettings
-        ? window.getCurrentSettings()
-        : {};
-      window.applySettings({ ...existing, ...patch });
+      window.applySettings(patch);
     }
 
     try {
@@ -491,73 +498,6 @@
     if (label) label.textContent = 'current: ' + (presetName || 'custom');
     const edLabel = el('themeEditorActiveLabel');
     if (edLabel) edLabel.textContent = presetName || 'custom';
-  }
-
-  function renderPresets() {
-    const grid = el('presetGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
-
-    let activeData;
-    try {
-      activeData = JSON.parse(localStorage.getItem(ACTIVE_KEY) || '{}');
-    } catch (_) {
-      activeData = {};
-    }
-    const activeName = activeData.name || 'default';
-
-    getAllPresets().forEach((preset) => {
-      const isBuiltIn = BUILT_IN_PRESETS.some((p) => p.name === preset.name);
-      const btn = document.createElement('div');
-      btn.style.cssText =
-        'border:1px solid var(--border-color);border-radius:4px;padding:8px;cursor:pointer;transition:border-color 0.15s;position:relative;';
-      if (preset.name === activeName)
-        btn.style.borderColor = 'var(--text-color)';
-
-      const swatchGrid = document.createElement('div');
-      swatchGrid.style.cssText =
-        'display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;height:32px;border-radius:3px;overflow:hidden;margin-bottom:6px;';
-      const swatchColors = [
-        preset.vars.bgColor,
-        preset.vars.panelBg,
-        preset.vars.textColor,
-        preset.vars.accentColor,
-      ];
-      swatchColors.forEach((c) => {
-        const s = document.createElement('span');
-        s.style.cssText = 'display:block;background:' + (c || '#888') + ';';
-        swatchGrid.appendChild(s);
-      });
-
-      const nameEl = document.createElement('div');
-      nameEl.style.cssText = 'font-size:0.78em;opacity:0.8;text-align:center;';
-      nameEl.textContent = preset.name;
-
-      btn.appendChild(swatchGrid);
-      btn.appendChild(nameEl);
-
-      if (!isBuiltIn) {
-        const del = document.createElement('button');
-        del.textContent = 'x';
-        del.className = 'small';
-        del.style.cssText =
-          'position:absolute;top:3px;right:3px;padding:1px 5px;font-size:0.7em;opacity:0.5;';
-        del.onclick = (e) => {
-          e.stopPropagation();
-          const arr = getUserPresets().filter((p) => p.name !== preset.name);
-          saveUserPresets(arr);
-          renderPresets();
-        };
-        btn.appendChild(del);
-      }
-
-      btn.addEventListener('click', () => {
-        writeEditor(preset);
-        renderPresets();
-      });
-
-      grid.appendChild(btn);
-    });
   }
 
   function livePreview() {
@@ -735,6 +675,44 @@
     }
   }
 
+  function renderPresets() {
+    const container = el('themePresetsContainer');
+    if (!container) return;
+
+    const all = getAllPresets();
+    const userPresets = getUserPresets();
+    container.innerHTML = '';
+
+    all.forEach((preset) => {
+      const isBuiltIn = BUILT_IN_PRESETS.some((p) => p.name === preset.name);
+      const btn = document.createElement('button');
+      btn.textContent = preset.name;
+      btn.addEventListener('click', () => {
+        writeEditor(preset);
+        livePreview();
+      });
+
+      if (!isBuiltIn) {
+        const del = document.createElement('button');
+        del.textContent = '✕';
+        del.title = 'delete preset';
+        del.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const updated = userPresets.filter((p) => p.name !== preset.name);
+          saveUserPresets(updated);
+          renderPresets();
+        });
+
+        const wrap = document.createElement('div');
+        wrap.appendChild(btn);
+        wrap.appendChild(del);
+        container.appendChild(wrap);
+      } else {
+        container.appendChild(btn);
+      }
+    });
+  }
+
   function init() {
     const openBtn = el('openThemeEditorBtn');
     const overlay = el('themeEditorOverlay');
@@ -806,12 +784,12 @@
       closeEditor();
     });
 
-    savePresetBtn.addEventListener('click', () => {
-      const name = prompt('preset name:');
+    savePresetBtn.addEventListener('click', async () => {
+      const name = await window.showPrompt('preset name:');
       if (!name || !name.trim()) return;
       const trimmed = name.trim().toLowerCase();
       if (BUILT_IN_PRESETS.some((p) => p.name === trimmed)) {
-        alert('that name is reserved');
+        await window.showAlert('that name is reserved');
         return;
       }
       const arr = getUserPresets().filter((p) => p.name !== trimmed);
@@ -836,19 +814,19 @@
         });
     });
 
-    importBtn.addEventListener('click', () => {
-      const raw = prompt('paste theme json:');
+    importBtn.addEventListener('click', async () => {
+      const raw = await window.showPrompt('paste theme json:');
       if (!raw) return;
       try {
         const parsed = JSON.parse(raw.trim());
         if (!parsed.vars) {
-          alert('invalid theme json');
+          window.showAlert('invalid theme json');
           return;
         }
         writeEditor(parsed);
         livePreview();
       } catch (_) {
-        alert('invalid json');
+        window.showAlert('invalid json');
       }
     });
 

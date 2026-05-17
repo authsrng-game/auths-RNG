@@ -378,13 +378,15 @@ function buyPotion(potionType) {
     saveAllData();
     showAnomalyPopup(`bought ${data.emoji} ${data.name}!`);
   } else {
-    alert(`need ${formatNum(data.cost)} points!`);
+    window.showAlert(`need ${formatNum(data.cost)} points!`);
   }
 }
 
 function usePotion(potionType) {
   if (playerPotions[potionType] <= 0) {
-    alert(`you don't have any ${potionData[potionType].name} potions!`);
+    window.showAlert(
+      `you don't have any ${potionData[potionType].name} potions!`,
+    );
     return;
   }
 
@@ -517,7 +519,8 @@ let globalLuckMultiplier = 1;
 
 function recalcLuckMultiplier() {
   shopLuckMultiplier = 1 + shopUpgrades.luck * 0.1;
-  globalLuckMultiplier = shopLuckMultiplier + anomaliesUsed * 0.5;
+  const anomalyMult = 1 + anomaliesUsed * 0.5;
+  globalLuckMultiplier = shopLuckMultiplier * anomalyMult;
   if (luckBoostActive) globalLuckMultiplier *= 4;
   globalLuckMultiplier *= potionLuckMultiplier;
   updateLuckDisplay();
@@ -1210,7 +1213,7 @@ function updateItem(d) {
     const availableToSell = currentData.count - alreadySold;
 
     if (availableToSell <= 0) {
-      alert('all copies already sold out!');
+      window.showAlert('all copies already sold out!');
       return;
     }
 
@@ -1503,7 +1506,7 @@ function initNotifCenter() {
 
 function consumeAnomaly() {
   if (anomalies <= 0) {
-    alert('no anomalies to consume :(');
+    window.showAlert('no anomalies to consume :(');
     return;
   }
   anomalies--;
@@ -1517,7 +1520,7 @@ function consumeAnomaly() {
 
 function consumeAllAnomalies() {
   if (anomalies <= 0) {
-    alert('no anomalies to consume :(');
+    window.showAlert('no anomalies to consume :(');
     return;
   }
 
@@ -1600,87 +1603,86 @@ if (savedActive) {
   } catch {}
 }
 
-function resetInventory() {
-  if (
-    confirm(
-      'are you comfortably sure that you will delete your sweet sweet data???',
-    )
-  ) {
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(TOTAL_ROLLS_KEY);
-    localStorage.removeItem(ACHIEVEMENTS_KEY);
-    localStorage.removeItem(ANOMALIES_KEY);
-    localStorage.removeItem(ANOMALIES_USED_KEY);
-    localStorage.removeItem(POINTS_KEY);
-    localStorage.removeItem(SHOP_UPGRADES_KEY);
-    localStorage.removeItem(SOLD_OUT_KEY);
-    localStorage.removeItem(LUCK_KEY);
-    localStorage.removeItem('daily_lastClaim');
-    localStorage.removeItem('daily_streak');
-    localStorage.removeItem('weekly_lastClaim');
-    localStorage.removeItem('weekly_streak');
-    localStorage.removeItem(playtimeKey);
-    localStorage.removeItem('userSettings');
-    localStorage.removeItem('wishingWell');
-    localStorage.removeItem('gauntletData');
-    localStorage.removeItem('_beacon_v2');
-    localStorage.removeItem('mutationsUnlocked');
-    localStorage.removeItem(NOTIF_KEY);
-    notifications = [];
-
-    inventoryData.clear();
-    inventoryList.innerHTML = '';
-    achievementsUnlocked.clear();
-    updateAchievementsUI();
-    totalRolls = 0;
-    updateTotalRolls();
-    points = 0;
-    anomalies = 0;
-    anomaliesUsed = 0;
-    shopUpgrades = {
-      luck: 0,
-      speed: 0,
-      pointMult: 0,
-      magnet: 0,
-      printer: 0,
-      duplicate: 0,
-    };
-    playerPotions = {
-      luck2x: 0,
-      luck4x: 0,
-      luck10x: 0,
-      luck50x: 0,
-      luck100x: 0,
-      luck150x: 0,
-      luck250x: 0,
-      luck300x: 0,
-      luck800x: 0,
-      luck1500x: 0,
-      duplicate: 0,
-    };
-    activePotions = [];
-    duplicateRollsLeft = 0;
-    potionLuckMultiplier = 1;
-    localStorage.removeItem(POTIONS_KEY);
-    localStorage.removeItem(ACTIVE_POTIONS_KEY);
-    updatePotionUI();
-    updateActivePotionsDisplay();
-    soldOutRarities.clear();
-    shopLuckMultiplier = 1.0;
-    rollSpeed = 1.0;
-    pointDivisor = 3.0;
-    totalSeconds = 0;
-
-    recalcLuckMultiplier();
-    updatePointsDisplay();
-    updateShopUI();
-    updateAnomalyUI();
-    updatePlaytimeDisplay();
-    updateLuckDisplay();
-
-    alert('all data reset! it was your choice btw');
-    location.reload();
-  }
+async function resetInventory() {
+  const confirmed = await window.showConfirm(
+    'are you comfortably sure that you will delete your sweet sweet data???',
+    'reset data',
+  );
+  if (!confirmed) return;
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(TOTAL_ROLLS_KEY);
+  localStorage.removeItem(ACHIEVEMENTS_KEY);
+  localStorage.removeItem(ANOMALIES_KEY);
+  localStorage.removeItem(ANOMALIES_USED_KEY);
+  localStorage.removeItem(POINTS_KEY);
+  localStorage.removeItem(SHOP_UPGRADES_KEY);
+  localStorage.removeItem(SOLD_OUT_KEY);
+  localStorage.removeItem(LUCK_KEY);
+  localStorage.removeItem('daily_lastClaim');
+  localStorage.removeItem('daily_streak');
+  localStorage.removeItem('weekly_lastClaim');
+  localStorage.removeItem('weekly_streak');
+  localStorage.removeItem(playtimeKey);
+  localStorage.removeItem('userSettings');
+  localStorage.removeItem('wishingWell');
+  localStorage.removeItem('gauntletData');
+  localStorage.removeItem('_beacon_v2');
+  localStorage.removeItem('mutationsUnlocked');
+  localStorage.removeItem(NOTIF_KEY);
+  notifications = [];
+  inventoryData.clear();
+  inventoryList.innerHTML = '';
+  achievementsUnlocked.clear();
+  updateAchievementsUI();
+  totalRolls = 0;
+  updateTotalRolls();
+  points = 0;
+  anomalies = 0;
+  anomaliesUsed = 0;
+  shopUpgrades = {
+    luck: 0,
+    speed: 0,
+    pointMult: 0,
+    magnet: 0,
+    printer: 0,
+    duplicate: 0,
+  };
+  playerPotions = {
+    luck2x: 0,
+    luck4x: 0,
+    luck10x: 0,
+    luck50x: 0,
+    luck100x: 0,
+    luck150x: 0,
+    luck250x: 0,
+    luck300x: 0,
+    luck800x: 0,
+    luck1500x: 0,
+    duplicate: 0,
+  };
+  activePotions = [];
+  duplicateRollsLeft = 0;
+  potionLuckMultiplier = 1;
+  localStorage.removeItem(POTIONS_KEY);
+  localStorage.removeItem(ACTIVE_POTIONS_KEY);
+  updatePotionUI();
+  updateActivePotionsDisplay();
+  soldOutRarities.clear();
+  shopLuckMultiplier = 1.0;
+  rollSpeed = 1.0;
+  pointDivisor = 3.0;
+  totalSeconds = 0;
+  recalcLuckMultiplier();
+  updatePointsDisplay();
+  updateShopUI();
+  updateAnomalyUI();
+  updatePlaytimeDisplay();
+  updateLuckDisplay();
+  await window.showAlert(
+    'all data reset! it was your choice btw',
+    'reset complete',
+  );
+  location.reload();
 }
 
 function startLuckBoost() {
@@ -1797,11 +1799,10 @@ function spinAndReveal(res) {
 
   if (totalRolls > 0 && totalRolls % 100 === 0) startLuckBoost();
 
-  // ── spinner style: none or fade ──────────────────────────────────────
   if (effectiveStyle === 'none' || effectiveStyle === 'fade') {
     spinner.innerHTML = '';
     spinner.style.transition = 'none';
-    void spinner.offsetWidth; // force reflow
+    void spinner.offsetWidth;
     spinner.style.transform = 'translateY(0)';
 
     const d = document.createElement('div');
@@ -1824,11 +1825,11 @@ function spinAndReveal(res) {
         window._spinnerResultAC = window.RarityStyle.apply(d, res.style);
       }
       maybeFireConfettiAndCutscene(res);
+      rollBtn.disabled = false;
     }, delay);
     return;
   }
 
-  // ── spinner style: slot (default) ────────────────────────────────────
   spinner.innerHTML = '';
   void spinner.offsetWidth;
   const items = [];
@@ -2073,11 +2074,10 @@ function updateWeeklyUI() {
   }
 }
 
-weeklyBtn.addEventListener('click', () => {
+weeklyBtn.addEventListener('click', async () => {
   const { lastClaim, streak } = loadWeeklyData();
   const now = Date.now();
   let newStreak = streak;
-
   if (!lastClaim) {
     newStreak = 1;
   } else {
@@ -2086,13 +2086,13 @@ weeklyBtn.addEventListener('click', () => {
     );
     newStreak = diffWeeks === 1 ? streak + 1 : 1;
   }
-
   saveWeeklyData(now.toString(), newStreak);
   updateWeeklyUI();
-  alert(`weekly claimed!\nstreak: ${newStreak}`);
+  await window.showAlert(
+    `weekly claimed!\nstreak: ${newStreak}`,
+    'weekly reward',
+  );
 });
-
-updateWeeklyUI();
 
 const dailyBtn = document.getElementById('dailyBtn');
 const dailyStatus = document.getElementById('dailyStatus');
@@ -2130,31 +2130,28 @@ function updateDailyUI() {
   }
 }
 
-dailyBtn.addEventListener('click', () => {
+dailyBtn.addEventListener('click', async () => {
   const today = getToday();
   const { lastClaim, streak } = loadDailyData();
-
   let newStreak = streak;
-
   if (!lastClaim) {
     newStreak = 1;
   } else {
     const last = new Date(lastClaim);
     const now = new Date(today);
-
-    const diffDays = Math.round((now - last) / (1000 * 60 * 60 * 24)); // fuh theres an error here that doesnt do ANYTHING... nastyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
-
+    const diffDays = Math.round((now - last) / (1000 * 60 * 60 * 24));
     if (diffDays === 1) {
       newStreak += 1;
     } else if (diffDays > 1) {
       newStreak = 1;
     }
   }
-
   saveDailyData(today, newStreak);
   updateDailyUI();
-
-  alert(`daily claimed!\nstreak: ${newStreak}`);
+  await window.showAlert(
+    `daily claimed!\nstreak: ${newStreak}`,
+    'daily reward',
+  );
 });
 
 updateDailyUI();
@@ -2565,17 +2562,17 @@ function throwIntoWell() {
   const amount = parseInt(input.value) || 0;
 
   if (amount <= 0) {
-    alert('you must throw at least 1 point!');
+    window.showAlert('you must throw at least 1 point!');
     return;
   }
 
   if (amount > points) {
-    alert(`you only have ${formatNum(points)} points!`);
+    window.showAlert(`you only have ${formatNum(points)} points!`);
     return;
   }
 
   if (isWellOnCooldown()) {
-    alert('the well is still recovering its magic!');
+    window.showAlert('the well is still recovering its magic!');
     return;
   }
 
