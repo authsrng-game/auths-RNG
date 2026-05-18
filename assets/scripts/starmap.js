@@ -49,21 +49,27 @@
 
   // ── data helpers ─────────────────────────────────────────────────────
   function loadData() {
-    try { return JSON.parse(localStorage.getItem(STARMAP_KEY) || '{}'); }
-    catch { return {}; }
+    try {
+      return JSON.parse(localStorage.getItem(STARMAP_KEY) || '{}');
+    } catch {
+      return {};
+    }
   }
   function saveData(d) {
     localStorage.setItem(STARMAP_KEY, JSON.stringify(d));
   }
   function getData() {
-    return Object.assign({
-      constellations: [],
-      voidShards: 0,
-      lastShardCalc: Date.now(),
-      shopPurchases: {},
-      permanentLuckStacks: 0,
-      voidMarketLuck: 0,
-    }, loadData());
+    return Object.assign(
+      {
+        constellations: [],
+        voidShards: 0,
+        lastShardCalc: Date.now(),
+        shopPurchases: {},
+        permanentLuckStacks: 0,
+        voidMarketLuck: 0,
+      },
+      loadData(),
+    );
   }
 
   // ── shard generation ─────────────────────────────────────────────────
@@ -73,8 +79,10 @@
 
   function totalShardsPerHour(constellations) {
     let total = 0;
-    constellations.forEach(c =>
-      c.stars.forEach(s => { total += shardsPerHourForStar(s.chance); })
+    constellations.forEach((c) =>
+      c.stars.forEach((s) => {
+        total += shardsPerHourForStar(s.chance);
+      }),
     );
     return total;
   }
@@ -82,16 +90,20 @@
   function accrueShards(d) {
     if (!d.constellations?.length) return d;
     const now = Date.now();
-    const elapsed = (now - (d.lastShardCalc || now)) / 3600000;
-    d.voidShards = (d.voidShards || 0) + totalShardsPerHour(d.constellations) * elapsed;
+    // use 0 explicitly — if lastShardCalc was never set, full elapsed since epoch
+    // would be wrong, so cap to a sane max of 24h to avoid absurd catch-up grants
+    const last = d.lastShardCalc > 0 ? d.lastShardCalc : now;
+    const elapsed = Math.min((now - last) / 3600000, 24); // cap at 24h
+    d.voidShards =
+      (d.voidShards || 0) + totalShardsPerHour(d.constellations) * elapsed;
     d.lastShardCalc = now;
     return d;
   }
-
   // ── star positioning (seeded from rarity name) fuck ────────────────────────
   function hashStr(str) {
     let h = 0;
-    for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+    for (let i = 0; i < str.length; i++)
+      h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
     return Math.abs(h);
   }
 
@@ -105,7 +117,8 @@
   // ── draw constellation on canvas ─────────────────────────────────────
   function drawConstellation(canvas, stars) {
     const ctx = canvas.getContext('2d');
-    const W = canvas.width, H = canvas.height;
+    const W = canvas.width,
+      H = canvas.height;
     ctx.clearRect(0, 0, W, H);
 
     ctx.fillStyle = 'rgba(0,0,0,0.4)';
@@ -124,7 +137,7 @@
     positions.forEach((p, i) => {
       const nearest = positions
         .map((q, j) => ({ j, dist: Math.hypot(q.x - p.x, q.y - p.y) }))
-        .filter(e => e.j !== i)
+        .filter((e) => e.j !== i)
         .sort((a, b) => a.dist - b.dist)
         .slice(0, 2);
       nearest.forEach(({ j, dist }) => {
@@ -169,8 +182,10 @@
 
   // Called by gauntlets.js applyReward or the crystallize buttonnnnnnnnnnnnnnnnnnnn
   window.crystallize = function () {
-    if (typeof inventoryData === 'undefined' || inventoryData.size === 0) {
-      window.showAlert?.('nothing to crystallize! collect some rarities first.');
+    if (inventoryData.size === 0) {
+      window.showAlert?.(
+        'nothing to crystallize! collect some rarities first.',
+      );
       return null;
     }
     const rolls = typeof totalRolls !== 'undefined' ? totalRolls : 0;
@@ -183,7 +198,7 @@
     for (const [name, { rarityObj }] of inventoryData.entries()) {
       stars.push({ name, chance: rarityObj.chance });
     }
-    stars.sort((a, b) => a.chance - b.chance); // rarest first
+    stars.sort((a, b) => a.chance - b.chance);
 
     const d = getData();
     accrueShards(d);
@@ -196,7 +211,10 @@
       totalRolls: rolls,
       playtime: typeof totalSeconds !== 'undefined' ? totalSeconds : 0,
       stars,
-      shardsPerHour: stars.reduce((s, st) => s + shardsPerHourForStar(st.chance), 0),
+      shardsPerHour: stars.reduce(
+        (s, st) => s + shardsPerHourForStar(st.chance),
+        0,
+      ),
     };
 
     d.constellations.push(c);
@@ -231,8 +249,10 @@
     const shards = Math.floor(d.voidShards || 0);
     const rate = totalShardsPerHour(d.constellations);
     const rolls = typeof totalRolls !== 'undefined' ? totalRolls : 0;
-    const canCrystallize = rolls >= 100 &&
-      typeof inventoryData !== 'undefined' && inventoryData.size > 0;
+    const canCrystallize =
+      rolls >= 100 &&
+      typeof inventoryData !== 'undefined' &&
+      inventoryData.size > 0;
 
     container.innerHTML = '';
 
@@ -254,7 +274,7 @@
       </div>
       <div class="starmap-stat">
         <div class="starmap-stat-label">prestige luck</div>
-        <div class="starmap-stat-value">+${((window.getStarmapLuckBonus() - 1)).toFixed(2)}x</div>
+        <div class="starmap-stat-value">+${(window.getStarmapLuckBonus() - 1).toFixed(2)}x</div>
       </div>
     `;
     container.appendChild(stats);
@@ -285,8 +305,10 @@
             window.doCrystallizeReset?.();
             renderStarmap();
             if (typeof showAnomalyPopup === 'function')
-              showAnomalyPopup(`✦ constellation #${c.index} created! +0.25x luck`);
-          }
+              showAnomalyPopup(
+                `✦ constellation #${c.index} created! +0.25x luck`,
+              );
+          },
         );
       }
     });
@@ -297,7 +319,9 @@
 
     const constLabel = document.createElement('div');
     constLabel.className = 'starmap-section-label';
-    constLabel.textContent = d.constellations.length ? 'your constellations' : 'no constellations yet';
+    constLabel.textContent = d.constellations.length
+      ? 'your constellations'
+      : 'no constellations yet';
     constSection.appendChild(constLabel);
 
     if (d.constellations.length === 0) {
@@ -306,7 +330,7 @@
       empty.textContent = 'crystallize your first run to begin.';
       constSection.appendChild(empty);
     } else {
-      [...d.constellations].reverse().forEach(c => {
+      [...d.constellations].reverse().forEach((c) => {
         constSection.appendChild(buildConstellationCard(c));
       });
     }
@@ -321,7 +345,9 @@
     marketLabel.textContent = '✦ void market';
     market.appendChild(marketLabel);
 
-    VOID_MARKET.forEach(item => market.appendChild(buildMarketItem(item, d, shards)));
+    VOID_MARKET.forEach((item) =>
+      market.appendChild(buildMarketItem(item, d, shards)),
+    );
     container.appendChild(market);
   }
 
@@ -330,7 +356,9 @@
     card.className = 'starmap-constellation-card';
 
     const date = new Date(c.createdAt).toLocaleDateString(undefined, {
-      month: 'short', day: 'numeric', year: 'numeric'
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
     });
     const rarest = c.stars[0];
     const rarestDenom = rarest ? Math.round(1 / rarest.chance) : 0;
@@ -365,8 +393,10 @@
     const el = document.createElement('div');
     el.className = 'starmap-market-item';
 
-    const bought = (d.shopPurchases?.[item.id]) || 0;
-    const maxed = (item.oneTime && bought > 0) || (item.maxStack && bought >= item.maxStack);
+    const bought = d.shopPurchases?.[item.id] || 0;
+    const maxed =
+      (item.oneTime && bought > 0) ||
+      (item.maxStack && bought >= item.maxStack);
     const canAfford = shards >= item.cost;
     const disabled = maxed || !canAfford;
 
@@ -383,7 +413,9 @@
     `;
 
     if (!disabled) {
-      el.querySelector('.market-buy-btn').addEventListener('click', () => buyItem(item));
+      el.querySelector('.market-buy-btn').addEventListener('click', () =>
+        buyItem(item),
+      );
     }
     return el;
   }
@@ -433,13 +465,18 @@
         background:rgba(200,200,255,0.75);border-radius:50%;pointer-events:none;z-index:2147483640;
         transform:translate(-50%,-50%);transition:opacity 0.5s,transform 0.5s;`;
       document.body.appendChild(dot);
-      setTimeout(() => { dot.style.opacity = '0'; dot.style.transform = 'translate(-50%,-50%) scale(0)'; }, 30);
+      setTimeout(() => {
+        dot.style.opacity = '0';
+        dot.style.transform = 'translate(-50%,-50%) scale(0)';
+      }, 30);
       setTimeout(() => dot.remove(), 560);
     });
   }
 
   function fmt(n) {
-    return typeof window.formatNum === 'function' ? window.formatNum(n) : String(Math.round(n));
+    return typeof window.formatNum === 'function'
+      ? window.formatNum(n)
+      : String(Math.round(n));
   }
 
   // Shard tick every 60s

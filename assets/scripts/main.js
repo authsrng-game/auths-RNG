@@ -469,18 +469,8 @@ function updateActivePotionsDisplay() {
 
 // Update potion timers
 setInterval(() => {
-  // Always run recalc/display regardless of current array length,
-  // so the final expiry tick actually clears things
-  const hadPotions = activePotions.length > 0;
-  recalcPotionLuck();
+  recalcPotionLuck(); // handles filter + multiplier reset internally
   updateActivePotionsDisplay();
-
-  // If all potions just expired, make sure luck is reset and display updated
-  if (hadPotions && activePotions.length === 0 && duplicateRollsLeft === 0) {
-    potionLuckMultiplier = 1;
-    recalcLuckMultiplier();
-    updateActivePotionsDisplay();
-  }
 }, 1000);
 
 // Make functions global
@@ -498,28 +488,26 @@ function showConfirmModal(title, text, onConfirm) {
 
   modalTitle.textContent = title;
   modalText.textContent = text;
-  modal.style.display = 'flex';
+  modal.style.display = 'flex'; // was already correct but CSS needed .show class
 
-  // Remove old listeners by cloning buttons
   const newConfirmBtn = confirmBtn.cloneNode(true);
   const newCancelBtn = cancelBtn.cloneNode(true);
   confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
   cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
 
-  // Add new listeners
+  const close = () => {
+    modal.style.display = 'none';
+  };
+
   newConfirmBtn.addEventListener('click', () => {
+    close();
     onConfirm();
-    modal.style.display = 'none';
   });
+  newCancelBtn.addEventListener('click', close);
 
-  newCancelBtn.addEventListener('click', () => {
-    modal.style.display = 'none';
-  });
-
-  // Close on background click
   const bgClickHandler = (e) => {
     if (e.target === modal) {
-      modal.style.display = 'none';
+      close();
       modal.removeEventListener('click', bgClickHandler);
     }
   };
@@ -1002,6 +990,7 @@ function saveAllData() {
 
 function loadAllData() {
   console.log('[main] loading all data...');
+
   const sr = localStorage.getItem(TOTAL_ROLLS_KEY);
   if (sr !== null) {
     totalRolls = parseInt(sr, 10);
@@ -1024,15 +1013,18 @@ function loadAllData() {
           inventoryList.appendChild(li);
         }
       });
-    } catch {}
+    } catch (e) {
+      console.error('[main] failed to parse inventory:', e);
+    }
   }
 
   const sa = localStorage.getItem(ACHIEVEMENTS_KEY);
   if (sa) {
     try {
-      const arr = JSON.parse(sa);
-      arr.forEach((id) => achievementsUnlocked.add(id));
-    } catch {}
+      JSON.parse(sa).forEach((id) => achievementsUnlocked.add(id));
+    } catch (e) {
+      console.error('[main] failed to parse achievements:', e);
+    }
   }
   updateAchievementsUI();
 
@@ -1040,6 +1032,12 @@ function loadAllData() {
   if (saAnom !== null) anomalies = parseInt(saAnom, 10) || 0;
   const saAnomUsed = localStorage.getItem(ANOMALIES_USED_KEY);
   if (saAnomUsed !== null) anomaliesUsed = parseInt(saAnomUsed, 10) || 0;
+
+  // re-derive upgrade-dependent values from loaded shopUpgrades
+  shopLuckMultiplier = 1 + shopUpgrades.luck * 0.1;
+  rollSpeed = Math.max(0.25, 1.0 - shopUpgrades.speed * 0.2);
+  pointDivisor = Math.max(1.0, 3.0 - shopUpgrades.pointMult * 0.2);
+
   recalcLuckMultiplier();
   console.log('[main] all data loaded.');
 }
@@ -1050,73 +1048,84 @@ function updateTotalRolls() {
 
 function addToInventory(o) {
   rarityTimestamps.set(o.name, Date.now());
+
   if (inventoryData.has(o.name)) {
     const d = inventoryData.get(o.name);
     d.count++;
     updateItem(d);
   } else {
     const li = document.createElement('li');
+    // set data BEFORE updateItem so liElement exists fully
     inventoryData.set(o.name, { rarityObj: o, count: 1, liElement: li });
-    updateItem(inventoryData.get(o.name));
+    const d = inventoryData.get(o.name);
+    updateItem(d);
     inventoryList.appendChild(li);
   }
+
   const isNearBottom =
     inventoryList.scrollHeight -
       inventoryList.scrollTop -
       inventoryList.clientHeight <
     60;
   if (isNearBottom) inventoryList.scrollTop = inventoryList.scrollHeight;
+
   updateCollectedCounter();
 
-  // ── auto-sell ──────────────────────────────────────────────────────────
-  const autoSellThresh = window.autoSellThreshold || 0;
-  if (autoSellThresh > 0) {
-    const denom = Math.round(1 / o.chance);
-    if (denom < autoSellThresh) {
-      const earned = calculateRarityPoints(o);
-      const d = inventoryData.get(o.name);
-      if (d) {
-        soldOutRarities.set(o.name, { count: d.count });
-        points += earned;
-        updatePointsDisplay();
-        updateShopUI();
-        updateItem(d);
-        showAnomalyPopup(`auto-sold ${o.name} for ${formatNum(earned)} pts`);
-      }
-    }
-  }
-
-  // ── rare highlight ─────────────────────────────────────────────────────
+  // rare highlight
   const rareThresh = window.rareThreshold || 1000;
-  const d2 = inventoryData.get(o.name);
-  if (d2) {
-    const denom2 = Math.round(1 / o.chance);
-    d2.liElement.classList.toggle('item-rare', denom2 >= rareThresh);
+  const d = inventoryData.get(o.name);
+  if (d) {
+    const denom = Math.round(1 / o.chance);
+    d.liElement.classList.toggle('item-rare', denom >= rareThresh);
   }
 
+  // duplicate upgrade proc (before auto-sell so counts are stable)
   if (shopUpgrades.duplicate > 0) {
     const dupeChance = shopUpgrades.duplicate / 100;
     if (Beacon.float() < dupeChance) {
-      // Add another copy!
-      if (inventoryData.has(o.name)) {
-        const d = inventoryData.get(o.name);
-        d.count++;
-        updateItem(d);
+      const d2 = inventoryData.get(o.name);
+      if (d2) {
+        d2.count++;
+        updateItem(d2);
       }
       showAnomalyPopup('duplicate proc!');
     }
   }
 
-  // handle da duplicate potion
+  // duplicate potion
   if (duplicateRollsLeft > 0) {
-    if (inventoryData.has(o.name)) {
-      const d = inventoryData.get(o.name);
-      d.count++;
-      updateItem(d);
+    const d2 = inventoryData.get(o.name);
+    if (d2) {
+      d2.count++;
+      updateItem(d2);
     }
     duplicateRollsLeft--;
     updateActivePotionsDisplay();
-    saveAllData();
+    debouncedSave();
+  }
+
+  // auto-sell — runs last so count is fully settled
+  const autoSellThresh = window.autoSellThreshold || 0;
+  if (autoSellThresh > 0) {
+    const denom = Math.round(1 / o.chance);
+    if (denom < autoSellThresh) {
+      const d2 = inventoryData.get(o.name);
+      if (d2) {
+        const alreadySold = soldOutRarities.has(o.name)
+          ? soldOutRarities.get(o.name).count
+          : 0;
+        const sellable = d2.count - alreadySold;
+        if (sellable > 0) {
+          const earned = calculateRarityPoints(o) * sellable;
+          soldOutRarities.set(o.name, { count: d2.count });
+          points += earned;
+          updatePointsDisplay();
+          updateShopUI();
+          updateItem(d2);
+          showAnomalyPopup(`auto-sold ${o.name} for ${formatNum(earned)} pts`);
+        }
+      }
+    }
   }
 }
 
@@ -1833,12 +1842,13 @@ function showRollChoice(res, onDone) {
 
   document.getElementById('rollChoiceSell').onclick = () =>
     cleanup(() => {
-      points += pts;
-      addToInventory(res); // add first so count is updated
+      // add to inventory first so count is correct, THEN mark as sold
+      addToInventory(res);
       const currentData = inventoryData.get(res.name);
-      const currentCount = currentData ? currentData.count : 1;
-      // Mark this new copy as sold; preserve any previously sold count
-      soldOutRarities.set(res.name, { count: currentCount });
+      if (currentData) {
+        soldOutRarities.set(res.name, { count: currentData.count });
+      }
+      points += pts;
       updatePointsDisplay();
       updateShopUI();
       showAnomalyPopup(`sold ${res.name} for ${formatNum(pts)} pts`);
@@ -1868,6 +1878,16 @@ function spinAndReveal(res) {
 
   if (totalRolls > 0 && totalRolls % 100 === 0) startLuckBoost();
 
+  const finalize = () => {
+    totalRolls++;
+    updateTotalRolls();
+    addToInventory(res);
+    awardAnomalyIfEligible(res);
+    checkAchievements(res);
+    updateRollsSinceRare(res);
+    maybeFireConfettiAndCutscene(res);
+  };
+
   if (effectiveStyle === 'none' || effectiveStyle === 'fade') {
     spinner.innerHTML = '';
     spinner.style.transition = 'none';
@@ -1884,21 +1904,15 @@ function spinAndReveal(res) {
     const delay = effectiveStyle === 'fade' ? 350 : 50;
     setTimeout(() => {
       spinner.classList.remove('fade-style');
-      totalRolls++;
-      updateTotalRolls();
-      addToInventory(res);
-      awardAnomalyIfEligible(res);
-      checkAchievements(res);
-      updateRollsSinceRare(res);
       if (res.style && window.RarityStyle) {
         window._spinnerResultAC = window.RarityStyle.apply(d, res.style);
       }
-      maybeFireConfettiAndCutscene(res);
-      rollBtn.disabled = false;
+      finalize();
     }, delay);
     return;
   }
 
+  // slot machine path
   spinner.innerHTML = '';
   void spinner.offsetWidth;
   const items = [];
@@ -1906,6 +1920,7 @@ function spinAndReveal(res) {
     items.push(rarities[Math.floor(Math.random() * rarities.length)]);
   }
   items.push(res);
+
   let _resultSpinDiv = null;
   items.forEach((o, idx) => {
     const d = document.createElement('div');
@@ -1924,21 +1939,15 @@ function spinAndReveal(res) {
 
   setTimeout(
     () => {
-      totalRolls++;
-      updateTotalRolls();
-      addToInventory(res);
-      awardAnomalyIfEligible(res);
-      checkAchievements(res);
-      updateRollsSinceRare(res);
       if (res.style && window.RarityStyle && _resultSpinDiv) {
         window._spinnerResultAC = window.RarityStyle.apply(
           _resultSpinDiv,
           res.style,
         );
       }
-      maybeFireConfettiAndCutscene(res);
+      finalize();
     },
-    duration * 1000 + 1000,
+    duration * 1000 + 200,
   );
 }
 
@@ -1947,10 +1956,8 @@ function maybeFireConfettiAndCutscene(res) {
   const cutsceneThresh = window.cutsceneThreshold || 0;
   const confettiThresh = window.confettiThreshold || 0;
 
-  // confetti
   if (confettiThresh > 0 && denom >= confettiThresh) triggerConfetti();
 
-  // cutscene — skip if rarity is below cutscene threshold
   const hasCutscene = !!cutsceneMap[res.name];
   const cutsceneAllowed =
     hasCutscene && (cutsceneThresh === 0 || denom >= cutsceneThresh);
@@ -1967,6 +1974,7 @@ function maybeFireConfettiAndCutscene(res) {
       lunarMusic.pause();
       if (!isMuted) backgroundMusic.play().catch(() => {});
     }
+    rollBtn.disabled = false;
     debouncedSave();
   };
 
@@ -1974,14 +1982,34 @@ function maybeFireConfettiAndCutscene(res) {
     playCutscene(res.name, afterReveal);
   } else {
     afterReveal();
-    rollBtn.disabled = false;
   }
 }
 
 let _saveTimer = null;
-function debouncedSave(delay = 2000) {
+function debouncedSave(delay = 1500) {
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(saveAllData, delay);
+}
+
+// Force immediate save when tab is hidden
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    clearTimeout(_saveTimer);
+    saveAllData();
+  }
+});
+
+// well timer: use a single module-level guard so rapid throws don't stack intervalss yeshvydvfwafvwhjk
+let wellTimerInterval = null;
+function startWellCooldownTimer() {
+  if (wellTimerInterval) return; // already running, don't stack
+  wellTimerInterval = setInterval(() => {
+    updateWellUI();
+    if (!isWellOnCooldown()) {
+      clearInterval(wellTimerInterval);
+      wellTimerInterval = null;
+    }
+  }, 1000);
 }
 
 const sortSelect = document.getElementById('sortSelect');
@@ -2239,11 +2267,6 @@ else
   );
 
 function generateRunCard() {
-  const rarityCounts = {};
-  for (const [name, { rarityObj, count }] of inventoryData.entries()) {
-    rarityCounts[rarityObj.name] = (rarityCounts[rarityObj.name] || 0) + count;
-  }
-
   const canvas = document.createElement('canvas');
   canvas.width = 800;
   canvas.height = 420;
@@ -2271,18 +2294,18 @@ function generateRunCard() {
   line('');
   line('rarities collected:');
 
-  if (Object.keys(rarityCounts).length === 0) {
+  const entries = Array.from(inventoryData.values())
+    .map(({ rarityObj, count }) => [rarityObj.name, count])
+    .sort((a, b) => b[1] - a[1]);
+
+  if (entries.length === 0) {
     line('  (none yet)');
   } else {
-    const entries = Object.entries(rarityCounts).sort((a, b) => b[1] - a[1]);
     const MAX_LINES = 18;
-    let i = 0;
-    for (const [name, cnt] of entries) {
-      if (i >= MAX_LINES) break;
+    entries.slice(0, MAX_LINES).forEach(([name, cnt]) => {
       const short = name.length > 24 ? name.slice(0, 21) + '...' : name;
       line(`${short.padEnd(24)} x${cnt}`, 12);
-      i++;
-    }
+    });
     if (entries.length > MAX_LINES) {
       line(`...and ${entries.length - MAX_LINES} more`, 9);
     }
@@ -2292,13 +2315,9 @@ function generateRunCard() {
   const a = document.createElement('a');
   a.href = dataUrl;
   a.download = 'authsrng_run.png';
-
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-
-  console.log('loaded!');
-  console.log('all assets are loaded');
 }
 
 window.backgroundMusic = backgroundMusic;
@@ -2547,12 +2566,19 @@ let wellData = {
   successes: 0,
 };
 
-// Load well data
 function loadWellData() {
   const saved = localStorage.getItem(WELL_KEY);
   if (saved) {
     try {
-      wellData = JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      // merge so any missing fields fall back to defaults above
+      wellData = {
+        lastThrow: parsed.lastThrow || 0,
+        totalThrown: parsed.totalThrown || 0,
+        totalReceived: parsed.totalReceived || 0,
+        timesThrown: parsed.timesThrown || 0,
+        successes: parsed.successes || 0, // guarded
+      };
     } catch (e) {
       console.error('Failed to load well data:', e);
     }
@@ -2723,21 +2749,6 @@ function showWellResult(won, amount) {
 function closeWellResult() {
   const modal = document.getElementById('wellResultModal');
   if (modal) modal.classList.remove('show');
-}
-
-// Start cooldown timer that updates every second
-let wellTimerInterval = null;
-
-function startWellCooldownTimer() {
-  if (wellTimerInterval) clearInterval(wellTimerInterval);
-
-  wellTimerInterval = setInterval(() => {
-    if (!isWellOnCooldown()) {
-      clearInterval(wellTimerInterval);
-      wellTimerInterval = null;
-    }
-    updateWellUI();
-  }, 1000);
 }
 
 // Initialize welling well
