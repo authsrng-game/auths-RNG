@@ -2267,7 +2267,7 @@ else
   );
 
 function generateRunCard() {
-  const W = 720, H = 620;
+  const W = 720, H = 380;
   const canvas = document.createElement('canvas');
   canvas.width = W;
   canvas.height = H;
@@ -2294,14 +2294,6 @@ function generateRunCard() {
   line(`playtime         ${formatPlaytime(totalSeconds)}`);
   line(`run id           ${runId}`);
 
-  const rng = (() => {
-    try {
-      const b = JSON.parse(localStorage.getItem('_beacon_v2') || '{}');
-      return b.seed ?? b.s0 ?? null;
-    } catch { return null; }
-  })();
-  if (rng !== null) line(`rng seed         ${rng}`);
-
   gap();
   dim('─'.repeat(54));
   gap();
@@ -2314,43 +2306,21 @@ function generateRunCard() {
   line(`achievements     ${achievementsUnlocked.size} / ${achievementsList.length}`);
   line(`daily streak     ${localStorage.getItem('daily_streak') || 0}  (weekly: ${localStorage.getItem('weekly_streak') || 0})`);
 
-  const wellRate = wellData.timesThrown > 0
-    ? Math.round((wellData.successes / wellData.timesThrown) * 100) + '%'
-    : 'n/a';
-  line(`wishing well     ${wellRate} win rate  /  ${formatNum(wellData.totalThrown)} pts thrown`);
-
   gap();
   dim('─'.repeat(54));
   gap();
 
-  line('top rarities (rarest first):');
-  gap();
+  const rarest = Array.from(inventoryData.values())
+    .sort((a, b) => a.rarityObj.chance - b.rarityObj.chance)[0];
 
-  const entries = Array.from(inventoryData.values())
-    .sort((a, b) => a.rarityObj.chance - b.rarityObj.chance)
-    .slice(0, 10);
-
-  if (entries.length === 0) {
-    dim('  (none yet)');
+  if (rarest) {
+    const d = Math.round(1 / rarest.rarityObj.chance).toLocaleString();
+    line(`rarest rolled    ${rarest.rarityObj.name} (1/${d})`);
   } else {
-    entries.forEach(({ rarityObj, count }) => {
-      const denom = Math.round(1 / rarityObj.chance).toLocaleString();
-      const name = rarityObj.name.length > 22 ? rarityObj.name.slice(0, 19) + '...' : rarityObj.name;
-      line(`  ${name.padEnd(24)} 1/${denom.padStart(10)}   x${count}`);
-    });
-    if (inventoryData.size > 10) {
-      gap();
-      dim(`  ...and ${inventoryData.size - 10} more`);
-    }
+    line(`rarest rolled    (none yet)`);
   }
 
-  const rarestEntry = entries[0];
-  if (rarestEntry) {
-    const d = Math.round(1 / rarestEntry.rarityObj.chance).toLocaleString();
-    ctx.fillStyle = '#444';
-    ctx.font = '11px monospace';
-    ctx.fillText(`rarest: ${rarestEntry.rarityObj.name} (1/${d})`, 30, H - 20);
-  }
+  dim(`generated        ${new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC`);
 
   ctx.fillStyle = '#444';
   ctx.font = '11px monospace';
