@@ -2267,51 +2267,33 @@ else
   );
 
 function generateRunCard() {
-  const W = 900, H = 560;
+  const W = 720, H = 480;
   const canvas = document.createElement('canvas');
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  const BG      = '#0a0a0a';
-  const PANEL   = '#111111';
-  const BORDER  = '#2a2a2a';
-  const DIM     = '#555555';
-  const MID     = '#999999';
-  const BRIGHT  = '#e8e8e8';
-  const ACCENT  = '#c8a96e';
-
-  ctx.fillStyle = BG;
+  ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, W, H);
 
-  ctx.strokeStyle = BORDER;
-  ctx.lineWidth = 1;
-  ctx.strokeRect(20, 20, W - 40, H - 40);
-  ctx.strokeRect(22, 22, W - 44, H - 44);
+  ctx.fillStyle = '#ddd';
+  ctx.font = '13px monospace';
 
-  ctx.fillStyle = PANEL;
-  ctx.fillRect(20, 20, W - 40, 54);
+  let y = 0;
+  const line = (text, color = '#ddd') => {
+    ctx.fillStyle = color;
+    ctx.fillText(text, 30, y += 22);
+  };
+  const gap = () => { y += 8; };
+  const dim = (text) => line(text, '#555');
 
-  ctx.fillStyle = ACCENT;
-  ctx.font = 'bold 15px monospace';
-  ctx.fillText("AUTH'S RNG", 40, 52);
+  line("auth's RNG  :::  run summary");
+  dim('─'.repeat(54));
+  gap();
 
-  ctx.fillStyle = MID;
-  ctx.font = '12px monospace';
-  ctx.fillText('run summary', 148, 52);
-
-  ctx.fillStyle = DIM;
-  ctx.font = '11px monospace';
-  ctx.textAlign = 'right';
-  ctx.fillText(new Date().toLocaleDateString('en-CA'), W - 40, 52);
-  ctx.textAlign = 'left';
-
-  ctx.strokeStyle = BORDER;
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(20, 74);
-  ctx.lineTo(W - 20, 74);
-  ctx.stroke();
+  line(`total rolls      ${formatNum(totalRolls)}`);
+  line(`playtime         ${formatPlaytime(totalSeconds)}`);
+  line(`run id           ${runId}`);
 
   const rng = (() => {
     try {
@@ -2319,123 +2301,56 @@ function generateRunCard() {
       return b.seed ?? b.s0 ?? null;
     } catch { return null; }
   })();
+  if (rng !== null) line(`rng seed         ${rng}`);
+
+  gap();
+  dim('─'.repeat(54));
+  gap();
+
+  line(`points           ${formatNum(points)}`);
+  line(`luck mult        ${formatMult(globalLuckMultiplier)}x`);
+  line(`shop luck        lv${shopUpgrades.luck}  speed lv${shopUpgrades.speed}  pts lv${shopUpgrades.pointMult}`);
+  line(`anomalies        ${anomalies} held  /  ${anomaliesUsed} consumed`);
+  line(`collected        ${inventoryData.size} / ${rarities.length}`);
+  line(`achievements     ${achievementsUnlocked.size} / ${achievementsList.length}`);
+  line(`daily streak     ${localStorage.getItem('daily_streak') || 0}  (weekly: ${localStorage.getItem('weekly_streak') || 0})`);
 
   const wellRate = wellData.timesThrown > 0
     ? Math.round((wellData.successes / wellData.timesThrown) * 100) + '%'
     : 'n/a';
+  line(`wishing well     ${wellRate} win rate  /  ${formatNum(wellData.totalThrown)} pts thrown`);
 
-  const starmapConstellations = (() => {
-    try {
-      return JSON.parse(localStorage.getItem('starmapData') || '{}').constellations?.length ?? 0;
-    } catch { return 0; }
-  })();
+  gap();
+  dim('─'.repeat(54));
+  gap();
 
-  const dailyStreak  = Number(localStorage.getItem('daily_streak')  || 0);
-  const weeklyStreak = Number(localStorage.getItem('weekly_streak') || 0);
+  line('top rarities (rarest first):');
+  gap();
 
-  const totalPotionsHeld = Object.values(playerPotions).reduce((a, b) => a + b, 0);
+  const entries = Array.from(inventoryData.values())
+    .sort((a, b) => a.rarityObj.chance - b.rarityObj.chance)
+    .slice(0, 10);
 
-  const rarest = Array.from(inventoryData.values())
-    .sort((a, b) => a.rarityObj.chance - b.rarityObj.chance)[0] ?? null;
-
-  const mostRolled = Array.from(inventoryData.values())
-    .sort((a, b) => b.count - a.count)[0] ?? null;
-
-  const COL1_X = 40, COL2_X = 310, COL3_X = 580;
-  const ROW1_Y = 110;
-  const ROW_H  = 58;
-
-  function statBlock(x, y, label, value, sub) {
-    ctx.fillStyle = DIM;
-    ctx.font = '10px monospace';
-    ctx.fillText(label.toUpperCase(), x, y);
-
-    ctx.fillStyle = BRIGHT;
-    ctx.font = 'bold 18px monospace';
-    ctx.fillText(value, x, y + 20);
-
-    if (sub) {
-      ctx.fillStyle = DIM;
-      ctx.font = '10px monospace';
-      ctx.fillText(sub, x, y + 36);
+  if (entries.length === 0) {
+    dim('  (none yet)');
+  } else {
+    entries.forEach(({ rarityObj, count }) => {
+      const denom = Math.round(1 / rarityObj.chance).toLocaleString();
+      const name = rarityObj.name.length > 22 ? rarityObj.name.slice(0, 19) + '...' : rarityObj.name;
+      line(`  ${name.padEnd(24)} 1/${denom.padStart(10)}   x${count}`);
+    });
+    if (inventoryData.size > 10) {
+      gap();
+      dim(`  ...and ${inventoryData.size - 10} more`);
     }
   }
 
-  statBlock(COL1_X, ROW1_Y,         'total rolls',   formatNum(totalRolls),         `run id: ${runId}`);
-  statBlock(COL2_X, ROW1_Y,         'playtime',      formatPlaytime(totalSeconds),  null);
-  statBlock(COL3_X, ROW1_Y,         'luck mult',     formatMult(globalLuckMultiplier) + 'x', `anomalies used: ${anomaliesUsed}`);
+  gap();
+  dim('─'.repeat(54));
+  dim(`generated ${new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC`);
 
-  statBlock(COL1_X, ROW1_Y + ROW_H, 'points',        formatNum(points),             null);
-  statBlock(COL2_X, ROW1_Y + ROW_H, 'collected',     `${inventoryData.size}/${rarities.length}`, `achievements: ${achievementsUnlocked.size}/${achievementsList.length}`);
-  statBlock(COL3_X, ROW1_Y + ROW_H, 'well w/r',      wellRate,                      `thrown: ${formatNum(wellData.totalThrown)} pts`);
-
-  statBlock(COL1_X, ROW1_Y + ROW_H * 2, 'shop luck lv',  String(shopUpgrades.luck),     `speed: ${shopUpgrades.speed}  pts: ${shopUpgrades.pointMult}`);
-  statBlock(COL2_X, ROW1_Y + ROW_H * 2, 'daily streak',  String(dailyStreak),           `weekly: ${weeklyStreak}`);
-  statBlock(COL3_X, ROW1_Y + ROW_H * 2, 'constellations',String(starmapConstellations),  `potions held: ${totalPotionsHeld}`);
-
-  if (rng !== null) {
-    statBlock(COL1_X, ROW1_Y + ROW_H * 3, 'rng seed', String(rng), null);
-  }
-  if (rarest) {
-    const d = Math.round(1 / rarest.rarityObj.chance);
-    const short = rarest.rarityObj.name.length > 18 ? rarest.rarityObj.name.slice(0, 15) + '...' : rarest.rarityObj.name;
-    statBlock(COL2_X, ROW1_Y + ROW_H * 3, 'rarest rolled', short, `1/${d.toLocaleString()}`);
-  }
-  if (mostRolled) {
-    const short = mostRolled.rarityObj.name.length > 18 ? mostRolled.rarityObj.name.slice(0, 15) + '...' : mostRolled.rarityObj.name;
-    statBlock(COL3_X, ROW1_Y + ROW_H * 3, 'most rolled', short, `x${mostRolled.count}`);
-  }
-
-  const divY = ROW1_Y + ROW_H * 4 + 4;
-  ctx.strokeStyle = BORDER;
-  ctx.beginPath();
-  ctx.moveTo(40, divY);
-  ctx.lineTo(W - 40, divY);
-  ctx.stroke();
-
-  ctx.fillStyle = DIM;
-  ctx.font = '10px monospace';
-  ctx.fillText('TOP RARITIES', 40, divY + 18);
-
-  const entries = Array.from(inventoryData.values())
-    .sort((a, b) => a.rarityObj.chance - b.rarityObj.chance);
-
-  const MAX_COLS = 3, MAX_ROWS = 3;
-  const CELL_W = (W - 80) / MAX_COLS;
-  const listY = divY + 32;
-
-  entries.slice(0, MAX_COLS * MAX_ROWS).forEach((d, i) => {
-    const col = i % MAX_COLS;
-    const row = Math.floor(i / MAX_COLS);
-    const x = 40 + col * CELL_W;
-    const y = listY + row * 26;
-    const denom = Math.round(1 / d.rarityObj.chance);
-    const name = d.rarityObj.name.length > 20 ? d.rarityObj.name.slice(0, 17) + '...' : d.rarityObj.name;
-
-    ctx.fillStyle = BRIGHT;
-    ctx.font = '12px monospace';
-    ctx.fillText(name, x, y);
-
-    ctx.fillStyle = DIM;
-    ctx.font = '11px monospace';
-    ctx.fillText(`1/${denom.toLocaleString()}  x${d.count}`, x, y + 13);
-  });
-
-  if (entries.length > MAX_COLS * MAX_ROWS) {
-    ctx.fillStyle = DIM;
-    ctx.font = '10px monospace';
-    ctx.fillText(`+${entries.length - MAX_COLS * MAX_ROWS} more`, 40, listY + MAX_ROWS * 26 + 4);
-  }
-
-  ctx.fillStyle = '#1a1a1a';
-  ctx.fillRect(20, H - 38, W - 40, 18);
-  ctx.fillStyle = DIM;
-  ctx.font = '10px monospace';
-  ctx.fillText(`generated ${new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC`, 40, H - 25);
-
-  const dataUrl = canvas.toDataURL('image/png');
   const a = document.createElement('a');
-  a.href = dataUrl;
+  a.href = canvas.toDataURL('image/png');
   a.download = 'authsrng_run.png';
   document.body.appendChild(a);
   a.click();
