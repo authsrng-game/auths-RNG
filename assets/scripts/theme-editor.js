@@ -280,6 +280,17 @@
         bgGradientTo: val('te-bgGradientTo') || '#1a1a2e',
         bgGradientAngle: intVal('te-bgGradientAngle', 135),
         bgGradientType: val('te-bgGradientType') || 'linear',
+				startAnim: {
+ 					enabled: el('te-sa-enabled').checked,
+  				preset: el('te-sa-preset').value,
+  				bgColor: el('te-sa-bgColor').value,
+  				fgColor: el('te-sa-fgColor').value,
+  				customBg: el('te-sa-customBg').value,
+  				customFg: el('te-sa-customFg').value,
+  				wakeText: el('te-sa-wakeText').value,
+  				speed: el('te-sa-speed').value,
+  				skipOnReturn: el('te-sa-skipOnReturn').checked
+				}
       },
     };
   }
@@ -379,6 +390,16 @@
       el('te-blurPanelOpacity').value = s.blurPanelOpacity ?? 55;
       el('te-blurPanelOpacityVal').textContent = s.blurPanelOpacity ?? 55;
     }
+		if (el('te-sa-enabled')) el('te-sa-enabled').checked = s.startAnim?.enabled ?? true;
+		if (el('te-sa-preset')) el('te-sa-preset').value = s.startAnim?.preset ?? 'default';
+		if (el('te-sa-bgColor')) el('te-sa-bgColor').value = s.startAnim?.bgColor ?? 'theme';
+		if (el('te-sa-fgColor')) el('te-sa-fgColor').value = s.startAnim?.fgColor ?? 'theme';
+		if (el('te-sa-customBg')) el('te-sa-customBg').value = s.startAnim?.customBg ?? '#0e0e0e';
+		if (el('te-sa-customFg')) el('te-sa-customFg').value = s.startAnim?.customFg ?? '#dcdcdc';
+		if (el('te-sa-wakeText')) el('te-sa-wakeText').value = s.startAnim?.wakeText ?? 'click/tap to wake up...';
+		if (el('te-sa-speed')) el('te-sa-speed').value = s.startAnim?.speed ?? 'normal';
+		if (el('te-sa-skipOnReturn')) el('te-sa-skipOnReturn').checked = s.startAnim?.skipOnReturn ?? false;
+		syncStartAnimUI();
     if (el('te-blurBorderOpacity')) {
       el('te-blurBorderOpacity').value = s.blurBorderOpacity ?? 8;
       el('te-blurBorderOpacityVal').textContent = s.blurBorderOpacity ?? 8;
@@ -545,11 +566,160 @@
       );
     } catch (_) {}
 
+		if (editorData.settings.startAnim) {
+  		try { localStorage.setItem('startAnimConfig', JSON.stringify(editorData.settings.startAnim)); } catch (_) {}
+		}
+
     const label = el('activeThemeName');
     if (label) label.textContent = 'current: ' + (presetName || 'custom');
     const edLabel = el('themeEditorActiveLabel');
     if (edLabel) edLabel.textContent = presetName || 'custom';
   }
+
+	function syncStartAnimUI() {
+  const enabled = el('te-sa-enabled')?.checked;
+  const preset = el('te-sa-preset')?.value;
+  const bgMode = el('te-sa-bgColor')?.value;
+  const fgMode = el('te-sa-fgColor')?.value;
+  const controls = el('te-sa-controls');
+  const customBgRow = el('te-sa-customBg-row');
+  const customFgRow = el('te-sa-customFg-row');
+
+  if (controls) controls.style.opacity = enabled ? '1' : '0.35';
+  if (controls) controls.style.pointerEvents = enabled ? '' : 'none';
+  if (customBgRow) customBgRow.style.display = bgMode === 'custom' ? 'block' : 'none';
+  if (customFgRow) customFgRow.style.display = fgMode === 'custom' ? 'block' : 'none';
+
+  const presetDesc = el('te-sa-preset-desc');
+  if (presetDesc) {
+    const DESCS = {
+      none: 'no animation — game loads instantly.',
+      default: 'a line expands horizontally then vertically and fades out.',
+      fade: 'plain fullscreen fade. click to dismiss.',
+      glitch: 'title text with rgb glitch effect.',
+      scan: 'scanline sweeps the screen with a "system ready" label.',
+      typewriter: 'title types out character by character.',
+      curtain: 'two panels wipe away from center.',
+      pixelate: 'screen fills with random tiles.',
+      ripple: 'concentric rings burst outward on click.'
+    };
+    presetDesc.textContent = DESCS[preset] || '';
+  }
+}
+
+function previewStartAnim() {
+  const existing = document.querySelector('.sa-container');
+  if (existing) existing.remove();
+  document.getElementById('startanim-style')?.remove();
+
+  const sa = el('te-sa-enabled');
+  if (!sa?.checked) {
+    showStartAnimError('animation is disabled — nothing to preview.');
+    return;
+  }
+
+  const preset = el('te-sa-preset')?.value;
+  if (!preset || preset === 'none') {
+    showStartAnimError('preset is set to "none" — nothing to preview.');
+    return;
+  }
+
+  const d = readEditor();
+  const cfg = d.settings.startAnim;
+  const bg = cfg.bgColor === 'theme' ? d.vars.bgColor : cfg.customBg;
+  const fg = cfg.fgColor === 'theme' ? d.vars.textColor : cfg.customFg;
+
+  el('themeEditorOverlay').style.display = 'none';
+
+  const cleanup = () => {
+    setTimeout(() => {
+      el('themeEditorOverlay').style.display = 'block';
+    }, 200);
+  };
+
+  const scriptSrc = document.querySelector('script[src*="startanim"]')?.src;
+  if (!scriptSrc) {
+    showStartAnimError('could not locate startanim.js to run preview.');
+    el('themeEditorOverlay').style.display = 'block';
+    return;
+  }
+
+  const tempConfig = { ...cfg, enabled: true };
+  try { localStorage.setItem('startAnimConfig', JSON.stringify(tempConfig)); } catch (_) {}
+
+  const iframe = document.createElement('iframe');
+  Object.assign(iframe.style, {
+    position: 'fixed', inset: '0', width: '100%', height: '100%',
+    border: 'none', zIndex: '999998', background: bg
+  });
+
+  iframe.srcdoc = `<!DOCTYPE html><html><head>
+    <style>body{margin:0;background:${bg};}</style>
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        const stored = ${JSON.stringify(tempConfig)};
+        localStorage.setItem('startAnimConfig', JSON.stringify(stored));
+        localStorage.setItem('themeEditorActive', JSON.stringify({
+          editorData: { vars: { bgColor: ${JSON.stringify(bg)}, textColor: ${JSON.stringify(fg)} } }
+        }));
+      });
+    <\/script>
+    <script src="${scriptSrc}"><\/script>
+  </head><body></body></html>`;
+
+  document.body.appendChild(iframe);
+
+  const escHandler = (e) => {
+    if (e.key === 'Escape') closePreview();
+  };
+
+  const hint = document.createElement('div');
+  Object.assign(hint.style, {
+    position: 'fixed', top: '12px', right: '12px',
+    background: 'rgba(0,0,0,0.7)', color: '#fff',
+    fontFamily: 'monospace', fontSize: '0.78em',
+    padding: '6px 10px', borderRadius: '3px',
+    zIndex: '999999', pointerEvents: 'none'
+  });
+  hint.textContent = 'esc to exit preview';
+  document.body.appendChild(hint);
+
+  function closePreview() {
+    iframe.remove();
+    hint.remove();
+    document.removeEventListener('keydown', escHandler);
+    cleanup();
+  }
+
+  document.addEventListener('keydown', escHandler);
+
+  iframe.addEventListener('load', () => {
+    try {
+      iframe.contentDocument?.addEventListener('click', closePreview, { once: true });
+      iframe.contentDocument?.addEventListener('touchstart', closePreview, { once: true, passive: true });
+    } catch (_) {}
+  });
+}
+
+function showStartAnimError(msg) {
+  const existing = el('te-sa-error');
+  if (existing) existing.remove();
+
+  const err = document.createElement('div');
+  err.id = 'te-sa-error';
+  Object.assign(err.style, {
+    marginTop: '8px', padding: '8px 10px',
+    background: 'rgba(180,40,40,0.15)',
+    border: '1px solid rgba(200,60,60,0.4)',
+    borderRadius: '3px', fontSize: '0.8em',
+    color: '#e08080', fontFamily: 'monospace'
+  });
+  err.textContent = msg;
+
+  const btn = el('te-sa-preview-btn');
+  btn?.parentNode?.insertBefore(err, btn.nextSibling);
+  setTimeout(() => err.remove(), 4000);
+}
 
   function livePreview() {
     const d = readEditor();
@@ -668,12 +838,15 @@
       'te-bgGradientTo',
       'te-bgGradientAngle',
       'te-bgGradientType',
+			'te-sa-enabled','te-sa-preset','te-sa-bgColor','te-sa-fgColor',
+			'te-sa-customBg','te-sa-customFg','te-sa-wakeText','te-sa-speed','te-sa-skipOnReturn'
     ];
     ids.forEach((id) => {
       const n = el(id);
       if (!n) return;
       n.addEventListener('input', () => {
         if (id === 'te-radius') el('te-radiusVal').textContent = n.value;
+				if (id.startsWith('te-sa-')) syncStartAnimUI();
         if (id === 'te-borderWidth')
           el('te-borderWidthVal').textContent = n.value;
         if (id === 'te-textSize') el('te-textSizeVal').textContent = n.value;
