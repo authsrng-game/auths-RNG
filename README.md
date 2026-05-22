@@ -32,6 +32,10 @@ roll for rarities, sell-out those rarities, buy upgrades, wish upon the wishing 
 
 auth's RNG is inspired by RNG games on the platform Roblox, such as Sol's RNG and Juke's RNG
 
+official wiki all about auth's RNG, how it works, and how to play it!  
+                ↓↓↓↓↓↓  
+https://github.com/authsrng-game/auths-RNG/wiki
+
 ---
 
 # versioning notes
