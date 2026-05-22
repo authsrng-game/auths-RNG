@@ -1567,9 +1567,24 @@ toggleBtn.addEventListener('click', () => {
       <option value="curtain">curtain</option>
       <option value="pixelate">pixelate</option>
       <option value="ripple">ripple</option>
+      <option value="custom">custom (javascript)</option>
       <option value="none">none (instant load)</option>
     </select>
     <div id="te-sa-preset-desc" style="font-size:0.75em;opacity:0.4;margin-bottom:12px;min-height:2em;line-height:1.5;"></div>
+
+    <div id="te-sa-customCode-row" style="display:none;margin-bottom:12px;">
+  <label style="display:block;margin-bottom:4px;font-size:0.85em;opacity:0.7;">animation code</label>
+  <div style="font-size:0.75em;opacity:0.35;margin-bottom:6px;line-height:1.6;font-family:monospace;">
+    args: container, bg, fg, wakeText, speedMs(n, fast?, slow?), dismiss<br>
+    attach click/touchstart to container to trigger dismiss
+  </div>
+  <textarea id="te-sa-customCode" rows="12" spellcheck="false" style="width:100%;padding:8px;font-family:monospace;font-size:0.78em;resize:vertical;box-sizing:border-box;" placeholder="const tap = container.querySelector('.sa-tap');
+container.addEventListener('click', () => {
+  container.style.transition = 'opacity ' + speedMs(600) + 'ms';
+  container.style.opacity = '0';
+  setTimeout(dismiss, speedMs(600));
+}, { once: true });"></textarea>
+</div>
 
     <label style="display:block;margin-bottom:4px;font-size:0.85em;opacity:0.7;">background color</label>
     <select id="te-sa-bgColor" style="width:100%;margin-bottom:8px;">
