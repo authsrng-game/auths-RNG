@@ -2,6 +2,10 @@
 
 this document is for contributors who want to test features without grinding for weeks.
 
+## wait, this isnt for finding bugs?
+
+no! this isn't for finding bugs. this is mainly for testers who wanna get ahead and test their new features and other stuff out. finding bugs and problems is handled with the smoke, lighthouse, ESLint, stylelint, HTMLLint checks that happens and checks with EVERY commit.
+
 ## quick start
 
 open the game in your browser, open devtools (`F12`), go to the **console** tab, and paste the script below. it will inject max stats, all rarities, all upgrades, and all unlocks directly into the live game — no reload needed.
