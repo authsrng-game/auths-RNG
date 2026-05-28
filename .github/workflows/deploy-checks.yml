@@ -41,8 +41,8 @@ jobs:
             "blog/*.html" \
             "blog/posts/*.html" \
             "boring/*.html" \
-            --config '{"doctype-first":true,"title-require":true,"attr-lowercase":true,"attr-value-double-quotes":true,"tag-pair":true,"id-unique":true,"src-not-empty":true,"alt-require":true}'
-
+            --config .htmlhintrc
+            
   smoke-test:
     name: smoke test
     runs-on: ubuntu-latest
