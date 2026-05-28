@@ -13,7 +13,7 @@ console.log(performance.now());
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.85);
-  z-index: 2147483647;
+  z-index: 999999;
   display: flex;
   align-items: center;
   justify-content: center;
