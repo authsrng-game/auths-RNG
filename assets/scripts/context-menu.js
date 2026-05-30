@@ -271,6 +271,7 @@
 	document.body.appendChild(menu);
 
 	function makeItem(icon, label, badge, onClick, opts = {}) {
+		console.log('[ctx-menu] item created:', label, opts);
 		const el = document.createElement('div');
 		el.className =
 			'_ctx-item' + (opts.disabled ? ' _ctx-disabled' : '') + (opts.danger ? ' _ctx-danger' : '');
@@ -327,9 +328,11 @@
 
 	function close() {
 		menu.classList.add('_ctx-hidden');
+		console.log('[ctx-menu] closed');
 	}
 
 	function open(x, y) {
+		console.log('[ctx-menu] open triggered', { x, y });
 		_justOpened = true;
 		setTimeout(() => {
 			_justOpened = false;
@@ -566,7 +569,7 @@
 	});
 
 	document.addEventListener('pointerdown', (e) => {
-		if (_justOpened) return;
+		if (_justOpened) console.log('[ctx-menu] ignored pointerdown (just opened)');
 		close();
 	});
 

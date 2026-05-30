@@ -252,21 +252,36 @@ select {
 	animation: scale-up-center 0.5s ease forwards;
 }
 
-@keyframes hot-pulse-anim {
-	0%,
-	100% {
-		box-shadow: 0 0 0 0 rgb(255 160 60 / 0%);
-		border-color: var(--border-color);
-	}
-
-	50% {
-		box-shadow: 0 0 10px 3px rgb(255 160 60 / 35%);
-		border-color: rgb(255 160 60 / 60%);
-	}
+#rollBtn.hot-pulse {
+	position: relative;
+	overflow: hidden;
 }
 
-#rollBtn.hot-pulse {
-	animation: hot-pulse-anim 1.2s ease-in-out infinite;
+#rollBtn.hot-pulse::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background-image:
+		repeating-linear-gradient(
+			45deg,
+			rgb(0 0 0 / 2%) 0px,
+			rgb(0 0 0 / 2%) 2px,
+			transparent 2px,
+			transparent 6px
+		);
+	opacity: 0.25;
+	mix-blend-mode: overlay;
+	animation: pattern-drift 8s linear infinite;
+	pointer-events: none;
+}
+
+@keyframes pattern-drift {
+	0% {
+		transform: translate(0, 0);
+	}
+	100% {
+		transform: translate(8px, 8px);
+	}
 }
 
 #rollBtn:disabled {

@@ -22,10 +22,14 @@
           _rng.loadState(parsed.rngState);
           if (parsed.pity) _roller.pity.deserialize(parsed.pity);
           if (parsed.streak) _roller.streak.deserialize(parsed.streak);
+          console.log('[Beacon] state restored');
           return;
         }
       }
-    } catch (_) {}
+    } catch (err) {
+      console.warn('[Beacon] failed to load save:', err);
+    }
+    console.log('[Beacon] creating fresh RNG state');
     _rng.init();
   }
 
@@ -40,7 +44,9 @@
           streak: _roller.streak.serialize(),
         }),
       );
-    } catch (_) {}
+    } catch (err) {
+      console.warn('[Beacon] failed to save:', err);
+    }
   }
 
   _load();
