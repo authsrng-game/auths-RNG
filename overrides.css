@@ -337,15 +337,6 @@ body {
   background: var(--button-bg);
 }
 
-.chip-new {
-  background: var(--achievement-bg);
-  border: 1px solid var(--achievement-border);
-  color: #6a9a6a;
-  border-radius: 20px;
-  padding: 1px 7px;
-  font-size: 0.9em;
-}
-
 .header-msg {
   font-size: 0.85em;
   opacity: 0.4;
