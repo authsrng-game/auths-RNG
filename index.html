@@ -357,12 +357,17 @@ Last release date on nightly: ${nightlyRDate}`;
 						<div id="spinner"></div>
 					</div>
 
-					<p id="totalRolls" class="lazy">total rolls: 0</p>
-					<p id="rollsSinceRare" class="lazy" style="display: none">rolls since last rare: 0</p>
-
-					<div id="luckDisplay" class="lazy">
-						<p id="luckMultiplier">luck multiplier: 1.0x</p>
-						<p id="luckBreakdown" class="small"></p>
+					<div class="roll-zone">
+						<button id="rollBtn" class="lazy">roll</button>
+						<div id="spinnerContainer" class="lazy">
+							<div id="spinner"></div>
+						</div>
+						<p id="totalRolls" class="lazy">total rolls: 0</p>
+						<p id="rollsSinceRare" class="lazy" style="display: none">rolls since last rare: 0</p>
+						<div id="luckDisplay" class="lazy">
+							<p id="luckMultiplier">luck multiplier: 1.0x</p>
+							<p id="luckBreakdown" class="small"></p>
+						</div>
 					</div>
 
 					<div id="dailyContainer" class="lazy">
