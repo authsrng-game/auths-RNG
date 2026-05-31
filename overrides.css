@@ -316,47 +316,64 @@ body {
 	position: relative;
 }
 
-h2.lazy {
-	margin-bottom: 0.5em;
+.site-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 1.4em;
 }
 
-p.lazy {
-	margin-bottom: 0.4em;
+.header-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72em;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 4px 10px;
+  margin-bottom: 14px;
+  opacity: 0.6;
+  background: var(--button-bg);
 }
 
-p.lazy + p.lazy {
-	margin-bottom: 0.6em;
-	opacity: 0.5;
-	font-size: 0.85em;
+.chip-new {
+  background: var(--achievement-bg);
+  border: 1px solid var(--achievement-border);
+  color: #6a9a6a;
+  border-radius: 20px;
+  padding: 1px 7px;
+  font-size: 0.9em;
 }
 
-body > a.lazy {
-	display: inline-block;
-	padding: 5px 12px;
-	border-radius: 20px;
-	border: 1px solid var(--border-color);
-	background: var(--button-bg);
-	font-size: 0.82em;
-	opacity: 0.75;
-	margin: 4px 3px;
-	letter-spacing: 0.03em;
-	transition: opacity 0.2s, background 0.2s, border-color 0.2s;
+.header-msg {
+  font-size: 0.85em;
+  opacity: 0.4;
+  font-style: italic;
+  margin: 0 0 16px;
+  line-height: 1.6;
+  text-align: center;
 }
 
-body > a.lazy:first-of-type {
-	margin-top: 10px;
+.header-links {
+  display: flex;
+  gap: 8px;
 }
 
-body > a.lazy:hover {
-	opacity: 1;
-	background: var(--button-hover);
-	border-color: var(--border-color);
+.header-link {
+  font-size: 0.82em;
+  padding: 4px 11px;
+  border: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--button-bg);
+  opacity: 0.7;
+  transition: opacity 0.2s, background 0.2s;
 }
 
-body > p:has(+ a.lazy),
-body > br:has(+ p),
-body > p + br {
-	display: none;
+.header-link:hover {
+  opacity: 1;
+  background: var(--button-hover);
 }
 
 body::before {
