@@ -597,25 +597,63 @@ select {
 	margin-top: 0.5em;
 }
 
+.roll-toolbar {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	width: 100%;
+	margin-top: 14px;
+	padding-top: 14px;
+	border-top: 1px solid var(--border-color);
+}
+
 #autoRollBtn {
-	position: fixed;
-	bottom: 16px;
-	right: 16px;
-	padding: 6px 10px;
-	font-size: 0.85em;
-	opacity: 0.5;
-	z-index: 9999;
-	background: var(--bg-color);
+	flex-shrink: 0;
+	position: static;
+	padding: 5px 10px;
+	font-size: 0.78em;
+	opacity: 0.6;
+	background: var(--button-bg);
 	border: 1px solid var(--border-color);
+	border-radius: 2px;
+	white-space: nowrap;
+	transition: opacity 0.2s, background 0.2s;
+	z-index: auto;
 }
 
 #autoRollBtn:hover {
-	opacity: 0.8;
+	opacity: 0.9;
 }
 
 #autoRollBtn.active {
 	opacity: 1;
 	border-color: var(--border-color);
+	background: var(--button-hover);
+}
+
+.rarity-trail {
+	flex: 1;
+	position: relative;
+	height: 28px;
+	overflow: hidden;
+}
+
+.trail-pill {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	white-space: nowrap;
+	font-size: 0.72em;
+	font-family: monospace;
+	padding: 3px 9px;
+	border-radius: 20px;
+	background: var(--overlay-bg);
+	border: 1px solid var(--pill-color, var(--border-color));
+	color: var(--pill-color, var(--text-color));
+	opacity: 0;
+	transition: left 0.38s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+	pointer-events: none;
+	user-select: none;
 }
 
 small.helper {
@@ -1383,10 +1421,6 @@ br + .image-column {
 @media (width <= 767px) {
 	.page-arrow {
 		display: none;
-	}
-
-	#autoRollBtn {
-		bottom: 90px;
 	}
 }
 
