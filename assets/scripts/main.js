@@ -341,6 +341,19 @@ function updateShopUI() {
 		dupeBtn.textContent = `upgrade (${formatNum(dupeCost)} pts)`;
 		dupeBtn.disabled = points < dupeCost || (shopUpgrades.duplicate || 0) >= 10;
 	}
+	const speedPips = document.getElementById('speedPips');
+	if (speedPips) {
+	  speedPips.querySelectorAll('.level-pip').forEach((pip, i) => {
+	    pip.classList.toggle('on', i < shopUpgrades.speed);
+	  });
+	}
+	
+	const magnetPips = document.getElementById('magnetPips');
+	if (magnetPips) {
+	  magnetPips.querySelectorAll('.level-pip').forEach((pip, i) => {
+	    pip.classList.toggle('on', i < (shopUpgrades.magnet || 0));
+	  });
+	}
 }
 
 function updatePotionUI() {
