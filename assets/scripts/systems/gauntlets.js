@@ -539,146 +539,147 @@ console.log(performance.now());
 
 	// ── render ───────────────────────────────────────────────────────────
 	function renderGauntlets() {
-		const container = document.getElementById('gauntletContainer');
-		if (!container) return;
-		const d = loadData();
-		const rolls = typeof totalRolls !== 'undefined' ? totalRolls : 0;
-
-		const rollEl = document.getElementById('gauntletRollDisplay');
-		if (rollEl) rollEl.textContent = 'your rolls: ' + rolls.toLocaleString();
-
-		container.innerHTML = '';
-
-		TIERS.forEach((tier) => {
-			const locked = isLocked(tier);
-			const rarNames = getTierRarities(tier);
-			const complete = !locked && isComplete(tier, d);
-			const claimable = complete && canClaim(tier, d);
-			const cdStr = !locked ? getCdStr(tier, d) : null;
-			const got = locked
-				? 0
-				: rarNames.filter((n) => typeof inventoryData !== 'undefined' && inventoryData.has(n))
-						.length;
-			const pct = rarNames.length ? Math.round((got / rarNames.length) * 100) : 0;
-
-			const el = document.createElement('div');
-			el.className = 'gauntlet-tier' + (locked ? ' gauntlet-locked' : '');
-			el.dataset.tier = tier.id;
-
-			// header
-			const hdr = document.createElement('div');
-			hdr.className = 'gauntlet-tier-header';
-
-			const nameEl = document.createElement('div');
-			nameEl.innerHTML =
-				'<span class="gauntlet-tier-name">' +
-				tier.emoji +
-				' ' +
-				tier.name +
-				'</span>' +
-				(tier.isGlobal ? '<span class="gauntlet-global-badge">rotating</span>' : '');
-
-			const metaEl = document.createElement('div');
-			metaEl.className = 'gauntlet-tier-meta' + (!locked ? ' gauntlet-unlocked-meta' : '');
-			if (locked) metaEl.textContent = '🔒 ' + tier.minRolls.toLocaleString() + ' rolls';
-			else if (claimable) metaEl.textContent = '✓ ready to claim!';
-			else if (complete) metaEl.textContent = '✓ complete';
-			else if (tier.minRolls > 0) metaEl.textContent = '✓ unlocked';
-
-			hdr.appendChild(nameEl);
-			hdr.appendChild(metaEl);
-			el.appendChild(hdr);
-
-			// global rotation countdown
-			if (tier.isGlobal && !locked) {
-				const next = (rotIdx() + 1) * 2 * 24 * 60 * 60 * 1000;
-				const rotEl = document.createElement('div');
-				rotEl.className = 'gauntlet-rotation-text';
-				rotEl.textContent = '⏱ rotates in: ' + formatWellTime(next - Date.now());
-				el.appendChild(rotEl);
-			}
-
-			if (!locked) {
-				// progress bar
-				const progEl = document.createElement('div');
-				progEl.className = 'gauntlet-progress-text';
-				progEl.textContent = got + ' / ' + rarNames.length + ' (' + pct + '%)';
-				el.appendChild(progEl);
-
-				const barWrap = document.createElement('div');
-				barWrap.className = 'gauntlet-bar-wrap';
-				const bar = document.createElement('div');
-				bar.className = 'gauntlet-bar';
-				bar.style.width = pct + '%';
-				if (complete) bar.style.background = '#4a8';
-				barWrap.appendChild(bar);
-				el.appendChild(barWrap);
-
-				// rarity chips
-				const chipGrid = document.createElement('div');
-				chipGrid.className = 'gauntlet-chip-grid';
-				rarNames.forEach((name) => {
-					const has = typeof inventoryData !== 'undefined' && inventoryData.has(name);
-					const chip = document.createElement('div');
-					chip.className = 'gauntlet-chip ' + (has ? 'chip-has' : 'chip-missing');
-					const rar =
-						typeof rarities !== 'undefined' ? rarities.find((r) => r.name === name) : null;
-					const den = rar ? '1/' + Math.round(1 / rar.chance).toLocaleString() : '1/?';
-					chip.textContent = (has ? '✓ ' : '') + name + ' (' + den + ')';
-					chipGrid.appendChild(chip);
-				});
-				el.appendChild(chipGrid);
-
-				// divider + rewards
-				const hr = document.createElement('hr');
-				hr.className = 'gauntlet-hr';
-				el.appendChild(hr);
-
-				const rewLabel = document.createElement('div');
-				rewLabel.className = 'gauntlet-reward-label';
-				rewLabel.textContent = 'choose a reward:';
-				el.appendChild(rewLabel);
-
-				const rewRow = document.createElement('div');
-				rewRow.className = 'gauntlet-reward-row';
-				tier.rewards.forEach((rew, i) => {
-					const btn = document.createElement('button');
-					btn.className = 'gauntlet-rew-btn' + (claimable ? ' rew-ready' : '');
-					btn.disabled = !claimable;
-					btn.textContent = rew.label;
-					const ci = i,
-						cid = tier.id;
-					btn.addEventListener('click', () => {
-						if (typeof showConfirmModal === 'function') {
-							showConfirmModal(
-								tier.emoji + ' ' + tier.name + ' gauntlet',
-								'claim: ' + rew.label + '?',
-								() => window.claimGauntletReward(cid, ci)
-							);
-						} else {
-							window.claimGauntletReward(cid, ci);
-						}
-					});
-					rewRow.appendChild(btn);
-				});
-				el.appendChild(rewRow);
-
-				if (cdStr) {
-					const cdEl = document.createElement('div');
-					cdEl.className = 'gauntlet-cd-text';
-					cdEl.textContent = cdStr;
-					el.appendChild(cdEl);
-				}
-			} else {
-				// locked — dim reward preview because being evil is SOOOOO FUNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-				const prev = document.createElement('div');
-				prev.className = 'gauntlet-locked-preview';
-				prev.textContent = 'rewards: ' + tier.rewards.map((r) => r.label).join(' · ');
-				el.appendChild(prev);
-			}
-
-			container.appendChild(el);
-		});
+	  const container = document.getElementById('gauntletContainer');
+	  if (!container) return;
+	  const d = loadData();
+	  const rolls = typeof totalRolls !== 'undefined' ? totalRolls : 0;
+	
+	  const rollEl = document.getElementById('gauntletRollDisplay');
+	  if (rollEl) rollEl.textContent = 'your rolls: ' + rolls.toLocaleString();
+	
+	  container.innerHTML = '';
+	
+	  TIERS.forEach((tier) => {
+	    const locked = isLocked(tier);
+	    const rarNames = getTierRarities(tier);
+	    const complete = !locked && isComplete(tier, d);
+	    const claimable = complete && canClaim(tier, d);
+	    const cdStr = !locked ? getCdStr(tier, d) : null;
+	    const got = locked
+	      ? 0
+	      : rarNames.filter((n) => typeof inventoryData !== 'undefined' && inventoryData.has(n)).length;
+	    const pct = rarNames.length ? Math.round((got / rarNames.length) * 100) : 0;
+	
+	    const el = document.createElement('div');
+	    el.className = 'gauntlet-tier' + (locked ? ' gauntlet-locked' : '');
+	    el.dataset.tier = tier.id;
+	
+	    const hdr = document.createElement('div');
+	    hdr.className = 'gauntlet-tier-header';
+	
+	    const nameWrap = document.createElement('div');
+	    nameWrap.style.display = 'flex';
+	    nameWrap.style.alignItems = 'center';
+	    nameWrap.style.gap = '0';
+	
+	    const nameEl = document.createElement('span');
+	    nameEl.className = 'gauntlet-tier-name';
+	    nameEl.textContent = tier.emoji + ' ' + tier.name;
+	    nameWrap.appendChild(nameEl);
+	
+	    if (tier.isGlobal) {
+	      const badge = document.createElement('span');
+	      badge.className = 'gauntlet-tier-badge';
+	      badge.textContent = 'rotating';
+	      nameWrap.appendChild(badge);
+	    }
+	
+	    const metaEl = document.createElement('div');
+	    metaEl.className = 'gauntlet-tier-meta' + (!locked && (claimable || complete) ? ' gauntlet-unlocked-meta' : '');
+	    if (locked) metaEl.textContent = '🔒 ' + tier.minRolls.toLocaleString();
+	    else if (claimable) metaEl.textContent = '✓ ready';
+	    else if (complete) metaEl.textContent = '✓ done';
+	
+	    hdr.appendChild(nameWrap);
+	    hdr.appendChild(metaEl);
+	    el.appendChild(hdr);
+	
+	    if (tier.isGlobal && !locked) {
+	      const next = (rotIdx() + 1) * 2 * 24 * 60 * 60 * 1000;
+	      const rotEl = document.createElement('div');
+	      rotEl.className = 'gauntlet-rotation-text';
+	      rotEl.textContent = 'rotates in ' + formatWellTime(next - Date.now());
+	      el.appendChild(rotEl);
+	    }
+	
+	    if (!locked) {
+	      const progEl = document.createElement('div');
+	      progEl.className = 'gauntlet-progress-text';
+	      progEl.textContent = got + ' / ' + rarNames.length + ' — ' + pct + '%';
+	      el.appendChild(progEl);
+	
+	      const barWrap = document.createElement('div');
+	      barWrap.className = 'gauntlet-bar-wrap';
+	      const bar = document.createElement('div');
+	      bar.className = 'gauntlet-bar';
+	      bar.style.width = pct + '%';
+	      if (complete) {
+	        bar.style.background = '#4a8';
+	        bar.style.opacity = '0.7';
+	      }
+	      barWrap.appendChild(bar);
+	      el.appendChild(barWrap);
+	
+	      const chipGrid = document.createElement('div');
+	      chipGrid.className = 'gauntlet-chip-grid';
+	      rarNames.forEach((name) => {
+	        const has = typeof inventoryData !== 'undefined' && inventoryData.has(name);
+	        const chip = document.createElement('div');
+	        chip.className = 'gauntlet-chip ' + (has ? 'chip-has' : 'chip-missing');
+	        const rar = typeof rarities !== 'undefined' ? rarities.find((r) => r.name === name) : null;
+	        const den = rar ? '1/' + Math.round(1 / rar.chance).toLocaleString() : '?';
+	        chip.textContent = (has ? '✓ ' : '') + name + ' · ' + den;
+	        chipGrid.appendChild(chip);
+	      });
+	      el.appendChild(chipGrid);
+	
+	      const hr = document.createElement('hr');
+	      hr.className = 'gauntlet-hr';
+	      el.appendChild(hr);
+	
+	      const rewLabel = document.createElement('div');
+	      rewLabel.className = 'gauntlet-reward-label';
+	      rewLabel.textContent = 'pick a reward';
+	      el.appendChild(rewLabel);
+	
+	      const rewRow = document.createElement('div');
+	      rewRow.className = 'gauntlet-reward-row';
+	      tier.rewards.forEach((rew, i) => {
+	        const btn = document.createElement('button');
+	        btn.className = 'gauntlet-rew-btn' + (claimable ? ' rew-ready' : '');
+	        btn.disabled = !claimable;
+	        btn.textContent = rew.label;
+	        const ci = i, cid = tier.id;
+	        btn.addEventListener('click', () => {
+	          if (typeof showConfirmModal === 'function') {
+	            showConfirmModal(
+	              tier.emoji + ' ' + tier.name,
+	              'claim: ' + rew.label + '?',
+	              () => window.claimGauntletReward(cid, ci)
+	            );
+	          } else {
+	            window.claimGauntletReward(cid, ci);
+	          }
+	        });
+	        rewRow.appendChild(btn);
+	      });
+	      el.appendChild(rewRow);
+	
+	      if (cdStr) {
+	        const cdEl = document.createElement('div');
+	        cdEl.className = 'gauntlet-cd-text';
+	        cdEl.textContent = cdStr;
+	        el.appendChild(cdEl);
+	      }
+	    } else {
+	      const prev = document.createElement('div');
+	      prev.className = 'gauntlet-locked-preview';
+	      prev.textContent = tier.rewards.map((r) => r.label).join(' · ');
+	      el.appendChild(prev);
+	    }
+	
+	    container.appendChild(el);
+	  });
 	}
 
 	window.renderGauntlets = renderGauntlets;
