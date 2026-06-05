@@ -338,99 +338,397 @@
 	}
 
 	// ── Dev overlay ───────────────────────────────────────────────────────
-	let devToggleBtn = el('devOverlayToggle');
-	if (!devToggleBtn) {
-		devToggleBtn = document.createElement('button');
-		devToggleBtn.id = 'devOverlayToggle';
-		devToggleBtn.textContent = 'hide dev';
-		document.body.appendChild(devToggleBtn);
-	}
-	let devCollapsed = false;
-	devToggleBtn.addEventListener('click', () => {
-		const panel = el('devOverlayPanel');
-		if (!panel) return;
-		devCollapsed = !devCollapsed;
-		panel.classList.toggle('collapsed', devCollapsed);
-		devToggleBtn.textContent = devCollapsed ? 'show dev' : 'hide dev';
-	});
-
-	let frameCount = 0,
-		lastFPSUpdate = performance.now(),
-		currentFPS = 0;
-
 	function startDevOverlay(settings) {
-		const panel = el('devOverlayPanel');
-		if (!panel) return;
-		clearInterval(devInterval);
-		devInterval = null;
-		if (!settings.dev) {
-			panel.style.display = 'none';
-			devToggleBtn.style.display = 'none';
-			return;
-		}
-		panel.style.display = 'block';
-		devToggleBtn.style.display = 'block';
-		(function countFrame() {
-			frameCount++;
-			const now = performance.now();
-			if (now - lastFPSUpdate >= 1000) {
-				currentFPS = Math.round((frameCount * 1000) / (now - lastFPSUpdate));
-				frameCount = 0;
-				lastFPSUpdate = now;
-			}
-			requestAnimationFrame(countFrame);
-		})();
-		devInterval = setInterval(() => {
-			const memInfo = performance.memory
-				? {
-						used: Math.round(performance.memory.usedJSHeapSize / 1024 / 1024),
-						limit: Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024),
-					}
-				: null;
-			const totalEl = document.getElementsByTagName('*').length;
-			const clickable = document.querySelectorAll('button,a,[onclick],input,select').length;
-			const navT = performance.getEntriesByType('navigation')[0];
-			const loadTime = navT ? Math.round(navT.loadEventEnd - navT.fetchStart) : 0;
-			let lsSize = 0,
-				lsKeys = [];
-			try {
-				for (const key in localStorage) {
-					if (!Object.prototype.hasOwnProperty.call(localStorage, key)) continue;
-					const s = localStorage[key].length + key.length;
-					lsSize += s;
-					lsKeys.push({ key, size: s });
-				}
-				lsKeys.sort((a, b) => b.size - a.size);
-			} catch (_) {}
-			const fps = currentFPS;
-			panel.textContent = [
-				`── PERFORMANCE ──`,
-				`FPS: ${fps}  FrameTime: ${fps ? (1000 / fps).toFixed(1) : '?'}ms  Load: ${loadTime}ms`,
-				memInfo
-					? `Memory: ${memInfo.used}MB / ${memInfo.limit}MB  (${((memInfo.used / memInfo.limit) * 100).toFixed(1)}%)`
-					: '',
-				`Particles: ${particles.length}  Intervals: ${[particleInterval, devInterval, rgbInterval, wackyInterval].filter(Boolean).length}`,
-				``,
-				`── DOM ──`,
-				`Elements: ${totalEl}  Interactive: ${clickable}`,
-				``,
-				`── STORAGE ──`,
-				`LocalStorage: ${(lsSize / 1024).toFixed(2)}KB (${((lsSize / (5 * 1024 * 1024)) * 100).toFixed(1)}%)  Keys: ${lsKeys.length}`,
-				lsKeys
-					.slice(0, 3)
-					.map((i) => `  ${i.key}: ${(i.size / 1024).toFixed(2)}KB`)
-					.join('  '),
-				``,
-				`── SYSTEM ──`,
-				`${window.innerWidth}x${window.innerHeight}  DPR:${window.devicePixelRatio}  Online:${navigator.onLine ? 'yes' : 'NO'}`,
-				`Theme:${settings.theme || 'black'}  Season:${settings.season || 'none'}`,
-				`Music: ${_activeMusicKey || 'none'} (pending: ${hasPendingChanges ? 'yes' : 'no'})`,
-			]
-				.filter((l) => l !== undefined)
-				.join('\n');
-		}, 500);
+	  const panel = document.getElementById('devOverlayPanel');
+	  const toggleBtn = document.getElementById('devOverlayToggle');
+	  if (!panel) return;
+	  clearInterval(devInterval);
+	  devInterval = null;
+	  if (!settings.dev) {
+	    panel.style.display = 'none';
+	    if (toggleBtn) toggleBtn.style.display = 'none';
+	    return;
+	  }
+	  panel.style.display = 'block';
+	  if (toggleBtn) toggleBtn.style.display = 'none';
+	  if (!panel._dcInit) {
+	    panel._dcInit = true;
+	    initDevConsole(panel);
+	  }
+	  devInterval = setInterval(() => updateDevStats(panel, settings), 500);
 	}
-
+	
+	function updateDevStats(panel, settings) {
+	  const fps = window._devFPS || '--';
+	  const fpsEl = document.getElementById('dc-fps');
+	  if (fpsEl) {
+	    fpsEl.textContent = fps;
+	    fpsEl.className = 'stat-v' + (fps >= 58 ? ' good' : fps >= 40 ? '' : ' warn');
+	  }
+	  const rollsEl = document.getElementById('dc-rolls');
+	  if (rollsEl) rollsEl.textContent = typeof totalRolls !== 'undefined' ? totalRolls.toLocaleString() : '--';
+	  const ptsEl = document.getElementById('dc-pts');
+	  if (ptsEl) ptsEl.textContent = typeof points !== 'undefined' ? formatNum(points) : '--';
+	  const luckEl = document.getElementById('dc-luck');
+	  if (luckEl) {
+	    const lv = typeof globalLuckMultiplier !== 'undefined' ? globalLuckMultiplier : 1;
+	    luckEl.textContent = formatMult(lv) + 'x';
+	    luckEl.className = 'stat-v' + (lv >= 2 ? ' warn' : '');
+	  }
+	  const anomEl = document.getElementById('dc-anom');
+	  if (anomEl) anomEl.textContent = typeof anomalies !== 'undefined' ? anomalies : '--';
+	  const memEl = document.getElementById('dc-mem');
+	  if (memEl) memEl.textContent = performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1024 / 1024) + 'MB' : '--';
+	  const pageEl = document.getElementById('dc-page');
+	  if (pageEl) pageEl.textContent = (typeof window._currentPage !== 'undefined' ? window._currentPage + 1 : '--');
+	}
+	
+	function initDevConsole(panel) {
+	  const logEl = document.getElementById('dc-log');
+	  const hintEl = document.getElementById('dc-hint');
+	  const inputRow = document.getElementById('dc-input-row');
+	  const inp = document.getElementById('dc-input');
+	  const flagsRow = document.getElementById('dc-flags');
+	
+	  let cmdHistory = [], histIdx = -1;
+	  let consoleOpen = false;
+	
+	  const dcFlags = {
+	    godmode: false,
+	    autosave: true,
+	    'inf-pts': false,
+	    noclip: false,
+	    'quiet-log': false,
+	    nightly: location.hostname === 'nightly.authsrng.xyz'
+	  };
+	
+	  function ts() {
+	    const d = new Date();
+	    return String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
+	  }
+	
+	  function dcLog(msg, cls='info') {
+	    if (dcFlags['quiet-log'] && cls === 'dim') return;
+	    const e = document.createElement('div');
+	    e.className = 'entry';
+	    e.innerHTML = `<span class="ts">${ts()}</span><span class="msg ${cls}">${msg}</span>`;
+	    logEl.appendChild(e);
+	    logEl.scrollTop = logEl.scrollHeight;
+	  }
+	
+	  function rebuildFlags() {
+	    flagsRow.innerHTML = '';
+	    Object.entries(dcFlags).forEach(([name, val]) => {
+	      const btn = document.createElement('button');
+	      btn.className = 'flag' + (val ? ' on' : '') + (name === 'nightly' && val ? ' red' : '');
+	      btn.textContent = name;
+	      btn.onclick = () => toggleDcFlag(name);
+	      btn.id = 'dcf-' + name;
+	      flagsRow.appendChild(btn);
+	    });
+	  }
+	
+	  function toggleDcFlag(name) {
+	    dcFlags[name] = !dcFlags[name];
+	    const btn = document.getElementById('dcf-' + name);
+	    if (btn) {
+	      btn.classList.toggle('on', dcFlags[name]);
+	      if (name === 'nightly') btn.classList.toggle('red', dcFlags[name]);
+	    }
+	    dcLog(`flag <span style="color:#aaa">${name}</span> → ${dcFlags[name] ? '<span style="color:#5d5">ON</span>' : '<span style="color:#555">off</span>'}`, 'dim');
+	    if (name === 'inf-pts' && dcFlags['inf-pts']) {
+	      if (typeof points !== 'undefined') { points = 999999999; if (typeof updatePointsDisplay === 'function') updatePointsDisplay(); if (typeof updateShopUI === 'function') updateShopUI(); }
+	    }
+	  }
+	
+	  function openConsole() {
+	    consoleOpen = true;
+	    inputRow.style.display = 'flex';
+	    hintEl.textContent = 'type a command · :help for list · :off to close';
+	    inp.focus();
+	  }
+	
+	  function closeConsole() {
+	    consoleOpen = false;
+	    inputRow.style.display = 'none';
+	    hintEl.textContent = 'type : to open console · :help for commands';
+	    inp.value = '';
+	    histIdx = -1;
+	  }
+	
+	  const hints = {
+	    set: 'set &lt;points|rolls|luck|anomalies|trust&gt; &lt;value&gt;',
+	    give: 'give &lt;potion|anomaly&gt; [type] [count]',
+	    shop: 'shop &lt;luck|speed|points|magnet|printer|dupe&gt; &lt;level&gt;',
+	    flag: 'flag &lt;name&gt; — toggle a flag',
+	    inspect: 'inspect &lt;luck|inventory|potions|save|shop|runes|starmap&gt;',
+	    roll: 'roll &lt;rarity name&gt; — force a specific roll result',
+	    goto: 'goto &lt;page 1-9&gt;',
+	    clear: 'clear the log',
+	    reset: 'reset &lt;save|luck|points|shop|potions|anomalies&gt;',
+	    reload: 'reload the page',
+	    eval: 'eval &lt;js expression&gt; — execute arbitrary js',
+	    ls: 'ls [prefix] — list localStorage keys',
+	    get: 'get &lt;key&gt; — read a localStorage key',
+	    del: 'del &lt;key&gt; — delete a localStorage key',
+	    find: 'find &lt;name&gt; — search rarities list',
+	    rarity: 'rarity &lt;name&gt; — show rarity info',
+	    boost: 'boost — trigger a 4x luck boost immediately',
+	    potion: 'potion &lt;type&gt; — use a potion by name',
+	    help: 'list all commands',
+	    off: 'close the console',
+	  };
+	
+	  const commands = {
+	    off() { closeConsole(); },
+	    help() {
+	      dcLog('commands:', 'info');
+	      Object.entries(hints).forEach(([k, v]) => dcLog(`  :${k} — ${v}`, 'dim'));
+	    },
+	    clear() { logEl.innerHTML = ''; dcLog('log cleared', 'dim'); },
+	    reload() { location.reload(); },
+	    set(args) {
+	      const [field, ...rest] = args;
+	      const val = Number(rest[0]);
+	      if (isNaN(val)) { dcLog('value must be a number', 'err'); return; }
+	      if (field === 'points' && typeof points !== 'undefined') {
+	        points = val; if (typeof updatePointsDisplay === 'function') updatePointsDisplay(); if (typeof updateShopUI === 'function') updateShopUI();
+	      } else if (field === 'rolls' && typeof totalRolls !== 'undefined') {
+	        totalRolls = val; if (typeof updateTotalRolls === 'function') updateTotalRolls();
+	      } else if (field === 'luck' && typeof anomaliesUsed !== 'undefined') {
+	        dcLog('luck is computed — use anomalies or shop to change it', 'warn'); return;
+	      } else if (field === 'anomalies' && typeof anomalies !== 'undefined') {
+	        anomalies = val; if (typeof updateAnomalyUI === 'function') updateAnomalyUI();
+	      } else if (field === 'trust' && typeof window.mutationTrust !== 'undefined') {
+	        window.mutationTrust = val;
+	      } else { dcLog(`unknown field "${field}"`, 'err'); return; }
+	      dcLog(`set ${field} → ${rest[0]}`, 'ok');
+	      if (dcFlags.autosave && typeof saveAllData === 'function') saveAllData();
+	    },
+	    give(args) {
+	      const [type, ...rest] = args;
+	      if (type === 'anomaly') {
+	        const n = Number(rest[0]) || 1;
+	        if (typeof anomalies !== 'undefined') { anomalies += n; if (typeof updateAnomalyUI === 'function') updateAnomalyUI(); }
+	        dcLog(`gave ${n} anomaly${n > 1 ? 's' : ''}`, 'ok');
+	        if (dcFlags.autosave && typeof saveAllData === 'function') saveAllData();
+	        return;
+	      }
+	      if (type === 'potion') {
+	        const t = rest[0] || 'luck2x', n = Number(rest[1]) || 1;
+	        if (typeof playerPotions !== 'undefined' && t in playerPotions) {
+	          playerPotions[t] += n;
+	          if (typeof updatePotionUI === 'function') updatePotionUI();
+	          dcLog(`gave ${n}x ${t} potion`, 'ok');
+	          if (dcFlags.autosave && typeof saveAllData === 'function') saveAllData();
+	        } else { dcLog(`unknown potion type "${t}"`, 'err'); }
+	        return;
+	      }
+	      dcLog(`unknown type "${type}"`, 'err');
+	    },
+	    shop(args) {
+	      const [upg, lvl] = args;
+	      const n = Number(lvl);
+	      if (!upg || isNaN(n)) { dcLog('usage: :shop <upgrade> <level>', 'err'); return; }
+	      const map = { luck: 'luck', speed: 'speed', points: 'pointMult', magnet: 'magnet', printer: 'printer', dupe: 'duplicate' };
+	      const key = map[upg];
+	      if (!key) { dcLog(`unknown upgrade "${upg}"`, 'err'); return; }
+	      if (typeof shopUpgrades !== 'undefined') {
+	        shopUpgrades[key] = n;
+	        if (typeof updateShopUI === 'function') updateShopUI();
+	        if (typeof recalcLuckMultiplier === 'function') recalcLuckMultiplier();
+	        dcLog(`set shop.${upg} → level ${n}`, 'ok');
+	        if (dcFlags.autosave && typeof saveAllData === 'function') saveAllData();
+	      }
+	    },
+	    flag(args) {
+	      const f = args[0];
+	      if (!f) { dcLog('usage: :flag <name>', 'err'); return; }
+	      if (!(f in dcFlags)) { dcLog(`unknown flag "${f}"`, 'err'); return; }
+	      toggleDcFlag(f);
+	    },
+	    inspect(args) {
+	      const t = args[0] || 'luck';
+	      if (t === 'luck') {
+	        const breakdown = typeof globalLuckMultiplier !== 'undefined' ? globalLuckMultiplier.toFixed(2) + 'x total' : 'unavailable';
+	        dcLog(`luck: ${breakdown} · shop lv${typeof shopUpgrades !== 'undefined' ? shopUpgrades.luck : '?'} · anomalies used: ${typeof anomaliesUsed !== 'undefined' ? anomaliesUsed : '?'}`, 'info');
+	      } else if (t === 'inventory') {
+	        const sz = typeof inventoryData !== 'undefined' ? inventoryData.size : '?';
+	        const total = typeof rarities !== 'undefined' ? rarities.length : '?';
+	        dcLog(`${sz}/${total} collected`, 'info');
+	      } else if (t === 'potions') {
+	        if (typeof playerPotions !== 'undefined') dcLog(Object.entries(playerPotions).filter(([,v])=>v>0).map(([k,v])=>`${k}:${v}`).join('  ') || 'none', 'info');
+	      } else if (t === 'save') {
+	        let sz = 0;
+	        try { for (const k in localStorage) { if (Object.prototype.hasOwnProperty.call(localStorage, k)) sz += localStorage[k].length + k.length; } } catch(_) {}
+	        dcLog(`localStorage: ${(sz/1024).toFixed(1)}KB · keys: ${Object.keys(localStorage).length}`, 'info');
+	      } else if (t === 'shop') {
+	        if (typeof shopUpgrades !== 'undefined') dcLog(Object.entries(shopUpgrades).map(([k,v])=>`${k}:${v}`).join('  '), 'info');
+	      } else if (t === 'runes') {
+	        const rd = localStorage.getItem('runesData');
+	        dcLog(rd ? rd.slice(0, 200) : 'no rune data', 'info');
+	      } else if (t === 'starmap') {
+	        const sd = localStorage.getItem('starmapData');
+	        try { const p = JSON.parse(sd || '{}'); dcLog(`constellations: ${(p.constellations||[]).length} · shards: ${p.voidShards||0}`, 'info'); } catch(_) { dcLog('no starmap data', 'dim'); }
+	      } else { dcLog(`unknown target "${t}"`, 'err'); }
+	    },
+	    goto(args) {
+	      const p = Number(args[0]);
+	      if (!p || p < 1 || p > 9) { dcLog('usage: :goto <1-9>', 'err'); return; }
+	      if (typeof window.goToPage === 'function') window.goToPage(p - 1);
+	      dcLog(`navigated to page ${p}`, 'ok');
+	    },
+	    roll(args) {
+	      const name = args.join(' ');
+	      if (!name) { dcLog('usage: :roll <rarity name>', 'err'); return; }
+	      if (typeof rarities === 'undefined') { dcLog('rarities not loaded', 'err'); return; }
+	      const r = rarities.find(x => x.name.toLowerCase() === name.toLowerCase());
+	      if (!r) { dcLog(`rarity "${name}" not found — try :find ${name}`, 'err'); return; }
+	      dcLog(`forcing roll → "${r.name}"`, 'warn');
+	      if (typeof spinAndReveal === 'function') {
+	        setTimeout(() => { spinAndReveal(r); dcLog(`rolled: ${r.name} (1/${Math.round(1/r.chance).toLocaleString()})`, 'ok'); }, 100);
+	      }
+	    },
+	    find(args) {
+	      const q = args.join(' ').toLowerCase();
+	      if (!q) { dcLog('usage: :find <query>', 'err'); return; }
+	      if (typeof rarities === 'undefined') { dcLog('rarities not loaded', 'err'); return; }
+	      const res = rarities.filter(r => r.name.toLowerCase().includes(q)).slice(0, 10);
+	      if (!res.length) { dcLog('no results', 'dim'); return; }
+	      res.forEach(r => dcLog(`${r.name} — 1/${Math.round(1/r.chance).toLocaleString()}`, 'dim'));
+	      if (rarities.filter(r=>r.name.toLowerCase().includes(q)).length > 10) dcLog('...and more', 'dim');
+	    },
+	    rarity(args) {
+	      const name = args.join(' ');
+	      if (!name) { dcLog('usage: :rarity <name>', 'err'); return; }
+	      if (typeof rarities === 'undefined') { dcLog('rarities not loaded', 'err'); return; }
+	      const r = rarities.find(x => x.name.toLowerCase() === name.toLowerCase());
+	      if (!r) { dcLog(`not found`, 'err'); return; }
+	      const denom = Math.round(1 / r.chance);
+	      const owned = typeof inventoryData !== 'undefined' && inventoryData.has(r.name);
+	      dcLog(`${r.name} — 1/${denom.toLocaleString()} · ${owned ? `owned x${inventoryData.get(r.name).count}` : 'not owned'} · style: ${r.style ? 'yes' : 'none'}`, 'info');
+	    },
+	    boost() {
+	      if (typeof startLuckBoost === 'function') { startLuckBoost(); dcLog('4x luck boost triggered', 'ok'); }
+	      else dcLog('startLuckBoost not available', 'err');
+	    },
+	    potion(args) {
+	      const t = args[0];
+	      if (!t) { dcLog('usage: :potion <type>', 'err'); return; }
+	      if (typeof usePotion === 'function') { usePotion(t); dcLog(`used potion: ${t}`, 'ok'); }
+	      else dcLog('usePotion not available', 'err');
+	    },
+	    reset(args) {
+	      const t = args[0];
+	      const confirm = args[1] === '--confirm';
+	      const valid = ['save', 'luck', 'points', 'shop', 'potions', 'anomalies'];
+	      if (!valid.includes(t)) { dcLog(`usage: :reset <${valid.join('|')}>`, 'err'); return; }
+	      if (!confirm) { dcLog(`run :reset ${t} --confirm to proceed`, 'warn'); return; }
+	      if (t === 'points' && typeof points !== 'undefined') {
+	        points = 0; if (typeof updatePointsDisplay === 'function') updatePointsDisplay(); if (typeof updateShopUI === 'function') updateShopUI();
+	      } else if (t === 'anomalies' && typeof anomalies !== 'undefined') {
+	        anomalies = 0; anomaliesUsed = 0; if (typeof updateAnomalyUI === 'function') updateAnomalyUI(); if (typeof recalcLuckMultiplier === 'function') recalcLuckMultiplier();
+	      } else if (t === 'shop' && typeof shopUpgrades !== 'undefined') {
+	        Object.keys(shopUpgrades).forEach(k => shopUpgrades[k] = 0); if (typeof updateShopUI === 'function') updateShopUI();
+	      } else if (t === 'potions' && typeof playerPotions !== 'undefined') {
+	        Object.keys(playerPotions).forEach(k => playerPotions[k] = 0); if (typeof updatePotionUI === 'function') updatePotionUI();
+	      } else if (t === 'luck') {
+	        if (typeof anomaliesUsed !== 'undefined') anomaliesUsed = 0; if (typeof recalcLuckMultiplier === 'function') recalcLuckMultiplier();
+	      } else if (t === 'save') {
+	        if (typeof resetInventory === 'function') resetInventory(); return;
+	      }
+	      dcLog(`reset ${t}`, 'ok');
+	      if (dcFlags.autosave && typeof saveAllData === 'function') saveAllData();
+	    },
+	    ls(args) {
+	      const prefix = args[0] || '';
+	      const keys = Object.keys(localStorage).filter(k => k.startsWith(prefix)).sort();
+	      if (!keys.length) { dcLog('no keys found', 'dim'); return; }
+	      keys.forEach(k => {
+	        const v = localStorage.getItem(k);
+	        dcLog(`${k} <span style="color:#444">${(v.length/1024).toFixed(1)}KB</span>`, 'dim');
+	      });
+	    },
+	    get(args) {
+	      const k = args[0];
+	      if (!k) { dcLog('usage: :get <key>', 'err'); return; }
+	      const v = localStorage.getItem(k);
+	      if (v === null) { dcLog(`key "${k}" not found`, 'err'); return; }
+	      dcLog(v.slice(0, 500) + (v.length > 500 ? '...' : ''), 'info');
+	    },
+	    del(args) {
+	      const k = args[0];
+	      if (!k) { dcLog('usage: :del <key>', 'err'); return; }
+	      if (!args[1] === '--confirm') { dcLog(`run :del ${k} --confirm to proceed`, 'warn'); return; }
+	      localStorage.removeItem(k); dcLog(`deleted "${k}"`, 'ok');
+	    },
+	    eval(args) {
+	      if (!dcFlags.godmode) { dcLog('eval requires godmode flag to be on', 'err'); return; }
+	      const expr = args.join(' ');
+	      try {
+	        const result = Function('"use strict"; return (' + expr + ')')();
+	        dcLog(String(result).slice(0, 300), 'ok');
+	      } catch(e) { dcLog(e.message, 'err'); }
+	    },
+	  };
+	
+	  dcLog('dev console — type : to open · :help for commands', 'info');
+	  dcLog(`build: ${location.hostname} · ${new Date().toLocaleTimeString()}`, 'dim');
+	
+	  rebuildFlags();
+	
+	  let frameCount = 0, lastFPSTime = performance.now();
+	  (function fpsLoop() {
+	    frameCount++;
+	    const now = performance.now();
+	    if (now - lastFPSTime >= 1000) {
+	      window._devFPS = Math.round(frameCount * 1000 / (now - lastFPSTime));
+	      frameCount = 0;
+	      lastFPSTime = now;
+	    }
+	    requestAnimationFrame(fpsLoop);
+	  })();
+	
+	  document.addEventListener('keydown', (e) => {
+	    if (e.target.id === 'dc-input') return;
+	    if (e.key === ':') {
+	      const panel = document.getElementById('devOverlayPanel');
+	      if (panel && panel.style.display !== 'none') {
+	        e.preventDefault();
+	        openConsole();
+	      }
+	    }
+	  });
+	
+	  inp.addEventListener('keydown', (e) => {
+	    if (e.key === 'ArrowUp') { e.preventDefault(); histIdx = Math.min(histIdx + 1, cmdHistory.length - 1); inp.value = cmdHistory[histIdx] || ''; return; }
+	    if (e.key === 'ArrowDown') { e.preventDefault(); histIdx = Math.max(histIdx - 1, -1); inp.value = histIdx < 0 ? '' : cmdHistory[histIdx] || ''; return; }
+	    if (e.key === 'Tab') {
+	      e.preventDefault();
+	      const v = inp.value.trim().replace(/^:/, '');
+	      const matches = Object.keys(commands).filter(k => k.startsWith(v));
+	      if (matches.length === 1) { inp.value = ':' + matches[0] + ' '; }
+	      else if (matches.length > 1) { dcLog('completions: ' + matches.map(m => ':' + m).join('  '), 'dim'); }
+	      return;
+	    }
+	    if (e.key === 'Escape') { closeConsole(); return; }
+	    if (e.key !== 'Enter') return;
+	    const raw = inp.value.trim();
+	    if (!raw) return;
+	    cmdHistory.unshift(raw); histIdx = -1;
+	    dcLog(':' + raw, 'cmd');
+	    const [cmd, ...args] = raw.replace(/^:/, '').split(/\s+/);
+	    if (commands[cmd]) commands[cmd](args);
+	    else dcLog(`unknown command "${cmd}" — try :help`, 'err');
+	    inp.value = '';
+	    hintEl.textContent = 'type a command · :help for list · :off to close';
+	  });
+	
+	  inp.addEventListener('input', () => {
+	    const v = inp.value.trim().replace(/^:/, '').split(/\s+/)[0];
+	    hintEl.textContent = hints[v] ? `:${v} — ${hints[v]}` : 'type a command · :help for list · :off to close';
+	  });
+	}
 	// ── applyMusic ────────────────────────────────────────────────────────
 	// Only called explicitly: on page load (init) and on saveChanges().
 	// The _activeMusicKey guard means even if called twice with same settings,
