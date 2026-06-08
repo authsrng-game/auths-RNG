@@ -4,6 +4,24 @@
 console.log(performance.now());
 
 (function () {
+	function patchSelectProperty(prop) {
+		const desc = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, prop);
+
+		Object.defineProperty(HTMLSelectElement.prototype, prop, {
+			get: desc.get,
+			set(v) {
+				console.log('patched', prop, v);
+
+				desc.set.call(this, v);
+
+				this.dispatchEvent(new Event('change', { bubbles: true }));
+			},
+		});
+	}
+
+	patchSelectProperty('value');
+	patchSelectProperty('selectedIndex');
+
 	const OVERLAY_CSS =
 		'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:20001;' +
 		'display:flex;align-items:center;justify-content:center;';
@@ -192,9 +210,9 @@ console.log(performance.now());
 	};
 
 	// ─custom fucking dropdown
-  // bitch
+	// bitch
 	// sorry
-	
+
 	const DD_WRAP_CSS =
 		'position:relative;display:inline-block;width:100%;font-family:monospace;font-size:0.85em;';
 	const DD_TRIGGER_CSS =
@@ -285,7 +303,6 @@ console.log(performance.now());
 					ev.stopPropagation();
 					select.selectedIndex = i;
 					trigger.textContent = opt.text;
-					select.dispatchEvent(new Event('change', { bubbles: true }));
 					closeActiveDropdown();
 				});
 
@@ -294,7 +311,7 @@ console.log(performance.now());
 
 			// position below trigger
 			const rect = trigger.getBoundingClientRect();
-			list.style.top = (rect.bottom + 2) + 'px';
+			list.style.top = rect.bottom + 2 + 'px';
 			list.style.left = rect.left + 'px';
 			list.style.width = rect.width + 'px';
 
@@ -313,21 +330,13 @@ console.log(performance.now());
 		observer.observe(select, { attributes: true, childList: true, subtree: true });
 
 		// also sync on programmatic .value changes
-		const origSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value')?.set;
-		if (origSetter) {
-			const sel = select;
-			Object.defineProperty(sel, 'value', {
-				set(v) {
-					origSetter.call(sel, v);
-					trigger.textContent = sel.options[sel.selectedIndex]?.text ?? '';
-				},
-				get() {
-					return HTMLSelectElement.prototype.value.__proto__ ?
-						sel.value : Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').get.call(sel);
-				},
-				configurable: true,
-			});
+		function syncTrigger() {
+			trigger.textContent = select.options[select.selectedIndex]?.text ?? '';
 		}
+
+		syncTrigger();
+
+		select.addEventListener('change', syncTrigger);
 	}
 
 	function initAllDropdowns() {
@@ -369,8 +378,8 @@ console.log(performance.now());
 		nameSpan.textContent = 'no file chosen';
 
 		const wrapper = document.createElement('div');
-		wrapper.style.cssText = 'display:flex;align-items:center;margin-top:' +
-			(input.style.marginTop || '0');
+		wrapper.style.cssText =
+			'display:flex;align-items:center;margin-top:' + (input.style.marginTop || '0');
 
 		btn.addEventListener('click', () => input.click());
 
@@ -398,5 +407,4 @@ console.log(performance.now());
 		document.querySelectorAll('input[type="file"]:not([_fileInit])').forEach(initFileInput);
 	});
 	fileObserver.observe(document.body, { childList: true, subtree: true });
-
 })();
