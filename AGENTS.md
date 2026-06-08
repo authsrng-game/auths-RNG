@@ -12,7 +12,7 @@ ai is **allowed** in this repository, but with clear boundaries so this project 
 
 ### what ai is for
 
-ai is a tool to assist contributors who already understand what they're doing. it's acceptable for:
+we use ai as a tool to assist contributors who already understand what they're doing. it's acceptable for:
 
 - filling in boilerplate that follows an established pattern
 - generating a first draft of something the contributor then reviews and edits
