@@ -50,7 +50,7 @@
 			const multBig = BigInt(Math.round(mult * Number(MULT_PRECISION)));
 			const denomBig = BigInt(denom);
 			let w = (SCALE * multBig) / (denomBig * MULT_PRECISION);
-			const minW = r.chance >= 0.01 ? 1n : 0n;
+			const minW = 1n;
 			if (w < minW) w = minW;
 
 			weights[i] = w;

@@ -1,4 +1,4 @@
-// settings.js
+
 (function () {
 	'use strict';
 
@@ -8,7 +8,7 @@
 		return document.getElementById(id);
 	}
 
-	// ── State ──────────────────────────────────────────────────────────────
+
 	let particles = [];
 	let particleInterval = null;
 	let devInterval = null;
@@ -16,13 +16,13 @@
 	let wackyInterval = null;
 	let visibilitySeasonListenerAdded = false;
 
-	// Discord-style pending changes
+
 	let savedSettings = {};
 	let hasPendingChanges = false;
 
-	// Music guard::::: THE fix for the tidal wave bug. This was the reason why my ears genuinely ached after when I discovered the bug. Phenomenal. fuck
-	// We only ever start/change audio when the key actually changes.
-	let _activeMusicKey = null; // e.g. 'default', 'custom_1', or '__muted__'
+
+
+	let _activeMusicKey = null;
 
 	const musicLinks = {
 		default: 'assets/audio/welcomecity.mp3',
@@ -31,9 +31,9 @@
 		fallout: 'assets/audio/fallout.mp3',
 	};
 
-	// ── IndexedDB helpers ──────────────────────────────────────────────────
-	// Tracks are stored as { id (auto), name, buffer (ArrayBuffer), type (MIME) }
-	// The music select uses 'custom_{id}' where id is the IDB record key.
+
+
+
 
 	function openMusicDB() {
 		return new Promise((resolve, reject) => {
@@ -167,7 +167,7 @@
 		});
 	}
 
-	// ── One-time migration from old base64 localStorage format ─────────────
+
 	async function migrateFromLocalStorage() {
 		const raw = localStorage.getItem('customMusic');
 		if (!raw) return;
@@ -184,7 +184,7 @@
 		console.log(`[music] migrating ${old.length} track(s) from localStorage → IndexedDB`);
 		for (const track of old) {
 			try {
-				// old format: { name, data: 'data:<type>;base64,...' }
+
 				const [meta, b64] = track.data.split(',');
 				const type = meta.replace('data:', '').replace(';base64', '');
 				const bin = atob(b64);
@@ -199,7 +199,7 @@
 		console.log('[music] migration complete, localStorage entry removed');
 	}
 
-	// ── Pending bar ────────────────────────────────────────────────────────
+
 	function createPendingBar() {
 		if (el('settingsPendingBar')) return;
 		const bar = document.createElement('div');
@@ -250,7 +250,7 @@
 		hidePendingBar();
 	}
 
-	// ── Background pattern ────────────────────────────────────────────────
+
 	function applyBackgroundPattern(pattern) {
 		const body = document.body;
 		body.style.backgroundImage = '';
@@ -284,7 +284,7 @@
 		if (btn) btn.textContent = text.trim() || 'roll';
 	}
 
-	// ── Seasonal particles ────────────────────────────────────────────────
+
 	function startSeasonalParticles(season, density) {
 		if (particleInterval) {
 			clearInterval(particleInterval);
@@ -347,7 +347,7 @@
 		})();
 	}
 
-	// ── Dev overlay ───────────────────────────────────────────────────────
+
 	function startDevOverlay(settings) {
 		const panel = document.getElementById('devOverlayPanel');
 		const toggleBtn = document.getElementById('devOverlayToggle');
@@ -939,11 +939,11 @@
 				: 'type a command · :help for list · :off to close';
 		});
 	}
-	// ── applyMusic ────────────────────────────────────────────────────────
-	// Only called explicitly: on page load (init) and on saveChanges().
-	// The _activeMusicKey guard means even if called twice with same settings,
-	// it is a no-op — no more tidal waves.
-	// Now async because custom tracks need an IDB fetch.
+
+
+
+
+
 	async function applyMusic(settings) {
 		const newKey = settings.muted ? '__muted__' : settings.music || 'default';
 		if (newKey === _activeMusicKey) return;
@@ -976,7 +976,7 @@
 				const track = await getTrack(id);
 				if (track && window.playCustomAudio) {
 					window.playCustomAudio(track.buffer, track.type, 0.3, true).catch(() => {
-						_activeMusicKey = null; // allow retry on next save
+						_activeMusicKey = null;
 						if (window.stopCustomAudio) window.stopCustomAudio();
 						if (window.backgroundMusic) {
 							window.backgroundMusic.src = musicLinks.default;
@@ -1000,7 +1000,7 @@
 		}
 	}
 
-	// ── applyVisuals ──────────────────────────────────────────────────────
+
 	function applyVisuals(settings) {
 		document.body.classList.toggle('legacy-mode', !!settings.legacyMode);
 		document.body.classList.toggle('blur-panels', !!settings.blurPanels);
@@ -1082,7 +1082,7 @@
 		if (window.refreshAllDisplays) window.refreshAllDisplays();
 	}
 
-	// ── syncUIToSettings ──────────────────────────────────────────────────
+
 	function syncUIToSettings(settings) {
 		if (el('musicSelect')) el('musicSelect').value = settings.music || 'default';
 		if (el('muteMusic')) el('muteMusic').checked = !!settings.muted;
@@ -1093,9 +1093,9 @@
 		if (el('rareThreshold')) el('rareThreshold').value = settings.rareThreshold || 1000;
 		if (el('autoSellThreshold')) el('autoSellThreshold').value = settings.autoSellThreshold || 0;
 	}
-	// blah!
 
-	// ── getCurrentSettings ────────────────────────────────────────────────
+
+
 	function getCurrentSettings() {
 		return {
 			music: (el('musicSelect') || {}).value || 'default',
@@ -1108,14 +1108,14 @@
 			autoSellThreshold: parseInt((el('autoSellThreshold') || {}).value || 0, 10),
 		};
 	}
-	// ── onChange — fires on every UI interaction ──────────────────────────
-	// Only applies visuals (safe). Music is NOT touched until save. We will not make the stupid fucking bug once again.
+
+
 	function onChange() {
 		applyVisuals(getCurrentSettings());
 		showPendingBar();
 	}
 
-	// ── Event binding ─────────────────────────────────────────────────────
+
 	function bindSettings() {
 		const ids = ['muteMusic', 'legacyMode', 'rawNumbers', 'devOverlay'];
 		ids.forEach((id) => {
@@ -1134,13 +1134,13 @@
 		});
 	}
 
-	// ── Web Audio API (custom music) ──────────────────────────────────────
-	// Now takes an ArrayBuffer (from IDB) + MIME type instead of a base64 data URL.
+
+
 	window.audioContext = null;
 	window.customAudioSource = null;
 	window.customAudioGain = null;
 
-	// In playCustomAudio, add resume() before decoding:
+
 	window.playCustomAudio = function (arrayBuffer, mimeType, volume, loop) {
 		return new Promise((resolve, reject) => {
 			try {
@@ -1153,7 +1153,7 @@
 				if (!window.audioContext)
 					window.audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-				// Resume suspended context (required after browser autoplay policy kicks in)
+
 				const ctx = window.audioContext;
 				const proceed = () => {
 					const bufferCopy = arrayBuffer.slice(0);
@@ -1200,7 +1200,7 @@
 		}
 	};
 
-	// ── Custom music upload UI ─────────────────────────────────────────────
+
 	async function loadCustomMusicUI() {
 		const musicSel = el('musicSelect');
 		const listWrapper = el('customMusicList');
@@ -1326,7 +1326,7 @@
 			const file = e.target.files[0];
 			if (!file) return;
 
-			// 100 MB limit — IndexedDB can handle it, localStorage couldn't
+
 			if (file.size > 100 * 1024 * 1024) {
 				window.showAlert('file too large! max 100MB');
 				upload.value = '';
@@ -1358,11 +1358,11 @@
 				window.showAlert('error reading file');
 				upload.value = '';
 			};
-			reader.readAsArrayBuffer(file); // ArrayBuffer, not data URL
+			reader.readAsArrayBuffer(file);
 		});
 	}
 
-	// ── Save / settings transfer ──────────────────────────────────────────
+
 	const SAVE_KEYS = [
 		'rarityInventory',
 		'totalRolls',
@@ -1381,6 +1381,20 @@
 		'daily_streak',
 		'weekly_lastClaim',
 		'weekly_streak',
+		'gauntletData',
+		'mutationsUnlocked',
+		'starmapData',
+		'starmapUnlocked',
+		'runesData',
+		'runeBlocks',
+		'runeGift',
+		'runeUpgrades',
+		'rarityTimestamps',
+		'mutationTrust',
+		'mutationTrustOwned',
+		'mutationTrustActive',
+		'mutationHistory',
+		'mutationBestResult',
 	];
 
 	function simpleHash(str) {
@@ -1598,7 +1612,7 @@
 		refreshSettingsCode();
 	}
 
-	// ── Legacy mode content mover ─────────────────────────────────────────
+
 	function bindLegacyMode() {
 		const legacyShopBtn = el('legacyShopBtn');
 		const legacySettingsBtn = el('legacySettingsBtn');
@@ -1660,7 +1674,7 @@
 		});
 	}
 
-	// ── Init ──────────────────────────────────────────────────────────────
+
 	async function init() {
 		console.log('[settings] initializing...');
 		createPendingBar();
@@ -1730,7 +1744,7 @@
 		get: () => savedSettings,
 	});
 
-	// Expose globals
+
 	window.applySettings = function (settings) {
 		savedSettings = { ...savedSettings, ...settings };
 		applyVisuals(savedSettings);

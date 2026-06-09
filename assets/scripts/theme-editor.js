@@ -532,7 +532,7 @@
 		document.documentElement.style.setProperty('--border-radius', cssRadius);
 		document
 			.querySelectorAll(
-				'button, .shop-item, #inventoryList, .page-dots, #notifPanel, .modal-content, .well-container, .gauntlet-tier, .potion-item, .index-content'
+				'button, .shop-item, #inventoryList, .page-dots, #notifPanel, .modal-content, .well-container, .gauntlet-tier, .potion-item, .index-content, #wellResultModal'
 			)
 			.forEach((n) => {
 				n.style.borderRadius = cssRadius;
@@ -669,7 +669,7 @@
 		document.documentElement.style.setProperty('--border-radius', cssRadius);
 		document
 			.querySelectorAll(
-				'button, .shop-item, #inventoryList, .page-dots, #notifPanel, .modal-content, .well-container, .gauntlet-tier, .potion-item, .index-content' // added #notifPanel and .index-content
+				'button, .shop-item, #inventoryList, .page-dots, #notifPanel, .modal-content, .well-container, .gauntlet-tier, .potion-item, .index-content, #wellResultModal'
 			)
 			.forEach((n) => {
 				n.style.borderRadius = cssRadius;
@@ -681,11 +681,11 @@
 		const rgb = hexToRgb(bgHex);
 		if (!rgb) return;
 
-		// Perceived luminance (0–255)
+
 		const lum = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
 		const isDark = lum < 128;
 
-		// Lighten or darken the bg by a fixed offset to derive panel/overlay colors
+
 		function shiftHex(r, g, b, amount) {
 			const clamp = (v) => Math.min(255, Math.max(0, v));
 			return (

@@ -1739,7 +1739,7 @@ hr.sep {
 	left: 0;
 	width: 100vw;
 	height: 100vh;
-	background: url('https://files.ozel.im/td32j.png') no-repeat center center;
+	background: url('https:
 	background-size: cover;
 	z-index: 9999;
 }
@@ -3837,4 +3837,317 @@ body.blur-panels .starmap-market-item {
 
 .page-dot.dot-unlocking {
 	animation: dotPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+#jukebox {
+	position: fixed;
+	top: 14px;
+	left: 14px;
+	z-index: 10001;
+	display: flex;
+	align-items: center;
+	pointer-events: none;
+}
+
+#jb-disc {
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	background: conic-gradient(
+		#1c1c1c 0deg,
+		#2e2e2e 45deg,
+		#0f0f0f 100deg,
+		#252525 160deg,
+		#0a0a0a 210deg,
+		#2a2a2a 270deg,
+		#141414 320deg,
+		#1c1c1c 360deg
+	);
+	border: 1.5px solid var(--border-color, #3a3a3a);
+	position: relative;
+	cursor: pointer;
+	pointer-events: auto;
+	flex-shrink: 0;
+	box-shadow: 0 2px 8px rgb(0 0 0 / 50%);
+	opacity: 0.22;
+	transition:
+		opacity 0.4s ease,
+		box-shadow 0.2s;
+}
+
+#jb-disc::before {
+	content: '';
+	position: absolute;
+	inset: 3px;
+	border-radius: 50%;
+	background: conic-gradient(
+		rgb(255 255 255 / 7%) 0deg,
+		rgb(255 255 255 / 1%) 90deg,
+		rgb(255 255 255 / 9%) 180deg,
+		rgb(255 255 255 / 2%) 270deg,
+		rgb(255 255 255 / 7%) 360deg
+	);
+	pointer-events: none;
+}
+
+#jb-disc::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 8px;
+	height: 8px;
+	background: var(--bg-color, #0e0e0e);
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+	border: 1.5px solid var(--border-color, #484848);
+}
+
+#jb-disc.jb-active {
+	opacity: 1;
+	box-shadow: 0 2px 14px rgb(0 0 0 / 60%);
+}
+
+#jb-disc.jb-spinning {
+	animation: jb-spin 2.8s linear infinite;
+}
+
+@keyframes jb-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+#jb-disc:hover {
+	box-shadow: 0 2px 18px rgb(220 220 220 / 10%);
+}
+
+#jb-eq {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
+	gap: 2px;
+	padding-bottom: 7px;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.3s;
+	z-index: 1;
+}
+
+#jb-disc.jb-spinning + #jb-eq {
+	opacity: 0.6;
+}
+
+.jb-bar {
+	width: 2px;
+	background: var(--text-color, #dcdcdc);
+	border-radius: 1px;
+}
+
+.jb-bar:nth-child(1) {
+	animation: jb-eq1 0.55s ease infinite alternate;
+}
+
+.jb-bar:nth-child(2) {
+	animation: jb-eq1 0.38s ease 0.08s infinite alternate;
+}
+
+.jb-bar:nth-child(3) {
+	animation: jb-eq1 0.65s ease 0.03s infinite alternate;
+}
+
+@keyframes jb-eq1 {
+	from {
+		height: 2px;
+		opacity: 0.5;
+	}
+
+	to {
+		height: 8px;
+		opacity: 1;
+	}
+}
+
+#jb-panel {
+	background: var(--panel-bg, #111);
+	border: 1px solid var(--border-color, #2a2a2a);
+	border-radius: var(--border-radius, 5px);
+	padding: 5px 8px 6px;
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	margin-left: 7px;
+	min-width: 190px;
+	opacity: 0;
+	transform: translateX(-6px) scale(0.97);
+	pointer-events: none;
+	transition:
+		opacity 0.18s ease,
+		transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+	box-shadow: 0 4px 16px rgb(0 0 0 / 40%);
+}
+
+#jb-panel.jb-open {
+	opacity: 1;
+	transform: translateX(0) scale(1);
+	pointer-events: auto;
+}
+
+#jb-row-controls {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	white-space: nowrap;
+}
+
+#jb-name {
+	font-family: monospace;
+	font-size: 0.7em;
+	color: var(--text-color, #dcdcdc);
+	opacity: 0.6;
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+#jb-time {
+	font-family: monospace;
+	font-size: 0.6em;
+	color: var(--text-color, #dcdcdc);
+	opacity: 0.3;
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
+#jb-progress-wrap {
+	width: 100%;
+	height: 3px;
+	background: var(--border-color, #333);
+	border-radius: 2px;
+	cursor: pointer;
+	position: relative;
+	transition: height 0.12s;
+	flex-shrink: 0;
+}
+
+#jb-progress-wrap:hover {
+	height: 5px;
+}
+
+#jb-progress-fill {
+	height: 100%;
+	background: var(--accent-color, #dcdcdc);
+	border-radius: 2px;
+	width: 0%;
+	pointer-events: none;
+}
+
+#jb-progress-fill.jb-smooth {
+	transition: width 0.65s linear;
+}
+
+#jb-row-vol {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+#jb-vol-label {
+	font-family: monospace;
+	font-size: 0.6em;
+	color: var(--text-color, #dcdcdc);
+	opacity: 0.3;
+	flex-shrink: 0;
+}
+
+#jb-vol {
+	flex: 1;
+	height: 3px;
+	cursor: pointer;
+	accent-color: var(--accent-color, #dcdcdc);
+	-webkit-appearance: none;
+	appearance: none;
+	background: var(--border-color, #333);
+	border-radius: 2px;
+	outline: none;
+	border: none;
+	padding: 0;
+}
+
+#jb-vol::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: var(--accent-color, #dcdcdc);
+	cursor: pointer;
+}
+
+#jb-vol::-moz-range-thumb {
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: var(--accent-color, #dcdcdc);
+	cursor: pointer;
+	border: none;
+}
+
+.jb-btn {
+	background: none;
+	border: 1px solid var(--border-color, #333);
+	color: var(--text-color, #dcdcdc);
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	border-radius: var(--border-radius, 3px);
+	font-size: 8px;
+	line-height: 1;
+	cursor: pointer !important;
+	opacity: 0.5;
+	transition:
+		opacity 0.12s,
+		background 0.12s;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.jb-btn:hover {
+	opacity: 1 !important;
+	background: var(--button-hover, var(--button-bg, #222));
+}
+
+body.legacy-mode #jukebox {
+	top: 52px;
+}
+
+body.blur-panels #notifPanel,
+body.blur-panels .index-content,
+body.blur-panels .gauntlet-tier,
+body.blur-panels .potion-item,
+body.blur-panels #wellResultModal,
+body.blur-panels .modal-content,
+body.blur-panels .well-container {
+	backdrop-filter: blur(var(--blur-intensity, 10px)) saturate(var(--blur-saturate, 140%));
+	-webkit-backdrop-filter: blur(var(--blur-intensity, 10px)) saturate(var(--blur-saturate, 140%));
+	background: rgb(var(--panel-bg-rgb, 17, 17, 17), var(--blur-panel-opacity, 0.55)) !important;
+	border-color: rgb(255 255 255 / var(--blur-border-opacity, 0.08)) !important;
+}
+
+#notifPanel,
+.index-content,
+.gauntlet-tier,
+.potion-item,
+#wellResultModal,
+.modal-content,
+.well-container {
+	border-radius: var(--border-radius, 2px);
+	border-width: var(--border-width, 1px);
 }

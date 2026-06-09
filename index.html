@@ -1,22 +1,22 @@
 <!doctype html>
 <html lang="en">
-	<!-- TIMESTAMP: 1778867898-->
+
 
 	<head>
 		<meta charset="UTF-8" />
-		<!-- <link rel="stylesheet" href="/assets/scripts/styles/styles.css" /> -->
+
 		<link rel="stylesheet" href="/assets/scripts/styles/overrides.css" />
 		<meta
 			name="viewport"
 			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
 		/>
 		<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-		<!-- a relic of the past...............-->
-		<link rel="preload" as="style" href="styles.css" />
+
+		<link rel="preload" as="style" href="/assets/scripts/styles/overrides.css" />
 		<title>auth's RNG</title>
-		<link rel="canonical" href="https://authsrng.xyz/" />
-		<link rel="preconnect" href="https://cdnjs.cloudflare.com" />
-		<link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
+		<link rel="canonical" href="https:
+		<link rel="preconnect" href="https:
+		<link rel="dns-prefetch" href="
 		<meta
 			name="description"
 			content="a free browser RNG game with incremental progression and rare collectible rolls"
@@ -34,8 +34,8 @@
 			property="og:description"
 			content="an addicting, web-based, RNG/incremental gacha game!"
 		/>
-		<meta property="og:image" content="https://authsrng.xyz/assets/images/authsRNG.png" />
-		<meta property="og:url" content="https://authsrng.xyz/" />
+		<meta property="og:image" content="https:
+		<meta property="og:url" content="https:
 
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:title" content="auth's RNG" />
@@ -43,8 +43,8 @@
 			name="twitter:description"
 			content="an addicting, web-based, RNG/incremental gacha game!"
 		/>
-		<meta name="twitter:image" content="https://authsrng.xyz/assets/images/authsRNG.png" />
-		<meta name="twitter:url" content="https://authsrng.xyz/" />
+		<meta name="twitter:image" content="https:
+		<meta name="twitter:url" content="https:
 
 		<meta name="mobile-web-app-capable" content="yes" />
 		<meta name="application-name" content="auth's RNG" />
@@ -52,9 +52,9 @@
 		<meta name="theme-color" content="#0e0e0e" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-		<link rel="apple-touch-icon" href="https://authsrng.xyz/assets/images/authsRNG.png" />
+		<link rel="apple-touch-icon" href="https:
 
-		<link rel="icon" sizes="192x192" href="https://authsrng.xyz/assets/images/authsRNG.png" />
+		<link rel="icon" sizes="192x192" href="https:
 		<link rel="manifest" href="manifest.json" />
 
 		<meta
@@ -64,21 +64,21 @@
 		<meta name="format-detection" content="telephone=no, email=no, address=no" />
 		<meta name="google" content="notranslate" />
 
-		<!-- for future contributors, and a note to myself: the duplicate preload is for safety, sometimes native doesnt work so we do the normal way-->
+
 		<link rel="preload" as="image" href="/assets/images/authsRNG.png" />
-		<link rel="preload" as="image" href="https://authsrng.xyz/assets/images/authsRNG.png" />
+		<link rel="preload" as="image" href="https:
 
 		<meta name="color-scheme" content="dark" />
 		<meta name="creator" content="auth" />
 
 		<script type="application/ld+json">
 			{
-				"@context": "https://schema.org",
+				"@context": "https:
 				"@type": "VideoGame",
 				"name": "auth's RNG",
 				"description": "an addicting, web-based, RNG/incremental gacha game!",
-				"image": "https://authsrng.xyz/assets/images/authsRNG.png",
-				"url": "https://authsrng.xyz/",
+				"image": "https:
+				"url": "https:
 				"applicationCategory": "Game",
 				"genre": ["Incremental", "Idle", "Casual"],
 				"gamePlatform": "Web Browser",
@@ -86,23 +86,23 @@
 				"author": {
 					"@type": "Person",
 					"name": "auth",
-					"url": "https://authguy.nekoweb.org"
+					"url": "https:
 				}
 			}
 		</script>
 
 		<script
-			src="//instant.page/5.2.0"
+			src="
 			type="module"
 			integrity="sha384-jnZyxPjiipYXnSU0ygqeac2q7CVYMbh84q0uHVRRxEtvFPiQYbXWUorga2aqZJ0z"
 			defer
 		></script>
 
-		<!-- IF YOU REMOVE ANY OF THESE META TAGS, I WILL KILL YOU!!!!! -->
-		<!-- DOING SO RUINS SOME FEATURES, OPTIMIZATIONS, AND HURTS SEO LIKE HELLLLLLLLLLLL!!!!!!!!!!! -->
-		<!-- DONT EVER DO IT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
-		<!-- GOT IT??????????? -->
-		<!-- good boyyyyyyy- -->
+
+
+
+
+
 	</head>
 
 	<body>
@@ -136,7 +136,7 @@
 				document.getElementById('unstable-banner').style.display = 'none';
 			} else {
 				document.getElementById('unstable-banner').addEventListener('click', function () {
-					this.style.display = 'none'; // fuck my life
+					this.style.display = 'none';
 				});
 			}
 		</script>
@@ -161,13 +161,13 @@
 				let el = document.getElementById('nightly-info');
 				try {
 					let [mainC, nightlyC, releases] = await Promise.all([
-						fetch('https://api.github.com/repos/auth1ery/auths-RNG/commits/main').then((r) =>
+						fetch('https:
 							r.status === 403 ? { rate: 1 } : r.json()
 						),
-						fetch('https://api.github.com/repos/auth1ery/auths-RNG/commits/nightly').then((r) =>
+						fetch('https:
 							r.status === 403 ? { rate: 1 } : r.json()
 						),
-						fetch('https://api.github.com/repos/auth1ery/auths-RNG/releases').then((r) =>
+						fetch('https:
 							r.status === 403 ? { rate: 1 } : r.json()
 						),
 					]);
@@ -201,9 +201,9 @@ Last release date on nightly: ${nightlyRDate}`;
 		</script>
 
 		<script>
-			// ccu
+
 			const _sid = Math.random().toString(36).slice(2);
-			const _hb = () => fetch('https://authsrng.xyz/api/ccu?sid=' + _sid, { method: 'POST' });
+			const _hb = () => fetch('https:
 
 			if (location.hostname !== 'nightly.authsrng.xyz') {
 				_hb();
@@ -212,7 +212,7 @@ Last release date on nightly: ${nightlyRDate}`;
 		</script>
 
 		<img
-			src="https://librecounter.org/counter.svg"
+			src="https:
 			referrerpolicy="unsafe-url"
 			width="0"
 			loading="lazy"
@@ -233,179 +233,17 @@ Last release date on nightly: ${nightlyRDate}`;
 				document.documentElement.appendChild(img);
 			}
 
-			// relic from the good ol neocities days :heart:
+
 		</script>
 
 		<script src="assets/scripts/startanim.js" defer></script>
-		<!-- screensaver was here <3333 -->
+
 
 		<button id="legacyShopBtn">shop</button>
 		<button id="legacySettingsBtn">settings</button>
 		<div id="legacyShopPopup"></div>
 		<div id="legacySettingsPopup"></div>
 
-		<script>
-			(function () {
-				function movePageIntoPopup(pageId, popupId) {
-					const page = document.getElementById(pageId);
-					const popup = document.getElementById(popupId);
-					if (!page || !popup || popup._hasContent) return;
-					while (page.firstChild) popup.appendChild(page.firstChild);
-					popup._sourcePageId = pageId;
-					popup._hasContent = true;
-				}
-
-				function movePopupBackToPage(popupId) {
-					const popup = document.getElementById(popupId);
-					if (!popup || !popup._hasContent || !popup._sourcePageId) return;
-					const page = document.getElementById(popup._sourcePageId);
-					if (!page) return;
-					while (popup.firstChild) page.appendChild(popup.firstChild);
-					popup._hasContent = false;
-				}
-
-				function openPopup(popupId, otherPopupId, pageId) {
-					const popup = document.getElementById(popupId);
-					const other = document.getElementById(otherPopupId);
-					if (!popup) return;
-
-					if (other && other.classList.contains('open')) {
-						other.classList.remove('open');
-						movePopupBackToPage(otherPopupId);
-					}
-
-					if (popup.classList.contains('open')) {
-						popup.classList.remove('open');
-						movePopupBackToPage(popupId);
-						return;
-					}
-
-					movePageIntoPopup(pageId, popupId);
-					popup.classList.add('open');
-				}
-
-				document.addEventListener('DOMContentLoaded', () => {
-					const shopBtn = document.getElementById('legacyShopBtn');
-					const settingsBtn = document.getElementById('legacySettingsBtn');
-
-					if (shopBtn)
-						shopBtn.addEventListener('click', (e) => {
-							e.stopPropagation();
-							openPopup('legacyShopPopup', 'legacySettingsPopup', 'page-2');
-						});
-
-					if (settingsBtn)
-						settingsBtn.addEventListener('click', (e) => {
-							e.stopPropagation();
-							openPopup('legacySettingsPopup', 'legacyShopPopup', 'page-7');
-						});
-
-					document.addEventListener('pointerdown', (e) => {
-						const shopPopup = document.getElementById('legacyShopPopup');
-						const settingsPopup = document.getElementById('legacySettingsPopup');
-						if (
-							shopBtn &&
-							!shopBtn.contains(e.target) &&
-							shopPopup &&
-							shopPopup.classList.contains('open') &&
-							!shopPopup.contains(e.target)
-						) {
-							shopPopup.classList.remove('open');
-							movePopupBackToPage('legacyShopPopup');
-						}
-						if (
-							settingsBtn &&
-							!settingsBtn.contains(e.target) &&
-							settingsPopup &&
-							settingsPopup.classList.contains('open') &&
-							!settingsPopup.contains(e.target)
-						) {
-							settingsPopup.classList.remove('open');
-							movePopupBackToPage('legacySettingsPopup');
-						}
-					});
-				});
-			})();
-		</script>
-
-		<!-- if you're reading this in the source code, you're cool -->
-		<!-- yes i recoded everything i hate myself -->
-		<!-- BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~ -->
-
-		<div class="site-header lazy">
-			<div class="header-chip">update 9.4</div>
-			<h1>welcome to auth's RNG!</h1>
-			<p class="header-msg" id="randomMessage"></p>
-			<div class="header-links">
-				<a href="https://discord.gg/mTDw8jJYqX" class="header-link">discord</a>
-				<a href="https://github.com/authsrng-game/auths-RNG/wiki" class="header-link">wiki</a>
-				<a href="blog/blog.html" class="header-link">blog</a>
-			</div>
-		</div>
-		<script src="assets/scripts/messages.js" defer></script>
-
-		<div class="page-wrapper">
-			<div class="page-container">
-				<div class="page" id="page-1">
-					<div class="roll-zone">
-						<button id="rollBtn" class="lazy">roll</button>
-						<div id="spinnerContainer" class="lazy">
-							<div id="spinner"></div>
-						</div>
-						<p id="totalRolls" class="lazy">total rolls: 0</p>
-						<p id="rollsSinceRare" class="lazy" style="display: none">rolls since last rare: 0</p>
-						<div id="luckDisplay" class="lazy">
-							<p id="luckMultiplier">luck multiplier: 1.0x</p>
-							<p id="luckBreakdown" class="small"></p>
-						</div>
-						<div class="roll-toolbar">
-							<button id="autoRollBtn">auto roll (OFF)</button>
-							<div class="rarity-trail" id="rarityTrail"></div>
-						</div>
-					</div>
-
-					<div id="dailyContainer" class="lazy">
-						<div id="dailyStatus">checking daily…</div>
-						<button id="dailyBtn">claim daily</button>
-					</div>
-
-					<div id="weeklyContainer" class="lazy">
-						<div id="weeklyStatus">checking weekly…</div>
-						<button id="weeklyBtn">claim weekly</button>
-					</div>
-
-					<br class="lazy" />
-
-					<div id="inventorySection" class="lazy">
-						<div class="inventory-header">
-							<span class="inventory-title">.................</span>
-							<div class="inventory-controls">
-								<span class="sort-label">sort</span>
-								<select id="sortSelect">
-									<option value="rare">rarest → common</option>
-									<option value="common">common → rarest</option>
-									<option value="alpha">a → z</option>
-								</select>
-							</div>
-						</div>
-
-						<div id="inventoryContainer">
-							<div
-								style="
-									display: flex;
-									justify-content: space-between;
-									align-items: center;
-									margin-bottom: 0.5em;
-								"
-							>
-								<div id="collectedCounter">0/0 collected</div>
-								<button id="indexBtn" class="small">view index</button>
-							</div>
-							<ul id="inventoryList"></ul>
-						</div>
-
-						<div id="anomalyPanel" title="anomalies are rare, consume for permanent luck boosts">
-							<span id="anomalyCount">anomalies: 0</span>
 							<div style="display: flex; gap: 4px">
 								<button id="consumeAnomalyBtn" class="small">consume one</button>
 								<button id="consumeAllAnomaliesBtn" class="small">consume all</button>
@@ -882,11 +720,7 @@ Last release date on nightly: ${nightlyRDate}`;
 				<div class="page" id="page-9">
 					<h2 style="margin-top: 0">links and more</h2>
 
-					<!--
-  <button id="rankedModeBtn" class="lazy" style="margin-bottom: 20px; width: 100%; max-width: 400px; font-size: 1.1em; padding: 12px; background: linear-gradient(90deg, #ff6b6b, #4ecdc4); color: #000; border: none; font-weight: bold;">
-    ranked mode
-  </button>
--->
+
 
 					<script>
 						const rankedBtn = document.getElementById('rankedModeBtn');
@@ -913,28 +747,28 @@ Last release date on nightly: ${nightlyRDate}`;
 
 					<a class="lazy" href="/assets/frontend/credits.html">credits</a>
 
-					<a class="lazy" href="http://authsrng.web.fc2.com/">lite version</a>
-					<a class="lazy" href="https://github.com/authsrng-game/auths-RNG/wiki">wiki</a>
+					<a class="lazy" href="http:
+					<a class="lazy" href="https:
 
 					<br /><br />
 
 					<p>join us on...</p>
 					<div class="image-column">
-						<a href="https://github.com/auth1ery/auths-RNG" class="image-link">
+						<a href="https:
 							<span class="link-text">github</span>
 						</a>
-						<a href="https://discord.gg/mTDw8jJYqX" class="image-link">
+						<a href="https:
 							<span class="link-text">discord</span>
 						</a>
-						<a href="https://www.reddit.com/r/authsRNG/" class="image-link">
+						<a href="https:
 							<span class="link-text">reddit</span>
 						</a>
 
-						<a href="https://nerimity.com/i/K0zUp" class="image-link">
+						<a href="https:
 							<span class="link-text">nerimity</span>
 						</a>
 
-						<a href="https://asterisk.authsrng.xyz" class="image-link">
+						<a href="https:
 							<span class="link-text">asterisk..</span>
 						</a>
 					</div>
@@ -944,7 +778,7 @@ Last release date on nightly: ${nightlyRDate}`;
 
 					<p>even more links...</p>
 					<div class="image-column">
-						<a href="https://stats.uptimerobot.com/TAmAzlTA1g" class="image-link">
+						<a href="https:
 							<span class="link-text">status</span>
 						</a>
 						<a href="/boring/legal.html" class="image-link">
@@ -953,26 +787,26 @@ Last release date on nightly: ${nightlyRDate}`;
 						<a href="LICENSE.txt" class="image-link">
 							<span class="link-text">license</span>
 						</a>
-						<a href="https://authguy.nekoweb.org" class="image-link">
+						<a href="https:
 							<span class="link-text">about me</span>
 						</a>
-						<a href="https://nightly.authsrng.xyz" class="image-link">
+						<a href="https:
 							<span class="link-text">nightly build (unstable)</span>
 						</a>
 					</div>
 
 					<br /><br />
 
-					<a href="http://s01.flagcounter.com/more/iljn"
+					<a href="http:
 						><img
-							src="https://s01.flagcounter.com/count2/iljn/bg_FFFFFF/txt_000000/border_CCCCCC/columns_2/maxflags_10/viewers_0/labels_0/pageviews_0/flags_0/percent_0/"
+							src="https:
 							alt="Flag Counter"
 							border="0"
 							loading="lazy"
 					/></a>
 
 					<img
-						src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fauthsrng.xyz&label=auth%27s+RNG&icon=cloud-check-fill&color=%23ea868f&message=&style=flat&tz=UTC"
+						src="https:
 						loading="lazy"
 						alt="hit counter"
 					/>
@@ -983,9 +817,9 @@ Last release date on nightly: ${nightlyRDate}`;
 					<br />
 
 					<p>feed my pet while you're at it:</p>
-					<a href="https://tamanotchi.world/29830c"
+					<a href="https:
 						><img
-							src="https://tamanotchi.world/i/29830"
+							src="https:
 							alt="It's tamaNOTchi! Click to feed!"
 							loading="lazy"
 					/></a>
@@ -1012,7 +846,7 @@ Last release date on nightly: ${nightlyRDate}`;
 
 		<div class="swipe-indicator">swipe to navigate!!!</div>
 
-		<!-- big ahh block hahahahhaah -->
+
 		<script src="/assets/scripts/engine/xoshiro256ss.js" defer></script>
 		<script src="/assets/scripts/engine/pity.js" defer></script>
 		<script src="/assets/scripts/engine/streak.js" defer></script>
@@ -1020,7 +854,7 @@ Last release date on nightly: ${nightlyRDate}`;
 		<script src="/assets/scripts/engine/roller.js" defer></script>
 		<script src="/assets/scripts/engine/bcore.js" defer></script>
 		<script src="assets/scripts/popup.js"></script>
-		<!-- sad fucker oh god i swear too much -->
+
 		<script src="assets/scripts/rarities.js" defer></script>
 		<script src="assets/scripts/rarityStyle.js" defer></script>
 		<script src="assets/scripts/main.js" defer></script>
@@ -1031,7 +865,7 @@ Last release date on nightly: ${nightlyRDate}`;
 		<script src="assets/scripts/systems/labs.js" defer></script>
 		<script src="assets/scripts/services/cleanup.js" defer></script>
 
-		<!-- Notification Center -->
+
 		<button id="notifBell" title="notifications" aria-label="open notifications">
 			🔔
 			<span id="notifBadge" class="notif-badge"></span>
@@ -1262,7 +1096,7 @@ Last release date on nightly: ${nightlyRDate}`;
 		</script>
 
 		<script>
-			// the custom cursor design is stupid
+
 			if (window.matchMedia('(pointer: fine)').matches) {
 				const cursor = document.getElementById('custom-cursor');
 				const plus = cursor.querySelector('.plus');
@@ -1481,292 +1315,6 @@ Last release date on nightly: ${nightlyRDate}`;
 
 		<script>
 			(function () {
-				const SAVE_KEYS = [
-					'rarityInventory',
-					'totalRolls',
-					'achievementsUnlocked',
-					'anomalies',
-					'anomaliesUsed',
-					'shopPoints',
-					'shopUpgrades',
-					'soldOutRarities',
-					'playerPotions',
-					'activePotions',
-					'wishingWell',
-					'luckBoostState',
-					'totalPlaytime',
-					'daily_lastClaim',
-					'daily_streak',
-					'weekly_lastClaim',
-					'weekly_streak',
-					'gauntletData',
-					'mutationsUnlocked',
-				];
-
-				function hash(str) {
-					let h = 0;
-					for (let i = 0; i < str.length; i++) {
-						h = (h << 5) - h + str.charCodeAt(i);
-						h |= 0;
-					}
-					return (h >>> 0).toString(16).padStart(8, '0');
-				}
-
-				function bundleKeys(keys) {
-					const obj = {};
-					keys.forEach((k) => {
-						const v = localStorage.getItem(k);
-						if (v !== null) obj[k] = v;
-					});
-					return obj;
-				}
-
-				function encode(bundle, tag) {
-					const payload = JSON.stringify(bundle);
-					const envelope = JSON.stringify({ p: payload, h: hash(payload), t: tag });
-					return btoa(unescape(encodeURIComponent(envelope)));
-				}
-
-				function decode(input, expectedTag) {
-					let envelope;
-					try {
-						envelope = JSON.parse(decodeURIComponent(escape(atob(input.trim()))));
-					} catch (e) {
-						return { error: 'invalid or corrupted data' };
-					}
-					if (!envelope || !envelope.p || !envelope.h || !envelope.t)
-						return { error: 'invalid format' };
-					if (envelope.t !== expectedTag) return { error: 'wrong type — expected ' + expectedTag };
-					if (hash(envelope.p) !== envelope.h) return { error: 'tampered or corrupted — blocked' };
-					let bundle;
-					try {
-						bundle = JSON.parse(envelope.p);
-					} catch (e) {
-						return { error: 'payload not valid json' };
-					}
-					return { bundle: bundle };
-				}
-
-				function refreshSave() {
-					const bundle = bundleKeys(SAVE_KEYS);
-					const codeEl = document.getElementById('saveTransferCode');
-					codeEl.textContent =
-						Object.keys(bundle).length > 0 ? encode(bundle, 'save') : '(no save data)';
-					adjustPageHeight(codeEl);
-				}
-
-				function refreshSettings() {
-					const raw = localStorage.getItem('userSettings');
-					const codeEl = document.getElementById('settingsTransferCode');
-					codeEl.textContent = raw ? encode({ userSettings: raw }, 'settings') : '(no settings)';
-					adjustPageHeight(codeEl);
-				}
-
-				function copyToClipboard(text, label) {
-					navigator.clipboard
-						.writeText(text)
-						.then(() => window.showAlert(label + ' copied!'))
-						.catch(() => {
-							const ta = document.createElement('textarea');
-							ta.value = text;
-							ta.style.position = 'fixed';
-							ta.style.opacity = '0';
-							document.body.appendChild(ta);
-							ta.select();
-							document.execCommand('copy');
-							document.body.removeChild(ta);
-							window.showAlert(label + ' copied!');
-						});
-				}
-
-				function downloadAsFile(text, filename) {
-					const blob = new Blob([text], { type: 'text/plain' });
-					const url = URL.createObjectURL(blob);
-					const a = document.createElement('a');
-					a.href = url;
-					a.download = filename;
-					document.body.appendChild(a);
-					a.click();
-					document.body.removeChild(a);
-					URL.revokeObjectURL(url);
-				}
-
-				const saveBtnActions = [
-					['exportSaveBtn', copyToClipboard, 'save data', refreshSave],
-					['downloadSaveBtn', downloadAsFile, 'authsrng_save.txt', refreshSave],
-					['refreshSaveBtn', refreshSave, null, null],
-				];
-
-				const settingsBtnActions = [
-					['exportSettingsBtn', copyToClipboard, 'settings', refreshSettings],
-					['downloadSettingsBtn', downloadAsFile, 'authsrng_settings.txt', refreshSettings],
-					['refreshSettingsBtn', refreshSettings, null, null],
-				];
-
-				document.getElementById('importSaveBtn').addEventListener('click', async () => {
-					const input = await window.showPrompt('paste your save data export:');
-					if (!input?.trim()) return;
-					const result = decode(input, 'save');
-					if (result.error) {
-						window.showAlert(result.error);
-						return;
-					}
-					Object.keys(result.bundle).forEach((k) => localStorage.setItem(k, result.bundle[k]));
-					window.showAlert('save data imported! reloading...');
-					setTimeout(() => location.reload(), 500);
-				});
-
-				document.getElementById('importSettingsBtn').addEventListener('click', async () => {
-					const input = await window.showPrompt('paste your settings export:');
-					if (!input?.trim()) return;
-					const result = decode(input, 'settings');
-					if (result.error) {
-						window.showAlert(result.error);
-						return;
-					}
-					if (result.bundle.userSettings)
-						localStorage.setItem('userSettings', result.bundle.userSettings);
-					if (typeof applySettings === 'function') {
-						try {
-							applySettings(JSON.parse(result.bundle.userSettings));
-						} catch (e) {}
-					}
-					window.showAlert('settings imported! reloading...');
-					setTimeout(() => location.reload(), 500);
-				});
-
-				function setupShowMore(codeElId, btnElId) {
-					const codeEl = document.getElementById(codeElId);
-					const btn = document.getElementById(btnElId);
-					let expanded = false;
-
-					function checkOverflow() {
-						btn.style.display = codeEl.scrollHeight > codeEl.clientHeight ? 'inline-block' : 'none';
-						adjustPageHeight(codeEl);
-					}
-
-					btn.addEventListener('click', () => {
-						expanded = !expanded;
-						codeEl.style.maxHeight = expanded ? 'none' : '3.5em';
-						btn.textContent = expanded ? 'show less' : 'show more';
-						checkOverflow();
-					});
-
-					return checkOverflow;
-				}
-
-				function adjustPageHeight(el) {
-					const page = el.closest('.page');
-					const container = el.closest('.page-container');
-					if (page && container) {
-						container.style.height = page.scrollHeight + 'px';
-					}
-				}
-
-				// Set up overflow watchers first
-				const checkSettingsOverflow = setupShowMore('settingsTransferCode', 'showMoreSettingsBtn');
-				const checkSaveOverflow = setupShowMore('saveTransferCode', 'showMoreSaveBtn');
-
-				// Now rebuild the action arrays with overflow checks baked in
-				const saveBtnActionsWithCheck = [
-					[
-						'exportSaveBtn',
-						copyToClipboard,
-						'save data',
-						() => {
-							refreshSave();
-							checkSaveOverflow();
-						},
-					],
-					[
-						'downloadSaveBtn',
-						downloadAsFile,
-						'authsrng_save.txt',
-						() => {
-							refreshSave();
-							checkSaveOverflow();
-						},
-					],
-					[
-						'refreshSaveBtn',
-						null,
-						null,
-						() => {
-							refreshSave();
-							checkSaveOverflow();
-						},
-					],
-				];
-				const settingsBtnActionsWithCheck = [
-					[
-						'exportSettingsBtn',
-						copyToClipboard,
-						'settings',
-						() => {
-							refreshSettings();
-							checkSettingsOverflow();
-						},
-					],
-					[
-						'downloadSettingsBtn',
-						downloadAsFile,
-						'authsrng_settings.txt',
-						() => {
-							refreshSettings();
-							checkSettingsOverflow();
-						},
-					],
-					[
-						'refreshSettingsBtn',
-						null,
-						null,
-						() => {
-							refreshSettings();
-							checkSettingsOverflow();
-						},
-					],
-				];
-
-				// Unified setup that always calls the refresh+overflow func
-				function setupBtnActionsV2(actions, type) {
-					actions.forEach(([id, func, param, refreshAndCheck]) => {
-						const el = document.getElementById(id);
-						if (!el) return;
-						el.addEventListener('click', () => {
-							refreshAndCheck();
-							if (!func) return;
-							const codeEl =
-								type === 'save'
-									? document.getElementById('saveTransferCode')
-									: document.getElementById('settingsTransferCode');
-							const text = codeEl.textContent;
-							if (text.includes('(no ')) {
-								window.showAlert('no ' + type + ' data to export');
-								return;
-							}
-							if (func === copyToClipboard) func(text, param);
-							else if (func === downloadAsFile) func(text, param);
-						});
-					});
-				}
-
-				setupBtnActionsV2(saveBtnActionsWithCheck, 'save');
-				setupBtnActionsV2(settingsBtnActionsWithCheck, 'settings');
-
-				refreshSave();
-				checkSaveOverflow();
-				refreshSettings();
-				checkSettingsOverflow();
-
-				document.querySelectorAll('.page-container').forEach((pc) => {
-					const firstPage = pc.querySelector('.page');
-					if (firstPage) pc.style.height = firstPage.scrollHeight + 'px';
-				});
-			})();
-		</script>
-
-		<script>
-			(function () {
 				const erudaBtn = document.getElementById('erudaBtn');
 				let erudaLoaded = false;
 
@@ -1778,7 +1326,7 @@ Last release date on nightly: ${nightlyRDate}`;
 						}
 
 						const script = document.createElement('script');
-						script.src = 'https://cdn.jsdelivr.net/npm/eruda';
+						script.src = 'https:
 						script.onload = function () {
 							eruda.init();
 							erudaLoaded = true;
@@ -1803,7 +1351,7 @@ Last release date on nightly: ${nightlyRDate}`;
 		<script src="assets/scripts/systems/mutations.js" defer></script>
 
 		<script>
-			// TAGS
+
 		</script>
 
 		<style>
@@ -1847,292 +1395,6 @@ Last release date on nightly: ${nightlyRDate}`;
 			#updatePopupClose:hover {
 				opacity: 1;
 			}
-			#updatePopupTag {
-				font-size: 1.3em;
-				margin-bottom: 6px;
-				font-weight: bold;
-			}
-			#updatePopupDate {
-				font-size: 0.8em;
-				opacity: 0.5;
-				margin-bottom: 16px;
-			}
-			#updatePopupBody {
-				font-size: 0.9em;
-				opacity: 0.8;
-				white-space: pre-wrap;
-				line-height: 1.6;
-			}
-		</style>
-
-		<div id="updatePopup" class="hidden">
-			<div id="updatePopupInner">
-				<button id="updatePopupClose">×</button>
-				<div id="updatePopupTag"></div>
-				<div id="updatePopupDate"></div>
-				<div id="updatePopupBody"></div>
-			</div>
-		</div>
-
-		<script>
-			(async () => {
-				const SEEN_KEY = 'seenReleaseTag';
-				try {
-					const res = await fetch(
-						'https://api.github.com/repos/auth1ery/auths-RNG/releases/latest'
-					);
-					if (!res.ok) return;
-					const data = await res.json();
-					const tag = data.tag_name;
-					if (!tag || localStorage.getItem(SEEN_KEY) === tag) return;
-
-					document.getElementById('updatePopupTag').textContent = tag;
-					document.getElementById('updatePopupDate').textContent = new Date(
-						data.published_at
-					).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-					document.getElementById('updatePopupBody').textContent =
-						data.body || '(no release notes)';
-					document.getElementById('updatePopup').classList.remove('hidden');
-
-					document.getElementById('updatePopupClose').addEventListener('click', () => {
-						localStorage.setItem(SEEN_KEY, tag);
-						document.getElementById('updatePopup').classList.add('hidden');
-					});
-				} catch (e) {}
-			})();
-		</script>
-
-		<div
-			id="themeEditorOverlay"
-			style="
-				display: none;
-				position: fixed;
-				inset: 0;
-				background: rgba(0, 0, 0, 0.92);
-				z-index: 20000;
-				overflow-y: auto;
-			"
-		>
-			<div id="themeEditorPanel" style="max-width: 680px; margin: 0 auto; padding: 24px 20px 80px">
-				<div
-					style="
-						display: flex;
-						justify-content: space-between;
-						align-items: center;
-						margin-bottom: 20px;
-						position: sticky;
-						top: 0;
-						background: var(--bg-color);
-						padding: 12px 0;
-						border-bottom: 1px solid var(--border-color);
-						z-index: 1;
-					"
-				>
-					<span style="font-size: 1.1em">theme editor</span>
-					<div style="display: flex; gap: 8px; align-items: center">
-						<span id="themeEditorActiveLabel" style="font-size: 0.8em; opacity: 0.5"></span>
-						<button id="themeEditorClose" class="small">close</button>
-					</div>
-				</div>
-
-				<div style="margin-bottom: 24px">
-					<div style="font-size: 0.75em; opacity: 0.4; letter-spacing: 0.06em; margin-bottom: 10px">
-						presets
-					</div>
-					<div
-						id="presetGrid"
-						style="
-							display: grid;
-							grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-							gap: 8px;
-						"
-					></div>
-					<div style="display: flex; gap: 6px; margin-top: 10px">
-						<button id="saveThemeBtn" class="small">save as preset</button>
-						<button id="importThemeBtn" class="small">import json</button>
-						<button id="exportThemeBtn" class="small">export json</button>
-					</div>
-				</div>
-
-				<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px">
-					<div>
-						<div
-							style="font-size: 0.75em; opacity: 0.4; letter-spacing: 0.06em; margin-bottom: 12px"
-						>
-							colors
-						</div>
-
-						<label style="display: block; margin-bottom: 4px; font-size: 0.85em; opacity: 0.7"
-							>background</label
-						>
-						<input
-							type="color"
-							id="te-bgColor"
-							value="#0e0e0e"
-							style="width: 100%; height: 32px; margin-bottom: 6px"
-						/>
-						<button
-							id="te-autoAdapt"
-							class="small"
-							style="width: 100%; margin-bottom: 10px; opacity: 0.7"
-						>
-							auto-adapt other colors to background
-						</button>
-
-						<label style="display: block; margin-bottom: 4px; font-size: 0.85em; opacity: 0.7"
-							>text</label
-						>
-						<input
-							type="color"
-							id="te-textColor"
-							value="#dcdcdc"
-							style="width: 100%; height: 32px; margin-bottom: 10px"
-						/>
-
-						<label style="display: block; margin-bottom: 4px; font-size: 0.85em; opacity: 0.7"
-							>panel</label
-						>
-						<input
-							type="color"
-							id="te-panelBg"
-							value="#111111"
-							style="width: 100%; height: 32px; margin-bottom: 10px"
-						/>
-
-						<label style="display: block; margin-bottom: 4px; font-size: 0.85em; opacity: 0.7"
-							>overlay</label
-						>
-						<input
-							type="color"
-							id="te-overlayBg"
-							value="#0a0a0a"
-							style="width: 100%; height: 32px; margin-bottom: 10px"
-						/>
-
-						<label style="display: block; margin-bottom: 4px; font-size: 0.85em; opacity: 0.7"
-							>border</label
-						>
-						<input
-							type="color"
-							id="te-borderColor"
-							value="#2a2a2a"
-							style="width: 100%; height: 32px; margin-bottom: 10px"
-						/>
-
-						<label style="display: block; margin-bottom: 4px; font-size: 0.85em; opacity: 0.7"
-							>button background</label
-						>
-						<input
-							type="color"
-							id="te-buttonBg"
-							value="#1a1a1a"
-							style="width: 100%; height: 32px; margin-bottom: 10px"
-						/>
-
-						<label style="display: block; margin-bottom: 4px; font-size: 0.85em; opacity: 0.7"
-							>accent / rare highlight</label
-						>
-						<input
-							type="color"
-							id="te-accentColor"
-							value="#dcdcdc"
-							style="width: 100%; height: 32px; margin-bottom: 10px"
-						/>
-
-						<label style="display: block; margin-bottom: 4px; font-size: 0.85em; opacity: 0.7"
-							>points color</label
-						>
-						<input
-							type="color"
-							id="te-pointsColor"
-							value="#ffb86b"
-							style="width: 100%; height: 32px; margin-bottom: 10px"
-						/>
-
-						<label style="display: block; margin-bottom: 4px; font-size: 0.85em; opacity: 0.7"
-							>achievement background</label
-						>
-						<input
-							type="color"
-							id="te-achievementBg"
-							value="#1a2a1a"
-							style="width: 100%; height: 32px; margin-bottom: 10px"
-						/>
-
-						<label style="display: block; margin-bottom: 4px; font-size: 0.85em; opacity: 0.7"
-							>achievement border</label
-						>
-						<input
-							type="color"
-							id="te-achievementBorder"
-							value="#2a4a2a"
-							style="width: 100%; height: 32px; margin-bottom: 10px"
-						/>
-
-						<div style="margin-top: 28px">
-							<div
-								style="font-size: 0.75em; opacity: 0.4; letter-spacing: 0.06em; margin-bottom: 12px"
-							>
-								start animation
-							</div>
-
-							<label
-								style="
-									display: flex;
-									align-items: center;
-									gap: 8px;
-									margin-bottom: 14px;
-									font-size: 0.85em;
-									opacity: 0.7;
-								"
-							>
-								<input type="checkbox" id="te-sa-enabled" checked />
-								show start animation
-							</label>
-
-							<div id="te-sa-controls">
-								<label style="display: block; margin-bottom: 4px; font-size: 0.85em; opacity: 0.7"
-									>preset</label
-								>
-								<select id="te-sa-preset" style="width: 100%; margin-bottom: 6px">
-									<option value="default">default (line expand)</option>
-									<option value="fade">fade</option>
-									<option value="glitch">glitch</option>
-									<option value="scan">scanline</option>
-									<option value="typewriter">typewriter</option>
-									<option value="curtain">curtain</option>
-									<option value="pixelate">pixelate</option>
-									<option value="ripple">ripple</option>
-									<option value="custom">custom (javascript)</option>
-									<option value="none">none (instant load)</option>
-								</select>
-								<div
-									id="te-sa-preset-desc"
-									style="
-										font-size: 0.75em;
-										opacity: 0.4;
-										margin-bottom: 12px;
-										min-height: 2em;
-										line-height: 1.5;
-									"
-								></div>
-
-								<div id="te-sa-customCode-row" style="display: none; margin-bottom: 12px">
-									<label style="display: block; margin-bottom: 4px; font-size: 0.85em; opacity: 0.7"
-										>animation code</label
-									>
-									<div
-										style="
-											font-size: 0.75em;
-											opacity: 0.35;
-											margin-bottom: 6px;
-											line-height: 1.6;
-											font-family: monospace;
-										"
-									>
-										args: container, bg, fg, wakeText, speedMs(n, fast?, slow?), dismiss<br />
-										attach click/touchstart to container to trigger dismiss
-									</div>
 									<textarea
 										id="te-sa-customCode"
 										rows="12"
@@ -2612,7 +1874,7 @@ container.addEventListener('click', () => {
 		</script>
 
 		<script src="assets/scripts/trust-cosmetics.js" defer></script>
-		<!-- a lone ugly ass soul-->
+
 
 		<script>
 			function hidePageDot(pageIndex) {
@@ -2646,7 +1908,7 @@ container.addEventListener('click', () => {
 				dot.addEventListener('animationend', () => dot.classList.remove('dot-unlocking'), {
 					once: true,
 				});
-				// re-sync transform since layout widths changed
+
 				window.goToPage(window._currentPage);
 			}
 
