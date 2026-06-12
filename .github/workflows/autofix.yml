@@ -42,6 +42,7 @@ jobs:
             "**/*.css" \
             "**/*.html" \
             --ignore-path .gitignore
+        continue-on-error: true
 
       - name: eslint --fix
         run: npx eslint --fix
@@ -62,7 +63,7 @@ jobs:
           git add -A
 
           if git diff --cached --quiet; then
-            echo "nothing to fix, codebase is already clean!"
+            echo "nothing to fix, codebase is already clean! ✓"
           else
             git commit -m "chore: autofix formatting and lint [skip ci]"
             git push

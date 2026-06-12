@@ -162,10 +162,10 @@ const potionData = {
 	},
 	luck3000x: {
 		name: 'philosopher luck',
-		mult: 3000x,
+		mult: 3000,
 		duration: 40000,
 		cost: 2500000,
-		emoji: '🔮'.
+		emoji: '🔮',
 	},
 	duplicate: { name: 'duplicate', rolls: 10, cost: 5000, emoji: '🎭' },
 };
