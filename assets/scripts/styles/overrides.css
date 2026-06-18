@@ -714,6 +714,7 @@ select {
 .dev-tab:hover {
 	color: #aaa;
 }
+
 .dev-tab.active {
 	color: #ccc;
 	border-bottom-color: #555;
@@ -732,15 +733,18 @@ select {
 	cursor: pointer;
 	gap: 8px;
 }
+
 .dc-stor-row:hover {
 	background: #111;
 }
+
 .dc-stor-key {
 	color: #7af;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
+
 .dc-stor-size {
 	color: #444;
 	white-space: nowrap;
@@ -755,25 +759,31 @@ select {
 	gap: 8px;
 	align-items: center;
 }
+
 .dc-net-ok {
 	color: #5d5;
 }
+
 .dc-net-err {
 	color: #f66;
 }
+
 .dc-net-pending {
 	color: #fa6;
 }
+
 .dc-net-method {
 	color: #888;
 	font-size: 10px;
 }
+
 .dc-net-url {
 	color: #aaa;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
+
 .dc-net-time {
 	color: #555;
 	font-size: 10px;
@@ -788,18 +798,22 @@ select {
 	gap: 8px;
 	align-items: center;
 }
+
 .dc-watch-expr {
 	color: #7af;
 }
+
 .dc-watch-val {
 	color: #ccc;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
+
 .dc-watch-changed {
 	color: #ff6;
 }
+
 .dc-watch-del {
 	background: none;
 	border: none;
@@ -808,6 +822,7 @@ select {
 	padding: 0 4px;
 	font-size: 13px;
 }
+
 .dc-watch-del:hover {
 	color: #f66;
 }
