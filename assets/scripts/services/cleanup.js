@@ -1,7 +1,3 @@
-// cleanup.js
-// i could've just optimized some parts in existing scripts but ill do the easy way
-// might bite me later
-
 console.log(performance.now());
 
 (function () {
@@ -9,77 +5,77 @@ console.log(performance.now());
 
 	const $ = (id) => document.getElementById(id);
 
-	// ── spinner div soup ────────────────────────────────────────────────
-	// each roll creates 51 spin-item divs. they sit there until the NEXT roll
-	// clears them. under auto-roll + hidden tab they can stack hundreds deep and it WILL lag out the game overtime.
+	const INITIAL_CLEANUP_DELAY = 1000;
+	const TICK_INTERVAL_VISIBLE = 5000;
+	const TICK_INTERVAL_HIDDEN = 60000;
+	const THOROUGH_TICK_THRESHOLD = 6;
+	const LONG_TERM_TICK_THRESHOLD = 24;
+	const HEALTH_FAILURE_THRESHOLD = 3;
+	const STORAGE_WARNING_THRESHOLD_BYTES = 3.5 * 1024 * 1024;
+
+	const taskFailures = new Map();
+	let lastTickTime = performance.now();
+	let tickCount = 0;
+	let lastLsSize = 0;
+	let schedulerHandle = null;
+
+	function runTask(name, fn) {
+		try {
+			fn();
+			taskFailures.set(name, 0);
+		} catch (e) {
+			const fails = (taskFailures.get(name) || 0) + 1;
+			taskFailures.set(name, fails);
+			if (fails >= HEALTH_FAILURE_THRESHOLD) {
+				console.warn(`[cleanup] task "${name}" failing repeatedly:`, e);
+			}
+		}
+	}
+
 	function cleanSpinner() {
 		const spinner = $('spinner');
 		const rollBtn = $('rollBtn');
-		if (!spinner || !rollBtn) return;
-		if (rollBtn.disabled) return; // roll mid-flight, leave it alone
-
-		const childCount = spinner.children.length;
-		if (childCount > 2) {
-			// more than a couple items = stale from a finished roll
+		if (spinner && rollBtn && !rollBtn.disabled && spinner.children.length > 2) {
 			spinner.innerHTML = '';
 			spinner.style.transition = 'none';
 			spinner.style.transform = 'translateY(0)';
 		}
 	}
 
-	// ── orphaned confetti canvases ──────────────────────────────────────
-	// triggerConfetti() creates a <canvas> and removes it via rAF when done.
-	// if the tab goes hidden mid-animation, rAF pauses and the canvas lingers.
-	// also guards against stacking multiple confetti runs (every 100 rolls).
 	function cleanOrphanedCanvases() {
 		document.querySelectorAll('canvas').forEach((c) => {
-			if (c.id === 'seasonCanvas') return; // seasonal particles, hands off
 			if (!c.id && c.style.position === 'fixed') {
 				c.remove();
 			}
 		});
 	}
 
-	// ── new-roll class timeout pileup ──────────────────────────────────
-	// updateItem() does setTimeout(() => el.classList.remove('new-roll'), 2000)
-	// on EVERY inventory update. at 500ms auto-roll with a big inventory that's
-	// hundreds of pending closures all holding li element references.
-	// we just strip the class directly; the timeouts still fire but do nothing.
 	function cleanNewRollHighlights() {
 		document.querySelectorAll('#inventoryList .new-roll').forEach((el) => {
 			el.classList.remove('new-roll');
 		});
 	}
 
-	// ── audio context health ────────────────────────────────────────────
-	// browsers suspend AudioContext when a tab goes hidden. suspended contexts
-	// prevent completed OscillatorNode/GainNode pairs from being GC'd.
-	// resuming it lets the engine clean them up.
 	function resumeAudioContext() {
 		const ctx = window.audioContext;
-		if (!ctx) return;
-		if (ctx.state === 'suspended') {
-			ctx.resume().catch(() => {});
-		}
-		if (ctx.state === 'closed') {
-			// let playRollSound() recreate it fresh on next roll
-			window.audioContext = null;
+		if (ctx) {
+			if (ctx.state === 'suspended') {
+				ctx.resume().catch(() => {});
+			} else if (ctx.state === 'closed') {
+				window.audioContext = null;
+			}
 		}
 	}
 
-	// ── active potions display, skip redundant rebuilds ───────────────
-	// the setInterval in main.js calls updateActivePotionsDisplay() every 1s
-	// unconditionally, creating and destroying DOM nodes even when nothing changed.
-	// we wrap it to bail out early when the visible state is identical.
 	function patchPotionDisplay() {
 		const orig = window.updateActivePotionsDisplay;
-		if (typeof orig !== 'function') return false; // signal failure
+		if (typeof orig !== 'function' || orig._cleanupPatched) return;
 
 		let lastSnapshot = null;
 
 		window.updateActivePotionsDisplay = function () {
-			const ap = window.activePotions || [];
-			const dup = window.duplicateRollsLeft || 0;
+			const ap = (typeof activePotions !== 'undefined' ? activePotions : window.activePotions) || [];
+			const dup = (typeof duplicateRollsLeft !== 'undefined' ? duplicateRollsLeft : window.duplicateRollsLeft) || 0;
 
 			const snapshot =
 				ap.map((p) => p.type + ':' + Math.ceil((p.endTime - Date.now()) / 1000)).join(',') +
@@ -90,19 +86,14 @@ console.log(performance.now());
 			lastSnapshot = snapshot;
 			orig.apply(this, arguments);
 		};
-
-		return true; // signal success so the retry doesn't fire
+		window.updateActivePotionsDisplay._cleanupPatched = true;
 	}
 
-	// ── page container height drift ────────────────────────────────────
-	// goToPage() sets .page-container height to the active page's scrollHeight.
-	// as inventory grows the height goes stale and clips content. we nudge it
-	// back if it's drifted more than 80px from reality.
 	function fixPageContainerHeight() {
 		const container = document.querySelector('.page-container');
 		if (!container) return;
 		const idx = parseInt(localStorage.getItem('currentPage') || '0', 10);
-		const activePage = document.getElementById('page-' + (idx + 1));
+		const activePage = $('page-' + (idx + 1));
 		if (!activePage) return;
 		const real = activePage.scrollHeight;
 		const current = parseInt(container.style.height, 10) || 0;
@@ -111,121 +102,158 @@ console.log(performance.now());
 		}
 	}
 
-	// ── stale luck boost overlay ───────────────────────────────────────
-	// if the tab was hidden when the 60s boost expired, the overlay stays on
-	// because the setInterval that drives updateLuckTimer() was paused.
-	// when we return, we check if the timer label is at 0 and force-hide.
 	function checkLuckBoostOverlay() {
 		const overlay = $('luckBoostOverlay');
 		const timerEl = $('luckTimer');
-		if (!overlay || overlay.style.display !== 'flex') return;
-		if (timerEl && (timerEl.textContent === '0' || timerEl.textContent === '')) {
-			overlay.style.display = 'none';
+		if (overlay && overlay.style.display === 'flex' && timerEl) {
+			if (timerEl.textContent === '0' || timerEl.textContent === '') {
+				overlay.style.display = 'none';
+			}
 		}
 	}
 
-	// ── notification storage trim ──────────────────────────────────────
-	// addNotification() caps at 200 but older versions may have written more.
-	// also purge read notifications older than 7 days to keep LS lean.
 	function trimNotifications() {
 		const KEY = 'notifications';
 		const MAX = 150;
 		const STALE_MS = 7 * 24 * 60 * 60 * 1000;
-		try {
-			const raw = localStorage.getItem(KEY);
-			if (!raw) return;
-			let arr = JSON.parse(raw);
-			if (!Array.isArray(arr)) return;
+		const raw = localStorage.getItem(KEY);
+		if (!raw) return;
+		let arr = JSON.parse(raw);
+		if (!Array.isArray(arr)) return;
 
-			const now = Date.now();
-			arr = arr.filter((n) => !(n.read && now - n.ts > STALE_MS)); // drop old read ones
-			if (arr.length > MAX) arr = arr.slice(arr.length - MAX); // hard cap
+		const now = Date.now();
+		const initialLen = arr.length;
+		arr = arr.filter((n) => !(n.read && now - n.ts > STALE_MS));
+		if (arr.length > MAX) arr = arr.slice(-MAX);
 
+		if (arr.length !== initialLen) {
 			localStorage.setItem(KEY, JSON.stringify(arr));
-		} catch (_) {}
+		}
 	}
 
-	// ── localStorage size monitor ──────────────────────────────────────
-	// inventory JSON + notifications can eat into the 5MB quota over time.
-	// warn in console if we're getting close so it's obvious in devtools......
+	function pruneDevLog() {
+		const log = $('dc-log');
+		if (log && log.children.length > 100) {
+			while (log.children.length > 50) {
+				log.removeChild(log.firstChild);
+			}
+		}
+	}
+
+	function cleanRarityTrail() {
+		const trail = $('rarityTrail');
+		if (trail && trail.children.length > 20) {
+			const trailRect = trail.getBoundingClientRect();
+			Array.from(trail.children).forEach((pill) => {
+				if (pill.getBoundingClientRect().left >= trailRect.right) {
+					pill.remove();
+				}
+			});
+		}
+	}
+
+	function cleanWellRipples() {
+		document.querySelectorAll('.well-ripple').forEach((r) => {
+			const opacity = window.getComputedStyle(r).opacity;
+			if (opacity === '0') r.remove();
+		});
+	}
+
 	function checkLocalStorageSize() {
-		try {
-			let total = 0;
-			for (const key of Object.keys(localStorage)) {
-				total += ((localStorage.getItem(key) || '').length + key.length) * 2; // utf-16 bytes
-			}
-			const kb = (total / 1024).toFixed(1);
-			window._cleanupLsKB = parseFloat(kb); // expose for devOverlay or console checks
-			if (total > 3.5 * 1024 * 1024) {
-				console.warn('[cleanup] localStorage at ' + kb + 'KB — getting close to 5MB quota!');
-			}
-		} catch (_) {}
+		let total = 0;
+		for (let i = 0; i < localStorage.length; i++) {
+			const key = localStorage.key(i);
+			total += (key.length + (localStorage.getItem(key) || '').length) * 2;
+		}
+		const kb = (total / 1024).toFixed(1);
+		window._cleanupLsKB = parseFloat(kb);
+
+		if (total > STORAGE_WARNING_THRESHOLD_BYTES) {
+			console.warn(`[cleanup] localStorage at ${kb}KB — approaching 5MB quota!`);
+		}
+		if (lastLsSize > 0 && total > lastLsSize + 1024 * 100 && tickCount % LONG_TERM_TICK_THRESHOLD === 0) {
+			console.warn(`[cleanup] significant localStorage growth detected: ${kb}KB`);
+		}
+		lastLsSize = total;
 	}
 
-	// ── scheduler ─────────────────────────────────────────────────────────
-	let tick = 0;
+	function performCleanup(mode) {
+		const isManual = mode === 'manual';
+		const isThorough = isManual || mode === 'thorough' || tickCount % THOROUGH_TICK_THRESHOLD === 0;
+		const isLongTerm = isManual || tickCount % LONG_TERM_TICK_THRESHOLD === 0;
 
-	function runCleanup(source) {
-		tick++;
+		runTask('spinner', cleanSpinner);
+		runTask('canvases', cleanOrphanedCanvases);
+		runTask('audio', resumeAudioContext);
+		runTask('luckBoost', checkLuckBoostOverlay);
+		runTask('rarityTrail', cleanRarityTrail);
+		runTask('wellRipples', cleanWellRipples);
 
-		// every 5s
-		cleanSpinner();
-		cleanOrphanedCanvases();
-		resumeAudioContext();
-		checkLuckBoostOverlay();
-
-		// every 30s
-		if (tick % 6 === 0 || source === 'manual') {
-			cleanNewRollHighlights();
-			fixPageContainerHeight();
+		if (isThorough) {
+			runTask('highlights', cleanNewRollHighlights);
+			runTask('containerHeight', fixPageContainerHeight);
+			runTask('potionDisplay', patchPotionDisplay);
+			runTask('devLog', pruneDevLog);
 		}
 
-		// every 2min
-		if (tick % 24 === 0 || source === 'manual') {
-			trimNotifications();
-			checkLocalStorageSize();
+		if (isLongTerm) {
+			runTask('notifications', trimNotifications);
+			runTask('storageSize', checkLocalStorageSize);
+		}
+
+		tickCount++;
+	}
+
+	function scheduleNext() {
+		const interval = document.hidden ? TICK_INTERVAL_HIDDEN : TICK_INTERVAL_VISIBLE;
+		const now = performance.now();
+		const timeSinceLast = now - lastTickTime;
+
+		if (timeSinceLast >= interval) {
+			const run = () => {
+				performCleanup(document.hidden ? 'standard' : 'thorough');
+				lastTickTime = performance.now();
+				scheduleNext();
+			};
+
+			if (window.requestIdleCallback) {
+				schedulerHandle = window.requestIdleCallback(run, { timeout: 2000 });
+			} else {
+				schedulerHandle = setTimeout(run, 0);
+			}
+		} else {
+			schedulerHandle = setTimeout(scheduleNext, interval - timeSinceLast);
 		}
 	}
 
-	// ── visibility-triggered pass ─────────────────────────────────────────
-	// returning from a hidden tab is exactly when stale state accumulates.
 	document.addEventListener('visibilitychange', () => {
-		if (document.hidden) return;
-		cleanSpinner();
-		cleanOrphanedCanvases();
-		resumeAudioContext();
-		checkLuckBoostOverlay();
-	});
-
-	// ── init ──────────────────────────────────────────────────────────────
-	// wait for window load so main.js (defer) has fully executed
-	window.addEventListener('load', () => {
-		// patch potion display — retry once if main.js exports aren't ready yet
-		if (!patchPotionDisplay()) {
-			setTimeout(patchPotionDisplay, 500);
+		if (schedulerHandle) {
+			if (window.cancelIdleCallback) window.cancelIdleCallback(schedulerHandle);
+			else clearTimeout(schedulerHandle);
 		}
-		setInterval(runCleanup, 5_000);
-		runCleanup(); // immediate first pass
+
+		if (!document.hidden) {
+			performCleanup('thorough');
+			lastTickTime = performance.now();
+		}
+		scheduleNext();
 	});
 
-	// ── manual trigger ────────────────────────────────────────────────────
+	window.addEventListener('load', () => {
+		setTimeout(() => {
+			performCleanup('thorough');
+			scheduleNext();
+		}, INITIAL_CLEANUP_DELAY);
+	});
+
 	// if you're reading this, you're cool. you now have the privilege of knowing the knowledge:
 	// call window.forceCleanup() from the eruda console or devOverlay to manually clean up
 	window.forceCleanup = function () {
-		cleanSpinner();
-		cleanOrphanedCanvases();
-		cleanNewRollHighlights();
-		trimNotifications();
-		fixPageContainerHeight();
-		checkLocalStorageSize();
+		performCleanup('manual');
 		console.log(
-			'[cleanup] manual run done!' +
-				' LS: ' +
-				(window._cleanupLsKB || '?') +
-				'KB' +
-				' | spinner children: ' +
-				($('spinner')?.children.length ?? '?') +
-				' | new-roll els: 0 (just cleared)'
+			`[cleanup] manual run complete. LS: ${window._cleanupLsKB || '?'}KB | ` +
+				`spinner: ${$('spinner')?.children.length ?? '?'} | ` +
+				`highlights cleared.`
 		);
 	};
 })();
