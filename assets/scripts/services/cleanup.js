@@ -55,7 +55,7 @@ console.log(performance.now());
 			spinner.style.transform = 'translateY(0)';
 		}
 	}
-	
+
 	function cleanOrphanedCanvases() {
 		document.querySelectorAll('canvas').forEach((c) => {
 			if (!c.id && c.style.position === 'fixed') {
