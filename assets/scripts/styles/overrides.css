@@ -830,6 +830,36 @@ select {
 	color: #f66;
 }
 
+.glow-blob {
+	position: absolute;
+	border-radius: 50%;
+	filter: blur(60px);
+	transform: translate(-50%, -50%);
+	animation: glow-blob-float linear infinite;
+}
+
+@keyframes glow-blob-float {
+	0% {
+		transform: translate(-50%, -50%) translate(0, 0);
+	}
+	25% {
+		transform: translate(-50%, -50%) translate(40px, -30px);
+	}
+	50% {
+		transform: translate(-50%, -50%) translate(-20px, 40px);
+	}
+	75% {
+		transform: translate(-50%, -50%) translate(-40px, -20px);
+	}
+	100% {
+		transform: translate(-50%, -50%) translate(0, 0);
+	}
+}
+
+body.reduce-motion .glow-blob {
+	animation: none !important;
+}
+
 .stat {
 	display: flex;
 	gap: 5px;

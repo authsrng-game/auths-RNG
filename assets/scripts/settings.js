@@ -1333,6 +1333,40 @@
 		}
 	}
 
+	function applyGlowBlobs(settings) {
+		let container = el('glowBlobsContainer');
+		if (!settings.glowEnabled) {
+			if (container) container.remove();
+			return;
+		}
+		if (!container) {
+			container = document.createElement('div');
+			container.id = 'glowBlobsContainer';
+			container.style.cssText =
+				'position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0;';
+			document.body.appendChild(container);
+		}
+		const count = settings.glowCount ?? 3;
+		const existing = container.children.length;
+		while (container.children.length > count) container.lastChild.remove();
+		for (let i = existing; i < count; i++) {
+			const blob = document.createElement('div');
+			blob.className = 'glow-blob';
+			blob.style.left = Math.random() * 100 + '%';
+			blob.style.top = Math.random() * 100 + '%';
+			blob.style.animationDelay = (Math.random() * -20).toFixed(2) + 's';
+			container.appendChild(blob);
+		}
+		container.querySelectorAll('.glow-blob').forEach((blob) => {
+			const size = settings.glowSize ?? 300;
+			blob.style.width = size + 'px';
+			blob.style.height = size + 'px';
+			blob.style.background = settings.glowColor || '#dcdcdc';
+			blob.style.opacity = (settings.glowOpacity ?? 20) / 100;
+			blob.style.animationDuration = (settings.glowSpeed ?? 20) + 's';
+		});
+	}
+
 	// ── applyVisuals ──────────────────────────────────────────────────────
 	function applyVisuals(settings) {
 		document.body.classList.toggle('legacy-mode', !!settings.legacyMode);
@@ -1377,6 +1411,11 @@
 		if (settings.accentColor) {
 			document.documentElement.style.setProperty('--accent-color', settings.accentColor);
 		}
+
+		if (settings.bgPattern !== undefined) applyBackgroundPattern(settings.bgPattern);
+		applyGlowBlobs(settings);
+		if (settings.season !== undefined)
+			startSeasonalParticles(settings.season, settings.particleDensity || 'medium');
 
 		document.body.setAttribute('data-inv-style', settings.inventoryStyle || 'compact');
 

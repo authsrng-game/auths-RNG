@@ -280,6 +280,12 @@
 				bgGradientTo: val('te-bgGradientTo') || '#1a1a2e',
 				bgGradientAngle: intVal('te-bgGradientAngle', 135),
 				bgGradientType: val('te-bgGradientType') || 'linear',
+				glowEnabled: checked('te-glowEnabled'),
+				glowColor: val('te-glowColor'),
+				glowCount: intVal('te-glowCount', 3),
+				glowSize: intVal('te-glowSize', 300),
+				glowOpacity: intVal('te-glowOpacity', 20),
+				glowSpeed: intVal('te-glowSpeed', 20),
 				startAnim: {
 					enabled: el('te-sa-enabled') ? el('te-sa-enabled').checked : true,
 					preset: el('te-sa-preset') ? el('te-sa-preset').value : 'default',
@@ -337,7 +343,24 @@
 		if (el('te-bgPattern')) el('te-bgPattern').value = s.bgPattern || 'none';
 		if (el('te-season')) el('te-season').value = s.season || 'none';
 		if (el('te-particleDensity')) el('te-particleDensity').value = s.particleDensity || 'medium';
-
+		if (el('te-glowEnabled')) el('te-glowEnabled').checked = !!s.glowEnabled;
+		if (el('te-glowColor')) el('te-glowColor').value = s.glowColor || '#dcdcdc';
+		if (el('te-glowCount')) {
+			el('te-glowCount').value = s.glowCount ?? 3;
+			el('te-glowCountVal').textContent = s.glowCount ?? 3;
+		}
+		if (el('te-glowSize')) {
+			el('te-glowSize').value = s.glowSize ?? 300;
+			el('te-glowSizeVal').textContent = s.glowSize ?? 300;
+		}
+		if (el('te-glowOpacity')) {
+			el('te-glowOpacity').value = s.glowOpacity ?? 20;
+			el('te-glowOpacityVal').textContent = s.glowOpacity ?? 20;
+		}
+		if (el('te-glowSpeed')) {
+			el('te-glowSpeed').value = s.glowSpeed ?? 20;
+			el('te-glowSpeedVal').textContent = s.glowSpeed ?? 20;
+		}
 		if (el('te-bgType')) el('te-bgType').value = s.bgType || 'color';
 		if (el('te-bgGradientFrom')) el('te-bgGradientFrom').value = s.bgGradientFrom || '#0e0e0e';
 		if (el('te-bgGradientTo')) el('te-bgGradientTo').value = s.bgGradientTo || '#1a1a2e';
@@ -375,6 +398,7 @@
 			el('te-blurSaturate').value = s.blurSaturate ?? 140;
 			el('te-blurSaturateVal').textContent = s.blurSaturate ?? 140;
 		}
+		syncGlowUI();
 		if (el('te-blurPanelOpacity')) {
 			el('te-blurPanelOpacity').value = s.blurPanelOpacity ?? 55;
 			el('te-blurPanelOpacityVal').textContent = s.blurPanelOpacity ?? 55;
@@ -519,6 +543,12 @@
 			bgGradientTo: s.bgGradientTo,
 			bgGradientAngle: s.bgGradientAngle,
 			bgGradientType: s.bgGradientType,
+			glowEnabled: s.glowEnabled,
+			glowColor: s.glowColor,
+			glowCount: s.glowCount,
+			glowSize: s.glowSize,
+			glowOpacity: s.glowOpacity,
+			glowSpeed: s.glowSpeed,
 		};
 	}
 
@@ -782,6 +812,12 @@
 			'te-sa-speed',
 			'te-sa-skipOnReturn',
 			'te-sa-customCode',
+			'te-glowEnabled',
+			'te-glowColor',
+			'te-glowCount',
+			'te-glowSize',
+			'te-glowOpacity',
+			'te-glowSpeed',
 		];
 		ids.forEach((id) => {
 			const n = el(id);
@@ -796,6 +832,11 @@
 				if (id === 'te-blurPanelOpacity') el('te-blurPanelOpacityVal').textContent = n.value;
 				if (id === 'te-blurBorderOpacity') el('te-blurBorderOpacityVal').textContent = n.value;
 				if (id === 'te-bgGradientAngle') el('te-bgGradientAngleVal').textContent = n.value;
+				if (id === 'te-glowCount') el('te-glowCountVal').textContent = n.value;
+				if (id === 'te-glowSize') el('te-glowSizeVal').textContent = n.value;
+				if (id === 'te-glowOpacity') el('te-glowOpacityVal').textContent = n.value;
+				if (id === 'te-glowSpeed') el('te-glowSpeedVal').textContent = n.value;
+				if (id === 'te-glowEnabled') syncGlowUI();
 				livePreview();
 			});
 			n.addEventListener('change', livePreview);
@@ -811,6 +852,12 @@
 		const imageControls = el('te-imageControls');
 		if (gradientControls) gradientControls.style.display = type === 'gradient' ? 'block' : 'none';
 		if (imageControls) imageControls.style.display = type === 'image' ? 'block' : 'none';
+	}
+
+	function syncGlowUI() {
+		const enabled = el('te-glowEnabled')?.checked;
+		const controls = el('te-glowControls');
+		if (controls) controls.style.display = enabled ? 'block' : 'none';
 	}
 
 	async function refreshBgImagePreview() {
@@ -885,6 +932,8 @@
 		if (previewAnimBtn) previewAnimBtn.addEventListener('click', previewStartAnim);
 		if (autoAdaptBtn) autoAdaptBtn.addEventListener('click', autoAdaptFromBackground);
 
+		syncGlowUI();
+		
 		if (!openBtn || !overlay) return;
 
 		let snapshotBeforeOpen = null;
