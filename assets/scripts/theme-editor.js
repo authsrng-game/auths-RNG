@@ -621,21 +621,24 @@
 
 		el('themeEditorOverlay').style.display = 'none';
 
-		window._saRunPreview(cfg, bg, fg, () => {
+		let finished = false;
+		const finish = () => {
+			if (finished) return;
+			finished = true;
+			document.removeEventListener('keydown', escHandler);
 			setTimeout(() => {
 				el('themeEditorOverlay').style.display = 'block';
 			}, 200);
-		});
+		};
 
 		const escHandler = (e) => {
 			if (e.key !== 'Escape') return;
 			document.querySelector('.sa-container')?.remove();
 			document.getElementById('startanim-style')?.remove();
-			document.removeEventListener('keydown', escHandler);
-			setTimeout(() => {
-				el('themeEditorOverlay').style.display = 'block';
-			}, 100);
+			finish();
 		};
+
+		window._saRunPreview(cfg, bg, fg, finish);
 		document.addEventListener('keydown', escHandler);
 	}
 

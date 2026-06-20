@@ -10,11 +10,12 @@ console.log(performance.now());
 		Object.defineProperty(HTMLSelectElement.prototype, prop, {
 			get: desc.get,
 			set(v) {
-				console.log('patched', prop, v);
-
+				const before = desc.get.call(this);
 				desc.set.call(this, v);
-
-				this.dispatchEvent(new Event('change', { bubbles: true }));
+				const after = desc.get.call(this);
+				if (before !== after) {
+					this.dispatchEvent(new Event('change', { bubbles: true }));
+				}
 			},
 		});
 	}
@@ -116,9 +117,12 @@ console.log(performance.now());
 
 			const close = () => {
 				document.removeEventListener('keydown', handler);
+				_activeOverlayCleanup = null;
 				overlay.remove();
 				resolve();
 			};
+
+			_activeOverlayCleanup = close;
 
 			box.appendChild(makeBtnRow(makeButton('ok', BTN_PRIMARY, close)));
 
@@ -147,9 +151,12 @@ console.log(performance.now());
 
 			const finish = (result) => {
 				document.removeEventListener('keydown', handler);
+				_activeOverlayCleanup = null;
 				overlay.remove();
 				resolve(result);
 			};
+
+			_activeOverlayCleanup = () => finish(false);
 
 			box.appendChild(
 				makeBtnRow(
@@ -181,9 +188,12 @@ console.log(performance.now());
 			box.appendChild(input);
 
 			const finish = (value) => {
+				_activeOverlayCleanup = null;
 				overlay.remove();
 				resolve(value);
 			};
+
+			_activeOverlayCleanup = () => finish(null);
 
 			box.appendChild(
 				makeBtnRow(
