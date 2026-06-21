@@ -44,6 +44,9 @@ let rollSpeed = 1.0;
 let shopLuckMultiplier = 1.0;
 let pointDivisor = 3.0;
 
+let _rollClickTimer = null;
+let _rollFinalizeTimer = null;
+
 const STORAGE_KEY = 'rarityInventory',
 	TOTAL_ROLLS_KEY = 'totalRolls',
 	ACHIEVEMENTS_KEY = 'achievementsUnlocked';
@@ -617,7 +620,8 @@ lunarMusic.volume = 0; // ITS INTENTIONALLY 0. DONT MAKE A FIX TO THIS. when we 
 const runId = Math.floor(Math.random() * 1e10);
 
 const playtimeKey = 'totalPlaytime';
-let totalSeconds = parseInt(localStorage.getItem(playtimeKey)) || 0;
+let storedSeconds = parseInt(localStorage.getItem(playtimeKey)) || 0;
+let sessionStart = Date.now();
 
 function formatTimeDisplay(seconds) {
 	const h = Math.floor(seconds / 3600);
@@ -626,18 +630,27 @@ function formatTimeDisplay(seconds) {
 	return [h > 0 ? `${h}h` : '', m > 0 ? `${m}m` : '', `${s}s`].filter(Boolean).join(' ');
 }
 
+function getCurrentTotalSeconds() {
+	return storedSeconds + Math.floor((Date.now() - sessionStart) / 1000);
+}
+
+function flushPlaytime() {
+	storedSeconds = getCurrentTotalSeconds();
+	sessionStart = Date.now();
+	localStorage.setItem(playtimeKey, storedSeconds);
+}
+
 function updatePlaytimeDisplay() {
 	const display = document.getElementById('playtimeDisplay');
 	if (display) {
-		display.textContent = 'total playtime: ' + formatTimeDisplay(totalSeconds);
+		display.textContent = 'total playtime: ' + formatTimeDisplay(getCurrentTotalSeconds());
 	}
 }
 
 updatePlaytimeDisplay();
 
 setInterval(() => {
-	totalSeconds++;
-	localStorage.setItem(playtimeKey, totalSeconds);
+	flushPlaytime();
 	updatePlaytimeDisplay();
 }, 1000);
 
@@ -1754,7 +1767,9 @@ async function resetInventory() {
 	shopLuckMultiplier = 1.0;
 	rollSpeed = 1.0;
 	pointDivisor = 3.0;
-	totalSeconds = 0;
+	storedSeconds = 0;
+	sessionStart = Date.now();
+	localStorage.setItem(playtimeKey, 0);
 	recalcLuckMultiplier();
 	updatePointsDisplay();
 	updateShopUI();
@@ -1874,7 +1889,8 @@ function spinAndReveal(res) {
 		spinner.appendChild(d);
 
 		const delay = effectiveStyle === 'fade' ? 350 : 50;
-		setTimeout(() => {
+		_rollFinalizeTimer = setTimeout(() => {
+			_rollFinalizeTimer = null;
 			spinner.classList.remove('fade-style');
 			if (res.style && window.RarityStyle) {
 				window._spinnerResultAC = window.RarityStyle.apply(d, res.style);
@@ -1911,8 +1927,9 @@ function spinAndReveal(res) {
 	spinner.style.transition = `transform ${duration}s ease-out`;
 	spinner.style.transform = `translateY(-${scroll}px)`;
 
-	setTimeout(
+	_rollFinalizeTimer = setTimeout(
 		() => {
+			_rollFinalizeTimer = null;
 			if (res.style && window.RarityStyle && _resultSpinDiv) {
 				window._spinnerResultAC = window.RarityStyle.apply(_resultSpinDiv, res.style);
 			}
@@ -1965,6 +1982,7 @@ function debouncedSave(delay = 1500) {
 document.addEventListener('visibilitychange', () => {
 	if (document.hidden) {
 		clearTimeout(_saveTimer);
+		flushPlaytime();
 		saveAllData();
 	}
 });
@@ -2005,7 +2023,8 @@ rollBtn.addEventListener('click', () => {
 			backgroundMusic.play().catch(() => {});
 		}
 
-		setTimeout(() => {
+		_rollClickTimer = setTimeout(() => {
+			_rollClickTimer = null;
 			try {
 				if (window._perfMarkRollStart) window._perfMarkRollStart();
 				spinAndReveal(res);
@@ -2033,11 +2052,37 @@ document.addEventListener('visibilitychange', () => {
 		updateActivePotionsDisplay();
 	}
 
+	if (_rollClickTimer) {
+		clearTimeout(_rollClickTimer);
+		_rollClickTimer = null;
+		spinner.style.transition = 'none';
+		spinner.style.transform = 'translateY(0)';
+		spinner.innerHTML = '';
+		rollBtn.disabled = false;
+	}
+
+	if (_rollFinalizeTimer) {
+		clearTimeout(_rollFinalizeTimer);
+		_rollFinalizeTimer = null;
+		spinner.style.transition = 'none';
+		spinner.style.transform = 'translateY(0)';
+		spinner.innerHTML = '';
+		rollBtn.disabled = false;
+	}
+
 	if (!isCutscenePlaying && rollBtn.disabled) {
 		spinner.style.transition = 'none';
 		spinner.style.transform = 'translateY(0)';
 		spinner.innerHTML = '';
 		rollBtn.disabled = false;
+	}
+
+	if (luckBoostActive) {
+		updateLuckTimer();
+	}
+
+	if (isWellOnCooldown()) {
+		updateWellUI();
 	}
 });
 
@@ -2269,7 +2314,7 @@ function generateRunCard() {
 	gap();
 
 	line(`total rolls      ${formatNum(totalRolls)}`);
-	line(`playtime         ${formatPlaytime(totalSeconds)}`);
+	line(`playtime         ${formatPlaytime(getCurrentTotalSeconds())}`);
 	line(`run id           ${runId}`);
 
 	gap();

@@ -1228,10 +1228,21 @@ Last release date on nightly: ${nightlyRDate}`;
 		<script>
 			(function () {
 				const toggleBtn = document.getElementById('autoRollBtn');
-				let autoRollInterval = null;
+				let autoRollTickInterval = null;
+				let nextRollAt = 0;
 
 				function getAutoRollDelay() {
 					return Math.max(500, (typeof rollSpeed !== 'undefined' ? rollSpeed : 1) * 1000 + 400);
+				}
+
+				function tick() {
+					if (document.hidden) return;
+					if (typeof isCutscenePlaying !== 'undefined' && isCutscenePlaying) return;
+					if (Date.now() < nextRollAt) return;
+
+					const rollBtn = document.getElementById('rollBtn');
+					if (rollBtn && !rollBtn.disabled) rollBtn.click();
+					nextRollAt = Date.now() + getAutoRollDelay();
 				}
 
 				toggleBtn.addEventListener('click', () => {
@@ -1240,22 +1251,18 @@ Last release date on nightly: ${nightlyRDate}`;
 					toggleBtn.textContent = isActive ? 'auto roll (ON)' : 'auto roll (OFF)';
 
 					if (isActive) {
-						const tick = () => {
-							if (
-								!document.hidden &&
-								!(typeof isCutscenePlaying !== 'undefined' && isCutscenePlaying)
-							) {
-								const rollBtn = document.getElementById('rollBtn');
-								if (rollBtn && !rollBtn.disabled) rollBtn.click();
-							}
-							if (toggleBtn.classList.contains('active')) {
-								autoRollInterval = setTimeout(tick, getAutoRollDelay());
-							}
-						};
-						autoRollInterval = setTimeout(tick, getAutoRollDelay());
+						nextRollAt = Date.now() + getAutoRollDelay();
+						if (autoRollTickInterval) clearInterval(autoRollTickInterval);
+						autoRollTickInterval = setInterval(tick, 250);
 					} else {
-						clearTimeout(autoRollInterval);
-						autoRollInterval = null;
+						if (autoRollTickInterval) clearInterval(autoRollTickInterval);
+						autoRollTickInterval = null;
+					}
+				});
+
+				document.addEventListener('visibilitychange', () => {
+					if (!document.hidden && toggleBtn.classList.contains('active')) {
+						nextRollAt = Date.now() + getAutoRollDelay();
 					}
 				});
 
@@ -2223,7 +2230,7 @@ container.addEventListener('click', () => {
 							"
 						>
 							<input type="checkbox" id="te-glowEnabled" />
-							enable glow blobs
+							enable glow blobs (may affect performance~!)
 						</label>
 
 						<div id="te-glowControls" style="display: none">
