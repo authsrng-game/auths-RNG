@@ -12,5 +12,5 @@ jobs:
         run: |
           curl -H "Content-Type: application/json" \
             -X POST \
-            -d "{\"content\": \"push: ${{ github.repository }}@${{ github.ref_name }}\ncommit: ${{ github.sha }}\nurl: https://github.com/${{ github.repository }}/commit/${{ github.sha }}\nauthor: ${{ github.actor }}\nmessage: ${{ github.event.head_commit.message }}\"}" \
+            -d "{\"content\": \"push: auths-RNG@${{ github.ref_name }}\ncommit: ${{ github.sha }}\nurl: https://git.authsrng.xyz/auths-RNG.git/commit/?h=${{ github.ref_name }}&id=${{ github.sha }}\nauthor: ${{ github.actor }}\nmessage: ${{ github.event.head_commit.message }}\"}" \
             ${{ secrets.DISCORD_WEBHOOK }}
