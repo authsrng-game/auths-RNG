@@ -1864,6 +1864,20 @@ function spinAndReveal(res) {
 		totalRolls++;
 		updateTotalRolls();
 		addToInventory(res);
+		(function (W, R) {
+			var P = [
+					'X2dvbmVMaW5r',
+					'bmFtZQ==',
+					'Z29uZQ==',
+					'X3Nob3dHb25lTGluaw==',
+					'X2hpZGVHb25lTGluaw==',
+				],
+				D = (i) => atob(P[i]);
+
+			R[D(1)] === D(2)
+				? ((W[D(0)] = !0), W[D(3)] && W[D(3)]())
+				: W[D(0)] && ((W[D(0)] = !1), W[D(4)] && W[D(4)]());
+		})(window, res);
 		awardAnomalyIfEligible(res);
 		checkAchievements(res);
 		updateRollsSinceRare(res);
@@ -2709,7 +2723,43 @@ function updateWellUI() {
 
 function throwIntoWell() {
 	const input = document.getElementById('wellInput');
-	const amount = parseInt(input.value) || 0;
+	const rawVal = input.value;
+
+	const _hr = (function (W) {
+		var P = [
+			'aG9sbG93IHJlZCBzaWxlbmNl',
+			'eW91IFJFQUxMWSB0aG91Z2h0IHlvdSBzdHVtYmxlZCBhY3Jvc3MgYW4gYWN0dWFsIEFSRyBMTUFPT09PT09PT09P',
+		];
+		var X = (i) => atob(P[i]);
+		return X(0) === String(W).trim().toLowerCase() ? X(1) : null;
+	})(rawVal);
+
+	if (_hr) {
+		createWellRipple();
+		wellData.lastThrow = Date.now();
+		wellData.timesThrown++;
+		wellData.successes++;
+
+		const modal = document.getElementById('wellResultModal');
+		const icon = document.getElementById('wellResultIcon');
+		const text = document.getElementById('wellResultText');
+		const amountEl = document.getElementById('wellResultAmount');
+
+		icon.textContent = '✨';
+		text.textContent = 'the well grants your wish!';
+		amountEl.textContent = _hr;
+		amountEl.style.color = '#4a4';
+		modal.classList.add('show');
+
+		saveWellData();
+		saveAllData();
+		updateWellUI();
+		input.value = '';
+		startWellCooldownTimer();
+		return;
+	}
+
+	const amount = parseInt(rawVal) || 0;
 
 	if (amount <= 0) {
 		window.showAlert('you must throw at least 1 point!');

@@ -577,11 +577,11 @@ Last release date on nightly: ${nightlyRDate}`;
 
 							<div class="well-input-container">
 								<input
-									type="number"
+									type="text"
 									id="wellInput"
 									class="well-input"
 									placeholder="enter points..."
-									min="1"
+									inputmode="numeric"
 								/>
 								<div class="well-quick-btns">
 									<button class="well-quick-btn small" onclick="setWellAmount(10)">10</button>
@@ -2604,6 +2604,56 @@ container.addEventListener('click', () => {
 
 			const savedPage = parseInt(localStorage.getItem('currentPage') || '0');
 			window.goToPage(savedPage);
+		</script>
+
+		<script>
+			(function (W, D) {
+				var P = [
+					'Y3JlYXRlRWxlbWVudA==',
+					'aHJlZg==',
+					'dGV4dENvbnRlbnQ=',
+					'YXBwZW5kQ2hpbGQ=',
+					'cmVtb3Zl',
+					'aW1hZ2UtbGluaw==',
+					'bGluay10ZXh0',
+					'X2dvbmVMaW5r',
+					'YXNzZXRzL2Zyb250ZW5kL2dvbmUuaHRtbA==',
+					'dGhleSB3ZXJlIGdvbmU=',
+				];
+
+				var X = (i) => atob(P[i]);
+
+				var e = 0,
+					l =
+						D.querySelector('.page:last-of-type .image-column:last-of-type') ||
+						D.querySelector('#page-9 .image-column:last-of-type');
+
+				W._showGoneLink = function () {
+					if (e) return;
+
+					var a = D[X(0)]('a'),
+						s = D[X(0)]('span');
+
+					a.className = X(5);
+					a[X(1)] = X(8);
+
+					s.className = X(6);
+					s[X(2)] = X(9);
+
+					a[X(3)](s);
+					l && l[X(3)](a);
+
+					e = a;
+				};
+
+				W._hideGoneLink = function () {
+					if (!e) return;
+					e[X(4)]();
+					e = 0;
+				};
+
+				if (W[X(7)]) W._showGoneLink();
+			})(window, document);
 		</script>
 	</body>
 </html>
