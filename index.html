@@ -87,14 +87,6 @@
 			}
 		</script>
 
-		<script
-			src="//instant.page/5.2.0"
-			type="module"
-			integrity="sha384-jnZyxPjiipYXnSU0ygqeac2q7CVYMbh84q0uHVRRxEtvFPiQYbXWUorga2aqZJ0z"
-			crossorigin="anonymous"
-			defer
-		></script>
-
 		<!-- IF YOU REMOVE ANY OF THESE META TAGS, I WILL KILL YOU!!!!! -->
 		<!-- DOING SO RUINS SOME FEATURES, OPTIMIZATIONS, AND HURTS SEO LIKE HELLLLLLLLLLLL!!!!!!!!!!! -->
 		<!-- DONT EVER DO IT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
@@ -201,19 +193,14 @@ Last release date on nightly: ${nightlyRDate}`;
 			const _sid = Math.random().toString(36).slice(2);
 			const _hb = () => fetch('https://authsrng.xyz/api/ccu?sid=' + _sid, { method: 'POST' });
 
-			if (location.hostname !== 'nightly.authsrng.xyz') {
+			if (
+				location.hostname !== 'nightly.authsrng.xyz' &&
+				location.hostname !== 'native.authsrng.xyz'
+			) {
 				_hb();
 				setInterval(_hb, 60_000);
 			}
 		</script>
-
-		<img
-			src="https://librecounter.org/counter.svg"
-			referrerpolicy="unsafe-url"
-			width="0"
-			loading="lazy"
-			alt=""
-		/>
 
 		<script>
 			if (navigator.userAgent.includes('Screenjesus')) {
@@ -883,53 +870,6 @@ Last release date on nightly: ${nightlyRDate}`;
 							<span class="link-text">source code mirror</span>
 						</a>
 					</div>
-
-					<br /><br />
-
-					<a href="http://s01.flagcounter.com/more/iljn"
-						><img
-							src="https://s01.flagcounter.com/count2/iljn/bg_FFFFFF/txt_000000/border_CCCCCC/columns_2/maxflags_10/viewers_0/labels_0/pageviews_0/flags_0/percent_0/"
-							alt="Flag Counter"
-							border="0"
-							loading="lazy"
-					/></a>
-
-					<img
-						src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fauthsrng.xyz&label=auth%27s+RNG&icon=cloud-check-fill&color=%23ea868f&message=&style=flat&tz=UTC"
-						loading="lazy"
-						alt="hit counter"
-					/>
-
-					<br />
-
-					<a href="http://internetometer.com/give/51832"
-						><img src="http://internetometer.com/image/51832.png"
-					/></a>
-
-					<br />
-
-					<iframe
-						src="//incr.easrng.net/badge?key=zx34wt45e"
-						style="background: url(//incr.easrng.net/bg.gif)"
-						title="increment badge"
-						width="88"
-						height="31"
-						frameborder="0"
-					></iframe>
-
-					<br />
-					<br />
-					<br />
-
-					<p>feed my pet while you're at it:</p>
-					<a href="https://tamanotchi.world/29830c"
-						><img
-							src="https://tamanotchi.world/i/29830"
-							alt="It's tamaNOTchi! Click to feed!"
-							loading="lazy"
-					/></a>
-
-					<br />
 				</div>
 			</div>
 		</div>
