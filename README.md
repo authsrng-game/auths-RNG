@@ -27,6 +27,7 @@ the repository for the web game, auth's RNG!
 
 main branch: https://authsrng.xyz (stable)
 nightly branch: https://nightly.authsrng.xyz (unstable, but with latest code and updates every commit)
+native branch: https://native.authsrng.xyz (more privacy respecting, made for the android apps)
 
 app repos:
 
