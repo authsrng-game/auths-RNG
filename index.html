@@ -201,7 +201,10 @@ Last release date on nightly: ${nightlyRDate}`;
 			const _sid = Math.random().toString(36).slice(2);
 			const _hb = () => fetch('https://authsrng.xyz/api/ccu?sid=' + _sid, { method: 'POST' });
 
-			if (location.hostname !== 'nightly.authsrng.xyz') {
+			if (
+				location.hostname !== 'nightly.authsrng.xyz' &&
+				location.hostname !== 'native.authsrng.xyz'
+			) {
 				_hb();
 				setInterval(_hb, 60_000);
 			}
