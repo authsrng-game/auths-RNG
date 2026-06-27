@@ -31,6 +31,8 @@ nightly branch: https://nightly.authsrng.xyz (unstable, but with latest code and
 app repos:
 
 - android: https://github.com/authsrng-game/auths-RNG-apk
+  
+---
 
 > made with ♥ in canada! 🇨🇦
 
