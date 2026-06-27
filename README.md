@@ -25,8 +25,12 @@ the repository for the web game, auth's RNG!
   <img src="assets/repo3.png" width="30%" />
 </p>
 
-[![Play Stable](https://img.shields.io/badge/▶_PLAY-stable-5BCEFA)](https://authsrng.xyz)
-[![Play Nightly](https://img.shields.io/badge/▶_PLAY-nightly-F5A9B8)](https://nightly.authsrng.xyz)
+main branch: https://authsrng.xyz (stable)
+nightly branch: https://nightly.authsrng.xyz (unstable, but with latest code and updates every commit)
+
+app repos:
+
+- android: https://github.com/authsrng-game/auths-RNG-apk
 
 > made with ♥ in canada! 🇨🇦
 
