@@ -25,20 +25,6 @@ the repository for the web game, auth's RNG!
   <img src="assets/repo3.png" width="30%" />
 </p>
 
-main branch: https://authsrng.xyz (stable)  
-nightly branch: https://nightly.authsrng.xyz (unstable, but with latest code and updates every commit)  
-native branch: https://native.authsrng.xyz (more privacy respecting, made for the mobile apps)  
-
-app repos:
-
-- android: https://github.com/authsrng-game/auths-RNG-apk
-  
----
-
-> made with ♥ in canada! 🇨🇦
-
----
-
 ## about
 
 auth's RNG is a web-based incremental RNG game built with raw HTML/CSS/JS with online features. roll for rarities, sell them out, buy upgrades, wish upon the wishing well, and collect as many rarities as possible!!!!!
@@ -54,6 +40,24 @@ check out the [official wiki](https://github.com/authsrng-game/auths-RNG/wiki) f
 official wiki all about auth's RNG, how it works, and how to play it!!
                 ↓↓↓↓↓↓  
 https://github.com/authsrng-game/auths-RNG/wiki
+
+---
+
+## meet the branches and versions of the game
+
+main branch: https://authsrng.xyz  
+nightly branch: https://nightly.authsrng.xyz  
+native branch: https://native.authsrng.xyz  
+
+**the main branch** is for the stable and impactful releases of the game! with its name, it's the main game.  
+**the nightly branch** doesnt build or update nightly (i just thought the term was cool), it serves as a bleeding edge development branch and updates with every single commit!  
+**the native branch** is the site that gets maintained seperately. it serves as the website client for the auth's RNG mobile apps and is built for speed and privacy
+
+---
+
+## other repos
+
+android app repo: https://github.com/authsrng-game/auths-RNG-apk
 
 ---
 
