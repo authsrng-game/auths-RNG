@@ -25,9 +25,9 @@ the repository for the web game, auth's RNG!
   <img src="assets/repo3.png" width="30%" />
 </p>
 
-main branch: https://authsrng.xyz (stable)
-nightly branch: https://nightly.authsrng.xyz (unstable, but with latest code and updates every commit)
-native branch: https://native.authsrng.xyz (more privacy respecting, made for the android apps)
+main branch: https://authsrng.xyz (stable)  
+nightly branch: https://nightly.authsrng.xyz (unstable, but with latest code and updates every commit)  
+native branch: https://native.authsrng.xyz (more privacy respecting, made for the mobile apps)  
 
 app repos:
 
@@ -125,5 +125,7 @@ if you thought the git log held all of auth's RNG development history... no it d
 made with [contrib.rocks](https://contrib.rocks).
 
 ---
+
+git is a goddamn idiotic truckload of sh*t
 
 <3
