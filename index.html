@@ -3,7 +3,9 @@
 	<!-- TIMESTAMP: 1778867898-->
 
 	<head>
-		<meta charset="UTF-8" />
+				<meta charset="UTF-8" />
+		<meta http-equiv="content-language" content="en" />
+<meta name="language" content="English" />
 		<link rel="stylesheet" href="/assets/scripts/styles/overrides.css" />
 		<meta
 			name="viewport"
@@ -17,6 +19,24 @@
 		<link rel="dns-prefetch" href="//cdnjs.cloudflare.com" />
 		<link rel="preconnect" href="https://cdn.jsdelivr.net" />
 		<link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
+		<meta name="author" content="auth" />
+		<meta name="rating" content="general" />
+			<meta name="generator" content="auth's RNG custom engine" />
+	<meta name="subject" content="incremental rng game" />
+	<meta name="classification" content="game" />
+		<meta name="revisit-after" content="4 days" />
+		<meta http-equiv="x-dns-prefetch-control" content="on" />
+		<meta name="format-detection" content="telephone=no, email=no, address=no" />
+<meta name="HandheldFriendly" content="true" />
+<meta name="MobileOptimized" content="width" />
+		<meta name="generator" content="auth's RNG engine" />
+		<meta name="coverage" content="worldwide" />
+		<meta name="abstract" content="incremental RNG gacha browser game" />
+		<meta name="summary" content="browser-based RNG incremental game with rare collectibles" />
+		<meta name="topic" content="gaming" />
+		<meta name="distribution" content="global" />
+		<meta name="target" content="all" />
+		<meta name="referrer" content="strict-origin-when-cross-origin" />
 		<meta
 			name="description"
 			content="a free browser RNG game with incremental progression and rare collectible rolls"
@@ -27,7 +47,6 @@
 			content="rng game, browser game, gacha game, idle game, incremental game, rare items, gacha, webgame, opensource, open-source, addicting, incremental, idle, rng, auth's RNG, auths rng, auth's rng, auths RNG"
 		/>
 		<meta name="robots" content="index, follow" />
-
 		<meta property="og:type" content="website" />
 		<meta property="og:site_name" content="auth's RNG" />
 		<meta property="og:title" content="auth's RNG" />
@@ -37,7 +56,18 @@
 		/>
 		<meta property="og:image" content="https://authsrng.xyz/assets/images/authsRNG.png" />
 		<meta property="og:url" content="https://authsrng.xyz/" />
-
+		<meta name="original-source" content="https://authsrng.xyz/" />
+		<meta name="source" content="authsrng.xyz" />
+		<meta name="revised" content="2026-06-28" />
+		<meta name="fediverse:creator" content="@auth" />
+		<meta name="twitter:creator" content="@auth" />
+		<meta name="twitter:site" content="@auth" />
+		<meta name="renderer" content="webkit" />
+		<meta name="force-rendering" content="webkit" />
+		<meta name="replies-to" content="authsrng.xyz" />
+		<meta name="reply-to" content="hello@authsrng.xyz" />
+		<meta name="contact" content="https://authguy.nekoweb.org" />
+		<meta name="build-date" content="2026-06-28" />
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:title" content="auth's RNG" />
 		<meta
@@ -46,7 +76,6 @@
 		/>
 		<meta name="twitter:image" content="https://authsrng.xyz/assets/images/authsRNG.png" />
 		<meta name="twitter:url" content="https://authsrng.xyz/" />
-
 		<meta name="mobile-web-app-capable" content="yes" />
 		<meta name="application-name" content="auth's RNG" />
 		<meta name="apple-mobile-web-app-title" content="auth's RNG" />
@@ -54,19 +83,14 @@
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<link rel="apple-touch-icon" href="https://authsrng.xyz/assets/images/authsRNG.png" />
-
 		<link rel="icon" sizes="192x192" href="https://authsrng.xyz/assets/images/authsRNG.png" />
 		<link rel="manifest" href="manifest.json" />
-
 		<meta name="google" content="notranslate" />
-
 		<!-- for future contributors, and a note to myself: the duplicate preload is for safety, sometimes native doesnt work so we do the normal way-->
 		<link rel="preload" as="image" href="/assets/images/authsRNG.png" />
 		<link rel="preload" as="image" href="https://authsrng.xyz/assets/images/authsRNG.png" />
-
 		<meta name="color-scheme" content="dark" />
 		<meta name="creator" content="auth" />
-
 		<script type="application/ld+json">
 			{
 				"@context": "https://schema.org",
@@ -97,127 +121,6 @@
 		<script src="assets/scripts/legal-popup.js" defer></script>
 
 		<script src="/assets/scripts/warn.js" defer></script>
-
-		<div
-			id="unstable-banner"
-			style="
-				position: fixed;
-				top: 0;
-				left: 0;
-				width: 100%;
-				background: #000;
-				color: #fff;
-				font-family: monospace;
-				font-size: 11px;
-				padding: 6px 8px;
-				z-index: 2147483647;
-				text-align: center;
-				cursor: pointer;
-			"
-		>
-			UNSTABLE BUILD! this build is for testers and the developer of the game. do NOT trust your
-			save data with this version. click me to dismiss.
-		</div>
-
-		<script>
-			if (window.location.hostname !== 'nightly.authsrng.xyz') {
-				document.getElementById('unstable-banner').style.display = 'none';
-			} else {
-				document.getElementById('unstable-banner').addEventListener('click', function () {
-					this.style.display = 'none'; // fuck my life
-				});
-			}
-		</script>
-
-		<div
-			id="nightly-info"
-			style="
-				position: fixed;
-				bottom: 4px;
-				right: 6px;
-				color: #fff;
-				font-size: 10px;
-				font-family: monospace;
-				z-index: 2147483647;
-				white-space: pre;
-				pointer-events: none;
-			"
-		></div>
-		<script>
-			(async () => {
-				if (location.hostname !== 'nightly.authsrng.xyz') return;
-				let el = document.getElementById('nightly-info');
-				try {
-					let [mainC, nightlyC, releases] = await Promise.all([
-						fetch('https://api.github.com/repos/authsrng-game/auths-RNG/commits/main').then((r) =>
-							r.status === 403 ? { rate: 1 } : r.json()
-						),
-						fetch('https://api.github.com/repos/authsrng-game/auths-RNG/commits/nightly').then(
-							(r) => (r.status === 403 ? { rate: 1 } : r.json())
-						),
-						fetch('https://api.github.com/repos/authsrng-game/auths-RNG/releases').then((r) =>
-							r.status === 403 ? { rate: 1 } : r.json()
-						),
-					]);
-
-					if (mainC.rate || nightlyC.rate || releases.rate) {
-						el.textContent = 'Rate limited by GitHub.';
-						return;
-					}
-
-					let fmt = (c) => {
-						let msg = c.commit.message.split('\n')[0];
-						let sha = c.sha.slice(0, 7);
-						let date = new Date(c.commit.author.date).toLocaleString();
-						return `${sha} • ${msg} • ${date}`;
-					};
-
-					let mainR = releases.find((r) => r.target_commitish === 'main');
-					let nightlyR = releases.find((r) => r.target_commitish === 'nightly');
-
-					let mainRDate = mainR ? new Date(mainR.published_at).toLocaleString() : 'none';
-					let nightlyRDate = nightlyR ? new Date(nightlyR.published_at).toLocaleString() : 'none';
-
-					el.textContent = `(nightly) branch: ${fmt(nightlyC)}
-(main) branch: ${fmt(mainC)}
-Last release date on main: ${mainRDate}
-Last release date on nightly: ${nightlyRDate}`;
-				} catch (e) {
-					el.textContent = '';
-				}
-			})();
-		</script>
-
-		<script>
-			// ccu
-			const _sid = Math.random().toString(36).slice(2);
-			const _hb = () => fetch('https://authsrng.xyz/api/ccu?sid=' + _sid, { method: 'POST' });
-
-			if (
-				location.hostname !== 'nightly.authsrng.xyz' &&
-				location.hostname !== 'native.authsrng.xyz'
-			) {
-				_hb();
-				setInterval(_hb, 60_000);
-			}
-		</script>
-
-		<script>
-			if (navigator.userAgent.includes('Screenjesus')) {
-				const img = document.createElement('img');
-				img.src = '/images/page.png';
-				img.style.position = 'fixed';
-				img.style.inset = '0';
-				img.style.width = '100vw';
-				img.style.height = '100vh';
-				img.style.objectFit = 'contain';
-				img.style.objectPosition = 'center 41%';
-				img.style.zIndex = '999999';
-				document.documentElement.appendChild(img);
-			}
-
-			// relic from the good ol neocities days :heart:
-		</script>
 
 		<script src="assets/scripts/startanim.js" defer></script>
 		<!-- screensaver was here <3333 -->
