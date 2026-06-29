@@ -20,10 +20,10 @@ jobs:
           ref: native
           fetch-depth: 0
 
-      - name: set up node
+      - name: set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: install minifiers
         run: npm install -g terser clean-css-cli html-minifier-terser
@@ -67,4 +67,4 @@ jobs:
         with:
           commit_message: "chore: auto-minify code [skip ci]"
           branch: native
-          file_pattern: "*.js *.css *.html *.htm"
+          file_pattern: "*.js *.css *.html"
