@@ -1,0 +1,70 @@
+name: minify code for speed
+
+on:
+  push:
+    branches:
+      - native
+
+permissions:
+  contents: write
+
+jobs:
+  minify:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/native'
+
+    steps:
+      - name: checkout native branch
+        uses: actions/checkout@v4
+        with:
+          ref: native
+          fetch-depth: 0
+
+      - name: set up node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: install minifiers
+        run: npm install -g terser clean-css-cli html-minifier-terser
+
+      - name: minify JS files
+        run: |
+          find . -type f -name "*.js" \
+            ! -name "*.min.js" \
+            ! -path "./node_modules/*" \
+            ! -path "./.git/*" | while read -r file; do
+              echo "Minifying $file"
+              terser "$file" -o "$file" --compress --mangle
+          done
+
+      - name: minify CSS files
+        run: |
+          find . -type f -name "*.css" \
+            ! -name "*.min.css" \
+            ! -path "./node_modules/*" \
+            ! -path "./.git/*" | while read -r file; do
+              echo "Minifying $file"
+              cleancss -o "$file" "$file"
+          done
+
+      - name: minify HTML files
+        run: |
+          find . -type f \( -name "*.html" -o -name "*.htm" \) \
+            ! -path "./node_modules/*" \
+            ! -path "./.git/*" | while read -r file; do
+              echo "Minifying $file"
+              html-minifier-terser \
+                --collapse-whitespace \
+                --remove-comments \
+                --minify-css true \
+                --minify-js true \
+                -o "$file" "$file"
+          done
+
+      - name: commit minified files
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: auto-minify code [skip ci]"
+          branch: native
+          file_pattern: "*.js *.css *.html *.htm"
