@@ -932,7 +932,7 @@ const messages = [
 	'git is a TRUCKLOAD OF GARBAGE',
 	'i will find you and i will personally serve you steak',
 	'shrimp good :thumbsup:',
-	'i still instictively use clear in the devtools console instead of clear()'
+	'i still instictively use clear in the devtools console instead of clear()',
 ];
 
 const randomIndex = Math.floor(Math.random() * messages.length);
