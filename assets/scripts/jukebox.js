@@ -364,7 +364,7 @@
 			_skipBusy = false;
 		}
 	}
-	
+
 	async function saveSettings() {
 		if (window.applySettings && window.getCurrentSettings)
 			await window.applySettings(window.getCurrentSettings());
@@ -377,7 +377,7 @@
 		m.checked = !m.checked;
 		await saveSettings();
 	}
-	
+
 	btnPlay.addEventListener('click', async (e) => {
 		e.stopPropagation();
 		await togglePlay();
