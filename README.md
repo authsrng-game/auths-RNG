@@ -136,4 +136,6 @@ made with [contrib.rocks](https://contrib.rocks).
 
 git is a goddamn idiotic truckload of sh*t
 
+also the platform txt and asterisk are dead meat, we dont talk about what happened to those platforms
+
 <3
