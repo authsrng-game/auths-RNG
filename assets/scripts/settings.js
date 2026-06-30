@@ -1524,16 +1524,16 @@
 			const n = el(id);
 			if (n) n.addEventListener('change', onChange);
 		});
-	
+
 		const muteMusicEl = el('muteMusic');
 		if (muteMusicEl) muteMusicEl.addEventListener('change', onMusicChange);
-	
+
 		const musicSelectEl = el('musicSelect');
 		if (musicSelectEl) musicSelectEl.addEventListener('change', onMusicChange);
-	
+
 		const rollSoundEl = el('rollSound');
 		if (rollSoundEl) rollSoundEl.addEventListener('change', onChange);
-	
+
 		['rareThreshold', 'autoSellThreshold'].forEach((id) => {
 			const n = el(id);
 			if (n) n.addEventListener('input', onChange);
