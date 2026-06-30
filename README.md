@@ -70,6 +70,10 @@ and again:
 > [!IMPORTANT]
 > **NOT A ROBLOX GAME!!!!!!!**
 
+auth's RNG isn't an RNG algorithm with auth in it, auth is just the alias the creator of this game goes by, which her name is "auth" or "ivy" if you wanna get a little personal. so auth's RNG is an RNG web-game made by auth, not a security thing.
+
+this game wasn't supposed to copy the roblox games, or be one :(
+
 ---
 
 ## contributing
