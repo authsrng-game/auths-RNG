@@ -1496,6 +1496,15 @@
 		showPendingBar();
 	}
 
+	async function onMusicChange() {
+		const current = { ...savedSettings, ...getCurrentSettings() };
+		await applyMusic(current);
+		savedSettings = current;
+		try {
+			localStorage.setItem('userSettings', JSON.stringify(current));
+		} catch (_) {}
+	}
+
 	async function saveChanges() {
 		const current = { ...savedSettings, ...getCurrentSettings() };
 		applyVisuals(current);
@@ -1510,17 +1519,21 @@
 
 	// ── Event binding ─────────────────────────────────────────────────────
 	function bindSettings() {
-		const ids = ['muteMusic', 'legacyMode', 'rawNumbers', 'devOverlay'];
+		const ids = ['legacyMode', 'rawNumbers', 'devOverlay'];
 		ids.forEach((id) => {
 			const n = el(id);
 			if (n) n.addEventListener('change', onChange);
 		});
-
-		['musicSelect', 'rollSound'].forEach((id) => {
-			const n = el(id);
-			if (n) n.addEventListener('change', onChange);
-		});
-
+	
+		const muteMusicEl = el('muteMusic');
+		if (muteMusicEl) muteMusicEl.addEventListener('change', onMusicChange);
+	
+		const musicSelectEl = el('musicSelect');
+		if (musicSelectEl) musicSelectEl.addEventListener('change', onMusicChange);
+	
+		const rollSoundEl = el('rollSound');
+		if (rollSoundEl) rollSoundEl.addEventListener('change', onChange);
+	
 		['rareThreshold', 'autoSellThreshold'].forEach((id) => {
 			const n = el(id);
 			if (n) n.addEventListener('input', onChange);
