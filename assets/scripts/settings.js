@@ -1275,72 +1275,72 @@
 	// ── applyMusic ─hdvsj
 	let _musicApplyToken = 0;
 
-async function applyMusic(settings) {
-	const newKey = settings.muted ? '__muted__' : settings.music || 'default';
-	if (newKey === _activeMusicKey) return;
-	_activeMusicKey = newKey;
+	async function applyMusic(settings) {
+		const newKey = settings.muted ? '__muted__' : settings.music || 'default';
+		if (newKey === _activeMusicKey) return;
+		_activeMusicKey = newKey;
 
-	const myToken = ++_musicApplyToken;
+		const myToken = ++_musicApplyToken;
 
-	if (settings.muted) {
+		if (settings.muted) {
+			if (window.backgroundMusic) {
+				window.backgroundMusic.pause();
+				window.backgroundMusic.volume = 0;
+			}
+			if (window.lunarMusic) {
+				window.lunarMusic.pause();
+				window.lunarMusic.volume = 0;
+			}
+			if (window.stopCustomAudio) window.stopCustomAudio();
+			return;
+		}
+
+		if (window.lunarMusic) window.lunarMusic.volume = 0.6;
+
+		const musicKey = settings.music || 'default';
+
+		if (window.stopCustomAudio) window.stopCustomAudio();
 		if (window.backgroundMusic) {
 			window.backgroundMusic.pause();
-			window.backgroundMusic.volume = 0;
 		}
-		if (window.lunarMusic) {
-			window.lunarMusic.pause();
-			window.lunarMusic.volume = 0;
-		}
-		if (window.stopCustomAudio) window.stopCustomAudio();
-		return;
-	}
 
-	if (window.lunarMusic) window.lunarMusic.volume = 0.6;
-
-	const musicKey = settings.music || 'default';
-
-	if (window.stopCustomAudio) window.stopCustomAudio();
-	if (window.backgroundMusic) {
-		window.backgroundMusic.pause();
-	}
-
-	if (musicKey.startsWith('custom_')) {
-		if (window.backgroundMusic) {
-			window.backgroundMusic.src = '';
-			window.backgroundMusic.load();
-		}
-		try {
-			const id = parseInt(musicKey.replace('custom_', ''), 10);
-			const track = await getTrack(id);
-			if (myToken !== _musicApplyToken) return;
-			if (track && window.playCustomAudio) {
-				try {
-					await window.playCustomAudio(track.buffer, track.type, 0.3, true);
-				} catch (_) {
-					if (myToken !== _musicApplyToken) return;
-					_activeMusicKey = null;
-					if (window.stopCustomAudio) window.stopCustomAudio();
-					if (window.backgroundMusic) {
-						window.backgroundMusic.src = musicLinks.default;
-						window.backgroundMusic.volume = 0.3;
-						window.backgroundMusic.loop = true;
-						window.backgroundMusic.play().catch(() => {});
+		if (musicKey.startsWith('custom_')) {
+			if (window.backgroundMusic) {
+				window.backgroundMusic.src = '';
+				window.backgroundMusic.load();
+			}
+			try {
+				const id = parseInt(musicKey.replace('custom_', ''), 10);
+				const track = await getTrack(id);
+				if (myToken !== _musicApplyToken) return;
+				if (track && window.playCustomAudio) {
+					try {
+						await window.playCustomAudio(track.buffer, track.type, 0.3, true);
+					} catch (_) {
+						if (myToken !== _musicApplyToken) return;
+						_activeMusicKey = null;
+						if (window.stopCustomAudio) window.stopCustomAudio();
+						if (window.backgroundMusic) {
+							window.backgroundMusic.src = musicLinks.default;
+							window.backgroundMusic.volume = 0.3;
+							window.backgroundMusic.loop = true;
+							window.backgroundMusic.play().catch(() => {});
+						}
 					}
 				}
+			} catch (e) {
+				console.error('custom music error:', e);
 			}
-		} catch (e) {
-			console.error('custom music error:', e);
-		}
-	} else {
-		if (myToken !== _musicApplyToken) return;
-		if (window.backgroundMusic) {
-			window.backgroundMusic.src = musicLinks[musicKey] || musicLinks.default;
-			window.backgroundMusic.volume = 0.3;
-			window.backgroundMusic.loop = true;
-			window.backgroundMusic.play().catch(() => {});
+		} else {
+			if (myToken !== _musicApplyToken) return;
+			if (window.backgroundMusic) {
+				window.backgroundMusic.src = musicLinks[musicKey] || musicLinks.default;
+				window.backgroundMusic.volume = 0.3;
+				window.backgroundMusic.loop = true;
+				window.backgroundMusic.play().catch(() => {});
+			}
 		}
 	}
-}
 
 	function applyGlowBlobs(settings) {
 		let container = el('glowBlobsContainer');
