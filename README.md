@@ -83,6 +83,30 @@ we don't bite with contributions! a good PR is something like a UI tweak, balanc
 > [!WARNING]
 > **do not touch `.github/workflows`**! even if it's a package tweak or fix. we maintain it ourselves and it may break the dev workflow and your PR will get rejected fast.
 
+the official bulletin board (https://authsrng.bbs.fc2.com/) is also good if you want to make a PR without being labeled as a contributor, and if you just want to contribute anonymously. make the first sentence be your commit message (be sure to add "Commit" at the start of it) and write a description of why you made this change. then use `git diff` and after you've reached the end of the git log by holding down `Enter` or what keybind you use to scroll down git logs, copy and paste the entire output and put it 2 lines under your commit message. CAPITIALIZATION AND CORRECT GRAMMAR IS NEEDED!
+
+example:
+
+```txt
+Commit: Replace unused script tag
+
+Script "example.js" was removed before, and the script
+tag made errors of the file not existing. Remove excess
+line.
+
+diff --git a/index.html b/index.html
+index 1234567..89abcde 100644
+--- a/index.html
++++ b/index.html
+@@ -284,7 +284,6 @@
+     <script src="assets/scripts/vendor.js" defer></script>
+     <script src="assets/scripts/utils.js" defer></script>
+-    <script src="assets/scripts/example.js" defer></script>
+     <script src="assets/scripts/main.js" defer></script>
+     </body>
+ </html>
+```
+
 refer to `CONTRIBUTING.md` and especially `meta/TESTING.md` before diving in!
 
 > [!NOTE]
