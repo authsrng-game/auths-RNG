@@ -925,6 +925,14 @@ const messages = [
 	'speaking true facts right here you hear me',
 	'You are in: authsrng.xyz',
 	'there are padding :thumbsup:',
+	'auth is currently wearing thigh highs and a skirt as you are reading this',
+	'auths rng is a they/them btw',
+	'happy month!',
+	'how do you use extensions in VS codium',
+	'git is a TRUCKLOAD OF GARBAGE',
+	'i will find you and i will personally serve you steak',
+	'shrimp good :thumbsup:',
+	'i still instictively use clear in the devtools console instead of clear()',
 ];
 
 const randomIndex = Math.floor(Math.random() * messages.length);

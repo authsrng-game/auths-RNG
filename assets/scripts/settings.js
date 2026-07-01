@@ -1272,15 +1272,15 @@
 				: 'type a command · :help for list · :off to close';
 		});
 	}
-	// ── applyMusic ────────────────────────────────────────────────────────
-	// Only called explicitly: on page load (init) and on saveChanges().
-	// The _activeMusicKey guard means even if called twice with same settings,
-	// it is a no-op — no more tidal waves.
-	// Now async because custom tracks need an IDB fetch.
+	// ── applyMusic ─hdvsj
+	let _musicApplyToken = 0;
+
 	async function applyMusic(settings) {
 		const newKey = settings.muted ? '__muted__' : settings.music || 'default';
 		if (newKey === _activeMusicKey) return;
 		_activeMusicKey = newKey;
+
+		const myToken = ++_musicApplyToken;
 
 		if (settings.muted) {
 			if (window.backgroundMusic) {
@@ -1298,18 +1298,27 @@
 		if (window.lunarMusic) window.lunarMusic.volume = 0.6;
 
 		const musicKey = settings.music || 'default';
+
+		if (window.stopCustomAudio) window.stopCustomAudio();
+		if (window.backgroundMusic) {
+			window.backgroundMusic.pause();
+		}
+
 		if (musicKey.startsWith('custom_')) {
 			if (window.backgroundMusic) {
-				window.backgroundMusic.pause();
 				window.backgroundMusic.src = '';
 				window.backgroundMusic.load();
 			}
 			try {
 				const id = parseInt(musicKey.replace('custom_', ''), 10);
 				const track = await getTrack(id);
+				if (myToken !== _musicApplyToken) return;
 				if (track && window.playCustomAudio) {
-					window.playCustomAudio(track.buffer, track.type, 0.3, true).catch(() => {
-						_activeMusicKey = null; // allow retry on next save
+					try {
+						await window.playCustomAudio(track.buffer, track.type, 0.3, true);
+					} catch (_) {
+						if (myToken !== _musicApplyToken) return;
+						_activeMusicKey = null;
 						if (window.stopCustomAudio) window.stopCustomAudio();
 						if (window.backgroundMusic) {
 							window.backgroundMusic.src = musicLinks.default;
@@ -1317,13 +1326,13 @@
 							window.backgroundMusic.loop = true;
 							window.backgroundMusic.play().catch(() => {});
 						}
-					});
+					}
 				}
 			} catch (e) {
 				console.error('custom music error:', e);
 			}
 		} else {
-			if (window.stopCustomAudio) window.stopCustomAudio();
+			if (myToken !== _musicApplyToken) return;
 			if (window.backgroundMusic) {
 				window.backgroundMusic.src = musicLinks[musicKey] || musicLinks.default;
 				window.backgroundMusic.volume = 0.3;
@@ -1487,6 +1496,15 @@
 		showPendingBar();
 	}
 
+	async function onMusicChange() {
+		const current = { ...savedSettings, ...getCurrentSettings() };
+		await applyMusic(current);
+		savedSettings = current;
+		try {
+			localStorage.setItem('userSettings', JSON.stringify(current));
+		} catch (_) {}
+	}
+
 	async function saveChanges() {
 		const current = { ...savedSettings, ...getCurrentSettings() };
 		applyVisuals(current);
@@ -1501,16 +1519,20 @@
 
 	// ── Event binding ─────────────────────────────────────────────────────
 	function bindSettings() {
-		const ids = ['muteMusic', 'legacyMode', 'rawNumbers', 'devOverlay'];
+		const ids = ['legacyMode', 'rawNumbers', 'devOverlay'];
 		ids.forEach((id) => {
 			const n = el(id);
 			if (n) n.addEventListener('change', onChange);
 		});
 
-		['musicSelect', 'rollSound'].forEach((id) => {
-			const n = el(id);
-			if (n) n.addEventListener('change', onChange);
-		});
+		const muteMusicEl = el('muteMusic');
+		if (muteMusicEl) muteMusicEl.addEventListener('change', onMusicChange);
+
+		const musicSelectEl = el('musicSelect');
+		if (musicSelectEl) musicSelectEl.addEventListener('change', onMusicChange);
+
+		const rollSoundEl = el('rollSound');
+		if (rollSoundEl) rollSoundEl.addEventListener('change', onChange);
 
 		['rareThreshold', 'autoSellThreshold'].forEach((id) => {
 			const n = el(id);
@@ -2115,10 +2137,10 @@
 	});
 
 	// Expose globals
-	window.applySettings = function (settings) {
+	window.applySettings = async function (settings) {
 		savedSettings = { ...savedSettings, ...settings };
 		applyVisuals(savedSettings);
-		applyMusic(savedSettings);
+		await applyMusic(savedSettings);
 		syncUIToSettings(savedSettings);
 		try {
 			localStorage.setItem('userSettings', JSON.stringify(savedSettings));

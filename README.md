@@ -25,20 +25,6 @@ the repository for the web game, auth's RNG!
   <img src="assets/repo3.png" width="30%" />
 </p>
 
-main branch: https://authsrng.xyz (stable)
-nightly branch: https://nightly.authsrng.xyz (unstable, but with latest code and updates every commit)
-native branch: https://native.authsrng.xyz (more privacy respecting, made for the android apps)
-
-app repos:
-
-- android: https://github.com/authsrng-game/auths-RNG-apk
-  
----
-
-> made with ♥ in canada! 🇨🇦
-
----
-
 ## about
 
 auth's RNG is a web-based incremental RNG game built with raw HTML/CSS/JS with online features. roll for rarities, sell them out, buy upgrades, wish upon the wishing well, and collect as many rarities as possible!!!!!
@@ -57,6 +43,24 @@ https://github.com/authsrng-game/auths-RNG/wiki
 
 ---
 
+## meet the branches and versions of the game
+
+main branch: https://authsrng.xyz  
+nightly branch: https://nightly.authsrng.xyz  
+native branch: https://native.authsrng.xyz  
+
+**the main branch** is for the stable and impactful releases of the game! with its name, it's the main game.  
+**the nightly branch** doesnt build or update nightly (i just thought the term was cool), it serves as a bleeding edge development branch and updates with every single commit!  
+**the native branch** is the site that gets maintained seperately. it serves as the website client for the auth's RNG mobile apps and is built for speed and privacy
+
+---
+
+## other repos
+
+android app repo: https://github.com/authsrng-game/auths-RNG-apk
+
+---
+
 ## misconceptions
 
 it's **auth's RNG**. not "Auth's RNG", or "authsrng", or "Auth RNG". lowercase "rng" is fine.
@@ -65,6 +69,10 @@ and again:
 
 > [!IMPORTANT]
 > **NOT A ROBLOX GAME!!!!!!!**
+
+auth's RNG isn't an RNG algorithm with auth in it, auth is just the alias the creator of this game goes by, which her name is "auth" or "ivy" if you wanna get a little personal. so auth's RNG is an RNG web-game made by auth, not a security thing.
+
+this game wasn't supposed to copy the roblox games, or be one :(
 
 ---
 
@@ -125,5 +133,9 @@ if you thought the git log held all of auth's RNG development history... no it d
 made with [contrib.rocks](https://contrib.rocks).
 
 ---
+
+git is a goddamn idiotic truckload of sh*t
+
+also the platform txt and asterisk are dead meat, we dont talk about what happened to those platforms
 
 <3
