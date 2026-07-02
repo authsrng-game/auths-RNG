@@ -904,30 +904,53 @@ Last release date on nightly: ${nightlyRDate}`;
 						</a>
 					</div>
 
-					<br /><br />
+					<br />
 
+					<span class="widget-status" id="flagCounterStatus">(loading...)</span>
 					<a href="http://s01.flagcounter.com/more/iljn"
 						><img
 							src="https://s01.flagcounter.com/count2/iljn/bg_FFFFFF/txt_000000/border_CCCCCC/columns_2/maxflags_10/viewers_0/labels_0/pageviews_0/flags_0/percent_0/"
 							alt="Flag Counter"
 							border="0"
 							loading="lazy"
+							onload="document.getElementById('flagCounterStatus').style.display = 'none'"
+							onerror="
+								var s = document.getElementById('flagCounterStatus');
+								s.textContent = 'failed to load!';
+								s.style.color = 'red';
+							"
 					/></a>
 
+					<span class="widget-status" id="hitCounterStatus">(loading...)</span>
 					<img
 						src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fauthsrng.xyz&label=auth%27s+RNG&icon=cloud-check-fill&color=%23ea868f&message=&style=flat&tz=UTC"
 						loading="lazy"
 						alt="hit counter"
+						onload="document.getElementById('hitCounterStatus').style.display = 'none'"
+						onerror="
+							var s = document.getElementById('hitCounterStatus');
+							s.textContent = 'failed to load!';
+							s.style.color = 'red';
+						"
 					/>
 
 					<br />
 
+					<span class="widget-status" id="internetometerStatus">(loading...)</span>
 					<a href="http://internetometer.com/give/51832"
-						><img src="http://internetometer.com/image/51832.png"
+						><img
+							src="http://internetometer.com/image/51832.png"
+							onload="document.getElementById('internetometerStatus').style.display = 'none'"
+							onerror="
+								var s = document.getElementById('internetometerStatus');
+								s.textContent = 'failed to load!';
+								s.style.color = 'red';
+							"
 					/></a>
 
 					<br />
 
+					<span class="widget-status" id="incrBadgeStatus">(loading...)</span>
 					<iframe
 						src="//incr.easrng.net/badge?key=zx34wt45e"
 						style="background: url(//incr.easrng.net/bg.gif)"
@@ -935,6 +958,12 @@ Last release date on nightly: ${nightlyRDate}`;
 						width="88"
 						height="31"
 						frameborder="0"
+						onload="document.getElementById('incrBadgeStatus').style.display = 'none'"
+						onerror="
+							var s = document.getElementById('incrBadgeStatus');
+							s.textContent = 'failed to load!';
+							s.style.color = 'red';
+						"
 					></iframe>
 
 					<br />
@@ -942,11 +971,18 @@ Last release date on nightly: ${nightlyRDate}`;
 					<br />
 
 					<p>feed my pet while you're at it:</p>
+					<span class="widget-status" id="tamanotchiStatus">(loading...)</span>
 					<a href="https://tamanotchi.world/29830c"
 						><img
 							src="https://tamanotchi.world/i/29830"
 							alt="It's tamaNOTchi! Click to feed!"
 							loading="lazy"
+							onload="document.getElementById('tamanotchiStatus').style.display = 'none'"
+							onerror="
+								var s = document.getElementById('tamanotchiStatus');
+								s.textContent = 'failed to load!';
+								s.style.color = 'red';
+							"
 					/></a>
 
 					<br />
