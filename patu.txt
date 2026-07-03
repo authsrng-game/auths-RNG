@@ -1,7 +1,0 @@
-game
-rng
-indie
-
-https://authsrng.xyz
-https://kernel.org
-https://cloudlull.fyi
