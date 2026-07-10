@@ -24,7 +24,7 @@ console.log(performance.now());
 		'weekly_lastClaim',
 		'weekly_streak',
 		'gauntletData',
-		'mutationsUnlocked'
+		'mutationsUnlocked',
 	];
 
 	function uid_hash(str) {
@@ -107,7 +107,7 @@ console.log(performance.now());
 			const r = await fetch(API, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json', ...authHeaders() },
-				body: JSON.stringify({ payload })
+				body: JSON.stringify({ payload }),
 			});
 			const data = await r.json();
 			if (!r.ok) {
@@ -126,7 +126,8 @@ console.log(performance.now());
 
 	async function doRestore() {
 		if (!window.AuthAccount || !window.AuthAccount.isLoggedIn()) return;
-		if (!confirm('restore from cloud? this will overwrite your current save. are you sure?')) return;
+		if (!confirm('restore from cloud? this will overwrite your current save. are you sure?'))
+			return;
 
 		setStatus('restoring...', '');
 		try {
