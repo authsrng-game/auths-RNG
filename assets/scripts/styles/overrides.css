@@ -4378,7 +4378,9 @@ body.blur-panels .starmap-market-item {
 	z-index: 9998;
 	color: var(--text-color);
 	opacity: 0.8;
-	transition: opacity 0.2s, border-color 0.2s;
+	transition:
+		opacity 0.2s,
+		border-color 0.2s;
 }
 
 .account-btn:hover {
