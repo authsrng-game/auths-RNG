@@ -20,7 +20,7 @@ console.log(performance.now());
 		} catch (_) {}
 		return {
 			name: localStorage.getItem('lbRarestName') || 'none',
-			denom: parseInt(localStorage.getItem('lbRarestDenom') || '0')
+			denom: parseInt(localStorage.getItem('lbRarestDenom') || '0'),
 		};
 	}
 
@@ -34,7 +34,7 @@ console.log(performance.now());
 			rarestName: rarest.name || 'none',
 			rarestDenom: rarest.denom,
 			playtime: parseInt(localStorage.getItem('totalPlaytime') || '0'),
-			points: parseInt(localStorage.getItem('shopPoints') || '0')
+			points: parseInt(localStorage.getItem('shopPoints') || '0'),
 		};
 	}
 
@@ -61,7 +61,7 @@ console.log(performance.now());
 			const r = await fetch(API, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json', ...authHeaders() },
-				body: JSON.stringify(buildPayload())
+				body: JSON.stringify(buildPayload()),
 			});
 			const data = await r.json();
 			if (!r.ok) {
