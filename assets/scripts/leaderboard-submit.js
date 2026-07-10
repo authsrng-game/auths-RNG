@@ -6,25 +6,6 @@ console.log(performance.now());
 	const API = 'https://leaderboard.authsrng.xyz/api/leaderboard';
 	const SUBMIT_INTERVAL = 15 * 60 * 1000;
 
-	function getUid() {
-		// reuses cloud backup uid so they share one identity
-		let uid = localStorage.getItem('cloudBackupUid');
-		const valid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-		if (!uid || !valid.test(uid)) {
-			uid = crypto.randomUUID();
-			localStorage.setItem('cloudBackupUid', uid);
-		}
-		return uid;
-	}
-
-	function isEnabled() {
-		return localStorage.getItem('lbEnabled') === 'true';
-	}
-
-	function getUsername() {
-		return localStorage.getItem('lbUsername') || null;
-	}
-
 	function getRarest() {
 		try {
 			const inv = JSON.parse(localStorage.getItem('rarityInventory') || '{}');
@@ -39,7 +20,7 @@ console.log(performance.now());
 		} catch (_) {}
 		return {
 			name: localStorage.getItem('lbRarestName') || 'none',
-			denom: parseInt(localStorage.getItem('lbRarestDenom') || '0'),
+			denom: parseInt(localStorage.getItem('lbRarestDenom') || '0')
 		};
 	}
 
@@ -48,15 +29,17 @@ console.log(performance.now());
 		const totalRarities = Object.values(inv).reduce((s, v) => s + (parseInt(v) || 0), 0);
 		const rarest = getRarest();
 		return {
-			uid: getUid(),
-			username: getUsername(),
 			rolls: parseInt(localStorage.getItem('totalRolls') || '0'),
 			rarities: totalRarities,
 			rarestName: rarest.name || 'none',
 			rarestDenom: rarest.denom,
 			playtime: parseInt(localStorage.getItem('totalPlaytime') || '0'),
-			points: parseInt(localStorage.getItem('shopPoints') || '0'),
+			points: parseInt(localStorage.getItem('shopPoints') || '0')
 		};
+	}
+
+	function isEnabled() {
+		return localStorage.getItem('lbEnabled') === 'true';
 	}
 
 	function setStatus(msg, color) {
@@ -66,14 +49,19 @@ console.log(performance.now());
 		el.style.color = color || '';
 	}
 
+	function authHeaders() {
+		const token = window.AuthAccount ? window.AuthAccount.getToken() : null;
+		return token ? { Authorization: 'Bearer ' + token } : {};
+	}
+
 	async function submit(silent) {
-		if (!isEnabled() || !getUsername()) return false;
+		if (!isEnabled() || !window.AuthAccount || !window.AuthAccount.isLoggedIn()) return false;
 		if (!silent) setStatus('submitting...', '');
 		try {
 			const r = await fetch(API, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(buildPayload()),
+				headers: { 'Content-Type': 'application/json', ...authHeaders() },
+				body: JSON.stringify(buildPayload())
 			});
 			const data = await r.json();
 			if (!r.ok) {
@@ -89,51 +77,16 @@ console.log(performance.now());
 	}
 
 	async function deleteEntry() {
-		const uid = getUid();
 		try {
-			await fetch(API + '/' + uid, {
-				method: 'DELETE',
-				headers: { 'X-Backup-Key': uid },
-			});
+			await fetch(API, { method: 'DELETE', headers: authHeaders() });
 		} catch (_) {}
-	}
-
-	async function setupUsername() {
-		while (true) {
-			const username = prompt(
-				'choose a permanent leaderboard username\n(3–20 chars, a-z 0-9 _ -)\n\nthis cannot be changed later.'
-			);
-			if (!username) return null;
-
-			if (!/^[a-zA-Z0-9_-]{3,20}$/.test(username)) {
-				alert('invalid. 3–20 chars, letters/numbers/underscore/hyphen only. try again.');
-				continue;
-			}
-
-			setStatus('checking availability...', '');
-			try {
-				const r = await fetch(API + '/username/' + encodeURIComponent(username));
-				const data = await r.json();
-				if (!data.available) {
-					alert('"' + username + '" is taken. pick another.');
-					continue;
-				}
-			} catch (e) {
-				alert("couldn't check availability: " + e.message);
-				return null;
-			}
-
-			if (!confirm('"' + username + '" — permanent, cannot be changed. confirm?')) continue;
-			localStorage.setItem('lbUsername', username);
-			return username;
-		}
 	}
 
 	let autoTimer = null;
 
 	function startAuto() {
 		clearInterval(autoTimer);
-		if (!isEnabled()) return;
+		if (!isEnabled() || !window.AuthAccount || !window.AuthAccount.isLoggedIn()) return;
 		autoTimer = setInterval(() => {
 			if (!document.hidden) submit(true);
 		}, SUBMIT_INTERVAL);
@@ -142,6 +95,14 @@ console.log(performance.now());
 	function buildUI() {
 		const section = document.getElementById('leaderboardSection');
 		if (!section) return;
+
+		if (!window.AuthAccount || !window.AuthAccount.isLoggedIn()) {
+			section.innerHTML = `
+      <small class="helper" style="margin-top:6px;display:block;">
+        log in to join the leaderboard.
+      </small>`;
+			return;
+		}
 
 		const rolls = parseInt(localStorage.getItem('totalRolls') || '0');
 
@@ -158,16 +119,11 @@ console.log(performance.now());
 			section.innerHTML = `
       <button id="enableLbBtn" class="small" style="width:100%;margin-top:4px;">join leaderboard</button>
       <small class="helper" style="margin-top:6px;display:block;">
-        opt-in — your stats shown publicly. requires a permanent username.
+        your stats shown publicly under your account username.
         <a href="leaderboard.html" style="opacity:0.6;">view leaderboard</a>
       </small>`;
 
 			document.getElementById('enableLbBtn').addEventListener('click', async () => {
-				const username = await setupUsername();
-				if (!username) {
-					setStatus('', '');
-					return;
-				}
 				localStorage.setItem('lbEnabled', 'true');
 				buildUI();
 				startAuto();
@@ -177,7 +133,7 @@ console.log(performance.now());
 			return;
 		}
 
-		const username = getUsername();
+		const username = window.AuthAccount.getUsername();
 
 		section.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
@@ -213,6 +169,10 @@ console.log(performance.now());
 			startAuto();
 			submit(true);
 		}
+		document.addEventListener('authchange', () => {
+			buildUI();
+			startAuto();
+		});
 	}
 
 	document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
