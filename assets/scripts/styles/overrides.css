@@ -4368,7 +4368,7 @@ body.blur-panels .starmap-market-item {
 .account-btn {
 	position: fixed;
 	top: 10px;
-	left: 10px;
+	right: 10px;
 	background: var(--panel-bg);
 	border: 1px solid var(--border-color);
 	padding: 6px 14px;
