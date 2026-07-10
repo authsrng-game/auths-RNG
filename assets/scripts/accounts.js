@@ -46,7 +46,7 @@ console.log(performance.now());
 		const res = await fetch(API + path, {
 			method: opts.method || 'GET',
 			headers,
-			body: opts.body ? JSON.stringify(opts.body) : undefined
+			body: opts.body ? JSON.stringify(opts.body) : undefined,
 		});
 		let data;
 		try {
@@ -149,7 +149,8 @@ console.log(performance.now());
 	}
 
 	async function refreshBackupKeys() {
-		if (!confirm('this will invalidate your old backup keys and generate 3 new ones. continue?')) return;
+		if (!confirm('this will invalidate your old backup keys and generate 3 new ones. continue?'))
+			return;
 		try {
 			const data = await apiCall('/refresh-backup-keys', { method: 'POST' });
 			hideOverlay('accountInfoOverlay');
@@ -175,7 +176,7 @@ console.log(performance.now());
 			try {
 				const data = await apiCall('/change-password', {
 					method: 'POST',
-					body: { currentPassword, newPassword }
+					body: { currentPassword, newPassword },
 				});
 				localStorage.setItem(TOKEN_KEY, data.token);
 				status.style.color = '#8d8';
@@ -254,12 +255,14 @@ console.log(performance.now());
 			setAuthStatus('resetting...', '');
 			const data = await apiCall('/reset-password', {
 				method: 'POST',
-				body: { username, backupKey, newPassword }
+				body: { username, backupKey, newPassword },
 			});
 			setSession(data.token, data.uid, data.username);
 			hideOverlay('authOverlay');
 			updateAccountBtn();
-			window.showAlert(`password reset! you have ${data.backupKeysRemaining} backup key(s) left. refresh them from your account page if you're running low.`);
+			window.showAlert(
+				`password reset! you have ${data.backupKeysRemaining} backup key(s) left. refresh them from your account page if you're running low.`
+			);
 		} catch (e) {
 			setAuthStatus(e.message, '#f66');
 		}
@@ -304,13 +307,13 @@ console.log(performance.now());
 				if (hadCloudBackup) {
 					fetch('https://backup.authsrng.xyz/api/backup/' + oldUid, {
 						method: 'DELETE',
-						headers: { 'X-Backup-Key': oldUid }
+						headers: { 'X-Backup-Key': oldUid },
 					}).catch(() => {});
 				}
 				if (hadLeaderboard) {
 					fetch('https://leaderboard.authsrng.xyz/api/leaderboard/' + oldUid, {
 						method: 'DELETE',
-						headers: { 'X-Backup-Key': oldUid }
+						headers: { 'X-Backup-Key': oldUid },
 					}).catch(() => {});
 				}
 			}
@@ -354,7 +357,7 @@ console.log(performance.now());
 		getUsername,
 		getUid,
 		isLoggedIn,
-		clearSession
+		clearSession,
 	};
 
 	document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
