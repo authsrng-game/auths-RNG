@@ -1016,6 +1016,7 @@ Last release date on nightly: ${nightlyRDate}`;
 		<script src="/assets/scripts/engine/roller.js" defer></script>
 		<script src="/assets/scripts/engine/bcore.js" defer></script>
 		<script src="assets/scripts/popup.js"></script>
+		<script src="assets/scripts/accounts.js" defer></script>
 		<!-- sad fucker oh god i swear too much -->
 		<script src="assets/scripts/rarities.js" defer></script>
 		<script src="assets/scripts/rarityStyle.js" defer></script>
@@ -1060,6 +1061,59 @@ Last release date on nightly: ${nightlyRDate}`;
 		</div>
 
 		<div id="anomalyPopup"></div>
+
+		<div id="accountBtn" class="account-btn">log in</div>
+
+		<div id="authOverlay" class="auth-overlay">
+			<div class="auth-modal">
+				<button id="authClose" class="index-close">×</button>
+				<div class="auth-tabs">
+					<button id="authTabLogin" class="dev-tab active" style="flex:1">log in</button>
+					<button id="authTabSignup" class="dev-tab" style="flex:1">sign up</button>
+					<button id="authTabForgot" class="dev-tab" style="flex:1">forgot</button>
+				</div>
+				<div id="authFormLogin">
+					<input type="text" id="loginUsername" class="auth-field" placeholder="username">
+					<input type="password" id="loginPassword" class="auth-field" placeholder="password">
+					<button id="loginSubmit" class="small" style="width:100%;">log in</button>
+				</div>
+				<div id="authFormSignup" style="display:none">
+					<input type="text" id="signupUsername" class="auth-field" placeholder="username (3-20 chars, a-z0-9_-)">
+					<input type="password" id="signupPassword" class="auth-field" placeholder="password (min 8 chars)">
+					<input type="password" id="signupPasswordConfirm" class="auth-field" placeholder="confirm password">
+					<button id="signupSubmit" class="small" style="width:100%;">sign up</button>
+				</div>
+				<div id="authFormForgot" style="display:none">
+					<input type="text" id="forgotUsername" class="auth-field" placeholder="username">
+					<input type="text" id="forgotBackupKey" class="auth-field" placeholder="backup key">
+					<input type="password" id="forgotNewPassword" class="auth-field" placeholder="new password (min 8 chars)">
+					<button id="forgotSubmit" class="small" style="width:100%;">reset password</button>
+				</div>
+				<div id="authStatus" class="auth-status"></div>
+			</div>
+		</div>
+		
+		<div id="accountInfoOverlay" class="auth-overlay">
+			<div class="auth-modal">
+				<button id="accountInfoClose" class="index-close">×</button>
+				<div id="accountInfoBody"></div>
+			</div>
+		</div>
+		
+		<div id="backupKeysOverlay" class="auth-overlay">
+			<div class="auth-modal">
+				<button id="backupKeysClose" class="index-close">×</button>
+				<div id="backupKeysBody"></div>
+			</div>
+		</div>
+		
+		<div id="migrationPopup" class="auth-overlay">
+			<div class="auth-modal">
+				<h3 style="margin-top:0">accounts are here!!</h3>
+				<p id="migrationText" style="font-size:0.85em;opacity:0.8;"></p>
+				<button id="migrationOk" class="small" style="width:100%;">ok</button>
+			</div>
+		</div>
 
 		<div id="confirmModal">
 			<div class="modal-content">
