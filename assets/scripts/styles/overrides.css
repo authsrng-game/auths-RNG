@@ -4364,3 +4364,91 @@ body.blur-panels .starmap-market-item {
 	border-color: #6a2a2a;
 	background: rgb(120 40 40 / 10%);
 }
+
+.account-btn {
+	position: fixed;
+	top: 10px;
+	left: 10px;
+	background: var(--panel-bg);
+	border: 1px solid var(--border-color);
+	padding: 6px 14px;
+	border-radius: 20px;
+	font-size: 0.85em;
+	cursor: pointer;
+	z-index: 9998;
+	color: var(--text-color);
+	opacity: 0.8;
+	transition: opacity 0.2s, border-color 0.2s;
+}
+
+.account-btn:hover {
+	opacity: 1;
+	border-color: var(--text-color);
+}
+
+.auth-overlay {
+	display: none;
+	position: fixed;
+	inset: 0;
+	background: rgb(0 0 0 / 85%);
+	z-index: 20001;
+	align-items: center;
+	justify-content: center;
+}
+
+.auth-overlay.show {
+	display: flex;
+}
+
+.auth-modal {
+	background: var(--panel-bg);
+	border: 1px solid var(--border-color);
+	border-radius: 4px;
+	padding: 24px;
+	max-width: 400px;
+	width: 90%;
+	max-height: 85vh;
+	overflow-y: auto;
+	position: relative;
+	color: var(--text-color);
+}
+
+.auth-tabs {
+	display: flex;
+	gap: 0;
+	border-bottom: 1px solid var(--border-color);
+	margin-bottom: 16px;
+}
+
+.auth-field {
+	display: block;
+	width: 100%;
+	padding: 8px 10px;
+	margin-bottom: 10px;
+	background: var(--input-bg);
+	border: 1px solid var(--border-color);
+	border-radius: 2px;
+	color: var(--text-color);
+	font-family: monospace;
+	font-size: 0.9em;
+	box-sizing: border-box;
+}
+
+.auth-status {
+	font-size: 0.85em;
+	min-height: 1.2em;
+	margin-top: 8px;
+}
+
+.backup-key-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 8px 10px;
+	margin-bottom: 6px;
+	background: var(--overlay-bg);
+	border: 1px solid var(--border-color);
+	border-radius: 2px;
+	font-family: monospace;
+	font-size: 0.9em;
+}
