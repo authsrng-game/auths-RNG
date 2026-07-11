@@ -37,7 +37,7 @@
 		'mutationHistory',
 		'mutationBestResult',
 		'rarityTimestamps',
-		'notifications'
+		'notifications',
 	];
 
 	function getToken() {
@@ -103,10 +103,10 @@
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: 'Bearer ' + token
+				Authorization: 'Bearer ' + token,
 			},
 			body: JSON.stringify({ entries: entries }),
-			keepalive: true
+			keepalive: true,
 		})
 			.then(function (r) {
 				if (!r.ok) throw new Error('push failed');
