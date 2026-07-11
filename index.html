@@ -1017,6 +1017,7 @@ Last release date on nightly: ${nightlyRDate}`;
 		<script src="/assets/scripts/engine/bcore.js" defer></script>
 		<script src="assets/scripts/popup.js"></script>
 		<script src="assets/scripts/sync.js"></script>
+		<script src="assets/scripts/social.js" defer></script>
 		<script src="assets/scripts/accounts.js" defer></script>
 		<!-- sad fucker oh god i swear too much -->
 		<script src="assets/scripts/rarities.js" defer></script>
@@ -1062,6 +1063,29 @@ Last release date on nightly: ${nightlyRDate}`;
 		</div>
 
 		<div id="anomalyPopup"></div>
+
+		<button id="friendsBtn" class="social-btn" style="bottom:16px;right:74px;" title="friends">
+			👥
+			<span id="friendsBadge" class="notif-badge"></span>
+		</button>
+		<button id="messagesBtn" class="social-btn" style="bottom:16px;right:16px;" title="messages">
+			✉️
+			<span id="messagesBadge" class="notif-badge"></span>
+		</button>
+		
+		<div id="friendsOverlay" class="auth-overlay">
+			<div class="auth-modal">
+				<button id="friendsClose" class="index-close">×</button>
+				<div id="friendsBody"></div>
+			</div>
+		</div>
+		
+		<div id="messagesOverlay" class="auth-overlay">
+			<div class="auth-modal" style="max-width:480px;">
+				<button id="messagesClose" class="index-close">×</button>
+				<div id="messagesBody"></div>
+			</div>
+		</div>
 
 		<div id="accountBtn" class="account-btn">log in</div>
 
