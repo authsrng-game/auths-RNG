@@ -444,21 +444,21 @@ console.log(performance.now());
 			}
 
 			try {
-			    status.style.color = '';
-			    status.textContent = 'saving...';
-			    const data = await apiCall('/profile', { method: 'POST', body: payload });
-			    if (data.avatarUrl) {
-			        localStorage.setItem('authAvatarUrl', data.avatarUrl);
-			    } else if (payload.removeAvatar) {
-			        localStorage.removeItem('authAvatarUrl');
-			    }
-			    updateAccountBtn();
-			    status.style.color = '#8d8';
-			    status.textContent = 'saved!';
-			    setTimeout(openAccountInfo, 600);
+				status.style.color = '';
+				status.textContent = 'saving...';
+				const data = await apiCall('/profile', { method: 'POST', body: payload });
+				if (data.avatarUrl) {
+					localStorage.setItem('authAvatarUrl', data.avatarUrl);
+				} else if (payload.removeAvatar) {
+					localStorage.removeItem('authAvatarUrl');
+				}
+				updateAccountBtn();
+				status.style.color = '#8d8';
+				status.textContent = 'saved!';
+				setTimeout(openAccountInfo, 600);
 			} catch (e) {
-			    status.style.color = '#f66';
-			    status.textContent = e.message;
+				status.style.color = '#f66';
+				status.textContent = e.message;
 			}
 		});
 	}
