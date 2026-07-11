@@ -933,10 +933,10 @@ const messages = [
 	'i will find you and i will personally serve you steak',
 	'shrimp good :thumbsup:',
 	'i still instictively use clear in the devtools console instead of clear()',
- 'talking talking talking.. no more talking!!!!!!!!!!!!!!!!!!!',
- 'cookeh',
- 'we heart cookehs',
- 'beh....................'
+	'talking talking talking.. no more talking!!!!!!!!!!!!!!!!!!!',
+	'cookeh',
+	'we heart cookehs',
+	'beh....................',
 ];
 
 const randomIndex = Math.floor(Math.random() * messages.length);
