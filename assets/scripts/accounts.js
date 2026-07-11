@@ -109,7 +109,7 @@ console.log(performance.now());
 			reader.readAsDataURL(file);
 		});
 	}
-	
+
 	const ALLOWED_AVATAR_MIMES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/avif'];
 	const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 
@@ -150,16 +150,16 @@ console.log(performance.now());
 	}
 
 	async function openAccountInfo() {
-	const body = el('accountInfoBody');
-	body.innerHTML = '<p>loading...</p>';
-	showOverlay('accountInfoOverlay');
-	try {
-		const data = await apiCall('/me');
-		const avatarImg = data.avatarUrl
-			? `<img src="https://accounts.authsrng.xyz${data.avatarUrl}" class="account-avatar-preview" id="currentAvatarImg">`
-			: `<div class="account-avatar-placeholder" id="currentAvatarImg">${data.username.charAt(0).toUpperCase()}</div>`;
+		const body = el('accountInfoBody');
+		body.innerHTML = '<p>loading...</p>';
+		showOverlay('accountInfoOverlay');
+		try {
+			const data = await apiCall('/me');
+			const avatarImg = data.avatarUrl
+				? `<img src="https://accounts.authsrng.xyz${data.avatarUrl}" class="account-avatar-preview" id="currentAvatarImg">`
+				: `<div class="account-avatar-placeholder" id="currentAvatarImg">${data.username.charAt(0).toUpperCase()}</div>`;
 
-		body.innerHTML = `
+			body.innerHTML = `
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
           ${avatarImg}
           <div>
@@ -174,28 +174,28 @@ console.log(performance.now());
         <button id="logoutBtn" class="small" style="width:100%;margin-bottom:8px;color:#f66;">log out</button>
         <button id="deleteAcctBtn" class="small" style="width:100%;opacity:0.6;color:#f66;">delete account</button>
       `;
-		el('editProfileBtn').addEventListener('click', () => openEditProfile(data));
-		el('refreshKeysBtn').addEventListener('click', refreshBackupKeys);
-		el('changePwBtn').addEventListener('click', openChangePassword);
-		el('logoutBtn').addEventListener('click', () => {
-			clearSession();
-			hideOverlay('accountInfoOverlay');
-			updateAccountBtn();
-		});
-		el('deleteAcctBtn').addEventListener('click', openDeleteAccount);
-	} catch (e) {
-		body.innerHTML = `
+			el('editProfileBtn').addEventListener('click', () => openEditProfile(data));
+			el('refreshKeysBtn').addEventListener('click', refreshBackupKeys);
+			el('changePwBtn').addEventListener('click', openChangePassword);
+			el('logoutBtn').addEventListener('click', () => {
+				clearSession();
+				hideOverlay('accountInfoOverlay');
+				updateAccountBtn();
+			});
+			el('deleteAcctBtn').addEventListener('click', openDeleteAccount);
+		} catch (e) {
+			body.innerHTML = `
         <p style="color:#f66;">${e.message}</p>
         <p style="font-size:0.85em;opacity:0.6;">your session may be invalid or expired. log out and sign back in.</p>
         <button id="forceLogoutBtn" class="small" style="width:100%;color:#f66;">log out</button>
       `;
-		el('forceLogoutBtn').addEventListener('click', () => {
-			clearSession();
-			hideOverlay('accountInfoOverlay');
-			updateAccountBtn();
-		});
+			el('forceLogoutBtn').addEventListener('click', () => {
+				clearSession();
+				hideOverlay('accountInfoOverlay');
+				updateAccountBtn();
+			});
+		}
 	}
-}
 
 	async function refreshBackupKeys() {
 		if (!confirm('this will invalidate your old backup keys and generate 3 new ones. continue?'))
@@ -213,11 +213,11 @@ console.log(performance.now());
 		const body = el('accountInfoBody');
 		let selectedFile = null;
 		let removeFlag = false;
-	
+
 		const avatarPreview = currentData.avatarUrl
 			? `<img src="https://accounts.authsrng.xyz${currentData.avatarUrl}" class="account-avatar-preview" id="editAvatarPreview">`
 			: `<div class="account-avatar-placeholder" id="editAvatarPreview">${currentData.username.charAt(0).toUpperCase()}</div>`;
-	
+
 		body.innerHTML = `
 	      <h3 style="margin-top:0">edit profile</h3>
 	      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
@@ -233,16 +233,16 @@ console.log(performance.now());
 	      <button id="cancelProfileBtn" class="small" style="width:100%;opacity:0.6;">cancel</button>
 	      <div id="profileStatus" class="auth-status"></div>
 	    `;
-	
+
 		const bioInput = el('bioInput');
 		bioInput.addEventListener('input', () => {
 			el('bioCharCount').textContent = bioInput.value.length + ' / 300';
 		});
-	
+
 		el('avatarFileInput').addEventListener('change', (e) => {
 			const file = e.target.files[0];
 			if (!file) return;
-	
+
 			if (!ALLOWED_AVATAR_MIMES.includes(file.type)) {
 				window.showAlert('unsupported format. use png, jpg, gif, webp, or avif.');
 				e.target.value = '';
@@ -253,7 +253,7 @@ console.log(performance.now());
 				e.target.value = '';
 				return;
 			}
-	
+
 			selectedFile = file;
 			removeFlag = false;
 			const preview = el('editAvatarPreview');
@@ -271,7 +271,7 @@ console.log(performance.now());
 			};
 			reader.readAsDataURL(file);
 		});
-	
+
 		el('removeAvatarBtn').addEventListener('click', () => {
 			selectedFile = null;
 			removeFlag = true;
@@ -283,13 +283,13 @@ console.log(performance.now());
 			placeholder.textContent = currentData.username.charAt(0).toUpperCase();
 			preview.replaceWith(placeholder);
 		});
-	
+
 		el('cancelProfileBtn').addEventListener('click', () => openAccountInfo());
-	
+
 		el('saveProfileBtn').addEventListener('click', async () => {
 			const status = el('profileStatus');
 			const payload = { bio: bioInput.value };
-	
+
 			if (removeFlag) {
 				payload.removeAvatar = true;
 			} else if (selectedFile) {
@@ -302,7 +302,7 @@ console.log(performance.now());
 					return;
 				}
 			}
-	
+
 			try {
 				status.style.color = '';
 				status.textContent = 'saving...';
