@@ -46,7 +46,7 @@ console.log(performance.now());
 		const res = await fetch(API + path, {
 			method: opts.method || 'GET',
 			headers,
-			body: opts.body ? JSON.stringify(opts.body) : undefined
+			body: opts.body ? JSON.stringify(opts.body) : undefined,
 		});
 		let data;
 		try {
