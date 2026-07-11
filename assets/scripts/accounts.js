@@ -170,22 +170,26 @@ console.log(performance.now());
 			const avatarImg = data.avatarUrl
 				? `<img src="https://accounts.authsrng.xyz${data.avatarUrl}" class="account-avatar-preview" id="currentAvatarImg">`
 				: `<div class="account-avatar-placeholder" id="currentAvatarImg">${data.username.charAt(0).toUpperCase()}</div>`;
-
+			const bioHtml = data.bio
+				? `<p style="font-size:0.85em;opacity:0.75;margin:0 0 12px;white-space:pre-wrap;">${data.bio.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`
+				: `<p style="font-size:0.8em;opacity:0.4;margin:0 0 12px;font-style:italic;">no bio set</p>`;
+	
 			body.innerHTML = `
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-          ${avatarImg}
-          <div>
-            <h3 style="margin:0;">${data.username}</h3>
-            <p style="font-size:0.8em;opacity:0.5;margin:2px 0 0;">joined ${new Date(data.createdAt).toLocaleDateString()}</p>
-          </div>
-        </div>
-        <p style="font-size:0.85em;opacity:0.6;margin-bottom:12px;">backup keys remaining: ${data.backupKeysRemaining} / 3</p>
-        <button id="editProfileBtn" class="small" style="width:100%;margin-bottom:8px;">edit profile</button>
-        <button id="refreshKeysBtn" class="small" style="width:100%;margin-bottom:8px;">refresh backup keys</button>
-        <button id="changePwBtn" class="small" style="width:100%;margin-bottom:8px;">change password</button>
-        <button id="logoutBtn" class="small" style="width:100%;margin-bottom:8px;color:#f66;">log out</button>
-        <button id="deleteAcctBtn" class="small" style="width:100%;opacity:0.6;color:#f66;">delete account</button>
-      `;
+	        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+	          ${avatarImg}
+	          <div>
+	            <h3 style="margin:0;">${data.username}</h3>
+	            <p style="font-size:0.8em;opacity:0.5;margin:2px 0 0;">joined ${new Date(data.createdAt).toLocaleDateString()}</p>
+	          </div>
+	        </div>
+	        ${bioHtml}
+	        <p style="font-size:0.85em;opacity:0.6;margin-bottom:12px;">backup keys remaining: ${data.backupKeysRemaining} / 3</p>
+	        <button id="editProfileBtn" class="small" style="width:100%;margin-bottom:8px;">edit profile</button>
+	        <button id="refreshKeysBtn" class="small" style="width:100%;margin-bottom:8px;">refresh backup keys</button>
+	        <button id="changePwBtn" class="small" style="width:100%;margin-bottom:8px;">change password</button>
+	        <button id="logoutBtn" class="small" style="width:100%;margin-bottom:8px;color:#f66;">log out</button>
+	        <button id="deleteAcctBtn" class="small" style="width:100%;opacity:0.6;color:#f66;">delete account</button>
+	      `;
 			el('editProfileBtn').addEventListener('click', () => openEditProfile(data));
 			el('refreshKeysBtn').addEventListener('click', refreshBackupKeys);
 			el('changePwBtn').addEventListener('click', openChangePassword);
@@ -197,10 +201,10 @@ console.log(performance.now());
 			el('deleteAcctBtn').addEventListener('click', openDeleteAccount);
 		} catch (e) {
 			body.innerHTML = `
-        <p style="color:#f66;">${e.message}</p>
-        <p style="font-size:0.85em;opacity:0.6;">your session may be invalid or expired. log out and sign back in.</p>
-        <button id="forceLogoutBtn" class="small" style="width:100%;color:#f66;">log out</button>
-      `;
+	        <p style="color:#f66;">${e.message}</p>
+	        <p style="font-size:0.85em;opacity:0.6;">your session may be invalid or expired. log out and sign back in.</p>
+	        <button id="forceLogoutBtn" class="small" style="width:100%;color:#f66;">log out</button>
+	      `;
 			el('forceLogoutBtn').addEventListener('click', () => {
 				clearSession();
 				hideOverlay('accountInfoOverlay');
