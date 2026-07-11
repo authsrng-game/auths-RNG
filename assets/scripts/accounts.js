@@ -299,17 +299,6 @@ function renderSessions(sessions) {
 	        ${bioHtml}
 	        <p style="font-size:0.85em;opacity:0.6;margin-bottom:12px;">backup keys remaining: ${data.backupKeysRemaining} / 3</p>
 	        <button id="editProfileBtn" class="small" style="width:100%;margin-bottom:8px;">edit profile</button>
-				body.innerHTML = `
-	        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
-	          ${avatarImg}
-	          <div>
-	            <h3 style="margin:0;">${data.username}</h3>
-	            <p style="font-size:0.8em;opacity:0.5;margin:2px 0 0;">joined ${new Date(data.createdAt).toLocaleDateString()}</p>
-	          </div>
-	        </div>
-	        ${bioHtml}
-	        <p style="font-size:0.85em;opacity:0.6;margin-bottom:12px;">backup keys remaining: ${data.backupKeysRemaining} / 3</p>
-	        <button id="editProfileBtn" class="small" style="width:100%;margin-bottom:8px;">edit profile</button>
 	        <button id="sessionsBtn" class="small" style="width:100%;margin-bottom:8px;">manage sessions (${data.activeSessions || 1})</button>
 	        <button id="refreshKeysBtn" class="small" style="width:100%;margin-bottom:8px;">refresh backup keys</button>
 	        <button id="changePwBtn" class="small" style="width:100%;margin-bottom:8px;">change password</button>
@@ -318,13 +307,6 @@ function renderSessions(sessions) {
 	      `;
 			el('editProfileBtn').addEventListener('click', () => openEditProfile(data));
 			el('sessionsBtn').addEventListener('click', () => openSessions());
-			el('refreshKeysBtn').addEventListener('click', refreshBackupKeys);
-	        <button id="refreshKeysBtn" class="small" style="width:100%;margin-bottom:8px;">refresh backup keys</button>
-	        <button id="changePwBtn" class="small" style="width:100%;margin-bottom:8px;">change password</button>
-	        <button id="logoutBtn" class="small" style="width:100%;margin-bottom:8px;color:#f66;">log out</button>
-	        <button id="deleteAcctBtn" class="small" style="width:100%;opacity:0.6;color:#f66;">delete account</button>
-	      `;
-			el('editProfileBtn').addEventListener('click', () => openEditProfile(data));
 			el('refreshKeysBtn').addEventListener('click', refreshBackupKeys);
 			el('changePwBtn').addEventListener('click', openChangePassword);
 			el('logoutBtn').addEventListener('click', () => {
