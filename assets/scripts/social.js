@@ -4,12 +4,24 @@
 	const API = 'https://accounts.authsrng.xyz/api';
 	const POLL_INTERVAL = 60000;
 
-	function getToken() { return localStorage.getItem('authToken'); }
-	function isLoggedIn() { return !!getToken(); }
-	function el(id) { return document.getElementById(id); }
-	function showOverlay(id) { el(id).classList.add('show'); }
-	function hideOverlay(id) { el(id).classList.remove('show'); }
-	function escHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+	function getToken() {
+		return localStorage.getItem('authToken');
+	}
+	function isLoggedIn() {
+		return !!getToken();
+	}
+	function el(id) {
+		return document.getElementById(id);
+	}
+	function showOverlay(id) {
+		el(id).classList.add('show');
+	}
+	function hideOverlay(id) {
+		el(id).classList.remove('show');
+	}
+	function escHtml(s) {
+		return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	}
 
 	async function apiCall(path, options) {
 		const opts = options || {};
@@ -20,17 +32,22 @@
 		const res = await fetch(API + path, {
 			method: opts.method || 'GET',
 			headers,
-			body: opts.body ? JSON.stringify(opts.body) : undefined
+			body: opts.body ? JSON.stringify(opts.body) : undefined,
 		});
 		let data;
-		try { data = await res.json(); } catch (_) { data = {}; }
+		try {
+			data = await res.json();
+		} catch (_) {
+			data = {};
+		}
 		if (!res.ok) throw new Error(data.error || 'request failed');
 		return data;
 	}
 
 	function avatarHtml(username, avatarUrl, size) {
 		size = size || 32;
-		if (avatarUrl) return `<img src="https://accounts.authsrng.xyz${avatarUrl}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;">`;
+		if (avatarUrl)
+			return `<img src="https://accounts.authsrng.xyz${avatarUrl}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;">`;
 		return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:var(--button-bg);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0.6;">${escHtml((username || '?').charAt(0).toUpperCase())}</div>`;
 	}
 
@@ -119,17 +136,24 @@
 					await apiCall('/friends/accept', { method: 'POST', body: { requestId: btn.dataset.id } });
 					openFriends();
 					refreshBadges();
-				} catch (e) { window.showAlert('error: ' + e.message); }
+				} catch (e) {
+					window.showAlert('error: ' + e.message);
+				}
 			});
 		});
 
 		body.querySelectorAll('.decline-req').forEach((btn) => {
 			btn.addEventListener('click', async () => {
 				try {
-					await apiCall('/friends/decline', { method: 'POST', body: { requestId: btn.dataset.id } });
+					await apiCall('/friends/decline', {
+						method: 'POST',
+						body: { requestId: btn.dataset.id },
+					});
 					openFriends();
 					refreshBadges();
-				} catch (e) { window.showAlert('error: ' + e.message); }
+				} catch (e) {
+					window.showAlert('error: ' + e.message);
+				}
 			});
 		});
 
@@ -137,9 +161,14 @@
 			btn.addEventListener('click', async () => {
 				if (!confirm('remove ' + btn.dataset.username + ' as a friend?')) return;
 				try {
-					await apiCall('/friends/remove', { method: 'POST', body: { username: btn.dataset.username } });
+					await apiCall('/friends/remove', {
+						method: 'POST',
+						body: { username: btn.dataset.username },
+					});
 					openFriends();
-				} catch (e) { window.showAlert('error: ' + e.message); }
+				} catch (e) {
+					window.showAlert('error: ' + e.message);
+				}
 			});
 		});
 	}
@@ -200,7 +229,9 @@
     `;
 
 		const bodyInput = el('composeBody');
-		bodyInput.addEventListener('input', () => { el('composeCharCount').textContent = bodyInput.value.length + ' / 1500'; });
+		bodyInput.addEventListener('input', () => {
+			el('composeCharCount').textContent = bodyInput.value.length + ' / 1500';
+		});
 		el('backToThreadsBtn').addEventListener('click', openMessages);
 		el('sendComposeBtn').addEventListener('click', async () => {
 			const toUsername = el('composeTo').value.trim();
@@ -216,7 +247,10 @@
 			try {
 				status.style.color = '';
 				status.textContent = 'sending...';
-				await apiCall('/messages/send', { method: 'POST', body: { toUsername, subject, body: messageBody } });
+				await apiCall('/messages/send', {
+					method: 'POST',
+					body: { toUsername, subject, body: messageBody },
+				});
 				status.style.color = '#8d8';
 				status.textContent = 'sent!';
 				setTimeout(openMessages, 600);
@@ -276,7 +310,10 @@
 			return;
 		}
 		try {
-			const [friendsData, msgData] = await Promise.all([apiCall('/friends'), apiCall('/messages/unread-count')]);
+			const [friendsData, msgData] = await Promise.all([
+				apiCall('/friends'),
+				apiCall('/messages/unread-count'),
+			]);
 			toggleBadge('friendsBadge', friendsData.incoming.length);
 			toggleBadge('messagesBadge', msgData.count);
 		} catch (_) {}
@@ -301,10 +338,13 @@
 		const friendsClose = el('friendsClose');
 		const messagesClose = el('messagesClose');
 		if (friendsClose) friendsClose.addEventListener('click', () => hideOverlay('friendsOverlay'));
-		if (messagesClose) messagesClose.addEventListener('click', () => hideOverlay('messagesOverlay'));
+		if (messagesClose)
+			messagesClose.addEventListener('click', () => hideOverlay('messagesOverlay'));
 		[el('friendsOverlay'), el('messagesOverlay')].forEach((overlay) => {
 			if (!overlay) return;
-			overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('show'); });
+			overlay.addEventListener('click', (e) => {
+				if (e.target === overlay) overlay.classList.remove('show');
+			});
 		});
 	}
 
