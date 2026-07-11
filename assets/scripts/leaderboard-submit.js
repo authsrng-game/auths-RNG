@@ -39,7 +39,7 @@ console.log(performance.now());
 			rarestDenom: rarest.denom,
 			playtime: parseInt(localStorage.getItem('totalPlaytime') || '0'),
 			points: parseInt(localStorage.getItem('shopPoints') || '0'),
-			achievements
+			achievements,
 		};
 	}
 
