@@ -4551,6 +4551,7 @@ body.blur-panels .starmap-market-item {
 		opacity 0.2s,
 		border-color 0.2s;
 	cursor: pointer;
+	display: none;
 }
 
 .social-btn:hover {
