@@ -173,7 +173,7 @@ console.log(performance.now());
 			const bioHtml = data.bio
 				? `<p style="font-size:0.85em;opacity:0.75;margin:0 0 12px;white-space:pre-wrap;">${data.bio.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`
 				: `<p style="font-size:0.8em;opacity:0.4;margin:0 0 12px;font-style:italic;">no bio set</p>`;
-	
+
 			body.innerHTML = `
 	        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
 	          ${avatarImg}
