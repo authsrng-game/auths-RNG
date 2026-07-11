@@ -120,7 +120,7 @@ console.log(performance.now());
       <button id="enableLbBtn" class="small" style="width:100%;margin-top:4px;">join leaderboard</button>
       <small class="helper" style="margin-top:6px;display:block;">
         your stats shown publicly under your account username.
-        <a href="leaderboard.html" style="opacity:0.6;">view leaderboard</a>
+        <a href="/assets/frontend/leaderboard.html" style="opacity:0.6;">view leaderboard</a>
       </small>`;
 
 			document.getElementById('enableLbBtn').addEventListener('click', async () => {
