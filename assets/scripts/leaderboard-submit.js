@@ -61,17 +61,19 @@ console.log(performance.now());
 			const r = await fetch(API, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json', ...authHeaders() },
-				body: JSON.stringify(buildPayload()),
+				body: JSON.stringify(buildPayload())
 			});
 			const data = await r.json();
 			if (!r.ok) {
 				if (!silent) setStatus('error: ' + (data.error || r.status), '#ff8888');
+				else console.warn('[leaderboard] silent auto-submit rejected:', data.error || r.status);
 				return false;
 			}
 			if (!silent) setStatus('updated!', '#88dd88');
 			return true;
 		} catch (e) {
 			if (!silent) setStatus('failed: ' + e.message, '#ff8888');
+			else console.warn('[leaderboard] silent auto-submit failed:', e.message);
 			return false;
 		}
 	}
