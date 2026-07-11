@@ -37,7 +37,7 @@
 		'mutationHistory',
 		'mutationBestResult',
 		'rarityTimestamps',
-		'notifications',
+		'notifications'
 	];
 
 	function getToken() {
@@ -103,10 +103,10 @@
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: 'Bearer ' + token,
+				Authorization: 'Bearer ' + token
 			},
 			body: JSON.stringify({ entries: entries }),
-			keepalive: true,
+			keepalive: true
 		})
 			.then(function (r) {
 				if (!r.ok) throw new Error('push failed');
@@ -143,6 +143,52 @@
 			}
 			return result;
 		};
+	}
+
+	var overlayEl = null;
+
+	function createOverlay() {
+		if (overlayEl || !document.body) return;
+
+		var messages = [
+			'downloading data...',
+			'pulling your progress...',
+			'syncing save...',
+			'fetching your rarities...',
+			'grabbing your data...'
+		];
+		var msg = messages[Math.floor(Math.random() * messages.length)];
+
+		overlayEl = document.createElement('div');
+		overlayEl.id = 'syncBootOverlay';
+		overlayEl.style.cssText =
+			'position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;' +
+			'align-items:center;justify-content:center;gap:16px;' +
+			'background:#0e0e0e;color:#dcdcdc;font-family:monospace;font-size:0.95em;opacity:0.85;';
+
+		var spinner = document.createElement('div');
+		spinner.style.cssText =
+			'width:28px;height:28px;border:2px solid #303030;border-top-color:#dcdcdc;' +
+			'border-radius:50%;animation:syncBootSpin 0.8s linear infinite;';
+
+		var styleTag = document.createElement('style');
+		styleTag.textContent =
+			'@keyframes syncBootSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}';
+
+		var text = document.createElement('div');
+		text.textContent = msg;
+
+		overlayEl.appendChild(styleTag);
+		overlayEl.appendChild(spinner);
+		overlayEl.appendChild(text);
+		document.body.appendChild(overlayEl);
+	}
+
+	function removeOverlay() {
+		if (overlayEl && overlayEl.parentNode) {
+			overlayEl.parentNode.removeChild(overlayEl);
+		}
+		overlayEl = null;
 	}
 
 	function pullSync() {
@@ -201,12 +247,24 @@
 
 	function init() {
 		if (!getToken()) return;
+
+		createOverlay();
+
 		try {
 			pullSync();
 		} catch (e) {
 			console.error('[sync] pull failed:', e);
 		}
 		patchStorage();
+
+		var holdMs = 1000 + Math.random() * 3000;
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', function () {
+				setTimeout(removeOverlay, holdMs);
+			});
+		} else {
+			setTimeout(removeOverlay, holdMs);
+		}
 
 		document.addEventListener('visibilitychange', function () {
 			if (document.hidden) flushDirty();
