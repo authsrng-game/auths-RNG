@@ -4499,3 +4499,36 @@ body.blur-panels .starmap-market-item {
 		transform: rotate(360deg);
 	}
 }
+
+.account-avatar-preview {
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	object-fit: cover;
+	border: 1px solid var(--border-color);
+	flex-shrink: 0;
+}
+
+.account-avatar-placeholder {
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	background: var(--button-bg);
+	border: 1px solid var(--border-color);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.2em;
+	color: var(--text-color);
+	opacity: 0.6;
+	flex-shrink: 0;
+}
+
+.account-btn-avatar {
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	object-fit: cover;
+	vertical-align: middle;
+	margin-right: 5px;
+}
