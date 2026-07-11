@@ -4454,3 +4454,47 @@ body.blur-panels .starmap-market-item {
 	font-family: monospace;
 	font-size: 0.9em;
 }
+
+.sync-loading-overlay {
+	display: none;
+	position: fixed;
+	inset: 0;
+	background: var(--bg-color);
+	z-index: 999999;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+}
+
+.sync-loading-overlay.show {
+	display: flex;
+}
+
+.sync-loading-box {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+	color: var(--text-color);
+	font-family: monospace;
+	font-size: 0.95em;
+	opacity: 0.85;
+}
+
+.sync-spinner {
+	width: 28px;
+	height: 28px;
+	border: 2px solid var(--border-color);
+	border-top-color: var(--text-color);
+	border-radius: 50%;
+	animation: sync-spin 0.8s linear infinite;
+}
+
+@keyframes sync-spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
