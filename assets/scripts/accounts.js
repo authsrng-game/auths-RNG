@@ -24,10 +24,12 @@ console.log(performance.now());
 		return !!getToken();
 	}
 
-	function setSession(token, uid, username) {
+	function setSession(token, uid, username, avatarUrl) {
 		localStorage.setItem(TOKEN_KEY, token);
 		localStorage.setItem(UID_KEY, uid);
 		localStorage.setItem(USER_KEY, username);
+		if (avatarUrl) localStorage.setItem('authAvatarUrl', avatarUrl);
+		else localStorage.removeItem('authAvatarUrl');
 		document.dispatchEvent(new CustomEvent('authchange'));
 	}
 
@@ -83,7 +85,17 @@ console.log(performance.now());
 	function updateAccountBtn() {
 		const btn = el('accountBtn');
 		if (!btn) return;
-		btn.textContent = isLoggedIn() ? getUsername() : 'log in';
+		if (!isLoggedIn()) {
+			btn.innerHTML = 'log in';
+			return;
+		}
+		const avatarUrl = localStorage.getItem('authAvatarUrl');
+		const username = getUsername();
+		if (avatarUrl) {
+			btn.innerHTML = `<img src="https://accounts.authsrng.xyz${avatarUrl}" class="account-btn-avatar"> ${username}`;
+		} else {
+			btn.innerHTML = username;
+		}
 	}
 
 	function setAuthStatus(msg, color) {
