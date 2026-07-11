@@ -4460,7 +4460,7 @@ body.blur-panels .starmap-market-item {
 	position: fixed;
 	inset: 0;
 	background: var(--bg-color);
-	z-index: 999999;
+	z-index: 2147483646;
 	align-items: center;
 	justify-content: center;
 	flex-direction: column;
