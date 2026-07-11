@@ -28,6 +28,10 @@ console.log(performance.now());
 		const inv = JSON.parse(localStorage.getItem('rarityInventory') || '{}');
 		const totalRarities = Object.values(inv).reduce((s, v) => s + (parseInt(v) || 0), 0);
 		const rarest = getRarest();
+		let achievements = [];
+		try {
+			achievements = JSON.parse(localStorage.getItem('achievementsUnlocked') || '[]');
+		} catch (_) {}
 		return {
 			rolls: parseInt(localStorage.getItem('totalRolls') || '0'),
 			rarities: totalRarities,
@@ -35,6 +39,7 @@ console.log(performance.now());
 			rarestDenom: rarest.denom,
 			playtime: parseInt(localStorage.getItem('totalPlaytime') || '0'),
 			points: parseInt(localStorage.getItem('shopPoints') || '0'),
+			achievements
 		};
 	}
 
