@@ -138,7 +138,8 @@ console.log(performance.now());
 	        </p>
 	        <button id="refreshKeysBtn" class="small" style="width:100%;margin-bottom:8px;">refresh backup keys</button>
 	        <button id="changePwBtn" class="small" style="width:100%;margin-bottom:8px;">change password</button>
-	        <button id="logoutBtn" class="small" style="width:100%;color:#f66;">log out</button>
+	        <button id="logoutBtn" class="small" style="width:100%;margin-bottom:8px;color:#f66;">log out</button>
+	        <button id="deleteAcctBtn" class="small" style="width:100%;opacity:0.6;color:#f66;">delete account</button>
 	      `;
 			el('refreshKeysBtn').addEventListener('click', refreshBackupKeys);
 			el('changePwBtn').addEventListener('click', openChangePassword);
@@ -147,6 +148,7 @@ console.log(performance.now());
 				hideOverlay('accountInfoOverlay');
 				updateAccountBtn();
 			});
+			el('deleteAcctBtn').addEventListener('click', openDeleteAccount);
 		} catch (e) {
 			body.innerHTML = `
 	        <p style="color:#f66;">${e.message}</p>
@@ -195,6 +197,42 @@ console.log(performance.now());
 				status.style.color = '#8d8';
 				status.textContent = 'password updated!';
 				setTimeout(openAccountInfo, 800);
+			} catch (e) {
+				status.style.color = '#f66';
+				status.textContent = e.message;
+			}
+		});
+	}
+
+	function openDeleteAccount() {
+		const body = el('accountInfoBody');
+		body.innerHTML = `
+	      <h3 style="margin-top:0;color:#f66;">delete account</h3>
+	      <p style="font-size:0.85em;opacity:0.7;">
+	        this permanently deletes your account, your cloud backup, and your leaderboard entry.
+	        this cannot be undone. your local in-browser progress on this device will not be affected.
+	      </p>
+	      <input type="password" id="delPassword" class="auth-field" placeholder="enter your password to confirm">
+	      <button id="delConfirmBtn" class="small" style="width:100%;color:#f66;">permanently delete my account</button>
+	      <div id="delStatus" class="auth-status"></div>
+	    `;
+		el('delConfirmBtn').addEventListener('click', async () => {
+			const password = el('delPassword').value;
+			const status = el('delStatus');
+			if (!password) {
+				status.style.color = '#f66';
+				status.textContent = 'enter your password';
+				return;
+			}
+			if (!confirm('are you absolutely sure? this cannot be undone.')) return;
+			try {
+				status.style.color = '';
+				status.textContent = 'deleting...';
+				await apiCall('/delete', { method: 'POST', body: { password } });
+				clearSession();
+				hideOverlay('accountInfoOverlay');
+				updateAccountBtn();
+				window.showAlert('your account, cloud backup, and leaderboard entry have all been deleted.');
 			} catch (e) {
 				status.style.color = '#f66';
 				status.textContent = e.message;
