@@ -46,13 +46,17 @@ console.log(performance.now());
 		const res = await fetch(API + path, {
 			method: opts.method || 'GET',
 			headers,
-			body: opts.body ? JSON.stringify(opts.body) : undefined,
+			body: opts.body ? JSON.stringify(opts.body) : undefined
 		});
 		let data;
 		try {
 			data = await res.json();
 		} catch (_) {
 			data = {};
+		}
+		if (res.status === 401 && isLoggedIn()) {
+			clearSession();
+			updateAccountBtn();
 		}
 		if (!res.ok) throw new Error(data.error || 'request failed');
 		return data;
@@ -127,15 +131,15 @@ console.log(performance.now());
 		try {
 			const data = await apiCall('/me');
 			body.innerHTML = `
-        <h3 style="margin-top:0">${data.username}</h3>
-        <p style="font-size:0.85em;opacity:0.6;">
-          account created ${new Date(data.createdAt).toLocaleDateString()}<br>
-          backup keys remaining: ${data.backupKeysRemaining} / 3
-        </p>
-        <button id="refreshKeysBtn" class="small" style="width:100%;margin-bottom:8px;">refresh backup keys</button>
-        <button id="changePwBtn" class="small" style="width:100%;margin-bottom:8px;">change password</button>
-        <button id="logoutBtn" class="small" style="width:100%;color:#f66;">log out</button>
-      `;
+	        <h3 style="margin-top:0">${data.username}</h3>
+	        <p style="font-size:0.85em;opacity:0.6;">
+	          account created ${new Date(data.createdAt).toLocaleDateString()}<br>
+	          backup keys remaining: ${data.backupKeysRemaining} / 3
+	        </p>
+	        <button id="refreshKeysBtn" class="small" style="width:100%;margin-bottom:8px;">refresh backup keys</button>
+	        <button id="changePwBtn" class="small" style="width:100%;margin-bottom:8px;">change password</button>
+	        <button id="logoutBtn" class="small" style="width:100%;color:#f66;">log out</button>
+	      `;
 			el('refreshKeysBtn').addEventListener('click', refreshBackupKeys);
 			el('changePwBtn').addEventListener('click', openChangePassword);
 			el('logoutBtn').addEventListener('click', () => {
@@ -144,7 +148,16 @@ console.log(performance.now());
 				updateAccountBtn();
 			});
 		} catch (e) {
-			body.innerHTML = `<p style="color:#f66;">${e.message}</p>`;
+			body.innerHTML = `
+	        <p style="color:#f66;">${e.message}</p>
+	        <p style="font-size:0.85em;opacity:0.6;">your session may be invalid or expired. log out and sign back in.</p>
+	        <button id="forceLogoutBtn" class="small" style="width:100%;color:#f66;">log out</button>
+	      `;
+			el('forceLogoutBtn').addEventListener('click', () => {
+				clearSession();
+				hideOverlay('accountInfoOverlay');
+				updateAccountBtn();
+			});
 		}
 	}
 
