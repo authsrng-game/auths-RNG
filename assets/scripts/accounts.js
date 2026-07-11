@@ -78,19 +78,19 @@ console.log(performance.now());
 		const overlay = document.getElementById('syncLoadingOverlay');
 		const textEl = document.getElementById('syncLoadingText');
 		if (!overlay) return;
-	
+
 		const messages = [
 			'downloading data...',
 			'pulling your progress...',
 			'syncing save...',
 			'fetching your rarities...',
 			'acquiring data...',
-			'grabbing your data...'
+			'grabbing your data...',
 		];
 		if (textEl) textEl.textContent = messages[Math.floor(Math.random() * messages.length)];
-	
+
 		overlay.classList.add('show');
-	
+
 		const delay = 1000 + Math.random() * 3000;
 		setTimeout(() => {
 			location.reload();
@@ -123,32 +123,32 @@ console.log(performance.now());
 	}
 
 	function renderBackupKeys(keys) {
-	const body = el('backupKeysBody');
-	body.innerHTML = `
+		const body = el('backupKeysBody');
+		body.innerHTML = `
       <h3 style="margin-top:0">your backup keys</h3>
       <p style="font-size:0.85em;opacity:0.7;">
         save these somewhere safe. each key can only be used once to reset your password.
         this is the only time they will ever be shown in full. closing this window hides them permanently.
       </p>
     `;
-	keys.forEach((key, i) => {
-		const row = document.createElement('div');
-		row.className = 'backup-key-row';
-		row.innerHTML = `<span class="backup-key-value">key ${i + 1}: ${key}</span>`;
-		body.appendChild(row);
-	});
-	const closeBtn = document.createElement('button');
-	closeBtn.textContent = 'i saved these, close';
-	closeBtn.className = 'small';
-	closeBtn.style.marginTop = '10px';
-	closeBtn.style.width = '100%';
-	closeBtn.addEventListener('click', () => {
-		hideOverlay('backupKeysOverlay');
-		showSyncLoading();
-	});
-	body.appendChild(closeBtn);
-	showOverlay('backupKeysOverlay');
-}
+		keys.forEach((key, i) => {
+			const row = document.createElement('div');
+			row.className = 'backup-key-row';
+			row.innerHTML = `<span class="backup-key-value">key ${i + 1}: ${key}</span>`;
+			body.appendChild(row);
+		});
+		const closeBtn = document.createElement('button');
+		closeBtn.textContent = 'i saved these, close';
+		closeBtn.className = 'small';
+		closeBtn.style.marginTop = '10px';
+		closeBtn.style.width = '100%';
+		closeBtn.addEventListener('click', () => {
+			hideOverlay('backupKeysOverlay');
+			showSyncLoading();
+		});
+		body.appendChild(closeBtn);
+		showOverlay('backupKeysOverlay');
+	}
 
 	async function openAccountInfo() {
 		const body = el('accountInfoBody');
@@ -287,39 +287,39 @@ console.log(performance.now());
 	}
 
 	async function handleSignup() {
-	const username = el('signupUsername').value.trim();
-	const password = el('signupPassword').value;
-	const confirmPw = el('signupPasswordConfirm').value;
+		const username = el('signupUsername').value.trim();
+		const password = el('signupPassword').value;
+		const confirmPw = el('signupPasswordConfirm').value;
 
-	if (!/^[a-zA-Z0-9_-]{3,20}$/.test(username)) {
-		setAuthStatus('username must be 3-20 chars, letters/numbers/underscore/hyphen only', '#f66');
-		return;
-	}
-	if (password.length < 8) {
-		setAuthStatus('password must be at least 8 characters', '#f66');
-		return;
-	}
-	if (password !== confirmPw) {
-		setAuthStatus('passwords do not match', '#f66');
-		return;
-	}
+		if (!/^[a-zA-Z0-9_-]{3,20}$/.test(username)) {
+			setAuthStatus('username must be 3-20 chars, letters/numbers/underscore/hyphen only', '#f66');
+			return;
+		}
+		if (password.length < 8) {
+			setAuthStatus('password must be at least 8 characters', '#f66');
+			return;
+		}
+		if (password !== confirmPw) {
+			setAuthStatus('passwords do not match', '#f66');
+			return;
+		}
 
-	try {
-		setAuthStatus('creating account...', '');
-		const data = await apiCall('/register', { method: 'POST', body: { username, password } });
-		setSession(data.token, data.uid, data.username);
-		hideOverlay('authOverlay');
-		renderBackupKeys(data.backupKeys);
-	} catch (e) {
-		setAuthStatus(e.message, '#f66');
+		try {
+			setAuthStatus('creating account...', '');
+			const data = await apiCall('/register', { method: 'POST', body: { username, password } });
+			setSession(data.token, data.uid, data.username);
+			hideOverlay('authOverlay');
+			renderBackupKeys(data.backupKeys);
+		} catch (e) {
+			setAuthStatus(e.message, '#f66');
+		}
 	}
-}
 
 	async function handleForgot() {
 		const username = el('forgotUsername').value.trim();
 		const backupKey = el('forgotBackupKey').value.trim();
 		const newPassword = el('forgotNewPassword').value;
-	
+
 		if (!username || !backupKey || !newPassword) {
 			setAuthStatus('fill out all fields', '#f66');
 			return;
@@ -328,12 +328,12 @@ console.log(performance.now());
 			setAuthStatus('password must be at least 8 characters', '#f66');
 			return;
 		}
-	
+
 		try {
 			setAuthStatus('resetting...', '');
 			const data = await apiCall('/reset-password', {
 				method: 'POST',
-				body: { username, backupKey, newPassword }
+				body: { username, backupKey, newPassword },
 			});
 			setSession(data.token, data.uid, data.username);
 			hideOverlay('authOverlay');
