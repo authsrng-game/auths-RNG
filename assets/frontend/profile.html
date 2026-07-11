@@ -171,6 +171,19 @@
 				return String(Math.floor(n));
 			}
 
+			const achievementsMeta = [
+			  ['roller','Roller'],['gambler','Gambler'],['discordMod','Discord Mod'],['touchGrass','Touch Grass Please'],
+			  ['addicted','Addicted'],['insane','Insane'],['joel','Joel'],['crazyAddicted','Crazy Addicted'],
+			  ['funkyTown','Funky Town'],['outsideTime',"It's Outside Time Now"],['actually-addicted','Actually Addicted'],
+			  ['what','..what'],['devoted','Devoted'],['get-a-job','get a job'],['genuinely-insane','Genuinely Insane'],
+			  ['roll-factory','Roll Factory'],['just-one-more-roll','Just One More Roll'],['got-no-life','Got No LIfe'],
+			  ['introverted','Introverted'],['holy-hell','HOLY HELL'],['dude','dude'],['please-just-stop','PLEASE JUST STOP'],
+			  ['you-will-pay','you will pay'],['startingOut','Starting Out'],['lucky','Lucky'],['spammin','Spammin'],
+			  ['leftHanded','Left Handed'],['insanelyLucky','Insanely Lucky'],['lunar','Lunar'],['jackpot','Jackpot'],
+			  ['antimatter','Antimatter'],['oh-my-god','oh my god'],['market-crash','Market Crash'],
+			  ['phenomenon','Phenomenon'],['ok-bro','ok bro'],['summer','SUMMER']
+			].reduce((acc, [id, name]) => { acc[id] = name; return acc; }, {});
+
 			const params = new URLSearchParams(location.search);
 			const username = params.get('user');
 
@@ -204,16 +217,28 @@
 					? `<img class="avatar" src="https://accounts.authsrng.xyz${profile.avatarUrl}">`
 					: `<div class="avatar-placeholder">${escHtml(profile.username.charAt(0).toUpperCase())}</div>`;
 
-				let statsHtml = lbEntry
-					? `
-          <div class="stats-grid">
-            <div class="stat-card"><div class="stat-label">rolls</div><div class="stat-value">${abbr(lbEntry.rolls)}</div></div>
-            <div class="stat-card"><div class="stat-label">points</div><div class="stat-value">${abbr(lbEntry.points)}</div></div>
-            <div class="stat-card"><div class="stat-label">rarest</div><div class="stat-value">${escHtml(lbEntry.rarestName || 'none')}</div></div>
-            <div class="stat-card"><div class="stat-label">collected</div><div class="stat-value">${abbr(lbEntry.rarities)}</div></div>
-          </div>`
-					: `<p style="font-size:0.82em;opacity:0.4;font-style:italic;margin-bottom:20px;">not on the leaderboard</p>`;
-
+				let statsHtml = lbEntry ? `
+		          <div class="stats-grid">
+		            <div class="stat-card"><div class="stat-label">rolls</div><div class="stat-value">${abbr(lbEntry.rolls)}</div></div>
+		            <div class="stat-card"><div class="stat-label">points</div><div class="stat-value">${abbr(lbEntry.points)}</div></div>
+		            <div class="stat-card"><div class="stat-label">rarest</div><div class="stat-value">${escHtml(lbEntry.rarestName || 'none')}</div></div>
+		            <div class="stat-card"><div class="stat-label">collected</div><div class="stat-value">${abbr(lbEntry.rarities)}</div></div>
+		          </div>` : `<p style="font-size:0.82em;opacity:0.4;font-style:italic;margin-bottom:20px;">not on the leaderboard</p>`;
+		
+		      const unlockedIds = (lbEntry && Array.isArray(lbEntry.achievements)) ? lbEntry.achievements : [];
+		      const totalAch = Object.keys(achievementsMeta).length;
+		      let achHtml = `<div style="font-size:0.75em;opacity:0.4;margin-bottom:8px;">achievements (${unlockedIds.length} / ${totalAch})</div>`;
+		      if (unlockedIds.length === 0) {
+		        achHtml += `<p style="font-size:0.82em;opacity:0.4;font-style:italic;margin-bottom:20px;">no achievements yet</p>`;
+		      } else {
+		        achHtml += `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;">`;
+		        unlockedIds.forEach((id) => {
+		          const name = achievementsMeta[id] || id;
+		          achHtml += `<span style="font-size:0.72em;padding:4px 9px;border:1px solid var(--border);border-radius:20px;background:#141414;">${escHtml(name)}</span>`;
+		        });
+		        achHtml += `</div>`;
+		      }
+		      statsHtml += achHtml;
 				const isSelf =
 					isLoggedIn() &&
 					getMyUsername() &&
