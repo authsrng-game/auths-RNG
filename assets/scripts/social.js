@@ -103,7 +103,7 @@
 				html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-color);">
           <div style="display:flex;align-items:center;gap:8px;">
             ${avatarHtml(f.username, f.avatarUrl, 26)}
-            <a href="profile.html?user=${encodeURIComponent(f.username)}" style="color:var(--text-color);">${escHtml(f.username)}</a>
+            <a href="/assets/frontend/profile.html?user=${encodeURIComponent(f.username)}" style="color:var(--text-color);">${escHtml(f.username)}</a>
           </div>
           <button class="small remove-friend" data-username="${escHtml(f.username)}" style="opacity:0.5;">remove</button></div>`;
 			});
