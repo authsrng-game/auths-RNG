@@ -61,7 +61,7 @@ console.log(performance.now());
 			const r = await fetch(API, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json', ...authHeaders() },
-				body: JSON.stringify(buildPayload())
+				body: JSON.stringify(buildPayload()),
 			});
 			const data = await r.json();
 			if (!r.ok) {
