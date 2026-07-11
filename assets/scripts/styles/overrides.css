@@ -4540,7 +4540,6 @@ body.blur-panels .starmap-market-item {
 	background: var(--panel-bg);
 	border: 1px solid var(--border-color);
 	border-radius: 50%;
-	display: flex;
 	align-items: center;
 	justify-content: center;
 	font-size: 1.05em;
