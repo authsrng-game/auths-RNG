@@ -75,26 +75,9 @@ console.log(performance.now());
 	}
 
 	function showSyncLoading() {
-		const overlay = document.getElementById('syncLoadingOverlay');
-		const textEl = document.getElementById('syncLoadingText');
-		if (!overlay) return;
-
-		const messages = [
-			'downloading data...',
-			'pulling your progress...',
-			'syncing save...',
-			'fetching your rarities...',
-			'acquiring data...',
-			'grabbing your data...',
-		];
-		if (textEl) textEl.textContent = messages[Math.floor(Math.random() * messages.length)];
-
-		overlay.classList.add('show');
-
-		const delay = 1000 + Math.random() * 3000;
 		setTimeout(() => {
 			location.reload();
-		}, delay);
+		}, 150);
 	}
 
 	function updateAccountBtn() {
