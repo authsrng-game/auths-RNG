@@ -232,7 +232,9 @@ console.log(performance.now());
 				clearSession();
 				hideOverlay('accountInfoOverlay');
 				updateAccountBtn();
-				window.showAlert('your account, cloud backup, and leaderboard entry have all been deleted.');
+				window.showAlert(
+					'your account, cloud backup, and leaderboard entry have all been deleted.'
+				);
 			} catch (e) {
 				status.style.color = '#f66';
 				status.textContent = e.message;
