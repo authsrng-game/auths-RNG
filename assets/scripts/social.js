@@ -313,14 +313,17 @@
 
 	async function refreshBadges() {
 		updateSocialButtonsVisibility();
-	
+
 		if (!isLoggedIn()) {
 			toggleBadge('friendsBadge', 0);
 			toggleBadge('messagesBadge', 0);
 			return;
 		}
 		try {
-			const [friendsData, msgData] = await Promise.all([apiCall('/friends'), apiCall('/messages/unread-count')]);
+			const [friendsData, msgData] = await Promise.all([
+				apiCall('/friends'),
+				apiCall('/messages/unread-count'),
+			]);
 			toggleBadge('friendsBadge', friendsData.incoming.length);
 			toggleBadge('messagesBadge', msgData.count);
 		} catch (_) {}
@@ -365,12 +368,12 @@
 	}
 
 	function init() {
-	bindUI();
-	updateSocialButtonsVisibility();
-	refreshBadges();
-	checkComposeParam();
-	setInterval(refreshBadges, POLL_INTERVAL);
-}
+		bindUI();
+		updateSocialButtonsVisibility();
+		refreshBadges();
+		checkComposeParam();
+		setInterval(refreshBadges, POLL_INTERVAL);
+	}
 
 	document.addEventListener('authchange', refreshBadges);
 
