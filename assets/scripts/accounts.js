@@ -37,6 +37,8 @@ console.log(performance.now());
 		localStorage.removeItem(TOKEN_KEY);
 		localStorage.removeItem(UID_KEY);
 		localStorage.removeItem(USER_KEY);
+		localStorage.removeItem('authAvatarUrl');
+		localStorage.removeItem('pendingWelcomeBack');
 		document.dispatchEvent(new CustomEvent('authchange'));
 	}
 
@@ -76,6 +78,104 @@ console.log(performance.now());
 		el(id).classList.remove('show');
 	}
 
+	function showWelcomeBackPopup() {
+		let raw;
+		try {
+			raw = localStorage.getItem('pendingWelcomeBack');
+		} catch (_) {
+			raw = null;
+		}
+		if (!raw) return;
+		localStorage.removeItem('pendingWelcomeBack');
+	
+		let info;
+		try {
+			info = JSON.parse(raw);
+		} catch (_) {
+			return;
+		}
+		if (!info) return;
+	
+		const parts = [`you were gone ${info.daysAway} day${info.daysAway === 1 ? '' : 's'}!`];
+		if (info.pendingFriendRequests > 0)
+			parts.push(`${info.pendingFriendRequests} pending friend request${info.pendingFriendRequests === 1 ? '' : 's'}.`);
+		if (info.unreadMessages > 0)
+			parts.push(`${info.unreadMessages} unread message${info.unreadMessages === 1 ? '' : 's'}.`);
+	
+		const overlay = el('migrationPopup');
+		if (!overlay) return;
+		el('migrationText').textContent = parts.join(' ');
+		const heading = overlay.querySelector('h3');
+		if (heading) heading.textContent = 'welcome back!';
+		showOverlay('migrationPopup');
+		el('migrationOk').addEventListener('click', () => hideOverlay('migrationPopup'), { once: true });
+	}
+	
+	document.addEventListener('syncBootComplete', showWelcomeBackPopup);
+
+	async function openSessions() {
+	const body = el('accountInfoBody');
+	body.innerHTML = '<p>loading...</p>';
+	try {
+		const data = await apiCall('/sessions');
+		renderSessions(data.sessions);
+	} catch (e) {
+		body.innerHTML = `<p style="color:#f66;">${escHtml(e.message)}</p><button id="backToAccountBtn" class="small" style="width:100%;">back</button>`;
+		el('backToAccountBtn').addEventListener('click', () => openAccountInfo());
+	}
+}
+
+function renderSessions(sessions) {
+	const body = el('accountInfoBody');
+	let html = `
+      <h3 style="margin-top:0">active sessions</h3>
+      <p style="font-size:0.8em;opacity:0.6;margin-bottom:12px;">these are the devices/browsers currently logged into your account.</p>
+    `;
+
+	sessions.forEach((s) => {
+		html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-color);">
+        <div>
+          <div style="font-size:0.88em;">${escHtml(parseUA(s.userAgent))}${s.current ? ' <span style="opacity:0.5;font-size:0.85em;">(this device)</span>' : ''}</div>
+          <div style="font-size:0.72em;opacity:0.45;">last active ${new Date(s.lastSeenAt).toLocaleString()}</div>
+        </div>
+        ${s.current ? '' : `<button class="small revoke-session" data-sid="${escHtml(s.sid)}" style="opacity:0.6;color:#f66;">revoke</button>`}
+      </div>`;
+	});
+
+	html += `
+      <button id="revokeOthersBtn" class="small" style="width:100%;margin-top:12px;opacity:0.7;">log out all other devices</button>
+      <button id="backToAccountBtn" class="small" style="width:100%;margin-top:8px;opacity:0.6;">back</button>
+      <div id="sessionsStatus" class="auth-status"></div>
+    `;
+
+	body.innerHTML = html;
+
+	body.querySelectorAll('.revoke-session').forEach((btn) => {
+		btn.addEventListener('click', async () => {
+			try {
+				await apiCall('/sessions/revoke', { method: 'POST', body: { sid: btn.dataset.sid } });
+				openSessions();
+			} catch (e) {
+				el('sessionsStatus').style.color = '#f66';
+				el('sessionsStatus').textContent = e.message;
+			}
+		});
+	});
+
+	el('revokeOthersBtn').addEventListener('click', async () => {
+		if (!confirm('log out all other devices? this device stays logged in.')) return;
+		try {
+			await apiCall('/sessions/revoke-others', { method: 'POST' });
+			openSessions();
+		} catch (e) {
+			el('sessionsStatus').style.color = '#f66';
+			el('sessionsStatus').textContent = e.message;
+		}
+	});
+
+	el('backToAccountBtn').addEventListener('click', () => openAccountInfo());
+}
+	
 	function showSyncLoading() {
 		setTimeout(() => {
 			location.reload();
@@ -107,6 +207,20 @@ console.log(performance.now());
 
 	function capitalize(s) {
 		return s.charAt(0).toUpperCase() + s.slice(1);
+	}
+
+	function escHtml(s) {
+		return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	}
+	
+	function parseUA(ua) {
+		if (!ua) return 'unknown device';
+		if (/curl|wget/i.test(ua)) return 'script/cli';
+		if (/Mobi|Android/i.test(ua)) return 'mobile browser';
+		if (/Firefox/i.test(ua)) return 'firefox';
+		if (/Chrome/i.test(ua)) return 'chrome';
+		if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) return 'safari';
+		return 'browser';
 	}
 
 	function readFileAsBase64(file) {
@@ -185,6 +299,26 @@ console.log(performance.now());
 	        ${bioHtml}
 	        <p style="font-size:0.85em;opacity:0.6;margin-bottom:12px;">backup keys remaining: ${data.backupKeysRemaining} / 3</p>
 	        <button id="editProfileBtn" class="small" style="width:100%;margin-bottom:8px;">edit profile</button>
+				body.innerHTML = `
+	        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+	          ${avatarImg}
+	          <div>
+	            <h3 style="margin:0;">${data.username}</h3>
+	            <p style="font-size:0.8em;opacity:0.5;margin:2px 0 0;">joined ${new Date(data.createdAt).toLocaleDateString()}</p>
+	          </div>
+	        </div>
+	        ${bioHtml}
+	        <p style="font-size:0.85em;opacity:0.6;margin-bottom:12px;">backup keys remaining: ${data.backupKeysRemaining} / 3</p>
+	        <button id="editProfileBtn" class="small" style="width:100%;margin-bottom:8px;">edit profile</button>
+	        <button id="sessionsBtn" class="small" style="width:100%;margin-bottom:8px;">manage sessions (${data.activeSessions || 1})</button>
+	        <button id="refreshKeysBtn" class="small" style="width:100%;margin-bottom:8px;">refresh backup keys</button>
+	        <button id="changePwBtn" class="small" style="width:100%;margin-bottom:8px;">change password</button>
+	        <button id="logoutBtn" class="small" style="width:100%;margin-bottom:8px;color:#f66;">log out</button>
+	        <button id="deleteAcctBtn" class="small" style="width:100%;opacity:0.6;color:#f66;">delete account</button>
+	      `;
+			el('editProfileBtn').addEventListener('click', () => openEditProfile(data));
+			el('sessionsBtn').addEventListener('click', () => openSessions());
+			el('refreshKeysBtn').addEventListener('click', refreshBackupKeys);
 	        <button id="refreshKeysBtn" class="small" style="width:100%;margin-bottom:8px;">refresh backup keys</button>
 	        <button id="changePwBtn" class="small" style="width:100%;margin-bottom:8px;">change password</button>
 	        <button id="logoutBtn" class="small" style="width:100%;margin-bottom:8px;color:#f66;">log out</button>
@@ -410,7 +544,14 @@ console.log(performance.now());
 		try {
 			setAuthStatus('logging in...', '');
 			const data = await apiCall('/login', { method: 'POST', body: { username, password } });
-			setSession(data.token, data.uid, data.username);
+			if (data.welcomeBack) {
+				try {
+					localStorage.setItem('pendingWelcomeBack', JSON.stringify(data.welcomeBack));
+				} catch (_) {}
+			} else {
+				localStorage.removeItem('pendingWelcomeBack');
+			}
+			setSession(data.token, data.uid, data.username, data.avatarUrl);
 			hideOverlay('authOverlay');
 			showSyncLoading();
 		} catch (e) {
