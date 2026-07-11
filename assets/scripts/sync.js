@@ -37,7 +37,7 @@
 		'mutationHistory',
 		'mutationBestResult',
 		'rarityTimestamps',
-		'notifications'
+		'notifications',
 	];
 
 	function getToken() {
@@ -103,10 +103,10 @@
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: 'Bearer ' + token
+				Authorization: 'Bearer ' + token,
 			},
 			body: JSON.stringify({ entries: entries }),
-			keepalive: true
+			keepalive: true,
 		})
 			.then(function (r) {
 				if (!r.ok) throw new Error('push failed');
@@ -155,7 +155,7 @@
 			'pulling your progress...',
 			'syncing save...',
 			'fetching your rarities...',
-			'grabbing your data...'
+			'grabbing your data...',
 		];
 		var msg = messages[Math.floor(Math.random() * messages.length)];
 
