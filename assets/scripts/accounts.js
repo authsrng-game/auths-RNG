@@ -302,6 +302,7 @@ console.log(performance.now());
 	        </div>
 	        ${bioHtml}
 	        <p style="font-size:0.85em;opacity:0.6;margin-bottom:12px;">backup keys remaining: ${data.backupKeysRemaining} / 3</p>
+	        <button id="viewProfileBtn" class="small" style="width:100%;margin-bottom:8px;">view profile</button>
 	        <button id="editProfileBtn" class="small" style="width:100%;margin-bottom:8px;">edit profile</button>
 	        <button id="sessionsBtn" class="small" style="width:100%;margin-bottom:8px;">manage sessions (${data.activeSessions || 1})</button>
 	        <button id="refreshKeysBtn" class="small" style="width:100%;margin-bottom:8px;">refresh backup keys</button>
@@ -309,6 +310,9 @@ console.log(performance.now());
 	        <button id="logoutBtn" class="small" style="width:100%;margin-bottom:8px;color:#f66;">log out</button>
 	        <button id="deleteAcctBtn" class="small" style="width:100%;opacity:0.6;color:#f66;">delete account</button>
 	      `;
+			el('viewProfileBtn').addEventListener('click', () => {
+				window.location.href = `/assets/frontend/profile.html?user=${encodeURIComponent(data.username)}`;
+			});
 			el('editProfileBtn').addEventListener('click', () => openEditProfile(data));
 			el('sessionsBtn').addEventListener('click', () => openSessions());
 			el('refreshKeysBtn').addEventListener('click', refreshBackupKeys);
