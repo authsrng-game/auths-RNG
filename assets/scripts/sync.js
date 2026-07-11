@@ -189,6 +189,7 @@
 			overlayEl.parentNode.removeChild(overlayEl);
 		}
 		overlayEl = null;
+		document.dispatchEvent(new CustomEvent('syncBootComplete'));
 	}
 
 	function pullSync() {
