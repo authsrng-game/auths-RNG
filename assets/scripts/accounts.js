@@ -370,6 +370,7 @@ console.log(performance.now());
 	      <textarea id="bioInput" class="auth-field" rows="4" maxlength="300" placeholder="write a short bio...">${currentData.bio || ''}</textarea>
 	      <div style="font-size:0.75em;opacity:0.5;margin:-4px 0 10px;text-align:right;" id="bioCharCount">${(currentData.bio || '').length} / 300</div>
 	      <button id="saveProfileBtn" class="small" style="width:100%;margin-bottom:8px;">save changes</button>
+	      <button id="editThemeBtn" class="small" style="width:100%;margin-bottom:8px;opacity:0.8;">customize profile appearance</button>
 	      <button id="cancelProfileBtn" class="small" style="width:100%;opacity:0.6;">cancel</button>
 	      <div id="profileStatus" class="auth-status"></div>
 	    `;
@@ -426,6 +427,15 @@ console.log(performance.now());
 
 		el('cancelProfileBtn').addEventListener('click', () => openAccountInfo());
 
+		el('editThemeBtn').addEventListener('click', async () => {
+			try {
+				const meData = await apiCall('/me');
+				openEditTheme(meData);
+			} catch (e) {
+				window.showAlert('failed to load current theme: ' + e.message);
+			}
+		});
+		
 		el('saveProfileBtn').addEventListener('click', async () => {
 			const status = el('profileStatus');
 			const payload = { bio: bioInput.value };
@@ -453,6 +463,91 @@ console.log(performance.now());
 					localStorage.removeItem('authAvatarUrl');
 				}
 				updateAccountBtn();
+				status.style.color = '#8d8';
+				status.textContent = 'saved!';
+				setTimeout(openAccountInfo, 600);
+			} catch (e) {
+				status.style.color = '#f66';
+				status.textContent = e.message;
+			}
+		});
+	}
+
+	function openEditTheme(currentData) {
+		const body = el('accountInfoBody');
+		const theme = currentData.theme || { bannerType: 'none', bannerColor1: '#1a1a1a', bannerColor2: '#2a2a3a', accentColor: '#dcdcdc' };
+
+		body.innerHTML = `
+	      <h3 style="margin-top:0">customize profile</h3>
+	      <div id="themePreview" style="height:70px;border-radius:4px;border:1px solid var(--border-color);margin-bottom:14px;"></div>
+
+	      <label style="display:block;margin-bottom:4px;font-size:0.85em;opacity:0.7;">banner style</label>
+	      <select id="bannerTypeSelect" class="auth-field">
+	        <option value="none">none</option>
+	        <option value="solid">solid color</option>
+	        <option value="gradient">gradient</option>
+	      </select>
+
+	      <div id="bannerColorRow" style="display:none;margin-bottom:10px;">
+	        <label style="display:block;margin-bottom:4px;font-size:0.85em;opacity:0.7;">color</label>
+	        <input type="color" id="bannerColor1" style="width:100%;height:36px;">
+	      </div>
+
+	      <div id="bannerColor2Row" style="display:none;margin-bottom:10px;">
+	        <label style="display:block;margin-bottom:4px;font-size:0.85em;opacity:0.7;">second color</label>
+	        <input type="color" id="bannerColor2" style="width:100%;height:36px;">
+	      </div>
+
+	      <label style="display:block;margin-bottom:4px;font-size:0.85em;opacity:0.7;">accent color</label>
+	      <input type="color" id="accentColor" style="width:100%;height:36px;margin-bottom:14px;">
+
+	      <button id="saveThemeBtn" class="small" style="width:100%;margin-bottom:8px;">save theme</button>
+	      <button id="cancelThemeBtn" class="small" style="width:100%;opacity:0.6;">cancel</button>
+	      <div id="themeStatus" class="auth-status"></div>
+	    `;
+
+		const bannerTypeSelect = el('bannerTypeSelect');
+		const bannerColor1 = el('bannerColor1');
+		const bannerColor2 = el('bannerColor2');
+		const accentColor = el('accentColor');
+		const preview = el('themePreview');
+
+		bannerTypeSelect.value = theme.bannerType || 'none';
+		bannerColor1.value = theme.bannerColor1 || '#1a1a1a';
+		bannerColor2.value = theme.bannerColor2 || '#2a2a3a';
+		accentColor.value = theme.accentColor || '#dcdcdc';
+
+		function updatePreview() {
+			const type = bannerTypeSelect.value;
+			el('bannerColorRow').style.display = type === 'none' ? 'none' : 'block';
+			el('bannerColor2Row').style.display = type === 'gradient' ? 'block' : 'none';
+
+			if (type === 'none') preview.style.background = 'var(--overlay-bg)';
+			else if (type === 'solid') preview.style.background = bannerColor1.value;
+			else preview.style.background = `linear-gradient(135deg, ${bannerColor1.value}, ${bannerColor2.value})`;
+		}
+
+		bannerTypeSelect.addEventListener('change', updatePreview);
+		bannerColor1.addEventListener('input', updatePreview);
+		bannerColor2.addEventListener('input', updatePreview);
+		updatePreview();
+
+		el('cancelThemeBtn').addEventListener('click', () => openAccountInfo());
+
+		el('saveThemeBtn').addEventListener('click', async () => {
+			const status = el('themeStatus');
+			try {
+				status.style.color = '';
+				status.textContent = 'saving...';
+				await apiCall('/theme', {
+					method: 'POST',
+					body: {
+						bannerType: bannerTypeSelect.value,
+						bannerColor1: bannerColor1.value,
+						bannerColor2: bannerColor2.value,
+						accentColor: accentColor.value
+					}
+				});
 				status.style.color = '#8d8';
 				status.textContent = 'saved!';
 				setTimeout(openAccountInfo, 600);
