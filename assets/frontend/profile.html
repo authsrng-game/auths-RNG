@@ -10,193 +10,194 @@
 		<meta name="robots" content="noindex" />
 		<style>
 			:root {
-    --bg: #0e0e0e;
-    --text: #dcdcdc;
-    --muted: #666;
-    --border: #2a2a2a;
-    --accent: #88dd88;
-  }
+				--bg: #0e0e0e;
+				--text: #dcdcdc;
+				--muted: #666;
+				--border: #2a2a2a;
+				--accent: #88dd88;
+			}
 
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
 
-  html, body {
-    max-width: 100%;
-    overflow-x: hidden;
-  }
+			html,
+			body {
+				max-width: 100%;
+				overflow-x: hidden;
+			}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: monospace;
-    font-size: 16px;
-    line-height: 1.7;
-    min-height: 100vh;
-    padding: 0 0 28px;
-  }
+			body {
+				background: var(--bg);
+				color: var(--text);
+				font-family: monospace;
+				font-size: 16px;
+				line-height: 1.7;
+				min-height: 100vh;
+				padding: 0 0 28px;
+			}
 
-  a {
-    color: var(--text);
-    text-decoration: none;
-    border-bottom: 1px dotted #444;
-  }
+			a {
+				color: var(--text);
+				text-decoration: none;
+				border-bottom: 1px dotted #444;
+			}
 
-  a:hover {
-    opacity: 0.7;
-  }
+			a:hover {
+				opacity: 0.7;
+			}
 
-  .profile-banner {
-    width: 100%;
-    height: 72px;
-    background: #131313;
-  }
+			.profile-banner {
+				width: 100%;
+				height: 72px;
+				background: #131313;
+			}
 
-  .container {
-    max-width: 520px;
-    margin: 0 auto;
-    padding: 0 28px;
-  }
+			.container {
+				max-width: 520px;
+				margin: 0 auto;
+				padding: 0 28px;
+			}
 
-  .profile-header {
-    display: flex;
-    align-items: flex-end;
-    gap: 16px;
-    margin: -30px 0 20px;
-    position: relative;
-    z-index: 1;
-  }
+			.profile-header {
+				display: flex;
+				align-items: flex-end;
+				gap: 16px;
+				margin: -30px 0 20px;
+				position: relative;
+				z-index: 1;
+			}
 
-  .avatar {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid var(--bg);
-    background: var(--bg);
-    flex-shrink: 0;
-  }
+			.avatar {
+				width: 72px;
+				height: 72px;
+				border-radius: 50%;
+				object-fit: cover;
+				border: 4px solid var(--bg);
+				background: var(--bg);
+				flex-shrink: 0;
+			}
 
-  .avatar-placeholder {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: #1a1a1a;
-    border: 4px solid var(--bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8em;
-    opacity: 0.6;
-    flex-shrink: 0;
-  }
+			.avatar-placeholder {
+				width: 72px;
+				height: 72px;
+				border-radius: 50%;
+				background: #1a1a1a;
+				border: 4px solid var(--bg);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 1.8em;
+				opacity: 0.6;
+				flex-shrink: 0;
+			}
 
-  .header-text {
-    padding-bottom: 4px;
-    min-width: 0;
-  }
+			.header-text {
+				padding-bottom: 4px;
+				min-width: 0;
+			}
 
-  .username {
-    font-size: 1.3em;
-    line-height: 1.2;
-    overflow-wrap: break-word;
-  }
+			.username {
+				font-size: 1.3em;
+				line-height: 1.2;
+				overflow-wrap: break-word;
+			}
 
-  .joined {
-    font-size: 0.8em;
-    opacity: 0.5;
-    margin-top: 4px;
-  }
+			.joined {
+				font-size: 0.8em;
+				opacity: 0.5;
+				margin-top: 4px;
+			}
 
-  .bio {
-    font-size: 0.9em;
-    opacity: 0.85;
-    margin-bottom: 22px;
-    white-space: pre-wrap;
-    overflow-wrap: break-word;
-    background: #131313;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 12px 14px;
-  }
+			.bio {
+				font-size: 0.9em;
+				opacity: 0.85;
+				margin-bottom: 22px;
+				white-space: pre-wrap;
+				overflow-wrap: break-word;
+				background: #131313;
+				border: 1px solid var(--border);
+				border-radius: 4px;
+				padding: 12px 14px;
+			}
 
-  .stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 22px;
-  }
+			.stats-grid {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 8px;
+				margin-bottom: 22px;
+			}
 
-  .stat-card {
-    background: #131313;
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 10px 12px;
-    border-left: 3px solid var(--border);
-    min-width: 0;
-  }
+			.stat-card {
+				background: #131313;
+				border: 1px solid var(--border);
+				border-radius: 3px;
+				padding: 10px 12px;
+				border-left: 3px solid var(--border);
+				min-width: 0;
+			}
 
-  .stat-label {
-    font-size: 0.7em;
-    opacity: 0.4;
-    margin-bottom: 3px;
-    text-transform: lowercase;
-    letter-spacing: 0.04em;
-  }
+			.stat-label {
+				font-size: 0.7em;
+				opacity: 0.4;
+				margin-bottom: 3px;
+				text-transform: lowercase;
+				letter-spacing: 0.04em;
+			}
 
-  .stat-value {
-    font-size: 1.05em;
-    overflow-wrap: break-word;
-  }
+			.stat-value {
+				font-size: 1.05em;
+				overflow-wrap: break-word;
+			}
 
-  .achievements-section {
-    margin-bottom: 22px;
-  }
+			.achievements-section {
+				margin-bottom: 22px;
+			}
 
-  .actions {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
+			.actions {
+				display: flex;
+				gap: 8px;
+				margin-bottom: 16px;
+				flex-wrap: wrap;
+			}
 
-  button {
-    background: #1a1a1a;
-    color: var(--text);
-    border: 1px solid var(--border);
-    padding: 9px 16px;
-    font-family: monospace;
-    font-size: 0.9em;
-    cursor: pointer;
-    border-radius: 2px;
-    transition: background 0.15s;
-  }
+			button {
+				background: #1a1a1a;
+				color: var(--text);
+				border: 1px solid var(--border);
+				padding: 9px 16px;
+				font-family: monospace;
+				font-size: 0.9em;
+				cursor: pointer;
+				border-radius: 2px;
+				transition: background 0.15s;
+			}
 
-  button:hover {
-    background: #242424;
-  }
+			button:hover {
+				background: #242424;
+			}
 
-  .status-msg {
-    font-size: 0.85em;
-    min-height: 1.2em;
-    margin-bottom: 10px;
-  }
+			.status-msg {
+				font-size: 0.85em;
+				min-height: 1.2em;
+				margin-bottom: 10px;
+			}
 
-  .back-link {
-    display: inline-block;
-    padding: 9px 16px;
-    background: #1a1a1a;
-    border: 1px solid #2a2a2a;
-    border-radius: 2px;
-    font-size: 0.9em;
-  }
+			.back-link {
+				display: inline-block;
+				padding: 9px 16px;
+				background: #1a1a1a;
+				border: 1px solid #2a2a2a;
+				border-radius: 2px;
+				font-size: 0.9em;
+			}
 
-  .state-box {
-    opacity: 0.5;
-    padding: 2em 28px;
-  }
+			.state-box {
+				opacity: 0.5;
+				padding: 2em 28px;
+			}
 		</style>
 	</head>
 	<body>
