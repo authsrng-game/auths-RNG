@@ -137,9 +137,19 @@
 				opacity: 0.5;
 				padding: 2em 0;
 			}
-			.profile-banner { height: 90px; border-radius: 4px; margin-bottom: -30px; }
-		  .profile-header { position: relative; z-index: 1; }
-		  .avatar, .avatar-placeholder { border: 3px solid var(--bg); }
+			.profile-banner {
+				height: 90px;
+				border-radius: 4px;
+				margin-bottom: -30px;
+			}
+			.profile-header {
+				position: relative;
+				z-index: 1;
+			}
+			.avatar,
+			.avatar-placeholder {
+				border: 3px solid var(--bg);
+			}
 		</style>
 	</head>
 	<body>
@@ -247,7 +257,7 @@
 			        bannerStyle = `background:linear-gradient(135deg, ${theme.bannerColor1}, ${theme.bannerColor2});`;
 			      }
 			      const accent = HEX_COLOR_RE.test(theme.accentColor || '') ? theme.accentColor : '#dcdcdc';
-			
+
 			      container.innerHTML = `
 			        <div class="profile-banner" style="${bannerStyle}"></div>
 			        <div class="profile-header">
