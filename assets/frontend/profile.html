@@ -1,157 +1,318 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>profile - auth's RNG</title>
-<meta name="robots" content="noindex" />
-<style>
-  :root { --bg:#0e0e0e; --text:#dcdcdc; --muted:#666; --border:#2a2a2a; --accent:#88dd88; }
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { background:var(--bg); color:var(--text); font-family:monospace; font-size:16px; line-height:1.7; min-height:100vh; padding:28px; }
-  .container { max-width:520px; margin:0 auto; }
-  a { color:var(--text); text-decoration:none; border-bottom:1px dotted #444; }
-  a:hover { opacity:0.7; }
-  .profile-header { display:flex; align-items:center; gap:16px; margin-bottom:20px; position:relative; z-index:1; }
-  .avatar { width:72px; height:72px; border-radius:50%; object-fit:cover; border:3px solid var(--bg); }
-  .avatar-placeholder { width:72px; height:72px; border-radius:50%; background:#1a1a1a; border:3px solid var(--bg); display:flex; align-items:center; justify-content:center; font-size:1.8em; opacity:0.6; }
-  .username { font-size:1.3em; }
-  .joined { font-size:0.8em; opacity:0.5; margin-top:4px; }
-  .bio { font-size:0.9em; opacity:0.8; margin-bottom:20px; white-space:pre-wrap; }
-  .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:20px; }
-  .stat-card { background:#131313; border:1px solid var(--border); border-radius:3px; padding:10px 12px; }
-  .stat-label { font-size:0.7em; opacity:0.4; margin-bottom:3px; }
-  .stat-value { font-size:1em; }
-  .actions { display:flex; gap:8px; margin-bottom:20px; }
-  button { background:#1a1a1a; color:var(--text); border:1px solid var(--border); padding:8px 14px; font-family:monospace; font-size:0.9em; cursor:pointer; border-radius:2px; }
-  button:hover { background:#242424; }
-  .status-msg { font-size:0.85em; min-height:1.2em; margin-bottom:10px; }
-  .back-link { display:inline-block; margin-top:1em; padding:8px 16px; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:2px; font-size:0.9em; }
-  .state-box { opacity:0.5; padding:2em 0; }
-  .profile-banner { height:90px; border-radius:4px; margin-bottom:-30px; }
-</style>
-</head>
-<body>
-  <div class="container" id="container">
-    <div class="state-box" id="stateBox">loading profile...</div>
-  </div>
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+		/>
+		<title>profile - auth's RNG</title>
+		<meta name="robots" content="noindex" />
+		<style>
+			:root {
+				--bg: #0e0e0e;
+				--text: #dcdcdc;
+				--muted: #666;
+				--border: #2a2a2a;
+				--accent: #88dd88;
+			}
+			* {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+			body {
+				background: var(--bg);
+				color: var(--text);
+				font-family: monospace;
+				font-size: 16px;
+				line-height: 1.7;
+				min-height: 100vh;
+				padding: 28px;
+			}
+			.container {
+				max-width: 520px;
+				margin: 0 auto;
+			}
+			a {
+				color: var(--text);
+				text-decoration: none;
+				border-bottom: 1px dotted #444;
+			}
+			a:hover {
+				opacity: 0.7;
+			}
+			.profile-header {
+				display: flex;
+				align-items: center;
+				gap: 16px;
+				margin-bottom: 20px;
+				position: relative;
+				z-index: 1;
+			}
+			.avatar {
+				width: 72px;
+				height: 72px;
+				border-radius: 50%;
+				object-fit: cover;
+				border: 3px solid var(--bg);
+			}
+			.avatar-placeholder {
+				width: 72px;
+				height: 72px;
+				border-radius: 50%;
+				background: #1a1a1a;
+				border: 3px solid var(--bg);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 1.8em;
+				opacity: 0.6;
+			}
+			.username {
+				font-size: 1.3em;
+			}
+			.joined {
+				font-size: 0.8em;
+				opacity: 0.5;
+				margin-top: 4px;
+			}
+			.bio {
+				font-size: 0.9em;
+				opacity: 0.8;
+				margin-bottom: 20px;
+				white-space: pre-wrap;
+			}
+			.stats-grid {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 8px;
+				margin-bottom: 20px;
+			}
+			.stat-card {
+				background: #131313;
+				border: 1px solid var(--border);
+				border-radius: 3px;
+				padding: 10px 12px;
+			}
+			.stat-label {
+				font-size: 0.7em;
+				opacity: 0.4;
+				margin-bottom: 3px;
+			}
+			.stat-value {
+				font-size: 1em;
+			}
+			.actions {
+				display: flex;
+				gap: 8px;
+				margin-bottom: 20px;
+			}
+			button {
+				background: #1a1a1a;
+				color: var(--text);
+				border: 1px solid var(--border);
+				padding: 8px 14px;
+				font-family: monospace;
+				font-size: 0.9em;
+				cursor: pointer;
+				border-radius: 2px;
+			}
+			button:hover {
+				background: #242424;
+			}
+			.status-msg {
+				font-size: 0.85em;
+				min-height: 1.2em;
+				margin-bottom: 10px;
+			}
+			.back-link {
+				display: inline-block;
+				margin-top: 1em;
+				padding: 8px 16px;
+				background: #1a1a1a;
+				border: 1px solid #2a2a2a;
+				border-radius: 2px;
+				font-size: 0.9em;
+			}
+			.state-box {
+				opacity: 0.5;
+				padding: 2em 0;
+			}
+			.profile-banner {
+				height: 90px;
+				border-radius: 4px;
+				margin-bottom: -30px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container" id="container">
+			<div class="state-box" id="stateBox">loading profile...</div>
+		</div>
 
-  <script>
-    'use strict';
-    const ACCOUNTS_API = 'https://accounts.authsrng.xyz/api/accounts';
-    const FRIENDS_API = 'https://accounts.authsrng.xyz/api/friends';
-    const LB_API = 'https://leaderboard.authsrng.xyz/api/leaderboard';
-    const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+		<script>
+			'use strict';
+			const ACCOUNTS_API = 'https://accounts.authsrng.xyz/api/accounts';
+			const FRIENDS_API = 'https://accounts.authsrng.xyz/api/friends';
+			const LB_API = 'https://leaderboard.authsrng.xyz/api/leaderboard';
+			const HEX_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
 
-    function getToken() { return localStorage.getItem('authToken'); }
-    function getMyUsername() { return localStorage.getItem('authUsername'); }
-    function isLoggedIn() { return !!getToken(); }
-    function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+			function getToken() {
+				return localStorage.getItem('authToken');
+			}
+			function getMyUsername() {
+				return localStorage.getItem('authUsername');
+			}
+			function isLoggedIn() {
+				return !!getToken();
+			}
+			function escHtml(s) {
+				return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+			}
 
-    function abbr(n) {
-      n = Number(n) || 0;
-      if (n >= 1e9) return (n/1e9).toFixed(1).replace(/\.0$/,'') + 'B';
-      if (n >= 1e6) return (n/1e6).toFixed(1).replace(/\.0$/,'') + 'M';
-      if (n >= 1e3) return (n/1e3).toFixed(1).replace(/\.0$/,'') + 'K';
-      return String(Math.floor(n));
-    }
+			function abbr(n) {
+				n = Number(n) || 0;
+				if (n >= 1e9) return (n / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+				if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+				if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+				return String(Math.floor(n));
+			}
 
-    function fmtLastSeen(ts) {
-      if (!ts) return null;
-      const s = Math.floor((Date.now() - ts) / 1000);
-      if (s < 120) return 'online now';
-      if (s < 3600) return 'active ' + Math.floor(s / 60) + 'm ago';
-      if (s < 86400) return 'active ' + Math.floor(s / 3600) + 'h ago';
-      if (s < 604800) return 'active ' + Math.floor(s / 86400) + 'd ago';
-      return 'inactive for a while';
-    }
+			function fmtLastSeen(ts) {
+				if (!ts) return null;
+				const s = Math.floor((Date.now() - ts) / 1000);
+				if (s < 120) return 'online now';
+				if (s < 3600) return 'active ' + Math.floor(s / 60) + 'm ago';
+				if (s < 86400) return 'active ' + Math.floor(s / 3600) + 'h ago';
+				if (s < 604800) return 'active ' + Math.floor(s / 86400) + 'd ago';
+				return 'inactive for a while';
+			}
 
-    const achievementsMeta = [
-      ['roller','Roller'],['gambler','Gambler'],['discordMod','Discord Mod'],['touchGrass','Touch Grass Please'],
-      ['addicted','Addicted'],['insane','Insane'],['joel','Joel'],['crazyAddicted','Crazy Addicted'],
-      ['funkyTown','Funky Town'],['outsideTime',"It's Outside Time Now"],['actually-addicted','Actually Addicted'],
-      ['what','..what'],['devoted','Devoted'],['get-a-job','get a job'],['genuinely-insane','Genuinely Insane'],
-      ['roll-factory','Roll Factory'],['just-one-more-roll','Just One More Roll'],['got-no-life','Got No LIfe'],
-      ['introverted','Introverted'],['holy-hell','HOLY HELL'],['dude','dude'],['please-just-stop','PLEASE JUST STOP'],
-      ['you-will-pay','you will pay'],['startingOut','Starting Out'],['lucky','Lucky'],['spammin','Spammin'],
-      ['leftHanded','Left Handed'],['insanelyLucky','Insanely Lucky'],['lunar','Lunar'],['jackpot','Jackpot'],
-      ['antimatter','Antimatter'],['oh-my-god','oh my god'],['market-crash','Market Crash'],
-      ['phenomenon','Phenomenon'],['ok-bro','ok bro'],['summer','SUMMER']
-    ].reduce((acc, [id, name]) => { acc[id] = name; return acc; }, {});
+			const achievementsMeta = [
+				['roller', 'Roller'],
+				['gambler', 'Gambler'],
+				['discordMod', 'Discord Mod'],
+				['touchGrass', 'Touch Grass Please'],
+				['addicted', 'Addicted'],
+				['insane', 'Insane'],
+				['joel', 'Joel'],
+				['crazyAddicted', 'Crazy Addicted'],
+				['funkyTown', 'Funky Town'],
+				['outsideTime', "It's Outside Time Now"],
+				['actually-addicted', 'Actually Addicted'],
+				['what', '..what'],
+				['devoted', 'Devoted'],
+				['get-a-job', 'get a job'],
+				['genuinely-insane', 'Genuinely Insane'],
+				['roll-factory', 'Roll Factory'],
+				['just-one-more-roll', 'Just One More Roll'],
+				['got-no-life', 'Got No LIfe'],
+				['introverted', 'Introverted'],
+				['holy-hell', 'HOLY HELL'],
+				['dude', 'dude'],
+				['please-just-stop', 'PLEASE JUST STOP'],
+				['you-will-pay', 'you will pay'],
+				['startingOut', 'Starting Out'],
+				['lucky', 'Lucky'],
+				['spammin', 'Spammin'],
+				['leftHanded', 'Left Handed'],
+				['insanelyLucky', 'Insanely Lucky'],
+				['lunar', 'Lunar'],
+				['jackpot', 'Jackpot'],
+				['antimatter', 'Antimatter'],
+				['oh-my-god', 'oh my god'],
+				['market-crash', 'Market Crash'],
+				['phenomenon', 'Phenomenon'],
+				['ok-bro', 'ok bro'],
+				['summer', 'SUMMER'],
+			].reduce((acc, [id, name]) => {
+				acc[id] = name;
+				return acc;
+			}, {});
 
-    const params = new URLSearchParams(location.search);
-    const username = params.get('user');
+			const params = new URLSearchParams(location.search);
+			const username = params.get('user');
 
-    async function init() {
-      const container = document.getElementById('container');
-      if (!username) {
-        container.innerHTML = '<div class="state-box">no username specified. <a href="/">back to game</a></div>';
-        return;
-      }
+			async function init() {
+				const container = document.getElementById('container');
+				if (!username) {
+					container.innerHTML =
+						'<div class="state-box">no username specified. <a href="/">back to game</a></div>';
+					return;
+				}
 
-      let profile, lbEntry;
-      try {
-        const r = await fetch(ACCOUNTS_API + '/profile/' + encodeURIComponent(username));
-        if (!r.ok) throw new Error((await r.json()).error || 'user not found');
-        profile = await r.json();
-      } catch (e) {
-        container.innerHTML = `<div class="state-box">${escHtml(e.message)}<br><br><a href="/">back to game</a></div>`;
-        return;
-      }
+				let profile, lbEntry;
+				try {
+					const r = await fetch(ACCOUNTS_API + '/profile/' + encodeURIComponent(username));
+					if (!r.ok) throw new Error((await r.json()).error || 'user not found');
+					profile = await r.json();
+				} catch (e) {
+					container.innerHTML = `<div class="state-box">${escHtml(e.message)}<br><br><a href="/">back to game</a></div>`;
+					return;
+				}
 
-      try {
-        const r = await fetch(LB_API);
-        const data = await r.json();
-        lbEntry = (data.entries || []).find(e => e.username.toLowerCase() === username.toLowerCase());
-      } catch (_) {}
+				try {
+					const r = await fetch(LB_API);
+					const data = await r.json();
+					lbEntry = (data.entries || []).find(
+						(e) => e.username.toLowerCase() === username.toLowerCase()
+					);
+				} catch (_) {}
 
-      const avatarHtml = profile.avatarUrl
-        ? `<img class="avatar" src="https://accounts.authsrng.xyz${profile.avatarUrl}">`
-        : `<div class="avatar-placeholder">${escHtml(profile.username.charAt(0).toUpperCase())}</div>`;
+				const avatarHtml = profile.avatarUrl
+					? `<img class="avatar" src="https://accounts.authsrng.xyz${profile.avatarUrl}">`
+					: `<div class="avatar-placeholder">${escHtml(profile.username.charAt(0).toUpperCase())}</div>`;
 
-      let statsHtml = lbEntry ? `
+				let statsHtml = lbEntry
+					? `
           <div class="stats-grid">
             <div class="stat-card"><div class="stat-label">rolls</div><div class="stat-value">${abbr(lbEntry.rolls)}</div></div>
             <div class="stat-card"><div class="stat-label">points</div><div class="stat-value">${abbr(lbEntry.points)}</div></div>
             <div class="stat-card"><div class="stat-label">rarest</div><div class="stat-value">${escHtml(lbEntry.rarestName || 'none')}</div></div>
             <div class="stat-card"><div class="stat-label">collected</div><div class="stat-value">${abbr(lbEntry.rarities)}</div></div>
-          </div>` : `<p style="font-size:0.82em;opacity:0.4;font-style:italic;margin-bottom:20px;">not on the leaderboard</p>`;
+          </div>`
+					: `<p style="font-size:0.82em;opacity:0.4;font-style:italic;margin-bottom:20px;">not on the leaderboard</p>`;
 
-      const unlockedIds = (lbEntry && Array.isArray(lbEntry.achievements)) ? lbEntry.achievements : [];
-      const totalAch = Object.keys(achievementsMeta).length;
-      let achHtml = `<div style="font-size:0.75em;opacity:0.4;margin-bottom:8px;">achievements (${unlockedIds.length} / ${totalAch})</div>`;
-      if (unlockedIds.length === 0) {
-        achHtml += `<p style="font-size:0.82em;opacity:0.4;font-style:italic;margin-bottom:20px;">no achievements yet</p>`;
-      } else {
-        achHtml += `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;">`;
-        unlockedIds.forEach((id) => {
-          const name = achievementsMeta[id] || id;
-          achHtml += `<span style="font-size:0.72em;padding:4px 9px;border:1px solid var(--border);border-radius:20px;background:#141414;">${escHtml(name)}</span>`;
-        });
-        achHtml += `</div>`;
-      }
-      statsHtml += achHtml;
+				const unlockedIds =
+					lbEntry && Array.isArray(lbEntry.achievements) ? lbEntry.achievements : [];
+				const totalAch = Object.keys(achievementsMeta).length;
+				let achHtml = `<div style="font-size:0.75em;opacity:0.4;margin-bottom:8px;">achievements (${unlockedIds.length} / ${totalAch})</div>`;
+				if (unlockedIds.length === 0) {
+					achHtml += `<p style="font-size:0.82em;opacity:0.4;font-style:italic;margin-bottom:20px;">no achievements yet</p>`;
+				} else {
+					achHtml += `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;">`;
+					unlockedIds.forEach((id) => {
+						const name = achievementsMeta[id] || id;
+						achHtml += `<span style="font-size:0.72em;padding:4px 9px;border:1px solid var(--border);border-radius:20px;background:#141414;">${escHtml(name)}</span>`;
+					});
+					achHtml += `</div>`;
+				}
+				statsHtml += achHtml;
 
-      const isSelf = isLoggedIn() && getMyUsername() && getMyUsername().toLowerCase() === username.toLowerCase();
-      let actionsHtml = '';
-      if (isLoggedIn() && !isSelf) {
-        actionsHtml = `<div class="actions">
+				const isSelf =
+					isLoggedIn() &&
+					getMyUsername() &&
+					getMyUsername().toLowerCase() === username.toLowerCase();
+				let actionsHtml = '';
+				if (isLoggedIn() && !isSelf) {
+					actionsHtml = `<div class="actions">
             <button id="addFriendBtn">add friend</button>
             <button id="messageBtn">message</button>
           </div>
           <div class="status-msg" id="actionStatus"></div>`;
-      }
+				}
 
-      const theme = profile.theme || { bannerType: 'none', accentColor: '#dcdcdc' };
-      let bannerStyle = 'display:none;';
-      if (theme.bannerType === 'solid' && theme.bannerColor1) {
-        bannerStyle = `background:${theme.bannerColor1};`;
-      } else if (theme.bannerType === 'gradient' && theme.bannerColor1 && theme.bannerColor2) {
-        bannerStyle = `background:linear-gradient(135deg, ${theme.bannerColor1}, ${theme.bannerColor2});`;
-      }
-      const accent = HEX_COLOR_RE.test(theme.accentColor || '') ? theme.accentColor : '#dcdcdc';
+				const theme = profile.theme || { bannerType: 'none', accentColor: '#dcdcdc' };
+				let bannerStyle = 'display:none;';
+				if (theme.bannerType === 'solid' && theme.bannerColor1) {
+					bannerStyle = `background:${theme.bannerColor1};`;
+				} else if (theme.bannerType === 'gradient' && theme.bannerColor1 && theme.bannerColor2) {
+					bannerStyle = `background:linear-gradient(135deg, ${theme.bannerColor1}, ${theme.bannerColor2});`;
+				}
+				const accent = HEX_COLOR_RE.test(theme.accentColor || '') ? theme.accentColor : '#dcdcdc';
 
-      container.innerHTML = `
+				container.innerHTML = `
         <div class="profile-banner" style="${bannerStyle}"></div>
         <div class="profile-header">
           ${avatarHtml}
@@ -169,51 +330,59 @@
         </div>
       `;
 
-      document.querySelectorAll('.stat-card').forEach((card) => {
-        card.style.borderLeftColor = accent;
-        card.style.borderLeftWidth = '2px';
-      });
+				document.querySelectorAll('.stat-card').forEach((card) => {
+					card.style.borderLeftColor = accent;
+					card.style.borderLeftWidth = '2px';
+				});
 
-      const copyBtn = document.getElementById('copyLinkBtn');
-      if (copyBtn) {
-        copyBtn.addEventListener('click', () => {
-          navigator.clipboard.writeText(location.href).then(() => {
-            copyBtn.textContent = 'copied!';
-            setTimeout(() => { copyBtn.textContent = 'copy link'; }, 1500);
-          }).catch(() => {
-            copyBtn.textContent = 'failed to copy';
-          });
-        });
-      }
+				const copyBtn = document.getElementById('copyLinkBtn');
+				if (copyBtn) {
+					copyBtn.addEventListener('click', () => {
+						navigator.clipboard
+							.writeText(location.href)
+							.then(() => {
+								copyBtn.textContent = 'copied!';
+								setTimeout(() => {
+									copyBtn.textContent = 'copy link';
+								}, 1500);
+							})
+							.catch(() => {
+								copyBtn.textContent = 'failed to copy';
+							});
+					});
+				}
 
-      if (isLoggedIn() && !isSelf) {
-        document.getElementById('addFriendBtn').addEventListener('click', async () => {
-          const status = document.getElementById('actionStatus');
-          try {
-            status.style.color = '';
-            status.textContent = 'sending request...';
-            const r = await fetch(FRIENDS_API + '/request', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + getToken() },
-              body: JSON.stringify({ username: profile.username })
-            });
-            const data = await r.json();
-            if (!r.ok) throw new Error(data.error || 'failed');
-            status.style.color = '#8d8';
-            status.textContent = 'friend request sent!';
-          } catch (e) {
-            status.style.color = '#f66';
-            status.textContent = e.message;
-          }
-        });
+				if (isLoggedIn() && !isSelf) {
+					document.getElementById('addFriendBtn').addEventListener('click', async () => {
+						const status = document.getElementById('actionStatus');
+						try {
+							status.style.color = '';
+							status.textContent = 'sending request...';
+							const r = await fetch(FRIENDS_API + '/request', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json',
+									Authorization: 'Bearer ' + getToken(),
+								},
+								body: JSON.stringify({ username: profile.username }),
+							});
+							const data = await r.json();
+							if (!r.ok) throw new Error(data.error || 'failed');
+							status.style.color = '#8d8';
+							status.textContent = 'friend request sent!';
+						} catch (e) {
+							status.style.color = '#f66';
+							status.textContent = e.message;
+						}
+					});
 
-        document.getElementById('messageBtn').addEventListener('click', () => {
-          location.href = '/?compose=' + encodeURIComponent(profile.username);
-        });
-      }
-    }
+					document.getElementById('messageBtn').addEventListener('click', () => {
+						location.href = '/?compose=' + encodeURIComponent(profile.username);
+					});
+				}
+			}
 
-    init();
-  </script>
-</body>
+			init();
+		</script>
+	</body>
 </html>
