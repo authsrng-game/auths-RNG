@@ -243,6 +243,18 @@ console.log(performance.now());
 	const ALLOWED_AVATAR_MIMES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp', 'image/avif'];
 	const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 
+	const MAX_BANNER_BYTES = 3 * 1024 * 1024;
+	const MAX_PRONOUNS_CHARS = 30;
+
+	const THEME_PRESETS = [
+		{ name: 'default', bannerType: 'none', bannerColor1: '#1a1a1a', bannerColor2: '#2a2a3a', accentColor: '#dcdcdc' },
+		{ name: 'sunset', bannerType: 'gradient', bannerColor1: '#ff6b6b', bannerColor2: '#ffb347', accentColor: '#ffb347' },
+		{ name: 'void', bannerType: 'gradient', bannerColor1: '#0a0014', bannerColor2: '#2d0a3d', accentColor: '#b388ff' },
+		{ name: 'mint', bannerType: 'gradient', bannerColor1: '#0f3d2e', bannerColor2: '#1a5c46', accentColor: '#6ee7b7' },
+		{ name: 'crimson', bannerType: 'solid', bannerColor1: '#3d0a0a', bannerColor2: '#3d0a0a', accentColor: '#ff6b6b' },
+		{ name: 'ocean', bannerType: 'gradient', bannerColor1: '#0a1e3d', bannerColor2: '#1a4d7a', accentColor: '#5dade2' }
+	];
+
 	function switchAuthTab(tab) {
 		['login', 'signup', 'forgot'].forEach((t) => {
 			el('authTab' + capitalize(t)).classList.toggle('active', t === tab);
@@ -291,12 +303,15 @@ console.log(performance.now());
 			const bioHtml = data.bio
 				? `<p style="font-size:0.85em;opacity:0.75;margin:0 0 12px;white-space:pre-wrap;">${data.bio.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`
 				: `<p style="font-size:0.8em;opacity:0.4;margin:0 0 12px;font-style:italic;">no bio set</p>`;
+			const pronounsHtml = data.pronouns
+				? `<span style="font-size:0.78em;opacity:0.5;margin-left:6px;">(${escHtml(data.pronouns)})</span>`
+				: '';
 
 			body.innerHTML = `
 	        <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
 	          ${avatarImg}
 	          <div>
-	            <h3 style="margin:0;">${data.username}</h3>
+	            <h3 style="margin:0;">${data.username}${pronounsHtml}</h3>
 	            <p style="font-size:0.8em;opacity:0.5;margin:2px 0 0;">joined ${new Date(data.createdAt).toLocaleDateString()}</p>
 	          </div>
 	        </div>
@@ -353,13 +368,27 @@ console.log(performance.now());
 		const body = el('accountInfoBody');
 		let selectedFile = null;
 		let removeFlag = false;
+		let selectedBannerFile = null;
+		let removeBannerFlag = false;
 
 		const avatarPreview = currentData.avatarUrl
 			? `<img src="https://accounts.authsrng.xyz${currentData.avatarUrl}" class="account-avatar-preview" id="editAvatarPreview">`
 			: `<div class="account-avatar-placeholder" id="editAvatarPreview">${currentData.username.charAt(0).toUpperCase()}</div>`;
 
+		const bannerPreviewStyle = currentData.bannerImageUrl
+			? `background-image:url('https://accounts.authsrng.xyz${currentData.bannerImageUrl}');background-size:cover;background-position:center;`
+			: `background:var(--overlay-bg);`;
+
 		body.innerHTML = `
 	      <h3 style="margin-top:0">edit profile</h3>
+
+	      <label style="display:block;margin-bottom:4px;font-size:0.85em;opacity:0.7;">banner image</label>
+	      <div id="bannerPreview" style="height:70px;border-radius:4px;border:1px solid var(--border-color);margin-bottom:8px;${bannerPreviewStyle}"></div>
+	      <div style="display:flex;gap:6px;margin-bottom:14px;">
+	        <input type="file" id="bannerFileInput" accept="image/png,image/jpeg,image/gif,image/webp,image/avif" style="font-size:0.8em;flex:1;">
+	        <button id="removeBannerBtn" class="small" style="opacity:0.6;">${currentData.bannerImageUrl ? 'remove' : 'no image'}</button>
+	      </div>
+
 	      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
 	        ${avatarPreview}
 	        <div style="display:flex;flex-direction:column;gap:6px;">
@@ -367,10 +396,17 @@ console.log(performance.now());
 	          <button id="removeAvatarBtn" class="small" style="opacity:0.6;">${currentData.avatarUrl ? 'remove picture' : 'no picture set'}</button>
 	        </div>
 	      </div>
+
+	      <label style="display:block;margin-bottom:4px;font-size:0.85em;opacity:0.7;">pronouns</label>
+	      <input type="text" id="pronounsInput" class="auth-field" maxlength="30" placeholder="e.g. she/her, they/them" value="${escHtml(currentData.pronouns || '')}">
+
+	      <label style="display:block;margin-bottom:4px;font-size:0.85em;opacity:0.7;">bio</label>
 	      <textarea id="bioInput" class="auth-field" rows="4" maxlength="300" placeholder="write a short bio...">${currentData.bio || ''}</textarea>
 	      <div style="font-size:0.75em;opacity:0.5;margin:-4px 0 10px;text-align:right;" id="bioCharCount">${(currentData.bio || '').length} / 300</div>
+
 	      <button id="saveProfileBtn" class="small" style="width:100%;margin-bottom:8px;">save changes</button>
-	      <button id="editThemeBtn" class="small" style="width:100%;margin-bottom:8px;opacity:0.8;">customize profile appearance</button>
+	      <button id="editThemeBtn" class="small" style="width:100%;margin-bottom:8px;opacity:0.8;">customize appearance</button>
+	      <button id="editWidgetsBtn" class="small" style="width:100%;margin-bottom:8px;opacity:0.8;">customize layout</button>
 	      <button id="cancelProfileBtn" class="small" style="width:100%;opacity:0.6;">cancel</button>
 	      <div id="profileStatus" class="auth-status"></div>
 	    `;
@@ -378,6 +414,37 @@ console.log(performance.now());
 		const bioInput = el('bioInput');
 		bioInput.addEventListener('input', () => {
 			el('bioCharCount').textContent = bioInput.value.length + ' / 300';
+		});
+
+		el('bannerFileInput').addEventListener('change', (e) => {
+			const file = e.target.files[0];
+			if (!file) return;
+
+			if (!ALLOWED_AVATAR_MIMES.includes(file.type)) {
+				window.showAlert('unsupported format. use png, jpg, gif, webp, or avif.');
+				e.target.value = '';
+				return;
+			}
+			if (file.size > MAX_BANNER_BYTES) {
+				window.showAlert('banner image must be under 3MB.');
+				e.target.value = '';
+				return;
+			}
+
+			selectedBannerFile = file;
+			removeBannerFlag = false;
+			const reader = new FileReader();
+			reader.onload = () => {
+				el('bannerPreview').style.cssText = `height:70px;border-radius:4px;border:1px solid var(--border-color);margin-bottom:8px;background-image:url('${reader.result}');background-size:cover;background-position:center;`;
+			};
+			reader.readAsDataURL(file);
+		});
+
+		el('removeBannerBtn').addEventListener('click', () => {
+			selectedBannerFile = null;
+			removeBannerFlag = true;
+			el('bannerFileInput').value = '';
+			el('bannerPreview').style.cssText = 'height:70px;border-radius:4px;border:1px solid var(--border-color);margin-bottom:8px;background:var(--overlay-bg);';
 		});
 
 		el('avatarFileInput').addEventListener('change', (e) => {
@@ -436,9 +503,18 @@ console.log(performance.now());
 			}
 		});
 
+		el('editWidgetsBtn').addEventListener('click', async () => {
+			try {
+				const meData = await apiCall('/me');
+				openEditWidgets(meData);
+			} catch (e) {
+				window.showAlert('failed to load current layout: ' + e.message);
+			}
+		});
+
 		el('saveProfileBtn').addEventListener('click', async () => {
 			const status = el('profileStatus');
-			const payload = { bio: bioInput.value };
+			const payload = { bio: bioInput.value, pronouns: el('pronounsInput').value };
 
 			if (removeFlag) {
 				payload.removeAvatar = true;
@@ -456,13 +532,15 @@ console.log(performance.now());
 			try {
 				status.style.color = '';
 				status.textContent = 'saving...';
-				const data = await apiCall('/profile', { method: 'POST', body: payload });
-				if (data.avatarUrl) {
-					localStorage.setItem('authAvatarUrl', data.avatarUrl);
-				} else if (payload.removeAvatar) {
-					localStorage.removeItem('authAvatarUrl');
+				await apiCall('/profile', { method: 'POST', body: payload });
+
+				if (removeBannerFlag) {
+					await apiCall('/banner-image', { method: 'POST', body: { removeBanner: true } });
+				} else if (selectedBannerFile) {
+					const bannerBase64 = await readFileAsBase64(selectedBannerFile);
+					await apiCall('/banner-image', { method: 'POST', body: { bannerBase64, bannerMime: selectedBannerFile.type } });
 				}
-				updateAccountBtn();
+
 				status.style.color = '#8d8';
 				status.textContent = 'saved!';
 				setTimeout(openAccountInfo, 600);
@@ -485,6 +563,8 @@ console.log(performance.now());
 		body.innerHTML = `
 	      <h3 style="margin-top:0">customize profile</h3>
 	      <div id="themePreview" style="height:70px;border-radius:4px;border:1px solid var(--border-color);margin-bottom:14px;"></div>
+		  <label style="display:block;margin-bottom:6px;font-size:0.85em;opacity:0.7;">presets</label>
+	      <div id="presetGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px;"></div>
 
 	      <label style="display:block;margin-bottom:4px;font-size:0.85em;opacity:0.7;">banner style</label>
 	      <select id="bannerTypeSelect" class="auth-field">
@@ -538,6 +618,22 @@ console.log(performance.now());
 		bannerColor2.addEventListener('input', updatePreview);
 		updatePreview();
 
+		const presetGrid = el('presetGrid');
+		THEME_PRESETS.forEach((preset) => {
+			const btn = document.createElement('button');
+			btn.className = 'small';
+			btn.textContent = preset.name;
+			btn.style.fontSize = '0.75em';
+			btn.addEventListener('click', () => {
+				bannerTypeSelect.value = preset.bannerType;
+				bannerColor1.value = preset.bannerColor1;
+				bannerColor2.value = preset.bannerColor2;
+				accentColor.value = preset.accentColor;
+				updatePreview();
+			});
+			presetGrid.appendChild(btn);
+		});
+
 		el('cancelThemeBtn').addEventListener('click', () => openAccountInfo());
 
 		el('saveThemeBtn').addEventListener('click', async () => {
@@ -562,6 +658,87 @@ console.log(performance.now());
 				status.textContent = e.message;
 			}
 		});
+	}
+
+	function openEditWidgets(currentData) {
+		const body = el('accountInfoBody');
+		const widgetLabels = { bio: 'bio', stats: 'stats', achievements: 'achievements' };
+		const allWidgets = ['bio', 'stats', 'achievements'];
+		let order = (currentData.widgets && currentData.widgets.length ? currentData.widgets.slice() : allWidgets.slice());
+		allWidgets.forEach((w) => {
+			if (order.indexOf(w) === -1) order.push(w);
+		});
+		const enabled = new Set(currentData.widgets && currentData.widgets.length ? currentData.widgets : allWidgets);
+
+		function render() {
+			let html = `
+	      <h3 style="margin-top:0">customize layout</h3>
+	      <p style="font-size:0.8em;opacity:0.6;margin-bottom:12px;">toggle sections on/off and reorder them with the arrows.</p>
+	    `;
+			order.forEach((w, i) => {
+				const isOn = enabled.has(w);
+				html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-color);">
+          <label style="display:flex;align-items:center;gap:8px;${isOn ? '' : 'opacity:0.4;'}">
+            <input type="checkbox" class="widget-toggle" data-widget="${w}" ${isOn ? 'checked' : ''}>
+            ${escHtml(widgetLabels[w] || w)}
+          </label>
+          <div style="display:flex;gap:4px;">
+            <button class="small widget-up" data-index="${i}" style="opacity:${i === 0 ? '0.2' : '0.7'};" ${i === 0 ? 'disabled' : ''}>↑</button>
+            <button class="small widget-down" data-index="${i}" style="opacity:${i === order.length - 1 ? '0.2' : '0.7'};" ${i === order.length - 1 ? 'disabled' : ''}>↓</button>
+          </div>
+        </div>`;
+			});
+			html += `
+	      <button id="saveWidgetsBtn" class="small" style="width:100%;margin-top:12px;">save layout</button>
+	      <button id="cancelWidgetsBtn" class="small" style="width:100%;margin-top:8px;opacity:0.6;">back</button>
+	      <div id="widgetsStatus" class="auth-status"></div>
+	    `;
+			body.innerHTML = html;
+
+			body.querySelectorAll('.widget-toggle').forEach((cb) => {
+				cb.addEventListener('change', () => {
+					if (cb.checked) enabled.add(cb.dataset.widget);
+					else enabled.delete(cb.dataset.widget);
+					render();
+				});
+			});
+			body.querySelectorAll('.widget-up').forEach((btn) => {
+				btn.addEventListener('click', () => {
+					const i = parseInt(btn.dataset.index, 10);
+					if (i <= 0) return;
+					[order[i - 1], order[i]] = [order[i], order[i - 1]];
+					render();
+				});
+			});
+			body.querySelectorAll('.widget-down').forEach((btn) => {
+				btn.addEventListener('click', () => {
+					const i = parseInt(btn.dataset.index, 10);
+					if (i >= order.length - 1) return;
+					[order[i + 1], order[i]] = [order[i], order[i + 1]];
+					render();
+				});
+			});
+
+			el('cancelWidgetsBtn').addEventListener('click', () => openAccountInfo());
+
+			el('saveWidgetsBtn').addEventListener('click', async () => {
+				const status = el('widgetsStatus');
+				const finalOrder = order.filter((w) => enabled.has(w));
+				try {
+					status.style.color = '';
+					status.textContent = 'saving...';
+					await apiCall('/widgets', { method: 'POST', body: { widgets: finalOrder } });
+					status.style.color = '#8d8';
+					status.textContent = 'saved!';
+					setTimeout(openAccountInfo, 600);
+				} catch (e) {
+					status.style.color = '#f66';
+					status.textContent = e.message;
+				}
+			});
+		}
+
+		render();
 	}
 
 	function openChangePassword() {
