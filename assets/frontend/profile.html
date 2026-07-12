@@ -171,6 +171,16 @@
 				return String(Math.floor(n));
 			}
 
+			function fmtLastSeen(ts) {
+		      if (!ts) return null;
+		      const s = Math.floor((Date.now() - ts) / 1000);
+		      if (s < 120) return 'online now';
+		      if (s < 3600) return 'active ' + Math.floor(s / 60) + 'm ago';
+		      if (s < 86400) return 'active ' + Math.floor(s / 3600) + 'h ago';
+		      if (s < 604800) return 'active ' + Math.floor(s / 86400) + 'd ago';
+		      return 'inactive for a while';
+		    }
+
 			const achievementsMeta = [
 				['roller', 'Roller'],
 				['gambler', 'Gambler'],
@@ -290,6 +300,19 @@
           <div>
             <div class="username">${escHtml(profile.username)}</div>
             <div class="joined">joined ${new Date(profile.createdAt).toLocaleDateString()}</div>
+				container.innerHTML = `
+	        <div class="profile-header">
+	          ${avatarHtml}
+	          <div>
+	            <div class="username">${escHtml(profile.username)}</div>
+	            <div class="joined">joined ${new Date(profile.createdAt).toLocaleDateString()}${profile.lastSeenAt ? ' · ' + escHtml(fmtLastSeen(profile.lastSeenAt)) : ''}</div>
+	          </div>
+	        </div>
+	        ${profile.bio ? `<div class="bio">${escHtml(profile.bio)}</div>` : '<div class="bio" style="opacity:0.4;font-style:italic;">no bio set</div>'}
+	        ${statsHtml}
+	        ${actionsHtml}
+	        <a href="/" class="back-link">← back to game</a>
+	      `;
           </div>
         </div>
         ${profile.bio ? `<div class="bio">${escHtml(profile.bio)}</div>` : '<div class="bio" style="opacity:0.4;font-style:italic;">no bio set</div>'}
