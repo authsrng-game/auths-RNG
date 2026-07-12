@@ -9,147 +9,44 @@
 		<title>profile - auth's RNG</title>
 		<meta name="robots" content="noindex" />
 		<style>
-			:root {
-				--bg: #0e0e0e;
-				--text: #dcdcdc;
-				--muted: #666;
-				--border: #2a2a2a;
-				--accent: #88dd88;
-			}
-			* {
-				box-sizing: border-box;
-				margin: 0;
-				padding: 0;
-			}
-			body {
-				background: var(--bg);
-				color: var(--text);
-				font-family: monospace;
-				font-size: 16px;
-				line-height: 1.7;
-				min-height: 100vh;
-				padding: 28px;
-			}
-			.container {
-				max-width: 520px;
-				margin: 0 auto;
-			}
-			a {
-				color: var(--text);
-				text-decoration: none;
-				border-bottom: 1px dotted #444;
-			}
-			a:hover {
-				opacity: 0.7;
-			}
-			.profile-header {
-				display: flex;
-				align-items: center;
-				gap: 16px;
-				margin-bottom: 20px;
-				position: relative;
-				z-index: 1;
-			}
-			.avatar {
-				width: 72px;
-				height: 72px;
-				border-radius: 50%;
-				object-fit: cover;
-				border: 3px solid var(--bg);
-			}
-			.avatar-placeholder {
-				width: 72px;
-				height: 72px;
-				border-radius: 50%;
-				background: #1a1a1a;
-				border: 3px solid var(--bg);
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				font-size: 1.8em;
-				opacity: 0.6;
-			}
-			.username {
-				font-size: 1.3em;
-			}
-			.joined {
-				font-size: 0.8em;
-				opacity: 0.5;
-				margin-top: 4px;
-			}
-			.bio {
-				font-size: 0.9em;
-				opacity: 0.8;
-				margin-bottom: 20px;
-				white-space: pre-wrap;
-			}
-			.stats-grid {
-				display: grid;
-				grid-template-columns: 1fr 1fr;
-				gap: 8px;
-				margin-bottom: 20px;
-			}
-			.stat-card {
-				background: #131313;
-				border: 1px solid var(--border);
-				border-radius: 3px;
-				padding: 10px 12px;
-			}
-			.stat-label {
-				font-size: 0.7em;
-				opacity: 0.4;
-				margin-bottom: 3px;
-			}
-			.stat-value {
-				font-size: 1em;
-			}
-			.actions {
-				display: flex;
-				gap: 8px;
-				margin-bottom: 20px;
-			}
-			button {
-				background: #1a1a1a;
-				color: var(--text);
-				border: 1px solid var(--border);
-				padding: 8px 14px;
-				font-family: monospace;
-				font-size: 0.9em;
-				cursor: pointer;
-				border-radius: 2px;
-			}
-			button:hover {
-				background: #242424;
-			}
-			.status-msg {
-				font-size: 0.85em;
-				min-height: 1.2em;
-				margin-bottom: 10px;
-			}
-			.back-link {
-				display: inline-block;
-				margin-top: 1em;
-				padding: 8px 16px;
-				background: #1a1a1a;
-				border: 1px solid #2a2a2a;
-				border-radius: 2px;
-				font-size: 0.9em;
-			}
-			.state-box {
-				opacity: 0.5;
-				padding: 2em 0;
-			}
-			.profile-banner {
-				height: 90px;
-				border-radius: 4px;
-				margin-bottom: -30px;
-			}
+			:root { --bg:#0e0e0e; --text:#dcdcdc; --muted:#666; --border:#2a2a2a; --accent:#88dd88; }
+			  * { box-sizing:border-box; margin:0; padding:0; }
+			  body { background:var(--bg); color:var(--text); font-family:monospace; font-size:16px; line-height:1.7; min-height:100vh; padding:0 0 28px; }
+			  .container { max-width:520px; margin:0 auto; padding:0 28px; }
+			  a { color:var(--text); text-decoration:none; border-bottom:1px dotted #444; }
+			  a:hover { opacity:0.7; }
+			
+			  .profile-banner { height:120px; background:#131313; margin:0 calc(-1 * (50vw - 260px)); }
+			  @media (max-width: 576px) { .profile-banner { margin:0; } }
+			
+			  .profile-header { display:flex; align-items:flex-end; gap:16px; margin:-40px 0 20px; position:relative; z-index:1; }
+			  .avatar { width:84px; height:84px; border-radius:50%; object-fit:cover; border:4px solid var(--bg); background:var(--bg); flex-shrink:0; }
+			  .avatar-placeholder { width:84px; height:84px; border-radius:50%; background:#1a1a1a; border:4px solid var(--bg); display:flex; align-items:center; justify-content:center; font-size:2em; opacity:0.6; flex-shrink:0; }
+			  .header-text { padding-bottom:6px; }
+			  .username { font-size:1.35em; line-height:1.2; }
+			  .joined { font-size:0.8em; opacity:0.5; margin-top:4px; }
+			
+			  .bio { font-size:0.9em; opacity:0.85; margin-bottom:22px; white-space:pre-wrap; background:#131313; border:1px solid var(--border); border-radius:4px; padding:12px 14px; }
+			
+			  .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:22px; }
+			  .stat-card { background:#131313; border:1px solid var(--border); border-radius:3px; padding:10px 12px; border-left:2px solid var(--border); }
+			  .stat-label { font-size:0.7em; opacity:0.4; margin-bottom:3px; text-transform:lowercase; letter-spacing:0.04em; }
+			  .stat-value { font-size:1.05em; }
+			
+			  .achievements-section { margin-bottom:22px; }
+			
+			  .actions { display:flex; gap:8px; margin-bottom:16px; }
+			  button { background:#1a1a1a; color:var(--text); border:1px solid var(--border); padding:9px 16px; font-family:monospace; font-size:0.9em; cursor:pointer; border-radius:2px; transition:background 0.15s; }
+			  button:hover { background:#242424; }
+			  .status-msg { font-size:0.85em; min-height:1.2em; margin-bottom:10px; }
+			  .back-link { display:inline-block; padding:9px 16px; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:2px; font-size:0.9em; }
+			  .state-box { opacity:0.5; padding:2em 28px; }
 		</style>
 	</head>
 	<body>
-		<div class="container" id="container">
-			<div class="state-box" id="stateBox">loading profile...</div>
-		</div>
+		<div id="container">
+		    <div class="state-box" id="stateBox">loading profile...</div>
+		  </div>
 
 		<script>
 			'use strict';
@@ -237,10 +134,9 @@
 			async function init() {
 				const container = document.getElementById('container');
 				if (!username) {
-					container.innerHTML =
-						'<div class="state-box">no username specified. <a href="/">back to game</a></div>';
-					return;
-				}
+			        container.innerHTML = '<div class="state-box">no username specified. <a href="/">back to game</a></div>';
+			        return;
+			      }
 
 				let profile, lbEntry;
 				try {
@@ -313,22 +209,24 @@
 				const accent = HEX_COLOR_RE.test(theme.accentColor || '') ? theme.accentColor : '#dcdcdc';
 
 				container.innerHTML = `
-        <div class="profile-banner" style="${bannerStyle}"></div>
-        <div class="profile-header">
-          ${avatarHtml}
-          <div>
-            <div class="username" style="color:${accent};">${escHtml(profile.username)}</div>
-            <div class="joined">joined ${new Date(profile.createdAt).toLocaleDateString()}${profile.lastSeenAt ? ' · ' + escHtml(fmtLastSeen(profile.lastSeenAt)) : ''}</div>
-          </div>
-        </div>
-        ${profile.bio ? `<div class="bio">${escHtml(profile.bio)}</div>` : '<div class="bio" style="opacity:0.4;font-style:italic;">no bio set</div>'}
-        ${statsHtml}
-        ${actionsHtml}
-        <div style="display:flex;gap:8px;margin-top:1em;">
-          <a href="/" class="back-link">← back to game</a>
-          <button id="copyLinkBtn" style="padding:8px 16px;">copy link</button>
-        </div>
-      `;
+		        <div class="profile-banner" style="${bannerStyle}"></div>
+		        <div class="container">
+		          <div class="profile-header">
+		            ${avatarHtml}
+		            <div class="header-text">
+		              <div class="username" style="color:${accent};">${escHtml(profile.username)}</div>
+		              <div class="joined">joined ${new Date(profile.createdAt).toLocaleDateString()}${profile.lastSeenAt ? ' · ' + escHtml(fmtLastSeen(profile.lastSeenAt)) : ''}</div>
+		            </div>
+		          </div>
+		          ${profile.bio ? `<div class="bio">${escHtml(profile.bio)}</div>` : '<div class="bio" style="opacity:0.4;font-style:italic;">no bio set</div>'}
+		          ${statsHtml}
+		          ${actionsHtml}
+		          <div style="display:flex;gap:8px;margin-top:1em;">
+		            <a href="/" class="back-link">← back to game</a>
+		            <button id="copyLinkBtn">copy link</button>
+		          </div>
+		        </div>
+		      `;
 
 				document.querySelectorAll('.stat-card').forEach((card) => {
 					card.style.borderLeftColor = accent;
