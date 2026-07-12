@@ -289,93 +289,105 @@
 			const username = params.get('user');
 
 			async function init() {
-		      const outer = document.getElementById('container');
-		      if (!username) {
-		        outer.innerHTML = '<div class="state-box">no username specified. <a href="/">back to game</a></div>';
-		        return;
-		      }
-		
-		      let profile, lbEntry;
-		      try {
-		        const r = await fetch(ACCOUNTS_API + '/profile/' + encodeURIComponent(username));
-		        if (!r.ok) throw new Error((await r.json()).error || 'user not found');
-		        profile = await r.json();
-		      } catch (e) {
-		        outer.innerHTML = `<div class="state-box">${escHtml(e.message)}<br><br><a href="/">back to game</a></div>`;
-		        return;
-		      }
-		
-		      try {
-		        const r = await fetch(LB_API);
-		        const data = await r.json();
-		        lbEntry = (data.entries || []).find(e => e.username.toLowerCase() === username.toLowerCase());
-		      } catch (_) {}
-		
-		      const avatarHtml = profile.avatarUrl
-		        ? `<img class="avatar" src="https://accounts.authsrng.xyz${profile.avatarUrl}">`
-		        : `<div class="avatar-placeholder">${escHtml(profile.username.charAt(0).toUpperCase())}</div>`;
-		
-		      const pronounsHtml = profile.pronouns
-		        ? `<span style="font-size:0.75em;opacity:0.5;margin-left:6px;">(${escHtml(profile.pronouns)})</span>`
-		        : '';
-		
-		      const widgetHtml = {
-		        bio: profile.bio
-		          ? `<div class="bio">${escHtml(profile.bio)}</div>`
-		          : `<div class="bio" style="opacity:0.4;font-style:italic;">no bio set</div>`,
-		        stats: lbEntry ? `
+				const outer = document.getElementById('container');
+				if (!username) {
+					outer.innerHTML =
+						'<div class="state-box">no username specified. <a href="/">back to game</a></div>';
+					return;
+				}
+
+				let profile, lbEntry;
+				try {
+					const r = await fetch(ACCOUNTS_API + '/profile/' + encodeURIComponent(username));
+					if (!r.ok) throw new Error((await r.json()).error || 'user not found');
+					profile = await r.json();
+				} catch (e) {
+					outer.innerHTML = `<div class="state-box">${escHtml(e.message)}<br><br><a href="/">back to game</a></div>`;
+					return;
+				}
+
+				try {
+					const r = await fetch(LB_API);
+					const data = await r.json();
+					lbEntry = (data.entries || []).find(
+						(e) => e.username.toLowerCase() === username.toLowerCase()
+					);
+				} catch (_) {}
+
+				const avatarHtml = profile.avatarUrl
+					? `<img class="avatar" src="https://accounts.authsrng.xyz${profile.avatarUrl}">`
+					: `<div class="avatar-placeholder">${escHtml(profile.username.charAt(0).toUpperCase())}</div>`;
+
+				const pronounsHtml = profile.pronouns
+					? `<span style="font-size:0.75em;opacity:0.5;margin-left:6px;">(${escHtml(profile.pronouns)})</span>`
+					: '';
+
+				const widgetHtml = {
+					bio: profile.bio
+						? `<div class="bio">${escHtml(profile.bio)}</div>`
+						: `<div class="bio" style="opacity:0.4;font-style:italic;">no bio set</div>`,
+					stats: lbEntry
+						? `
 		          <div class="stats-grid">
 		            <div class="stat-card"><div class="stat-label">rolls</div><div class="stat-value">${abbr(lbEntry.rolls)}</div></div>
 		            <div class="stat-card"><div class="stat-label">points</div><div class="stat-value">${abbr(lbEntry.points)}</div></div>
 		            <div class="stat-card"><div class="stat-label">rarest</div><div class="stat-value">${escHtml(lbEntry.rarestName || 'none')}</div></div>
 		            <div class="stat-card"><div class="stat-label">collected</div><div class="stat-value">${abbr(lbEntry.rarities)}</div></div>
-		          </div>` : `<p style="font-size:0.82em;opacity:0.4;font-style:italic;margin-bottom:22px;">not on the leaderboard</p>`,
-		        achievements: (() => {
-		          const unlockedIds = (lbEntry && Array.isArray(lbEntry.achievements)) ? lbEntry.achievements : [];
-		          const totalAch = Object.keys(achievementsMeta).length;
-		          let html = `<div class="achievements-section"><div style="font-size:0.75em;opacity:0.4;margin-bottom:8px;">achievements (${unlockedIds.length} / ${totalAch})</div>`;
-		          if (unlockedIds.length === 0) {
-		            html += `<p style="font-size:0.82em;opacity:0.4;font-style:italic;">no achievements yet</p>`;
-		          } else {
-		            html += `<div style="display:flex;flex-wrap:wrap;gap:6px;">`;
-		            unlockedIds.forEach((id) => {
-		              const name = achievementsMeta[id] || id;
-		              html += `<span style="font-size:0.72em;padding:4px 9px;border:1px solid var(--border);border-radius:20px;background:#141414;">${escHtml(name)}</span>`;
-		            });
-		            html += `</div>`;
-		          }
-		          html += `</div>`;
-		          return html;
-		        })()
-		      };
-		
-		      const widgetOrder = (profile.widgets && profile.widgets.length) ? profile.widgets : ['bio', 'stats', 'achievements'];
-		      const sectionsHtml = widgetOrder.map((w) => widgetHtml[w] || '').join('');
-		
-		      const isSelf = isLoggedIn() && getMyUsername() && getMyUsername().toLowerCase() === username.toLowerCase();
-		      let actionsHtml = '';
-		      if (isLoggedIn() && !isSelf) {
-		        actionsHtml = `<div class="actions">
+		          </div>`
+						: `<p style="font-size:0.82em;opacity:0.4;font-style:italic;margin-bottom:22px;">not on the leaderboard</p>`,
+					achievements: (() => {
+						const unlockedIds =
+							lbEntry && Array.isArray(lbEntry.achievements) ? lbEntry.achievements : [];
+						const totalAch = Object.keys(achievementsMeta).length;
+						let html = `<div class="achievements-section"><div style="font-size:0.75em;opacity:0.4;margin-bottom:8px;">achievements (${unlockedIds.length} / ${totalAch})</div>`;
+						if (unlockedIds.length === 0) {
+							html += `<p style="font-size:0.82em;opacity:0.4;font-style:italic;">no achievements yet</p>`;
+						} else {
+							html += `<div style="display:flex;flex-wrap:wrap;gap:6px;">`;
+							unlockedIds.forEach((id) => {
+								const name = achievementsMeta[id] || id;
+								html += `<span style="font-size:0.72em;padding:4px 9px;border:1px solid var(--border);border-radius:20px;background:#141414;">${escHtml(name)}</span>`;
+							});
+							html += `</div>`;
+						}
+						html += `</div>`;
+						return html;
+					})(),
+				};
+
+				const widgetOrder =
+					profile.widgets && profile.widgets.length
+						? profile.widgets
+						: ['bio', 'stats', 'achievements'];
+				const sectionsHtml = widgetOrder.map((w) => widgetHtml[w] || '').join('');
+
+				const isSelf =
+					isLoggedIn() &&
+					getMyUsername() &&
+					getMyUsername().toLowerCase() === username.toLowerCase();
+				let actionsHtml = '';
+				if (isLoggedIn() && !isSelf) {
+					actionsHtml = `<div class="actions">
 		            <button id="addFriendBtn">add friend</button>
 		            <button id="messageBtn">message</button>
 		          </div>
 		          <div class="status-msg" id="actionStatus"></div>`;
-		      }
-		
-		      const theme = profile.theme || { bannerType: 'none', accentColor: '#dcdcdc' };
-		      let bannerStyle;
-		      if (profile.bannerImageUrl) {
-		        bannerStyle = `background-image:url('https://accounts.authsrng.xyz${profile.bannerImageUrl}');background-size:cover;background-position:center;`;
-		      } else if (theme.bannerType === 'solid' && theme.bannerColor1) {
-		        bannerStyle = `background:${theme.bannerColor1};`;
-		      } else if (theme.bannerType === 'gradient' && theme.bannerColor1 && theme.bannerColor2) {
-		        bannerStyle = `background:linear-gradient(135deg, ${theme.bannerColor1}, ${theme.bannerColor2});`;
-		      } else {
-		        bannerStyle = 'background:#131313;';
-		      }
-		      const accent = HEX_COLOR_RE.test(theme.accentColor || '') ? theme.accentColor : '#dcdcdc';
-		
-		      outer.innerHTML = `
+				}
+
+				const theme = profile.theme || { bannerType: 'none', accentColor: '#dcdcdc' };
+				let bannerStyle;
+				if (profile.bannerImageUrl) {
+					bannerStyle = `background-image:url('https://accounts.authsrng.xyz${profile.bannerImageUrl}');background-size:cover;background-position:center;`;
+				} else if (theme.bannerType === 'solid' && theme.bannerColor1) {
+					bannerStyle = `background:${theme.bannerColor1};`;
+				} else if (theme.bannerType === 'gradient' && theme.bannerColor1 && theme.bannerColor2) {
+					bannerStyle = `background:linear-gradient(135deg, ${theme.bannerColor1}, ${theme.bannerColor2});`;
+				} else {
+					bannerStyle = 'background:#131313;';
+				}
+				const accent = HEX_COLOR_RE.test(theme.accentColor || '') ? theme.accentColor : '#dcdcdc';
+
+				outer.innerHTML = `
 		        <div class="profile-banner" style="${bannerStyle}"></div>
 		        <div class="container">
 		          <div class="profile-header">
@@ -393,49 +405,57 @@
 		          </div>
 		        </div>
 		      `;
-		
-		      document.querySelectorAll('.stat-card').forEach((card) => {
-		        card.style.borderLeftColor = accent;
-		      });
-		
-		      const copyBtn = document.getElementById('copyLinkBtn');
-		      if (copyBtn) {
-		        copyBtn.addEventListener('click', () => {
-		          navigator.clipboard.writeText(location.href).then(() => {
-		            copyBtn.textContent = 'copied!';
-		            setTimeout(() => { copyBtn.textContent = 'copy link'; }, 1500);
-		          }).catch(() => {
-		            copyBtn.textContent = 'failed to copy';
-		          });
-		        });
-		      }
-		
-		      if (isLoggedIn() && !isSelf) {
-		        document.getElementById('addFriendBtn').addEventListener('click', async () => {
-		          const status = document.getElementById('actionStatus');
-		          try {
-		            status.style.color = '';
-		            status.textContent = 'sending request...';
-		            const r = await fetch(FRIENDS_API + '/request', {
-		              method: 'POST',
-		              headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + getToken() },
-		              body: JSON.stringify({ username: profile.username })
-		            });
-		            const data = await r.json();
-		            if (!r.ok) throw new Error(data.error || 'failed');
-		            status.style.color = '#8d8';
-		            status.textContent = 'friend request sent!';
-		          } catch (e) {
-		            status.style.color = '#f66';
-		            status.textContent = e.message;
-		          }
-		        });
-		
-		        document.getElementById('messageBtn').addEventListener('click', () => {
-		          location.href = '/?compose=' + encodeURIComponent(profile.username);
-		        });
-		      }
-		    }
+
+				document.querySelectorAll('.stat-card').forEach((card) => {
+					card.style.borderLeftColor = accent;
+				});
+
+				const copyBtn = document.getElementById('copyLinkBtn');
+				if (copyBtn) {
+					copyBtn.addEventListener('click', () => {
+						navigator.clipboard
+							.writeText(location.href)
+							.then(() => {
+								copyBtn.textContent = 'copied!';
+								setTimeout(() => {
+									copyBtn.textContent = 'copy link';
+								}, 1500);
+							})
+							.catch(() => {
+								copyBtn.textContent = 'failed to copy';
+							});
+					});
+				}
+
+				if (isLoggedIn() && !isSelf) {
+					document.getElementById('addFriendBtn').addEventListener('click', async () => {
+						const status = document.getElementById('actionStatus');
+						try {
+							status.style.color = '';
+							status.textContent = 'sending request...';
+							const r = await fetch(FRIENDS_API + '/request', {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json',
+									Authorization: 'Bearer ' + getToken(),
+								},
+								body: JSON.stringify({ username: profile.username }),
+							});
+							const data = await r.json();
+							if (!r.ok) throw new Error(data.error || 'failed');
+							status.style.color = '#8d8';
+							status.textContent = 'friend request sent!';
+						} catch (e) {
+							status.style.color = '#f66';
+							status.textContent = e.message;
+						}
+					});
+
+					document.getElementById('messageBtn').addEventListener('click', () => {
+						location.href = '/?compose=' + encodeURIComponent(profile.username);
+					});
+				}
+			}
 
 			init();
 		</script>
