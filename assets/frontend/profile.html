@@ -311,14 +311,27 @@
 			      ${profile.bio ? `<div class="bio">${escHtml(profile.bio)}</div>` : '<div class="bio" style="opacity:0.4;font-style:italic;">no bio set</div>'}
 			      ${statsHtml}
 			      ${actionsHtml}
-			      <a href="/" class="back-link">← back to game</a>
+			      const copyBtn = document.getElementById('copyLinkBtn');
+			      if (copyBtn) {
+			        copyBtn.addEventListener('click', () => {
+			          navigator.clipboard.writeText(location.href).then(() => {
+			            copyBtn.textContent = 'copied!';
+			            setTimeout(() => { copyBtn.textContent = 'copy link'; }, 1500);
+			          }).catch(() => {
+			            copyBtn.textContent = 'failed to copy';
+			          });
+			        });
+			      }
 			    `;
 			       </div>
 			     </div>
 			     ${profile.bio ? `<div class="bio">${escHtml(profile.bio)}</div>` : '<div class="bio" style="opacity:0.4;font-style:italic;">no bio set</div>'}
 			     ${statsHtml}
 			     ${actionsHtml}
-			     <a href="/" class="back-link">← back to game</a>
+			     <div style="display:flex;gap:8px;margin-top:1em;">
+		          <a href="/" class="back-link">← back to game</a>
+		          <button id="copyLinkBtn" style="padding:8px 16px;">copy link</button>
+		        </div>
 			   `;
 
 				if (isLoggedIn() && !isSelf) {
