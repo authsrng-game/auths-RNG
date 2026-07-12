@@ -435,7 +435,7 @@ console.log(performance.now());
 				window.showAlert('failed to load current theme: ' + e.message);
 			}
 		});
-		
+
 		el('saveProfileBtn').addEventListener('click', async () => {
 			const status = el('profileStatus');
 			const payload = { bio: bioInput.value };
@@ -475,7 +475,12 @@ console.log(performance.now());
 
 	function openEditTheme(currentData) {
 		const body = el('accountInfoBody');
-		const theme = currentData.theme || { bannerType: 'none', bannerColor1: '#1a1a1a', bannerColor2: '#2a2a3a', accentColor: '#dcdcdc' };
+		const theme = currentData.theme || {
+			bannerType: 'none',
+			bannerColor1: '#1a1a1a',
+			bannerColor2: '#2a2a3a',
+			accentColor: '#dcdcdc',
+		};
 
 		body.innerHTML = `
 	      <h3 style="margin-top:0">customize profile</h3>
@@ -524,7 +529,8 @@ console.log(performance.now());
 
 			if (type === 'none') preview.style.background = 'var(--overlay-bg)';
 			else if (type === 'solid') preview.style.background = bannerColor1.value;
-			else preview.style.background = `linear-gradient(135deg, ${bannerColor1.value}, ${bannerColor2.value})`;
+			else
+				preview.style.background = `linear-gradient(135deg, ${bannerColor1.value}, ${bannerColor2.value})`;
 		}
 
 		bannerTypeSelect.addEventListener('change', updatePreview);
@@ -545,8 +551,8 @@ console.log(performance.now());
 						bannerType: bannerTypeSelect.value,
 						bannerColor1: bannerColor1.value,
 						bannerColor2: bannerColor2.value,
-						accentColor: accentColor.value
-					}
+						accentColor: accentColor.value,
+					},
 				});
 				status.style.color = '#8d8';
 				status.textContent = 'saved!';
