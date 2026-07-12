@@ -23,6 +23,13 @@
 		return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 	}
 
+	function fmtLastSeenShort(ts) {
+		const s = Math.floor((Date.now() - ts) / 1000);
+		if (s < 3600) return Math.floor(s / 60) + 'm ago';
+		if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+		return Math.floor(s / 86400) + 'd ago';
+	}
+
 	function updateSocialButtonsVisibility() {
 		const friendsBtn = el('friendsBtn');
 		const messagesBtn = el('messagesBtn');
@@ -108,12 +115,18 @@
 			html += `<p style="font-size:0.82em;opacity:0.4;font-style:italic;">no friends yet</p>`;
 		} else {
 			data.friends.forEach((f) => {
+				const seenLabel = f.lastSeenAt
+					? (Date.now() - f.lastSeenAt < 120000 ? '<span style="color:#8d8;">● online</span>' : '<span style="opacity:0.4;">' + fmtLastSeenShort(f.lastSeenAt) + '</span>')
+					: '';
 				html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-color);">
           <div style="display:flex;align-items:center;gap:8px;">
             ${avatarHtml(f.username, f.avatarUrl, 26)}
-            <a href="/assets/frontend/profile.html?user=${encodeURIComponent(f.username)}" style="color:var(--text-color);">${escHtml(f.username)}</a>
+            <a href="profile.html?user=${encodeURIComponent(f.username)}" style="color:var(--text-color);">${escHtml(f.username)}</a>
           </div>
-          <button class="small remove-friend" data-username="${escHtml(f.username)}" style="opacity:0.5;">remove</button></div>`;
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.75em;">
+            ${seenLabel}
+            <button class="small remove-friend" data-username="${escHtml(f.username)}" style="opacity:0.5;">remove</button>
+          </div></div>`;
 			});
 		}
 
