@@ -116,7 +116,9 @@
 		} else {
 			data.friends.forEach((f) => {
 				const seenLabel = f.lastSeenAt
-					? (Date.now() - f.lastSeenAt < 120000 ? '<span style="color:#8d8;">● online</span>' : '<span style="opacity:0.4;">' + fmtLastSeenShort(f.lastSeenAt) + '</span>')
+					? Date.now() - f.lastSeenAt < 120000
+						? '<span style="color:#8d8;">● online</span>'
+						: '<span style="opacity:0.4;">' + fmtLastSeenShort(f.lastSeenAt) + '</span>'
 					: '';
 				html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-color);">
           <div style="display:flex;align-items:center;gap:8px;">
