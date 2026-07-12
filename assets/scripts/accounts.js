@@ -247,12 +247,48 @@ console.log(performance.now());
 	const MAX_PRONOUNS_CHARS = 30;
 
 	const THEME_PRESETS = [
-		{ name: 'default', bannerType: 'none', bannerColor1: '#1a1a1a', bannerColor2: '#2a2a3a', accentColor: '#dcdcdc' },
-		{ name: 'sunset', bannerType: 'gradient', bannerColor1: '#ff6b6b', bannerColor2: '#ffb347', accentColor: '#ffb347' },
-		{ name: 'void', bannerType: 'gradient', bannerColor1: '#0a0014', bannerColor2: '#2d0a3d', accentColor: '#b388ff' },
-		{ name: 'mint', bannerType: 'gradient', bannerColor1: '#0f3d2e', bannerColor2: '#1a5c46', accentColor: '#6ee7b7' },
-		{ name: 'crimson', bannerType: 'solid', bannerColor1: '#3d0a0a', bannerColor2: '#3d0a0a', accentColor: '#ff6b6b' },
-		{ name: 'ocean', bannerType: 'gradient', bannerColor1: '#0a1e3d', bannerColor2: '#1a4d7a', accentColor: '#5dade2' }
+		{
+			name: 'default',
+			bannerType: 'none',
+			bannerColor1: '#1a1a1a',
+			bannerColor2: '#2a2a3a',
+			accentColor: '#dcdcdc',
+		},
+		{
+			name: 'sunset',
+			bannerType: 'gradient',
+			bannerColor1: '#ff6b6b',
+			bannerColor2: '#ffb347',
+			accentColor: '#ffb347',
+		},
+		{
+			name: 'void',
+			bannerType: 'gradient',
+			bannerColor1: '#0a0014',
+			bannerColor2: '#2d0a3d',
+			accentColor: '#b388ff',
+		},
+		{
+			name: 'mint',
+			bannerType: 'gradient',
+			bannerColor1: '#0f3d2e',
+			bannerColor2: '#1a5c46',
+			accentColor: '#6ee7b7',
+		},
+		{
+			name: 'crimson',
+			bannerType: 'solid',
+			bannerColor1: '#3d0a0a',
+			bannerColor2: '#3d0a0a',
+			accentColor: '#ff6b6b',
+		},
+		{
+			name: 'ocean',
+			bannerType: 'gradient',
+			bannerColor1: '#0a1e3d',
+			bannerColor2: '#1a4d7a',
+			accentColor: '#5dade2',
+		},
 	];
 
 	function switchAuthTab(tab) {
@@ -435,7 +471,8 @@ console.log(performance.now());
 			removeBannerFlag = false;
 			const reader = new FileReader();
 			reader.onload = () => {
-				el('bannerPreview').style.cssText = `height:70px;border-radius:4px;border:1px solid var(--border-color);margin-bottom:8px;background-image:url('${reader.result}');background-size:cover;background-position:center;`;
+				el('bannerPreview').style.cssText =
+					`height:70px;border-radius:4px;border:1px solid var(--border-color);margin-bottom:8px;background-image:url('${reader.result}');background-size:cover;background-position:center;`;
 			};
 			reader.readAsDataURL(file);
 		});
@@ -444,7 +481,8 @@ console.log(performance.now());
 			selectedBannerFile = null;
 			removeBannerFlag = true;
 			el('bannerFileInput').value = '';
-			el('bannerPreview').style.cssText = 'height:70px;border-radius:4px;border:1px solid var(--border-color);margin-bottom:8px;background:var(--overlay-bg);';
+			el('bannerPreview').style.cssText =
+				'height:70px;border-radius:4px;border:1px solid var(--border-color);margin-bottom:8px;background:var(--overlay-bg);';
 		});
 
 		el('avatarFileInput').addEventListener('change', (e) => {
@@ -538,7 +576,10 @@ console.log(performance.now());
 					await apiCall('/banner-image', { method: 'POST', body: { removeBanner: true } });
 				} else if (selectedBannerFile) {
 					const bannerBase64 = await readFileAsBase64(selectedBannerFile);
-					await apiCall('/banner-image', { method: 'POST', body: { bannerBase64, bannerMime: selectedBannerFile.type } });
+					await apiCall('/banner-image', {
+						method: 'POST',
+						body: { bannerBase64, bannerMime: selectedBannerFile.type },
+					});
 				}
 
 				status.style.color = '#8d8';
@@ -664,11 +705,16 @@ console.log(performance.now());
 		const body = el('accountInfoBody');
 		const widgetLabels = { bio: 'bio', stats: 'stats', achievements: 'achievements' };
 		const allWidgets = ['bio', 'stats', 'achievements'];
-		let order = (currentData.widgets && currentData.widgets.length ? currentData.widgets.slice() : allWidgets.slice());
+		let order =
+			currentData.widgets && currentData.widgets.length
+				? currentData.widgets.slice()
+				: allWidgets.slice();
 		allWidgets.forEach((w) => {
 			if (order.indexOf(w) === -1) order.push(w);
 		});
-		const enabled = new Set(currentData.widgets && currentData.widgets.length ? currentData.widgets : allWidgets);
+		const enabled = new Set(
+			currentData.widgets && currentData.widgets.length ? currentData.widgets : allWidgets
+		);
 
 		function render() {
 			let html = `
