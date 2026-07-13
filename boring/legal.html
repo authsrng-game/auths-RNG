@@ -258,55 +258,107 @@
 						policy explains how data is handled when you play at <strong>authsrng.xyz</strong> and
 						any subdomains (nightly.authsrng.xyz, backup.authsrng.xyz, leaderboard.authsrng.xyz).
 						<div class="highlight-note">
-						  tl;dr: most of your game data lives in your own browser and never touches our servers.
-						  creating an account is optional and only needed for cloud saves, the leaderboard, and social features
-						  like friends and messaging. no ads, no analytics, no data selling.
+							tl;dr: most of your game data lives in your own browser and never touches our servers.
+							creating an account is optional and only needed for cloud saves, the leaderboard, and
+							social features like friends and messaging. no ads, no analytics, no data selling.
 						</div>
 					</div>
 				</div>
 
 				<div class="section-item" id="pp-collect">
-				  <div class="section-title">what data we collect</div>
-				  <div class="section-body">
-				    <strong>data stored only in your browser (we never see this unless you have an account with sync enabled):</strong>
-				    <ul>
-				      <li>your rarity inventory, roll count, achievements, shop upgrades, potions, anomalies, gauntlet progress, wishing well history, daily/weekly streak info, and notification history, saved to your browser's <code>localStorage</code></li>
-				      <li>your chosen game settings (theme, music preference, etc.)</li>
-				    </ul>
-				    <strong>data collected if you create an account (optional):</strong>
-				    <ul>
-				      <li><strong>username and password</strong> (password is hashed and never stored in plain text)</li>
-				      <li><strong>backup keys</strong>, generated for password recovery, shown once at creation, stored on our end only as hashes</li>
-				      <li><strong>profile info you choose to add</strong>: bio, pronouns, avatar image, banner image, profile theme colors, and your layout preferences. all optional and editable/removable at any time</li>
-				      <li><strong>session data</strong>: device/browser type and a rough "last active" timestamp for each device you're logged into, so you can review and revoke active sessions from your account settings</li>
-				      <li><strong>friend relationships and friend requests</strong> you send or receive</li>
-				      <li><strong>direct messages</strong> you send to other players through the in-game messaging feature</li>
-				      <li><strong>cloud save data</strong>, if you enable sync, mirrored to our server and kept in step with your local save automatically</li>
-				      <li><strong>leaderboard stats</strong>, if you opt in: total rolls, rarities collected, rarest rarity, playtime, points, and unlocked achievements, tied to your account username</li>
-				    </ul>
-				    <strong>data collected automatically (server logs):</strong>
-				    <ul>
-				      <li>standard web server access logs may temporarily capture ip addresses and user-agent strings as part of normal http operations. these are not processed for profiling, are not sold or shared, and are rotated regularly.</li>
-				    </ul>
-				    <div class="note">
-				      we do not use analytics platforms, advertising networks, fingerprinting scripts, or third-party tracking.
-				      external services loaded by the game are listed in the <a href="#pp-thirdparty">third-party services</a> section below.
-				    </div>
-				  </div>
+					<div class="section-title">what data we collect</div>
+					<div class="section-body">
+						<strong
+							>data stored only in your browser (we never see this unless you have an account with
+							sync enabled):</strong
+						>
+						<ul>
+							<li>
+								your rarity inventory, roll count, achievements, shop upgrades, potions, anomalies,
+								gauntlet progress, wishing well history, daily/weekly streak info, and notification
+								history, saved to your browser's <code>localStorage</code>
+							</li>
+							<li>your chosen game settings (theme, music preference, etc.)</li>
+						</ul>
+						<strong>data collected if you create an account (optional):</strong>
+						<ul>
+							<li>
+								<strong>username and password</strong> (password is hashed and never stored in plain
+								text)
+							</li>
+							<li>
+								<strong>backup keys</strong>, generated for password recovery, shown once at
+								creation, stored on our end only as hashes
+							</li>
+							<li>
+								<strong>profile info you choose to add</strong>: bio, pronouns, avatar image, banner
+								image, profile theme colors, and your layout preferences. all optional and
+								editable/removable at any time
+							</li>
+							<li>
+								<strong>session data</strong>: device/browser type and a rough "last active"
+								timestamp for each device you're logged into, so you can review and revoke active
+								sessions from your account settings
+							</li>
+							<li><strong>friend relationships and friend requests</strong> you send or receive</li>
+							<li>
+								<strong>direct messages</strong> you send to other players through the in-game
+								messaging feature
+							</li>
+							<li>
+								<strong>cloud save data</strong>, if you enable sync, mirrored to our server and
+								kept in step with your local save automatically
+							</li>
+							<li>
+								<strong>leaderboard stats</strong>, if you opt in: total rolls, rarities collected,
+								rarest rarity, playtime, points, and unlocked achievements, tied to your account
+								username
+							</li>
+						</ul>
+						<strong>data collected automatically (server logs):</strong>
+						<ul>
+							<li>
+								standard web server access logs may temporarily capture ip addresses and user-agent
+								strings as part of normal http operations. these are not processed for profiling,
+								are not sold or shared, and are rotated regularly.
+							</li>
+						</ul>
+						<div class="note">
+							we do not use analytics platforms, advertising networks, fingerprinting scripts, or
+							third-party tracking. external services loaded by the game are listed in the
+							<a href="#pp-thirdparty">third-party services</a> section below.
+						</div>
+					</div>
 				</div>
 
 				<div class="section-item" id="pp-account">
-				  <div class="section-title">accounts</div>
-				  <div class="section-body">
-				    creating an account is optional. you can play the entire game without one. an account is only needed for
-				    cloud save sync, the leaderboard, and social features (friends, messaging, public profiles).
-				    <ul>
-				      <li>passwords are hashed before storage; we cannot see or recover your actual password</li>
-				      <li>backup keys let you reset your password if you forget it. each key works once. save them somewhere safe when shown, since we cannot show them to you again after that point</li>
-				      <li>you can review and revoke individual active sessions (logged-in devices) from your account settings at any time</li>
-				      <li>you can delete your account at any time. doing so permanently removes your cloud backup, leaderboard entry, avatar, banner, and profile customization from our servers. your local, in-browser save is not affected. message history with other players is not deleted, since it's shared data belonging to a conversation, but your account will show as "[deleted user]" in any remaining threads</li>
-				    </ul>
-				  </div>
+					<div class="section-title">accounts</div>
+					<div class="section-body">
+						creating an account is optional. you can play the entire game without one. an account is
+						only needed for cloud save sync, the leaderboard, and social features (friends,
+						messaging, public profiles).
+						<ul>
+							<li>
+								passwords are hashed before storage; we cannot see or recover your actual password
+							</li>
+							<li>
+								backup keys let you reset your password if you forget it. each key works once. save
+								them somewhere safe when shown, since we cannot show them to you again after that
+								point
+							</li>
+							<li>
+								you can review and revoke individual active sessions (logged-in devices) from your
+								account settings at any time
+							</li>
+							<li>
+								you can delete your account at any time. doing so permanently removes your cloud
+								backup, leaderboard entry, avatar, banner, and profile customization from our
+								servers. your local, in-browser save is not affected. message history with other
+								players is not deleted, since it's shared data belonging to a conversation, but your
+								account will show as "[deleted user]" in any remaining threads
+							</li>
+						</ul>
+					</div>
 				</div>
 
 				<div class="section-item" id="pp-how">
@@ -382,15 +434,24 @@
 				</div>
 
 				<div class="section-item" id="pp-cloud">
-				  <div class="section-title">cloud backups &amp; save sync</div>
-				  <div class="section-body">
-				    cloud sync requires an account and is entirely opt-in. when enabled:
-				    <ul>
-				      <li>your save data is synced to our server automatically as you play, tied to your account, not an anonymous identifier</li>
-				      <li>you can disable sync or delete your account at any time; deleting your account permanently removes your cloud save from our server</li>
-				      <li>backups are provided as-is with no uptime guarantee. we recommend also keeping local save exports as a backup</li>
-				    </ul>
-				  </div>
+					<div class="section-title">cloud backups &amp; save sync</div>
+					<div class="section-body">
+						cloud sync requires an account and is entirely opt-in. when enabled:
+						<ul>
+							<li>
+								your save data is synced to our server automatically as you play, tied to your
+								account, not an anonymous identifier
+							</li>
+							<li>
+								you can disable sync or delete your account at any time; deleting your account
+								permanently removes your cloud save from our server
+							</li>
+							<li>
+								backups are provided as-is with no uptime guarantee. we recommend also keeping local
+								save exports as a backup
+							</li>
+						</ul>
+					</div>
 				</div>
 
 				<div class="section-item" id="pp-leaderboard">
@@ -408,23 +469,38 @@
 								you can opt out at any time — this permanently deletes your entry from our server
 							</li>
 						</ul>
-						your leaderboard identity is your account username. it is not anonymous once you opt in, since the whole point is a public, attributable leaderboard.
+						your leaderboard identity is your account username. it is not anonymous once you opt in,
+						since the whole point is a public, attributable leaderboard.
 					</div>
 				</div>
 
 				<div class="section-item" id="pp-social">
-				  <div class="section-title">friends, messaging &amp; public profiles</div>
-				  <div class="section-body">
-				    if you create an account, the following social features are available, all opt-in beyond having an account:
-				    <ul>
-				      <li><strong>friends</strong>: you can send friend requests by username. the other player must accept before you're connected. either side can remove a friendship at any time</li>
-				      <li><strong>messaging</strong>: you can send direct messages to any account by username, whether or not you're friends. messages are not end-to-end encrypted and are stored on our server so both participants can read them later</li>
-				      <li><strong>public profile page</strong>: if you have an account, a public profile page exists at a url based on your username, showing whatever you've chosen to make visible: avatar, banner, bio, pronouns, leaderboard stats, and achievements. anyone with the link can view it, whether or not they're logged in</li>
-				    </ul>
-				    <div class="note">
-				      information you put in your bio, username, and public profile is visible to anyone who visits your profile page. don't include information you don't want to be public.
-				    </div>
-				  </div>
+					<div class="section-title">friends, messaging &amp; public profiles</div>
+					<div class="section-body">
+						if you create an account, the following social features are available, all opt-in beyond
+						having an account:
+						<ul>
+							<li>
+								<strong>friends</strong>: you can send friend requests by username. the other player
+								must accept before you're connected. either side can remove a friendship at any time
+							</li>
+							<li>
+								<strong>messaging</strong>: you can send direct messages to any account by username,
+								whether or not you're friends. messages are not end-to-end encrypted and are stored
+								on our server so both participants can read them later
+							</li>
+							<li>
+								<strong>public profile page</strong>: if you have an account, a public profile page
+								exists at a url based on your username, showing whatever you've chosen to make
+								visible: avatar, banner, bio, pronouns, leaderboard stats, and achievements. anyone
+								with the link can view it, whether or not they're logged in
+							</li>
+						</ul>
+						<div class="note">
+							information you put in your bio, username, and public profile is visible to anyone who
+							visits your profile page. don't include information you don't want to be public.
+						</div>
+					</div>
 				</div>
 
 				<div class="section-item" id="pp-cookies">
@@ -556,7 +632,10 @@
 								<a href="https://www.oipc.ab.ca" target="_blank">oipc.ab.ca</a>
 							</li>
 						</ul>
-						if you have an account, most of these rights are self-serviceable in-game: edit or delete your profile info, revoke sessions, remove friends, and delete your account entirely, all from account settings. for anything not available in-game, or if you never created an account but believe we hold data about you, contact us at the address below.
+						if you have an account, most of these rights are self-serviceable in-game: edit or
+						delete your profile info, revoke sessions, remove friends, and delete your account
+						entirely, all from account settings. for anything not available in-game, or if you never
+						created an account but believe we hold data about you, contact us at the address below.
 					</div>
 				</div>
 
@@ -669,9 +748,18 @@
 							</li>
 							<li>use the service for any illegal purpose under canadian law or alberta law</li>
 							<li>impersonate other players on the leaderboard</li>
-							<li>harass, threaten, or send abusive messages to other players through the messaging system</li>
-							<li>use another person's account without permission, or attempt to access an account that isn't yours</li>
-							<li>upload avatar or banner images that are illegal, sexually explicit, or infringe someone else's copyright</li>
+							<li>
+								harass, threaten, or send abusive messages to other players through the messaging
+								system
+							</li>
+							<li>
+								use another person's account without permission, or attempt to access an account
+								that isn't yours
+							</li>
+							<li>
+								upload avatar or banner images that are illegal, sexually explicit, or infringe
+								someone else's copyright
+							</li>
 						</ul>
 						violation of these terms may result in your leaderboard entry being removed and/or your
 						cloud backup access being revoked.
@@ -736,14 +824,20 @@
 				</div>
 
 				<div class="section-item" id="tos-conduct">
-				  <div class="section-title">accounts &amp; user conduct</div>
-				  <div class="section-body">
-				    you are responsible for keeping your password and backup keys secure. we cannot recover a lost password without a valid backup key, and if all three are lost along with your password, the account may be permanently inaccessible.
-				    <div class="note">
-				      the developer reserves the right to suspend or delete any account, remove any profile content (bio, avatar, banner, messages), or restrict access to social features, without notice, for violations of these terms, abusive behavior toward other players, or content that is illegal or infringing.
-				    </div>
-				    profile content (bio, pronouns, avatar, banner) is user-generated content you are solely responsible for. don't upload or write anything you don't have the right to post.
-				  </div>
+					<div class="section-title">accounts &amp; user conduct</div>
+					<div class="section-body">
+						you are responsible for keeping your password and backup keys secure. we cannot recover
+						a lost password without a valid backup key, and if all three are lost along with your
+						password, the account may be permanently inaccessible.
+						<div class="note">
+							the developer reserves the right to suspend or delete any account, remove any profile
+							content (bio, avatar, banner, messages), or restrict access to social features,
+							without notice, for violations of these terms, abusive behavior toward other players,
+							or content that is illegal or infringing.
+						</div>
+						profile content (bio, pronouns, avatar, banner) is user-generated content you are solely
+						responsible for. don't upload or write anything you don't have the right to post.
+					</div>
 				</div>
 
 				<div class="section-item" id="tos-disclaimer">
