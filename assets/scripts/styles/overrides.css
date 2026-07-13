@@ -4556,3 +4556,20 @@ body.blur-panels .starmap-market-item {
 .social-btn:hover {
 	opacity: 1;
 }
+
+.auth-legal-note {
+	font-size: 0.72em;
+	opacity: 0.5;
+	text-align: center;
+	margin-top: 10px;
+	line-height: 1.5;
+}
+
+.auth-legal-note a {
+	opacity: 0.85;
+	border-bottom: 1px dotted #444;
+}
+
+.auth-legal-note a:hover {
+	opacity: 1;
+}
