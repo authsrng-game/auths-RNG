@@ -22,13 +22,20 @@ jobs:
           > diff.txt
           TOTAL=0
 
-          for sha in $(git log --since="7 days ago" --format="%H" -n 20); do
+          EXCLUDE_PATH=':!.github/workflows/aihealthcheck.yml'
+
+          for sha in $(git log --since="7 days ago" --format="%H" -n 20 -- . "$EXCLUDE_PATH"); do
             if [ "$TOTAL" -ge "$MAX_TOTAL_CHARS" ]; then
               echo "(stopped: total diff size cap reached)" >> diff.txt
               break
             fi
 
-            COMMIT_DIFF=$(git show "$sha" --no-color)
+            COMMIT_DIFF=$(git show "$sha" --no-color -- . "$EXCLUDE_PATH")
+
+            # skip commits that only touched the excluded workflow file (empty diff after filtering)
+            if [ -z "$COMMIT_DIFF" ]; then
+              continue
+            fi
             COMMIT_LEN=${#COMMIT_DIFF}
 
             if [ "$COMMIT_LEN" -gt "$MAX_COMMIT_CHARS" ]; then
