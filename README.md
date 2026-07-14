@@ -25,13 +25,6 @@ the repository for the web game, auth's RNG!
   <img src="assets/repo3.png" width="30%" />
 </p>
 
-[![Play Stable](https://img.shields.io/badge/▶_PLAY-stable-5BCEFA)](https://authsrng.xyz)
-[![Play Nightly](https://img.shields.io/badge/▶_PLAY-nightly-F5A9B8)](https://nightly.authsrng.xyz)
-
-> made with ♥ in canada! 🇨🇦
-
----
-
 ## about
 
 auth's RNG is a web-based incremental RNG game built with raw HTML/CSS/JS with online features. roll for rarities, sell them out, buy upgrades, wish upon the wishing well, and collect as many rarities as possible!!!!!
@@ -50,6 +43,24 @@ https://github.com/authsrng-game/auths-RNG/wiki
 
 ---
 
+## meet the branches and versions of the game
+
+main branch: https://authsrng.xyz  
+nightly branch: https://nightly.authsrng.xyz  
+native branch: https://native.authsrng.xyz  
+
+**the main branch** is for the stable and impactful releases of the game! with its name, it's the main game.  
+**the nightly branch** doesnt build or update nightly (i just thought the term was cool), it serves as a bleeding edge development branch and updates with every single commit!  
+**the native branch** is the site that gets maintained seperately. it serves as the website client for the auth's RNG mobile apps and is built for speed and privacy
+
+---
+
+## other repos
+
+android app repo: https://github.com/authsrng-game/auths-RNG-apk
+
+---
+
 ## misconceptions
 
 it's **auth's RNG**. not "Auth's RNG", or "authsrng", or "Auth RNG". lowercase "rng" is fine.
@@ -59,6 +70,10 @@ and again:
 > [!IMPORTANT]
 > **NOT A ROBLOX GAME!!!!!!!**
 
+auth's RNG isn't an RNG algorithm with auth in it, auth is just the alias the creator of this game goes by, which her name is "auth" or "ivy" if you wanna get a little personal. so auth's RNG is an RNG web-game made by auth, not a security thing.
+
+this game wasn't supposed to copy the roblox games, or be one :(
+
 ---
 
 ## contributing
@@ -67,6 +82,30 @@ we don't bite with contributions! a good PR is something like a UI tweak, balanc
 
 > [!WARNING]
 > **do not touch `.github/workflows`**! even if it's a package tweak or fix. we maintain it ourselves and it may break the dev workflow and your PR will get rejected fast.
+
+the official bulletin board (https://authsrng.bbs.fc2.com/) is also good if you want to make a PR without being labeled as a contributor, and if you just want to contribute anonymously. make the first sentence be your commit message (be sure to add "Commit" at the start of it) and write a description of why you made this change. then use `git diff` and after you've reached the end of the git log by holding down `Enter` or what keybind you use to scroll down git logs, copy and paste the entire output and put it 2 lines under your commit message. CAPITIALIZATION AND CORRECT GRAMMAR IS NEEDED!
+
+example:
+
+```txt
+Commit: Replace unused script tag
+
+Script "example.js" was removed before, and the script
+tag made errors of the file not existing. Remove excess
+line.
+
+diff --git a/index.html b/index.html
+index 1234567..89abcde 100644
+--- a/index.html
++++ b/index.html
+@@ -284,7 +284,6 @@
+     <script src="assets/scripts/vendor.js" defer></script>
+     <script src="assets/scripts/utils.js" defer></script>
+-    <script src="assets/scripts/example.js" defer></script>
+     <script src="assets/scripts/main.js" defer></script>
+     </body>
+ </html>
+```
 
 refer to `CONTRIBUTING.md` and especially `meta/TESTING.md` before diving in!
 
@@ -118,5 +157,9 @@ if you thought the git log held all of auth's RNG development history... no it d
 made with [contrib.rocks](https://contrib.rocks).
 
 ---
+
+git is a goddamn idiotic truckload of sh*t
+
+also the platform txt and asterisk are dead meat, we dont talk about what happened to those platforms
 
 <3

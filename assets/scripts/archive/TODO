@@ -1,0 +1,6 @@
+- Add archived files that are meaningful. 
+  This includes sibling auth's RNG versions
+  that are not hosted on the main site and
+  are hosted on a different web host.
+  Do not include standard website archives, 
+  as those are already preserved by Archive.org.

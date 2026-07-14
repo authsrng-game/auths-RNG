@@ -27,19 +27,6 @@ console.log(performance.now());
 		'mutationsUnlocked',
 	];
 
-	const AGREEMENT_TEXT = `auth's RNG CLOUD BACKUP - TERMS OF USE
-
-By clicking OK, you agree to the following:
-
-- Your game save data will be stored on a server maintained by auth, the developer of auth's RNG.
-- Your data is identified only by a randomly generated ID stored in your browser. No account, email address, or personal information is collected or required.
-- We will NEVER sell, share, rent, or distribute your data to any third party, for any reason, ever.
-- Cloud backups are provided as-is. We make no uptime guarantee. Backups can be lost due to server failure or maintenance. Keep local backups too in case something goes incredibly wrong on our end.
-- You can delete your cloud backup at any time from the settings page.
-- Your backup key is the random ID stored in your browser's localStorage. If you clear localStorage without noting it down, you will lose access to your cloud backup.
-
-Click OK to accept and enable cloud backups.`;
-
 	function uid_hash(str) {
 		let h = 0;
 		for (let i = 0; i < str.length; i++) {
@@ -81,16 +68,6 @@ Click OK to accept and enable cloud backups.`;
 		}
 	}
 
-	function getUid() {
-		let uid = localStorage.getItem('cloudBackupUid');
-		const valid = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-		if (!uid || !valid.test(uid)) {
-			uid = crypto.randomUUID();
-			localStorage.setItem('cloudBackupUid', uid);
-		}
-		return uid;
-	}
-
 	function isEnabled() {
 		return localStorage.getItem('cloudBackupEnabled') === 'true';
 	}
@@ -116,16 +93,21 @@ Click OK to accept and enable cloud backups.`;
 		el.textContent = ts ? 'last backup: ' + new Date(ts).toLocaleString() : 'no backup yet';
 	}
 
+	function authHeaders() {
+		const token = window.AuthAccount ? window.AuthAccount.getToken() : null;
+		return token ? { Authorization: 'Bearer ' + token } : {};
+	}
+
 	async function doBackup(silent) {
-		const uid = getUid();
+		if (!window.AuthAccount || !window.AuthAccount.isLoggedIn()) return false;
 		const payload = encode(bundle());
 		if (!silent) setStatus('backing up...', '');
 
 		try {
 			const r = await fetch(API, {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ uid, payload }),
+				headers: { 'Content-Type': 'application/json', ...authHeaders() },
+				body: JSON.stringify({ payload }),
 			});
 			const data = await r.json();
 			if (!r.ok) {
@@ -143,13 +125,13 @@ Click OK to accept and enable cloud backups.`;
 	}
 
 	async function doRestore() {
-		const uid = getUid();
+		if (!window.AuthAccount || !window.AuthAccount.isLoggedIn()) return;
 		if (!confirm('restore from cloud? this will overwrite your current save. are you sure?'))
 			return;
 
 		setStatus('restoring...', '');
 		try {
-			const r = await fetch(API + '/' + uid);
+			const r = await fetch(API, { headers: authHeaders() });
 			const data = await r.json();
 			if (!r.ok || !data.payload) {
 				setStatus('error: ' + (data.error || 'no backup found'), '#ff8888');
@@ -169,15 +151,12 @@ Click OK to accept and enable cloud backups.`;
 	}
 
 	async function doDelete() {
-		const uid = getUid();
+		if (!window.AuthAccount || !window.AuthAccount.isLoggedIn()) return;
 		if (!confirm('permanently delete your cloud backup? this cannot be undone.')) return;
 
 		setStatus('deleting...', '');
 		try {
-			const r = await fetch(API + '/' + uid, {
-				method: 'DELETE',
-				headers: { 'X-Backup-Key': uid },
-			});
+			const r = await fetch(API, { method: 'DELETE', headers: authHeaders() });
 			const data = await r.json();
 			if (!r.ok) {
 				setStatus('error: ' + (data.error || r.status), '#ff8888');
@@ -196,9 +175,9 @@ Click OK to accept and enable cloud backups.`;
 	function startAutoBackup() {
 		clearInterval(autoTimer);
 		autoTimer = null;
-		if (!isEnabled()) return;
+		if (!isEnabled() || !window.AuthAccount || !window.AuthAccount.isLoggedIn()) return;
 		const iv = getAutoInterval();
-		const ms = iv === '1h' ? 60 * 60 * 1000 : iv === '3h' ? 3 * 60 * 60 * 1000 : 30 * 60 * 1000; // default 30m
+		const ms = iv === '1h' ? 60 * 60 * 1000 : iv === '3h' ? 3 * 60 * 60 * 1000 : 30 * 60 * 1000;
 		autoTimer = setInterval(() => {
 			if (!document.hidden) doBackup(true);
 		}, ms);
@@ -208,15 +187,20 @@ Click OK to accept and enable cloud backups.`;
 		const section = document.getElementById('cloudBackupSection');
 		if (!section) return;
 
+		if (!window.AuthAccount || !window.AuthAccount.isLoggedIn()) {
+			section.innerHTML = `
+      <small class="helper" style="margin-top:6px;display:block;">
+        log in to enable cloud backups.
+      </small>`;
+			return;
+		}
+
 		if (!isEnabled()) {
 			section.innerHTML = `
       <button id="enableCloudBackupBtn" class="small" style="width:100%;margin-top:4px;">enable cloud backups</button>
-      <small class="helper" style="margin-top:6px;">opt-in — your save, stored remotely. agreement required.</small>
+      <small class="helper" style="margin-top:6px;">your save, stored remotely under your account.</small>
     `;
 			document.getElementById('enableCloudBackupBtn').addEventListener('click', async () => {
-				const agreed = confirm(AGREEMENT_TEXT);
-				if (!agreed) return;
-				localStorage.setItem('cloudBackupAgreed', 'true');
 				setEnabled(true);
 				buildUI();
 				startAutoBackup();
@@ -230,8 +214,6 @@ Click OK to accept and enable cloud backups.`;
 			? 'last backup: ' + new Date(parseInt(lastTs)).toLocaleString()
 			: 'no backup yet';
 		const iv = getAutoInterval();
-		const uid = getUid();
-		const maskedUid = uid.slice(0, 8) + '...' + uid.slice(-4);
 
 		section.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
@@ -250,10 +232,7 @@ Click OK to accept and enable cloud backups.`;
       <button id="cloudRestoreBtn" class="small">restore from cloud</button>
       <button id="cloudDeleteBtn" class="small" style="opacity:0.5;color:#ff8888;">delete backup</button>
     </div>
-    <div id="cloudBackupStatus" style="font-size:0.8em;min-height:1.2em;margin-bottom:6px;"></div>
-    <small class="helper">backup key: <span title="${uid}" style="opacity:0.4;font-size:0.9em;">${maskedUid}</span>
-      <button id="copyUidBtn" class="small" style="padding:2px 6px;font-size:0.75em;margin-left:4px;">copy</button>
-    </small>
+    <div id="cloudBackupStatus" style="font-size:0.8em;min-height:1.2em;"></div>
   `;
 
 		document.getElementById('disableCloudBackupBtn').addEventListener('click', () => {
@@ -272,15 +251,15 @@ Click OK to accept and enable cloud backups.`;
 		document.getElementById('cloudBackupNowBtn').addEventListener('click', () => doBackup(false));
 		document.getElementById('cloudRestoreBtn').addEventListener('click', doRestore);
 		document.getElementById('cloudDeleteBtn').addEventListener('click', doDelete);
-
-		document.getElementById('copyUidBtn').addEventListener('click', () => {
-			navigator.clipboard.writeText(uid).then(() => setStatus('backup key copied!', '#aaa'));
-		});
 	}
 
 	function init() {
 		buildUI();
 		if (isEnabled()) startAutoBackup();
+		document.addEventListener('authchange', () => {
+			buildUI();
+			startAutoBackup();
+		});
 	}
 
 	if (document.readyState === 'loading') {

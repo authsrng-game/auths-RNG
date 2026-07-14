@@ -4,7 +4,6 @@
 
 	<head>
 		<meta charset="UTF-8" />
-		<!-- <link rel="stylesheet" href="/assets/scripts/styles/styles.css" /> -->
 		<link rel="stylesheet" href="/assets/scripts/styles/overrides.css" />
 		<meta
 			name="viewport"
@@ -55,6 +54,23 @@
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<link rel="apple-touch-icon" href="https://authsrng.xyz/assets/images/authsRNG.png" />
+
+		<meta name="author" content="auth" />
+		<meta name="rating" content="general" />
+		<meta name="subject" content="incremental rng game" />
+		<meta name="classification" content="game" />
+		<meta name="revisit-after" content="4 days" />
+		<meta http-equiv="x-dns-prefetch-control" content="on" />
+		<meta name="format-detection" content="telephone=no, email=no, address=no" />
+		<meta name="HandheldFriendly" content="true" />
+		<meta name="MobileOptimized" content="width" />
+		<meta name="generator" content="auth's RNG engine" />
+		<meta name="coverage" content="worldwide" />
+		<meta name="abstract" content="incremental RNG gacha browser game" />
+		<meta name="summary" content="browser-based RNG incremental game with rare collectibles" />
+		<meta name="topic" content="gaming" />
+		<meta name="distribution" content="global" />
+		<meta name="target" content="all" />
 
 		<link rel="icon" sizes="192x192" href="https://authsrng.xyz/assets/images/authsRNG.png" />
 		<link rel="manifest" href="manifest.json" />
@@ -202,7 +218,10 @@ Last release date on nightly: ${nightlyRDate}`;
 			const _sid = Math.random().toString(36).slice(2);
 			const _hb = () => fetch('https://authsrng.xyz/api/ccu?sid=' + _sid, { method: 'POST' });
 
-			if (location.hostname !== 'nightly.authsrng.xyz') {
+			if (
+				location.hostname !== 'nightly.authsrng.xyz' &&
+				location.hostname !== 'native.authsrng.xyz'
+			) {
 				_hb();
 				setInterval(_hb, 60_000);
 			}
@@ -249,7 +268,7 @@ Last release date on nightly: ${nightlyRDate}`;
 		<!-- BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~ -->
 
 		<div class="site-header lazy">
-			<div class="header-chip">update 9.4</div>
+			<div class="header-chip">update 9.5</div>
 			<h1>welcome to auth's RNG!</h1>
 			<p class="header-msg" id="randomMessage"></p>
 			<div class="header-links">
@@ -791,12 +810,13 @@ Last release date on nightly: ${nightlyRDate}`;
 						<div class="settings-group">
 							<div class="settings-group-label">leaderboard</div>
 							<div id="leaderboardSection"></div>
+							<!-- FIXME: leaderboard link broken -->
 						</div>
 					</div>
 				</div>
 
 				<div class="page" id="page-9">
-					<h2 style="margin-top: 0">links and more</h2>
+					<h2 style="margin-top: 0">links and widgets</h2>
 
 					<!--
 					<button id="rankedModeBtn" class="lazy" style="margin-bottom: 20px; width: 100%; max-width: 400px; font-size: 1.1em; padding: 12px; background: linear-gradient(90deg, #ff6b6b, #4ecdc4); color: #000; border: none; font-weight: bold;">
@@ -814,6 +834,7 @@ Last release date on nightly: ${nightlyRDate}`;
 					</script>
 
 					<a class="lazy" href="/assets/frontend/leaderboard.html">LEADERBOARD!</a>
+					<a class="lazy" href="https://authsrng.atabook.org/">guestbook!</a>
 
 					<div id="resetContainer" class="lazy">
 						<button id="resetBtn">reset data...</button>
@@ -850,6 +871,10 @@ Last release date on nightly: ${nightlyRDate}`;
 							<span class="link-text">nerimity</span>
 						</a>
 
+						<a href="https://authsrng.bbs.fc2.com/" class="image-link">
+							<span class="link-text">official bulletin board!</span>
+						</a>
+
 						<a href="https://asterisk.authsrng.xyz" class="image-link">
 							<span class="link-text">asterisk..</span>
 						</a>
@@ -880,33 +905,85 @@ Last release date on nightly: ${nightlyRDate}`;
 						</a>
 					</div>
 
-					<br /><br />
+					<br />
 
+					<span class="widget-status" id="flagCounterStatus">(loading...)</span>
 					<a href="http://s01.flagcounter.com/more/iljn"
 						><img
 							src="https://s01.flagcounter.com/count2/iljn/bg_FFFFFF/txt_000000/border_CCCCCC/columns_2/maxflags_10/viewers_0/labels_0/pageviews_0/flags_0/percent_0/"
 							alt="Flag Counter"
 							border="0"
 							loading="lazy"
+							onload="document.getElementById('flagCounterStatus').style.display = 'none'"
+							onerror="
+								var s = document.getElementById('flagCounterStatus');
+								s.textContent = 'failed to load!';
+								s.style.color = 'red';
+							"
 					/></a>
 
+					<span class="widget-status" id="hitCounterStatus">(loading...)</span>
 					<img
 						src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fauthsrng.xyz&label=auth%27s+RNG&icon=cloud-check-fill&color=%23ea868f&message=&style=flat&tz=UTC"
 						loading="lazy"
 						alt="hit counter"
+						onload="document.getElementById('hitCounterStatus').style.display = 'none'"
+						onerror="
+							var s = document.getElementById('hitCounterStatus');
+							s.textContent = 'failed to load!';
+							s.style.color = 'red';
+						"
 					/>
 
 					<br />
+
+					<span class="widget-status" id="internetometerStatus">(loading...)</span>
+					<a href="http://internetometer.com/give/51832"
+						><img
+							src="http://internetometer.com/image/51832.png"
+							onload="document.getElementById('internetometerStatus').style.display = 'none'"
+							onerror="
+								var s = document.getElementById('internetometerStatus');
+								s.textContent = 'failed to load!';
+								s.style.color = 'red';
+							"
+					/></a>
+
+					<br />
+
+					<span class="widget-status" id="incrBadgeStatus">(loading...)</span>
+					<iframe
+						src="//incr.easrng.net/badge?key=zx34wt45e"
+						style="background: url(//incr.easrng.net/bg.gif)"
+						title="increment badge"
+						width="88"
+						height="31"
+						frameborder="0"
+						onload="document.getElementById('incrBadgeStatus').style.display = 'none'"
+						onerror="
+							var s = document.getElementById('incrBadgeStatus');
+							s.textContent = 'failed to load!';
+							s.style.color = 'red';
+						"
+					></iframe>
+
 					<br />
 					<br />
 					<br />
 
 					<p>feed my pet while you're at it:</p>
+					<span class="widget-status" id="tamanotchiStatus">(loading...)</span>
 					<a href="https://tamanotchi.world/29830c"
 						><img
 							src="https://tamanotchi.world/i/29830"
 							alt="It's tamaNOTchi! Click to feed!"
 							loading="lazy"
+							onload="document.getElementById('tamanotchiStatus').style.display = 'none'"
+							onerror="
+								var s = document.getElementById('tamanotchiStatus');
+								s.textContent = 'failed to load!';
+								s.style.color = 'red';
+							"
 					/></a>
 
 					<br />
@@ -939,6 +1016,9 @@ Last release date on nightly: ${nightlyRDate}`;
 		<script src="/assets/scripts/engine/roller.js" defer></script>
 		<script src="/assets/scripts/engine/bcore.js" defer></script>
 		<script src="assets/scripts/popup.js"></script>
+		<script src="assets/scripts/sync.js"></script>
+		<script src="assets/scripts/social.js" defer></script>
+		<script src="assets/scripts/accounts.js" defer></script>
 		<!-- sad fucker oh god i swear too much -->
 		<script src="assets/scripts/rarities.js" defer></script>
 		<script src="assets/scripts/rarityStyle.js" defer></script>
@@ -983,6 +1063,119 @@ Last release date on nightly: ${nightlyRDate}`;
 		</div>
 
 		<div id="anomalyPopup"></div>
+
+		<button id="friendsBtn" class="social-btn" style="bottom: 16px; right: 74px" title="friends">
+			👥
+			<span id="friendsBadge" class="notif-badge"></span>
+		</button>
+		<button id="messagesBtn" class="social-btn" style="bottom: 16px; right: 16px" title="messages">
+			✉️
+			<span id="messagesBadge" class="notif-badge"></span>
+		</button>
+
+		<div id="friendsOverlay" class="auth-overlay">
+			<div class="auth-modal">
+				<button id="friendsClose" class="index-close">×</button>
+				<div id="friendsBody"></div>
+			</div>
+		</div>
+
+		<div id="messagesOverlay" class="auth-overlay">
+			<div class="auth-modal" style="max-width: 480px">
+				<button id="messagesClose" class="index-close">×</button>
+				<div id="messagesBody"></div>
+			</div>
+		</div>
+
+		<div id="accountBtn" class="account-btn">log in</div>
+
+		<div id="authOverlay" class="auth-overlay">
+			<div class="auth-modal">
+				<button id="authClose" class="index-close">×</button>
+				<div class="auth-tabs">
+					<button id="authTabLogin" class="dev-tab active" style="flex: 1">log in</button>
+					<button id="authTabSignup" class="dev-tab" style="flex: 1">sign up</button>
+					<button id="authTabForgot" class="dev-tab" style="flex: 1">forgot??</button>
+				</div>
+				<div id="authFormLogin">
+					<input type="text" id="loginUsername" class="auth-field" placeholder="username" />
+					<input type="password" id="loginPassword" class="auth-field" placeholder="password" />
+					<button id="loginSubmit" class="small" style="width: 100%">log in</button>
+				</div>
+				<div id="authFormSignup" style="display: none">
+					<input
+						type="text"
+						id="signupUsername"
+						class="auth-field"
+						placeholder="username (3-20 chars, a-z0-9_-)"
+					/>
+					<input
+						type="password"
+						id="signupPassword"
+						class="auth-field"
+						placeholder="password (min 8 chars)"
+					/>
+					<input
+						type="password"
+						id="signupPasswordConfirm"
+						class="auth-field"
+						placeholder="confirm password"
+					/>
+					<button id="signupSubmit" class="small" style="width: 100%">sign up</button>
+					<p class="auth-legal-note">
+						by making an account, you agree to the
+						<a href="/boring/legal.html" target="_blank">privacy policy and terms of service</a>
+						and have read the
+						<a href="/boring/community.html" target="_blank">community code of conduct</a>!
+					</p>
+					<p class="auth-legal-note" style="opacity: 0.6">
+						⚠ accounts are in beta!! expect bugs, and back up your save data via settings just in
+						case..
+					</p>
+				</div>
+				<div id="authFormForgot" style="display: none">
+					<input type="text" id="forgotUsername" class="auth-field" placeholder="username" />
+					<input type="text" id="forgotBackupKey" class="auth-field" placeholder="backup key" />
+					<input
+						type="password"
+						id="forgotNewPassword"
+						class="auth-field"
+						placeholder="new password (min 8 chars)"
+					/>
+					<button id="forgotSubmit" class="small" style="width: 100%">reset password</button>
+				</div>
+				<div id="authStatus" class="auth-status"></div>
+			</div>
+		</div>
+
+		<div id="accountInfoOverlay" class="auth-overlay">
+			<div class="auth-modal">
+				<button id="accountInfoClose" class="index-close">×</button>
+				<div id="accountInfoBody"></div>
+			</div>
+		</div>
+
+		<div id="backupKeysOverlay" class="auth-overlay">
+			<div class="auth-modal">
+				<button id="backupKeysClose" class="index-close">×</button>
+				<div id="backupKeysBody"></div>
+			</div>
+		</div>
+
+		<div id="migrationPopup" class="auth-overlay">
+			<div class="auth-modal">
+				<h3 style="margin-top: 0">accounts are here!! (beta)</h3>
+				<p id="migrationText" style="font-size: 0.85em; opacity: 0.8"></p>
+				<button id="migrationOk" class="small" style="width: 100%">ok</button>
+			</div>
+		</div>
+
+		<div id="syncLoadingOverlay" class="sync-loading-overlay">
+			<div class="sync-loading-box">
+				<div class="sync-spinner"></div>
+				<div id="syncLoadingText">downloading data...</div>
+			</div>
+		</div>
 
 		<div id="confirmModal">
 			<div class="modal-content">

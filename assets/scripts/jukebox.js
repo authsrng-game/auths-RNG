@@ -345,26 +345,54 @@
 		return t.trim() || '—';
 	}
 
-	// ── Controls ───────────────────────────────────────────────────────────
-	function saveSettings() {
-		if (window.applySettings && window.getCurrentSettings)
-			window.applySettings(window.getCurrentSettings());
-	}
+	// ── da controls ───────────────────────────────────────────────────────────
 
-	function skip(delta) {
+	let _skipBusy = false;
+
+	async function skip(delta) {
+		if (_skipBusy) return;
+		_skipBusy = true;
 		const sel = document.getElementById('musicSelect');
-		if (!sel || !sel.options.length) return;
+		if (!sel || !sel.options.length) {
+			_skipBusy = false;
+			return;
+		}
 		sel.selectedIndex = (sel.selectedIndex + delta + sel.options.length) % sel.options.length;
-		saveSettings();
+		try {
+			await saveSettings();
+		} finally {
+			_skipBusy = false;
+		}
 	}
 
-	function togglePlay() {
+	async function saveSettings() {
+		if (window.applySettings && window.getCurrentSettings)
+			await window.applySettings(window.getCurrentSettings());
+	}
+
+	async function togglePlay() {
 		const m = document.getElementById('muteMusic');
 		if (!m) return;
 		// a shrimp could theoretically pilot a fucking mech if given enough funding
 		m.checked = !m.checked;
-		saveSettings();
+		await saveSettings();
 	}
+
+	btnPlay.addEventListener('click', async (e) => {
+		e.stopPropagation();
+		await togglePlay();
+		render();
+	});
+	btnPrev.addEventListener('click', async (e) => {
+		e.stopPropagation();
+		await skip(-1);
+		render();
+	});
+	btnNext.addEventListener('click', async (e) => {
+		e.stopPropagation();
+		await skip(1);
+		render();
+	});
 
 	function formatTime(s) {
 		if (!isFinite(s) || s < 0) return '0:00';
@@ -474,23 +502,6 @@
 	disc.addEventListener('click', () =>
 		panel.classList.contains('jb-open') ? closePanel() : openPanel()
 	);
-
-	// ── Button wiring ──────────────────────────────────────────────────────
-	btnPlay.addEventListener('click', (e) => {
-		e.stopPropagation();
-		togglePlay();
-		render();
-	});
-	btnPrev.addEventListener('click', (e) => {
-		e.stopPropagation();
-		skip(-1);
-		render();
-	});
-	btnNext.addEventListener('click', (e) => {
-		e.stopPropagation();
-		skip(1);
-		render();
-	});
 
 	const progressWrap = document.getElementById('jb-progress-wrap');
 	const progressFill = document.getElementById('jb-progress-fill');
