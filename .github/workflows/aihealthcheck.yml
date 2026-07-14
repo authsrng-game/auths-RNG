@@ -46,6 +46,6 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "weekly ai repo scan - ${{ github.repository }}"
-          to: your@email.com
+          to: skunkolee@gmail.com
           from: github actions
           body: file://report.txt
