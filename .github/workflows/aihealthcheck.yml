@@ -3,7 +3,7 @@ name: ai repo health check
 on:
   schedule:
     - cron: '0 9 * * 1'  # every monday at 9am utc
-  workflow_dispatch: 
+  workflow_dispatch:
 
 jobs:
   scan:
@@ -22,12 +22,11 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          DIFF=$(cat diff_trimmed.txt)
+          echo "Review this week's changes for bugs, security issues, and code smells. Be concise:" > prompt.txt
+          echo "" >> prompt.txt
+          cat diff_trimmed.txt >> prompt.txt
 
-          jq -n --arg prompt "Review this week's changes for bugs, security issues, and code smells. Be concise:
-
-$DIFF" \
-            '{contents: [{parts: [{text: $prompt}]}]}' > payload.json
+          jq -n --rawfile prompt prompt.txt '{contents: [{parts: [{text: $prompt}]}]}' > payload.json
 
           RESULT=$(curl -s "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$GEMINI_API_KEY" \
             -H "content-type: application/json" \
