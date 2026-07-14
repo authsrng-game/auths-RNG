@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: nightly
+          fetch-depth: 0
 
       - name: gather recent changes
         id: gather
