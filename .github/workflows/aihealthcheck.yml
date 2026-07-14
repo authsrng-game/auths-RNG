@@ -1,0 +1,49 @@
+name: ai repo health check
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # every monday at 9am utc
+  workflow_dispatch: 
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: gather recent changes
+        id: gather
+        run: |
+          git log --since="7 days ago" -p > diff.txt
+          head -c 6000 diff.txt > diff_trimmed.txt
+
+      - name: run ai analysis
+        id: analyze
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          DIFF=$(cat diff_trimmed.txt)
+
+          jq -n --arg prompt "Review this week's changes for bugs, security issues, and code smells. Be concise:
+
+$DIFF" \
+            '{contents: [{parts: [{text: $prompt}]}]}' > payload.json
+
+          RESULT=$(curl -s "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=$GEMINI_API_KEY" \
+            -H "content-type: application/json" \
+            -d @payload.json)
+
+          echo "$RESULT" | jq -r '.candidates[0].content.parts[0].text' > report.txt
+          cat report.txt
+
+      - name: send email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "weekly ai repo scan - ${{ github.repository }}"
+          to: your@email.com
+          from: github actions
+          body: file://report.txt
