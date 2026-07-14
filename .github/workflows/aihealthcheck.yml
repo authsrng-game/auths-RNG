@@ -1,10 +1,8 @@
 name: ai repo health check
-
 on:
   schedule:
     - cron: '0 9 * * 1'  # every monday at 9am utc
   workflow_dispatch:
-
 jobs:
   scan:
     runs-on: ubuntu-latest
@@ -17,17 +15,78 @@ jobs:
       - name: gather recent changes
         id: gather
         run: |
-          git log --since="7 days ago" -p > diff.txt
-          head -c 6000 diff.txt > diff_trimmed.txt
+          # cap per-commit diff size so one huge commit can't blow out the whole prompt
+          MAX_COMMIT_CHARS=4000
+          MAX_TOTAL_CHARS=20000
+
+          > diff.txt
+          TOTAL=0
+
+          for sha in $(git log --since="7 days ago" --format="%H" -n 20); do
+            if [ "$TOTAL" -ge "$MAX_TOTAL_CHARS" ]; then
+              echo "(stopped: total diff size cap reached)" >> diff.txt
+              break
+            fi
+
+            COMMIT_DIFF=$(git show "$sha" --no-color)
+            COMMIT_LEN=${#COMMIT_DIFF}
+
+            if [ "$COMMIT_LEN" -gt "$MAX_COMMIT_CHARS" ]; then
+              echo "$COMMIT_DIFF" | head -c "$MAX_COMMIT_CHARS" >> diff.txt
+              echo "" >> diff.txt
+              echo "(diff truncated: commit $sha was ${COMMIT_LEN} chars, over the ${MAX_COMMIT_CHARS} cap)" >> diff.txt
+              TOTAL=$((TOTAL + MAX_COMMIT_CHARS))
+            else
+              echo "$COMMIT_DIFF" >> diff.txt
+              TOTAL=$((TOTAL + COMMIT_LEN))
+            fi
+
+            echo "" >> diff.txt
+            echo "----" >> diff.txt
+            echo "" >> diff.txt
+          done
+
+          wc -c diff.txt
 
       - name: run ai analysis
         id: analyze
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          echo "Review this week's changes for bugs, security issues, and code smells. Be concise:" > prompt.txt
-          echo "" >> prompt.txt
-          cat diff_trimmed.txt >> prompt.txt
+          cat > prompt.txt << 'PROMPT_EOF'
+          You are an experienced code reviewer examining recent commits to a solo indie developer's repository. Review the commits in the diff below and produce a report in the exact style shown.
+
+          FORMAT (follow this precisely):
+
+          Start with one line:
+          "AI review found N potential issue(s) to consider:"
+          followed by a flat bullet list summarizing every issue, one line each, formatted as:
+          - [Severity] short one-sentence description of the issue.
+          Severity is one of: Critical, High, Medium, Low.
+
+          Then, below the summary list, add a "--" separator, then go commit by commit. For each commit that has at least one issue, use this structure:
+
+          --- Commit: <short hash> — <commit subject line> ---
+
+          Then for each issue found in that commit, show:
+          1. A short code excerpt (3-8 lines) from the diff giving context for the issue — copy it exactly as it appears in the diff, prefixed with "> " per line like a patch quote.
+          2. Immediately below the excerpt, a line: [Severity: X]
+          3. Then 1-3 sentences phrased as a probing question, in the same tone as a thoughtful reviewer asking the author to double check their own logic — e.g. "Does this cause X because Y?" or "Is it safe to assume Z here?" rather than flatly stating the bug. Be specific: name the variable, function, or line behavior in question.
+
+          Use "[ ... ]" on its own line to skip over irrelevant parts of a commit's diff between excerpts.
+
+          RULES:
+          - Only include real, substantive issues: bugs, logic errors, security problems (injection, auth flaws, secrets, unsafe input handling, out-of-bounds access, use-after-free, race conditions), broken error handling, resource leaks, or performance problems.
+          - Skip pure style nitpicks unless they cause an actual bug.
+          - If a commit has no real issues, omit it from the per-commit section entirely (it just won't appear).
+          - If there are zero issues across all commits, output only: "AI review found no significant issues this week." and stop there.
+          - Do not invent line numbers or hashes that are not present in the diff. Use the commit hash exactly as given.
+          - Keep excerpts short — just enough to give context for the question, not the whole function.
+
+          Here is the diff to review:
+          PROMPT_EOF
+
+          cat diff.txt >> prompt.txt
 
           jq -n --rawfile prompt prompt.txt '{contents: [{parts: [{text: $prompt}]}]}' > payload.json
 
