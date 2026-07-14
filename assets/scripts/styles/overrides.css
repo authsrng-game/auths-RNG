@@ -4573,3 +4573,13 @@ body.blur-panels .starmap-market-item {
 .auth-legal-note a:hover {
 	opacity: 1;
 }
+
+.beta-tag {
+  font-size: 0.65em;
+  opacity: 0.5;
+  border: 1px solid var(--border-color);
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin-left: 4px;
+  vertical-align: middle;
+}

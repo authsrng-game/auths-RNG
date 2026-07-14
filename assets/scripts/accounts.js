@@ -195,11 +195,10 @@ console.log(performance.now());
 		}
 		const avatarUrl = localStorage.getItem('authAvatarUrl');
 		const username = getUsername();
-		if (avatarUrl) {
-			btn.innerHTML = `<img src="https://accounts.authsrng.xyz${avatarUrl}" class="account-btn-avatar"> ${username}`;
-		} else {
-			btn.innerHTML = username;
-		}
+		const avatarHtml = avatarUrl
+			? `<img src="https://accounts.authsrng.xyz${avatarUrl}" class="account-btn-avatar"> `
+			: '';
+		btn.innerHTML = `${avatarHtml}${username} <span class="beta-tag">beta</span>`;
 	}
 
 	function setAuthStatus(msg, color) {
