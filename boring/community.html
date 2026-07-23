@@ -29,6 +29,17 @@
 				opacity: 0.95;
 			}
 
+			h2 {
+				font-size: 1.1rem;
+				font-weight: normal;
+				letter-spacing: 0.04em;
+				margin: 2em 0 1em 0;
+				text-transform: lowercase;
+				opacity: 0.7;
+				border-bottom: 1px solid #2a2a2a;
+				padding-bottom: 0.5em;
+			}
+
 			p.intro {
 				opacity: 0.75;
 				margin-bottom: 1.8em;
@@ -62,6 +73,15 @@
 			.rule-body strong {
 				color: #ffb86b;
 				font-weight: normal;
+			}
+
+			.rule-body ul {
+				margin: 0.6em 0 0 0;
+				padding-left: 1.3em;
+			}
+
+			.rule-body ul li {
+				margin-bottom: 0.3em;
 			}
 
 			a {
@@ -107,6 +127,8 @@
 				want the gist, read this instead.
 			</p>
 
+			<h2>the basics</h2>
+
 			<div class="rule">
 				<div class="rule-title">be decent to other players</div>
 				<div class="rule-body">
@@ -127,7 +149,8 @@
 				<div class="rule-title">keep profiles appropriate</div>
 				<div class="rule-body">
 					your bio, username, avatar, and banner are public. nothing sexually explicit, no hate
-					symbols, no illegal content, and don't impersonate other players or real people.
+					symbols, no illegal content, no extreme gore, no political content, and don't impersonate
+					other players or real people.
 				</div>
 			</div>
 
@@ -155,6 +178,130 @@
 				</div>
 			</div>
 
+			<h2>edge cases people actually ask about</h2>
+
+			<div class="rule">
+				<div class="rule-title">alt accounts</div>
+				<div class="rule-body">
+					having more than one account isn't against the rules on its own. using alts to fake
+					leaderboard rankings, farm friend request limits, evade a suspension, or get around a
+					removed leaderboard entry is. if we catch it, all the accounts involved get action taken,
+					not just the newest one.
+				</div>
+			</div>
+
+			<div class="rule">
+				<div class="rule-title">save editing vs. account cheating</div>
+				<div class="rule-body">
+					editing your own local save with dev tools, a hex editor, or whatever else is fine, that
+					data is yours and it never leaves your browser unless you sync it. the line is the
+					leaderboard: if an edited save gets synced and then submits stats publicly, that counts as
+					fabricated stats, and the entry gets pulled the same as any other cheat.
+				</div>
+			</div>
+
+			<div class="rule">
+				<div class="rule-title">bots, scripts, and automation</div>
+				<div class="rule-body">
+					automating your own client to play while you're away (auto-clickers, idle scripts) doesn't
+					touch our servers any differently than normal play, so it's not something we police.
+					automation that hits the backup, leaderboard, or messaging apis directly, outside of the
+					normal client, is not allowed, since that's what the rate limits exist to catch. ONLY use
+					in-game features like auto roll and ways to roll faster via in-game stuff, not external
+					scripts and panels that allow you to bypass that (or any kind of bypass, in fact!).
+				</div>
+			</div>
+
+			<div class="rule">
+				<div class="rule-title">minors on the platform</div>
+				<div class="rule-body">
+					the game itself is general-audience. accounts and social features are not intended for
+					children under 13. if a report or evidence suggests an account belongs to a child under
+					13, we'll disable social features on it and, where an email is on file, reach out. this
+					isn't punitive, it's just not a space we can knowingly host that data in.
+				</div>
+			</div>
+
+			<div class="rule">
+				<div class="rule-title">off-platform harassment</div>
+				<div class="rule-body">
+					if a dispute that started in-game (leaderboard beef, a friend falling out, whatever)
+					spills into harassment on discord, github, or elsewhere, and it's reported with evidence,
+					we can still act on the in-game account involved. we can't moderate other platforms, but
+					we're not going to pretend the harassment didn't originate here either.
+				</div>
+			</div>
+
+			<div class="rule">
+				<div class="rule-title">doxxing and real-world info</div>
+				<div class="rule-body">
+					posting someone else's real name, address, workplace, or other identifying info without
+					consent, anywhere in the game (bio, messages, leaderboard username), is an immediate
+					removal of the content and likely account action. this applies even if the info is
+					technically public elsewhere.
+				</div>
+			</div>
+
+			<div class="rule">
+				<div class="rule-title">self-harm or crisis content in messages</div>
+				<div class="rule-body">
+					if you see another player express something that sounds like they're in crisis, we'd
+					rather you reach out kindly or point them to a hotline than report it as a conduct issue.
+					this isn't a conduct violation, it's just not something automated moderation is equipped
+					to triage well, so a human report with context helps more than a flag.
+				</div>
+			</div>
+
+			<div class="rule">
+				<div class="rule-title">username and profile edge cases</div>
+				<div class="rule-body">
+					leaderboard usernames are permanent, so we're stricter about what's allowed there than
+					elsewhere:
+					<ul>
+						<li>slurs, hate symbols, or coded references to them: rejected outright, no appeal</li>
+						<li>impersonating a real person or another player: removed, account reviewed</li>
+						<li>
+							edgy, dark, or crude humor that isn't targeting a group or person: allowed, this is a
+							judgment call and we'd rather be permissive than paternalistic
+						</li>
+						<li>
+							usernames that look like official accounts ("admin", "authsrng-staff", etc): reserved,
+							contact us if you want an exception
+						</li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="rule">
+				<div class="rule-title">buying, selling, or trading accounts</div>
+				<div class="rule-body">
+					there's nothing monetized in the game, so we don't expect this to come up, but account
+					transfers outside of our systems aren't supported. if you hand your login to someone else,
+					you're accepting whatever they do with it as your own responsibility, and we won't reverse
+					actions taken on the account afterward on the basis that "it wasn't me."
+				</div>
+			</div>
+
+			<div class="rule">
+				<div class="rule-title">reporting mistakes and false reports</div>
+				<div class="rule-body">
+					reporting something that turns out to be fine isn't punished, we'd rather get reports we
+					have to dismiss than miss real ones. repeatedly reporting the same player in bad faith, as
+					a form of harassment on its own, is treated as harassment.
+				</div>
+			</div>
+
+			<div class="rule">
+				<div class="rule-title">disputing an action taken against you</div>
+				<div class="rule-body">
+					if your leaderboard entry, message, profile content, or account gets actioned and you
+					think it was a mistake, email us with your username and what happened. we're one person
+					running this, not a moderation team, so response times vary, but every appeal gets read.
+				</div>
+			</div>
+
+			<h2>enforcement</h2>
+
 			<div class="rule">
 				<div class="rule-title">breaking these gets your stuff removed</div>
 				<div class="rule-body">
@@ -163,8 +310,18 @@
 				</div>
 			</div>
 
+			<div class="rule">
+				<div class="rule-title">severity matters</div>
+				<div class="rule-body">
+					a first-time crude username gets a quiet reset request. targeted harassment, doxxing, or
+					account access violations get immediate and permanent action, no warning owed. we use
+					judgment here rather than a fixed strike system, since a rigid point system tends to
+					punish honest mistakes the same as bad-faith abuse.
+				</div>
+			</div>
+
 			<p class="footer-note">
-				this page is a friendly summary, not a legal document. the
+				this page is a friendly summary, not a legal document! the
 				<a href="/boring/legal.html">privacy policy &amp; terms of service</a> are what actually
 				governs the game.
 			</p>
