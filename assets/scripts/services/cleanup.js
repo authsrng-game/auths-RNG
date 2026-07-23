@@ -8,6 +8,7 @@ console.log(performance.now());
 
 	const $ = (id) => document.getElementById(id);
 
+	//config
 	const LIGHT_PASS_INTERVAL_VISIBLE_MS = 5000;
 	const LIGHT_PASS_INTERVAL_HIDDEN_MS = 20000;
 	const MEDIUM_PASS_INTERVAL_MS = 30000;
