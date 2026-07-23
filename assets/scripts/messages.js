@@ -939,7 +939,7 @@ const messages = [
 	'beh....................',
 	'weh....................',
 	'take the center stage!',
-	'we love useless messages dont we?'
+	'we love useless messages dont we?',
 ];
 
 const randomIndex = Math.floor(Math.random() * messages.length);
