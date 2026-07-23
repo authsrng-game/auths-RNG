@@ -235,23 +235,6 @@ Last release date on nightly: ${nightlyRDate}`;
 			alt=""
 		/>
 
-		<script>
-			if (navigator.userAgent.includes('Screenjesus')) {
-				const img = document.createElement('img');
-				img.src = '/images/page.png';
-				img.style.position = 'fixed';
-				img.style.inset = '0';
-				img.style.width = '100vw';
-				img.style.height = '100vh';
-				img.style.objectFit = 'contain';
-				img.style.objectPosition = 'center 41%';
-				img.style.zIndex = '999999';
-				document.documentElement.appendChild(img);
-			}
-
-			// relic from the good ol neocities days :heart:
-		</script>
-
 		<script src="assets/scripts/startanim.js" defer></script>
 		<!-- screensaver was here <3333 -->
 
@@ -817,21 +800,6 @@ Last release date on nightly: ${nightlyRDate}`;
 
 				<div class="page" id="page-9">
 					<h2 style="margin-top: 0">links and widgets</h2>
-
-					<!--
-					<button id="rankedModeBtn" class="lazy" style="margin-bottom: 20px; width: 100%; max-width: 400px; font-size: 1.1em; padding: 12px; background: linear-gradient(90deg, #ff6b6b, #4ecdc4); color: #000; border: none; font-weight: bold;">
-						ranked mode
-					</button>
-				-->
-
-					<script>
-						const rankedBtn = document.getElementById('rankedModeBtn');
-						if (rankedBtn) {
-							rankedBtn.addEventListener('click', function () {
-								window.location.href = 'ranked.html';
-							});
-						}
-					</script>
 
 					<a class="lazy" href="/assets/frontend/leaderboard.html">LEADERBOARD!</a>
 					<a class="lazy" href="https://authsrng.atabook.org/">guestbook!</a>
