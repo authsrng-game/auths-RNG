@@ -2794,7 +2794,7 @@ container.addEventListener('click', () => {
 			if (localStorage.getItem('mutationsUnlocked') !== '1') hidePageDot(3);
 			if (localStorage.getItem('starmapUnlocked') !== '1') hidePageDot(4);
 			if (localStorage.getItem('runesUnlocked') !== '1') hidePageDot(5);
-			
+
 			const savedPage = parseInt(localStorage.getItem('currentPage') || '0');
 			window.goToPage(savedPage);
 		</script>
