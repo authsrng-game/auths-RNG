@@ -1977,13 +1977,6 @@ function maybeFireConfettiAndCutscene(res) {
 	const cutsceneAllowed = hasCutscene && (cutsceneThresh === 0 || denom >= cutsceneThresh);
 
 	const afterReveal = () => {
-		if (res.name === 'SUMMER') {
-			lunarMusic.pause();
-			backgroundMusic.pause();
-			debouncedSave();
-			window.triggerSummerAfterlife();
-			return;
-		}
 		const isMuted = checkMuteSettings();
 		if (res.name === 'Lunar') {
 			if (!isMuted) {

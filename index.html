@@ -2794,21 +2794,7 @@ container.addEventListener('click', () => {
 			if (localStorage.getItem('mutationsUnlocked') !== '1') hidePageDot(3);
 			if (localStorage.getItem('starmapUnlocked') !== '1') hidePageDot(4);
 			if (localStorage.getItem('runesUnlocked') !== '1') hidePageDot(5);
-
-			if (localStorage.getItem('world') === '2') {
-				document.body.classList.add('world-2');
-				hidePageDot(2);
-				hidePageDot(3);
-				hidePageDot(4);
-				hidePageDot(5);
-				document.getElementById('achievementsContainer').style.display = 'none';
-				document.getElementById('dailyContainer').style.display = 'none';
-				document.getElementById('weeklyContainer').style.display = 'none';
-				document.getElementById('anomalyPanel').style.display = 'none';
-				const chip = document.querySelector('.header-chip');
-				if (chip) chip.textContent = 'afterlife';
-			}
-
+			
 			const savedPage = parseInt(localStorage.getItem('currentPage') || '0');
 			window.goToPage(savedPage);
 		</script>
@@ -2862,17 +2848,5 @@ container.addEventListener('click', () => {
 				if (W[X(7)]) W._showGoneLink();
 			})(window, document);
 		</script>
-
-		<div id="afterlifeOverlay">
-			<div id="afterlifeText"></div>
-		</div>
-
-		<div id="mazeOverlay">
-			<canvas id="mazeCanvas"></canvas>
-			<div id="mazeHint">wasd to move. mouse to look. click to lock cursor.</div>
-		</div>
-
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
-		<script src="assets/scripts/world-2/afterlife.js" defer></script>
 	</body>
 </html>
