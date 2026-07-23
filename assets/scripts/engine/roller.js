@@ -17,11 +17,7 @@
 			this.pity = new root.PityTracker();
 			this.streak = new root.StreakTracker();
 		}
-		_buildWeightTable(rarities,
-			luckMultiplier,
-			inventoryData,
-			shopUpgrades,
-			luckBoostActive) {
+		_buildWeightTable(rarities, luckMultiplier, inventoryData, shopUpgrades, luckBoostActive) {
 			const weights = new Array(rarities.length);
 			let totalWeight = 0n;
 			const streakMult = this.streak.getLuckMultiplier();
@@ -56,11 +52,7 @@
 
 			return { weights: weights, totalWeight: totalWeight };
 		}
-		roll(rarities,
-			luckMultiplier,
-			inventoryData,
-			shopUpgrades,
-			luckBoostActive) {
+		roll(rarities, luckMultiplier, inventoryData, shopUpgrades, luckBoostActive) {
 			const table = this._buildWeightTable(
 				rarities,
 				luckMultiplier,
@@ -107,12 +99,7 @@
 				isHotPulse: isHotPulse,
 			};
 		}
-		probabilityOf(rarity,
-			rarities,
-			luckMultiplier,
-			inventoryData,
-			shopUpgrades,
-			luckBoostActive) {
+		probabilityOf(rarity, rarities, luckMultiplier, inventoryData, shopUpgrades, luckBoostActive) {
 			const table = this._buildWeightTable(
 				rarities,
 				luckMultiplier,
@@ -127,9 +114,6 @@
 			return Number(table.weights[idx]) / Number(table.totalWeight);
 		}
 	}
-
-
-
 
 	root.BeaconRoller = BeaconRoller;
 })(typeof window !== 'undefined' ? window : this);

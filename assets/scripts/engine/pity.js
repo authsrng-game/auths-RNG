@@ -64,13 +64,5 @@
 		}
 	}
 
-
-
-
-
-
-
-
-
 	root.PityTracker = PityTracker;
 })(typeof window !== 'undefined' ? window : this);

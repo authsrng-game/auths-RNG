@@ -8,7 +8,8 @@
 			this._sessionSeed = null;
 		}
 		init() {
-			const seed = BigInt(Date.now()) ^
+			const seed =
+				BigInt(Date.now()) ^
 				BigInt(Math.floor((typeof performance !== 'undefined' ? performance.now() : 1) * 1e8));
 			this._gen.reseed(seed);
 			this._sessionSeed = seed.toString(16);
@@ -78,20 +79,6 @@
 			};
 		}
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	root.BeaconRNG = BeaconRNG;
 })(typeof window !== 'undefined' ? window : this);

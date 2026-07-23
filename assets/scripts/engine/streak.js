@@ -40,12 +40,14 @@
 
 			if (this._recentTiers.length >= COLD_WINDOW) {
 				const slice = this._recentTiers.slice(-COLD_WINDOW);
-				const avg = this._recentTiers.reduce(function (a, b) {
-					return a + b;
-				}, 0) / this._recentTiers.length;
-				const recentAvg = slice.reduce(function (a, b) {
-					return a + b;
-				}, 0) / COLD_WINDOW;
+				const avg =
+					this._recentTiers.reduce(function (a, b) {
+						return a + b;
+					}, 0) / this._recentTiers.length;
+				const recentAvg =
+					slice.reduce(function (a, b) {
+						return a + b;
+					}, 0) / COLD_WINDOW;
 
 				if (avg > 0 && recentAvg < avg * COLD_TIER_RATIO) return daily * 1.1;
 				if (avg > 0 && recentAvg > avg * HOT_TIER_RATIO) return daily * 0.94;
@@ -80,12 +82,6 @@
 			this._dryRuns = new Map(Object.entries(snap.dryRuns || {}));
 		}
 	}
-
-
-
-
-
-
 
 	root.StreakTracker = StreakTracker;
 })(typeof window !== 'undefined' ? window : this);

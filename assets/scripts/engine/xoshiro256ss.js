@@ -19,7 +19,7 @@
 				seed !== undefined
 					? seed
 					: BigInt(Date.now()) ^
-					BigInt(Math.floor((typeof performance !== 'undefined' ? performance.now() : 0) * 1e6))
+							BigInt(Math.floor((typeof performance !== 'undefined' ? performance.now() : 0) * 1e6))
 			);
 		}
 		reseed(raw) {
@@ -65,9 +65,11 @@
 			this._s = arr.map(function (v) {
 				return BigInt('0x' + v) & M64;
 			});
-			if (this._s.every(function (v) {
-				return v === 0n;
-			}))
+			if (
+				this._s.every(function (v) {
+					return v === 0n;
+				})
+			)
 				this._s[0] = 1n;
 		}
 		jump() {
@@ -77,7 +79,10 @@
 				0xa9582618e03fc9aan,
 				0x39abdc4529b1661cn,
 			];
-			let s0 = 0n, s1 = 0n, s2 = 0n, s3 = 0n;
+			let s0 = 0n,
+				s1 = 0n,
+				s2 = 0n,
+				s3 = 0n;
 			for (let i = 0; i < 4; i++) {
 				for (let b = 0; b < 64; b++) {
 					if ((JUMP[i] >> BigInt(b)) & 1n) {
@@ -95,13 +100,6 @@
 			this._s[3] = s3 & M64;
 		}
 	}
-
-
-
-
-
-
-
 
 	root.Xoshiro256SS = Xoshiro256SS;
 })(typeof window !== 'undefined' ? window : this); // oh this was confusing to make
