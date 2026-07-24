@@ -385,8 +385,9 @@
 				const copyBtn = document.getElementById('copyLinkBtn');
 				if (copyBtn) {
 					copyBtn.addEventListener('click', () => {
+						const shareUrl = 'https://accounts.authsrng.xyz/u/' + encodeURIComponent(username);
 						navigator.clipboard
-							.writeText(location.href)
+							.writeText(shareUrl)
 							.then(() => {
 								copyBtn.textContent = 'copied!';
 								setTimeout(() => {

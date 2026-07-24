@@ -399,6 +399,137 @@ console.log(performance.now());
 		}
 	}
 
+	function openCropModal(file, aspectRatio, onConfirm) {
+		const overlay = document.createElement('div');
+		overlay.className = 'auth-overlay show';
+		overlay.style.zIndex = '30000';
+
+		const modal = document.createElement('div');
+		modal.className = 'auth-modal';
+		modal.style.maxWidth = '420px';
+		modal.innerHTML = `
+			<h3 style="margin-top:0">crop image</h3>
+			<div id="cropStage" style="position:relative;width:100%;aspect-ratio:${aspectRatio};overflow:hidden;background:#000;border:1px solid var(--border-color);border-radius:3px;cursor:grab;">
+				<img id="cropImg" style="position:absolute;max-width:none;user-select:none;pointer-events:none;">
+			</div>
+			<label style="display:block;margin:12px 0 4px;font-size:0.85em;opacity:0.7;">zoom</label>
+			<input type="range" id="cropZoom" min="100" max="300" value="100" style="width:100%;margin-bottom:12px;">
+			<button id="cropConfirmBtn" class="small" style="width:100%;margin-bottom:8px;">use this crop</button>
+			<button id="cropCancelBtn" class="small" style="width:100%;opacity:0.6;">cancel</button>
+		`;
+		overlay.appendChild(modal);
+		document.body.appendChild(overlay);
+
+		const stage = modal.querySelector('#cropStage');
+		const img = modal.querySelector('#cropImg');
+		const zoomSlider = modal.querySelector('#cropZoom');
+
+		let naturalW = 0,
+			naturalH = 0;
+		let offsetX = 0,
+			offsetY = 0;
+		let zoom = 1;
+		let dragging = false,
+			dragStartX = 0,
+			dragStartY = 0,
+			dragOffX = 0,
+			dragOffY = 0;
+
+		const reader = new FileReader();
+		reader.onload = () => {
+			img.src = reader.result;
+			img.onload = () => {
+				naturalW = img.naturalWidth;
+				naturalH = img.naturalHeight;
+				layout();
+			};
+		};
+		reader.readAsDataURL(file);
+
+		function layout() {
+			const stageW = stage.clientWidth;
+			const stageH = stage.clientHeight;
+			const coverScale = Math.max(stageW / naturalW, stageH / naturalH);
+			const scale = coverScale * zoom;
+			const w = naturalW * scale;
+			const h = naturalH * scale;
+
+			offsetX = Math.min(0, Math.max(offsetX, stageW - w));
+			offsetY = Math.min(0, Math.max(offsetY, stageH - h));
+
+			img.style.width = w + 'px';
+			img.style.height = h + 'px';
+			img.style.left = offsetX + 'px';
+			img.style.top = offsetY + 'px';
+		}
+
+		zoomSlider.addEventListener('input', () => {
+			zoom = zoomSlider.value / 100;
+			layout();
+		});
+
+		stage.addEventListener('pointerdown', (e) => {
+			dragging = true;
+			dragStartX = e.clientX;
+			dragStartY = e.clientY;
+			dragOffX = offsetX;
+			dragOffY = offsetY;
+			stage.style.cursor = 'grabbing';
+			stage.setPointerCapture(e.pointerId);
+		});
+		stage.addEventListener('pointermove', (e) => {
+			if (!dragging) return;
+			offsetX = dragOffX + (e.clientX - dragStartX);
+			offsetY = dragOffY + (e.clientY - dragStartY);
+			layout();
+		});
+		stage.addEventListener('pointerup', () => {
+			dragging = false;
+			stage.style.cursor = 'grab';
+		});
+
+		function cleanup() {
+			overlay.remove();
+		}
+
+		modal.querySelector('#cropCancelBtn').addEventListener('click', cleanup);
+
+		modal.querySelector('#cropConfirmBtn').addEventListener('click', () => {
+			const stageW = stage.clientWidth;
+			const stageH = stage.clientHeight;
+			const coverScale = Math.max(stageW / naturalW, stageH / naturalH);
+			const scale = coverScale * zoom;
+
+			const outputW = aspectRatio === 1 ? 512 : 1200;
+			const outputH = aspectRatio === 1 ? 512 : Math.round(1200 / aspectRatio);
+
+			const canvas = document.createElement('canvas');
+			canvas.width = outputW;
+			canvas.height = outputH;
+			const ctx = canvas.getContext('2d');
+
+			const srcX = -offsetX / scale;
+			const srcY = -offsetY / scale;
+			const srcW = stageW / scale;
+			const srcH = stageH / scale;
+
+			ctx.drawImage(img, srcX, srcY, srcW, srcH, 0, 0, outputW, outputH);
+
+			const mime = file.type === 'image/gif' ? 'image/png' : file.type;
+			canvas.toBlob(
+				(blob) => {
+					const croppedFile = new File([blob], file.name.replace(/\.\w+$/, '') + '-cropped.png', {
+						type: mime,
+					});
+					cleanup();
+					onConfirm(croppedFile);
+				},
+				mime,
+				0.92
+			);
+		});
+	}
+
 	function openEditProfile(currentData) {
 		const body = el('accountInfoBody');
 		let selectedFile = null;
@@ -442,6 +573,7 @@ console.log(performance.now());
 	      <button id="saveProfileBtn" class="small" style="width:100%;margin-bottom:8px;">save changes</button>
 	      <button id="editThemeBtn" class="small" style="width:100%;margin-bottom:8px;opacity:0.8;">customize appearance</button>
 	      <button id="editWidgetsBtn" class="small" style="width:100%;margin-bottom:8px;opacity:0.8;">customize layout</button>
+				<button id="editSocialBtn" class="small" style="width:100%;margin-bottom:8px;opacity:0.8;">social links</button>
 	      <button id="cancelProfileBtn" class="small" style="width:100%;opacity:0.6;">cancel</button>
 	      <div id="profileStatus" class="auth-status"></div>
 	    `;
@@ -466,14 +598,17 @@ console.log(performance.now());
 				return;
 			}
 
-			selectedBannerFile = file;
-			removeBannerFlag = false;
-			const reader = new FileReader();
-			reader.onload = () => {
-				el('bannerPreview').style.cssText =
-					`height:70px;border-radius:4px;border:1px solid var(--border-color);margin-bottom:8px;background-image:url('${reader.result}');background-size:cover;background-position:center;`;
-			};
-			reader.readAsDataURL(file);
+			openCropModal(file, 16 / 5, (croppedFile) => {
+				selectedBannerFile = croppedFile;
+				removeBannerFlag = false;
+				const reader = new FileReader();
+				reader.onload = () => {
+					el('bannerPreview').style.cssText =
+						`height:70px;border-radius:4px;border:1px solid var(--border-color);margin-bottom:8px;background-image:url('${reader.result}');background-size:cover;background-position:center;`;
+				};
+				reader.readAsDataURL(croppedFile);
+			});
+			e.target.value = '';
 		});
 
 		el('removeBannerBtn').addEventListener('click', () => {
@@ -499,22 +634,25 @@ console.log(performance.now());
 				return;
 			}
 
-			selectedFile = file;
-			removeFlag = false;
-			const preview = el('editAvatarPreview');
-			const reader = new FileReader();
-			reader.onload = () => {
-				if (preview.tagName === 'IMG') {
-					preview.src = reader.result;
-				} else {
-					const img = document.createElement('img');
-					img.src = reader.result;
-					img.className = 'account-avatar-preview';
-					img.id = 'editAvatarPreview';
-					preview.replaceWith(img);
-				}
-			};
-			reader.readAsDataURL(file);
+			openCropModal(file, 1, (croppedFile) => {
+				selectedFile = croppedFile;
+				removeFlag = false;
+				const preview = el('editAvatarPreview');
+				const reader = new FileReader();
+				reader.onload = () => {
+					if (preview.tagName === 'IMG') {
+						preview.src = reader.result;
+					} else {
+						const img = document.createElement('img');
+						img.src = reader.result;
+						img.className = 'account-avatar-preview';
+						img.id = 'editAvatarPreview';
+						preview.replaceWith(img);
+					}
+				};
+				reader.readAsDataURL(croppedFile);
+			});
+			e.target.value = '';
 		});
 
 		el('removeAvatarBtn').addEventListener('click', () => {
@@ -546,6 +684,15 @@ console.log(performance.now());
 				openEditWidgets(meData);
 			} catch (e) {
 				window.showAlert('failed to load current layout: ' + e.message);
+			}
+		});
+
+		el('editSocialBtn').addEventListener('click', async () => {
+			try {
+				const meData = await apiCall('/me');
+				openEditSocialLinks(meData);
+			} catch (e) {
+				window.showAlert('failed to load current links: ' + e.message);
 			}
 		});
 
@@ -784,6 +931,68 @@ console.log(performance.now());
 		}
 
 		render();
+	}
+
+	function openEditSocialLinks(currentData) {
+		const body = el('accountInfoBody');
+		const platforms = [
+			{ key: 'discord', label: 'discord username' },
+			{ key: 'youtube', label: 'youtube handle' },
+			{ key: 'tiktok', label: 'tiktok handle' },
+			{ key: 'github', label: 'github username' },
+			{ key: 'twitch', label: 'twitch username' },
+		];
+		const existing = currentData.socialLinks || {};
+		const freeform = currentData.freeformLink || {};
+
+		let html = `<h3 style="margin-top:0">social links</h3><p style="font-size:0.8em;opacity:0.6;margin-bottom:12px;">just your username/handle on each platform, no need for full urls.</p>`;
+		platforms.forEach((p) => {
+			html += `<label style="display:block;margin-bottom:4px;font-size:0.85em;opacity:0.7;">${escHtml(p.label)}</label>
+        <input type="text" class="auth-field social-input" data-platform="${p.key}" placeholder="username" value="${escHtml(existing[p.key] ? existing[p.key].handle : '')}">`;
+		});
+		html += `
+      <label style="display:block;margin-bottom:4px;font-size:0.85em;opacity:0.7;">custom link label</label>
+      <input type="text" id="freeformLabel" class="auth-field" maxlength="30" placeholder="e.g. my website" value="${escHtml(freeform.label || '')}">
+      <label style="display:block;margin-bottom:4px;font-size:0.85em;opacity:0.7;">custom link url</label>
+      <input type="text" id="freeformUrl" class="auth-field" maxlength="300" placeholder="https://..." value="${escHtml(freeform.url || '')}">
+      <button id="saveSocialBtn" class="small" style="width:100%;margin-bottom:8px;">save links</button>
+      <button id="cancelSocialBtn" class="small" style="width:100%;opacity:0.6;">back</button>
+      <div id="socialStatus" class="auth-status"></div>
+    `;
+
+		body.innerHTML = html;
+
+		el('cancelSocialBtn').addEventListener('click', () => openAccountInfo());
+
+		el('saveSocialBtn').addEventListener('click', async () => {
+			const status = el('socialStatus');
+			const links = {};
+			body.querySelectorAll('.social-input').forEach((inp) => {
+				const v = inp.value.trim();
+				if (v) links[inp.dataset.platform] = v;
+			});
+			const freeformLabel = el('freeformLabel').value.trim();
+			const freeformUrl = el('freeformUrl').value.trim();
+
+			try {
+				status.style.color = '';
+				status.textContent = 'saving...';
+				await apiCall('/social-links', {
+					method: 'POST',
+					body: {
+						links,
+						freeformLabel: freeformUrl ? freeformLabel : undefined,
+						freeformUrl: freeformUrl || undefined,
+					},
+				});
+				status.style.color = '#8d8';
+				status.textContent = 'saved!!!';
+				setTimeout(openAccountInfo, 600);
+			} catch (e) {
+				status.style.color = '#f66';
+				status.textContent = e.message;
+			}
+		});
 	}
 
 	function openChangePassword() {
