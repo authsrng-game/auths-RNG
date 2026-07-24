@@ -4583,37 +4583,3 @@ body.blur-panels .starmap-market-item {
 	margin-left: 4px;
 	vertical-align: middle;
 }
-
-.social-links {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 6px;
-	margin-bottom: 18px;
-}
-
-.social-chip {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	padding: 5px 10px;
-	background: #131313;
-	border: 1px solid var(--border);
-	border-radius: 20px;
-	font-size: 0.78em;
-	color: var(--text);
-	text-decoration: none;
-}
-
-.social-chip:hover {
-	border-color: #444;
-}
-
-.social-chip svg {
-	flex-shrink: 0;
-	opacity: 0.75;
-}
-
-.social-chip-static {
-	cursor: default;
-	opacity: 0.75;
-}
