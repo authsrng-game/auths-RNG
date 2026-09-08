@@ -5720,10 +5720,7 @@ body.reduce-motion .info-tip-orbit span {
 	display: inline-flex;
 	margin-left: 6px;
 	vertical-align: middle;
-	top: auto;
-	left: auto;
-	right: auto;
-	bottom: auto;
+	inset: auto;
 }
 
 .info-tip-pos-inline .info-tip-orbit {
