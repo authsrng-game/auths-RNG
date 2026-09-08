@@ -388,7 +388,7 @@
 					const picker = document.createElement('div');
 					picker.className = 'reaction-picker';
 					picker.style.cssText =
-						'position:absolute;background:var(--panel-bg);border:1px solid var(--border-color);border-radius:20px;padding:4px 6px;display:flex;gap:4px;z-index:100;';
+						'position:absolute;background:var(--panel-bg);border:1px solid var(--border-color);border-radius:20px;padding:4px 6px;display:flex;gap:4px;z-index:25000;';
 					emojis.forEach((e) => {
 						const span = document.createElement('span');
 						span.textContent = e;
