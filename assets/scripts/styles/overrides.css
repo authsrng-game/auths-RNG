@@ -5714,3 +5714,18 @@ body.reduce-motion .info-tip-orbit span {
 	border-right: 1px solid var(--border-color);
 	border-bottom: 1px solid var(--border-color);
 }
+
+.info-tip-pos-inline {
+	position: static;
+	display: inline-flex;
+	margin-left: 6px;
+	vertical-align: middle;
+	top: auto;
+	left: auto;
+	right: auto;
+	bottom: auto;
+}
+
+.info-tip-pos-inline .info-tip-orbit {
+	inset: -5px;
+}

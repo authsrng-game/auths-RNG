@@ -22,14 +22,14 @@
 	const TOOLTIPS = [
 		{
 			id: 'anomalies',
-			container: () => document.getElementById('anomalyPanel'),
-			pos: 'top-left',
+			container: () => document.getElementById('anomalyCount'),
+			pos: 'inline',
 			text: 'drop from rolls rarer than 1/10,000. consume for a permanent luck boost, stacks forever.',
 		},
 		{
 			id: 'sell-rarity',
-			container: () => document.getElementById('inventoryContainer'),
-			pos: 'top-left',
+			container: () => document.querySelector('#inventoryContainer #collectedCounter'),
+			pos: 'inline',
 			text: 'double click or double tap a rarity to sell extras. you keep one copy always!',
 		},
 		{
@@ -94,7 +94,7 @@
 		const container = tip.container();
 		if (!container) return;
 
-		if (getComputedStyle(container).position === 'static') {
+		if (tip.pos !== 'inline' && getComputedStyle(container).position === 'static') {
 			container.style.position = 'relative';
 		}
 
