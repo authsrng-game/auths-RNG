@@ -13,45 +13,57 @@
 	const TIMEOUT_LINES = [
 		'"time\'s up." he starts folding into the noise before you can protest. he vanishes in your sight..',
 		'he checks a watch that wasn\'t there before. "we\'re done here, buckaroo."',
+  '*he dips.*',
 	];
 
-	const TELLS_STRONG = ["he doesn't blink.", '"go on. call it."', 'taps the table twice, slow.'];
+	const TELLS_STRONG = ["he doesn't blink.", '"go on. call it."', 'taps the table twice, slow.', 'id win anyway.'];
 	const TELLS_WEAK = [
 		'his coat shifts. just fabric. probably.',
 		'"...your funeral." something almost like nerves... ooh',
 		"he's too still. that's new.",
+  'hm.',
 	];
-	const TELLS_NEUTRAL = ['"heh."'];
+	const TELLS_NEUTRAL = ['"heh."', 'what's that smell?'];
 
 	const ARRIVAL_LINES = [
 		'a shape steadies in the static. "...you again."',
 		'you feel eyes before you see him. "sit."',
 		"the air gets heavier. he's already dealing.",
 		'"lost your friends up there yet?" he nods toward the rolls.',
+  'he stares at you coldly.',
+  'what are you gonna do, shoot me?',
 	];
 	const WIN_LINES = [
 		'he exhales through his teeth. "...fine."',
 		'"keep it. i\'ve got plenty.."',
 		'for a second his coat isn\'t a coat. then it is again. "well played."',
+  'sigh.',
+  'you earned it. now its my time.',
 	];
 	const LOSE_LINES = [
 		"he doesn't gloat. that's worse!",
 		'"i did say." he takes it without ceremony.',
 		'the deck folds itself back into shape. "again?"',
+  'sigh. this is boring, get better',
 	];
 	const FOLD_LINES = [
 		'"smart. boring. smart. i hate you."',
 		'he shrugs, already re-dealing.',
 		'"you\'ll call eventually. everyone does."',
+  'too scared to call? pfft..',
 	];
 	const TIER_UP_LINES = [
 		'"you\'re paying attention. i\'ll pay attention too."',
 		'he stops blinking entirely for the rest of the hand.',
 		'"no more games between us, then. really play."',
+  'you are more better than i thought.',
+  '*he thinks... slowly...*'
 	];
 	const DEPART_LINES = [
 		'he folds back into the noise between rolls.',
 		'"same time, whenever that is." he\'s already gone...?',
+  'goodbye.',
+  'he gets up and disappears under a blink...',
 	];
 
 	function pick(arr) {
