@@ -23,7 +23,7 @@
 		"he's too still. that's new.",
   'hm.',
 	];
-	const TELLS_NEUTRAL = ['"heh."', 'what's that smell?'];
+	const TELLS_NEUTRAL = ['"heh."', 'whats that smell?'];
 
 	const ARRIVAL_LINES = [
 		'a shape steadies in the static. "...you again."',
