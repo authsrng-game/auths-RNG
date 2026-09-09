@@ -83,7 +83,7 @@
 		if (localStorage.getItem(UNLOCK_KEY) === '1') return true;
 		if (typeof totalRolls !== 'undefined' && totalRolls >= UNLOCK_ROLLS) {
 			localStorage.setItem(UNLOCK_KEY, '1');
-			if (window.unlockPageDot) window.unlockPageDot(9);
+			if (window.unlockPageDot) window.unlockPageDot(11);
 			syncSettingRow();
 			return true;
 		}
