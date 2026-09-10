@@ -8,6 +8,7 @@
  */
 * { font-size: 100%; font-family: monospace; background:#000; color:#ccc }
 pre { white-space: pre-wrap }
+
 input,
 textarea { background:#033 }
 
@@ -42,14 +43,22 @@ a:visited { color:#96f }
 .hl.pps { color:#f30 } /* preprocessor string */
 .hl.slc { color:#09f } /* single-line comment */
 .hl.com { color:#09f } /* multi-line comment */
-/* .hl.opt { color:#ccc } */ /* operator */
-/* .hl.ipl { color:#ccc } */ /* interpolation */
+
+/* .hl.opt { color:#ccc } */
+
+ /* operator */
+
+/* .hl.ipl { color:#ccc } */
+
+ /* interpolation */
 
 /* keyword groups kw[a-z] */
 .hl.kwa { color:#ff0 }
 .hl.kwb { color:#0f0 }
 .hl.kwc { color:#ff0 }
+
 /* .hl.kwd { color:#ccc } */
 
 /* line-number (unused by public-inbox) */
+
 /* .hl.lin { color:#ccc } */
