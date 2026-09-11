@@ -42,10 +42,21 @@
 		return 4;
 	}
 
+	// Generated code starts here on 2026-09-11T03:25:15Z:
+	// Memoize BigInt denominator values to avoid ~300 conversions per roll.
+	const _denomBigCache = new WeakMap();
 	function denomBig(r) {
-		if (r.denomEpic && root.Epic) return root.Epic.from(r.denomEpic).toBigInt();
-		return BigInt(Math.round(1 / r.chance));
+		let cached = _denomBigCache.get(r);
+		if (cached !== undefined) return cached;
+		if (r.denomEpic && root.Epic) {
+			cached = root.Epic.from(r.denomEpic).toBigInt();
+		} else {
+			cached = BigInt(Math.round(1 / r.chance));
+		}
+		_denomBigCache.set(r, cached);
+		return cached;
 	}
+	// Generated code ends here on 2026-09-11T03:25:15Z:
 
 	class PlushRoller {
 		constructor(rng) {
