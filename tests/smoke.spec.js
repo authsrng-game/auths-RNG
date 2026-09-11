@@ -67,4 +67,12 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(count).toBe(1);
 	});
 	// Generated code ends here on 2026-06-18T00:28:00Z:
+
+	// Generated code starts here on 2026-06-18T00:30:00Z:
+	test('navigation arrows have accessible aria-labels', async ({ page }) => {
+		await page.goto(BASE_URL);
+		await expect(page.locator('#prevPage')).toHaveAttribute('aria-label', 'Previous page');
+		await expect(page.locator('#nextPage')).toHaveAttribute('aria-label', 'Next page');
+	});
+	// Generated code ends here on 2026-06-18T00:30:00Z:
 });
