@@ -68,7 +68,7 @@
 		<br />
 
 		<center>
-			<a class=".back-link" href="/index.html">back</a>
+			<a class=".back-link" href="/index.html" target="_blank" rel="noopener noreferrer">back</a>
 		</center>
 
 		<br />
@@ -89,7 +89,7 @@
 					posts.forEach((p) => {
 						const el = document.createElement('p');
 						el.innerHTML = `
-            <a href="post-s4f5.html?id=${p.id}">${p.title}</a>
+            <a href="post-s4f5.html?id=${p.id}" target="_blank" rel="noopener noreferrer">${p.title}</a>
             <span class="small"> — ${p.date}</span>
           `;
 						list.appendChild(el);

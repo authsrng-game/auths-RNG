@@ -132,7 +132,7 @@
 				html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-color);">
           <div style="display:flex;align-items:center;gap:8px;">
             ${avatarHtml(f.username, f.avatarUrl, 26)}
-            <a href="/assets/frontend/profile.html?user=${encodeURIComponent(f.username)}" style="color:var(--text-color);">${escHtml(f.username)}</a>
+            <a href="/assets/frontend/profile.html?user=${encodeURIComponent(f.username)}" style="color:var(--text-color);" target="_blank" rel="noopener noreferrer">${escHtml(f.username)}</a>
           </div>
           <div style="display:flex;align-items:center;gap:8px;font-size:0.75em;">
             ${seenLabel}

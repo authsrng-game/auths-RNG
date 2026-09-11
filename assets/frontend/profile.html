@@ -344,7 +344,7 @@
 				const outer = document.getElementById('container');
 				if (!username) {
 					outer.innerHTML =
-						'<div class="state-box">no username specified. <a href="/">back to game</a></div>';
+						'<div class="state-box">no username specified. <a href="/" target="_blank" rel="noopener noreferrer">back to game</a></div>';
 					return;
 				}
 
@@ -354,7 +354,7 @@
 					if (!r.ok) throw new Error((await r.json()).error || 'user not found');
 					profile = await r.json();
 				} catch (e) {
-					outer.innerHTML = `<div class="state-box">${escHtml(e.message)}<br><br><a href="/">back to game</a></div>`;
+					outer.innerHTML = `<div class="state-box">${escHtml(e.message)}<br><br><a href="/" target="_blank" rel="noopener noreferrer">back to game</a></div>`;
 					return;
 				}
 
@@ -459,7 +459,7 @@
 						${sectionsHtml}
 						${actionsHtml}
 						<div style="display:flex;gap:8px;margin-top:1em;">
-							<a href="/" class="back-link">← back to game</a>
+							<a href="/" class="back-link" target="_blank" rel="noopener noreferrer">← back to game</a>
 							<button id="copyLinkBtn">copy link</button>
 						</div>
 					</div>
