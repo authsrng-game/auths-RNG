@@ -196,23 +196,21 @@
 
 		// simple correctness heuristic for tier ramping
 		const shouldCall = playerCard >= 9;
-		let correct = false;
+		let correct;
 		let outcome; // 'win' | 'lose' | 'fold'
 
 		if (action === 'fold') {
 			outcome = 'fold';
 			correct = !shouldCall;
 		} else {
-			const won = playerCard > dealerCard;
-			outcome = won ? 'win' : 'lose';
-			correct = shouldCall === won ? shouldCall : correct;
+			outcome = playerCard > dealerCard ? 'win' : 'lose';
 			correct = shouldCall; // called and it matched the "should call" heuristic
 		}
 
 		s.handsPlayed++;
 		if (correct) s.correctReads++;
 
-		let resultText = '';
+		let resultText;
 		let reward = null;
 
 		if (outcome === 'fold') {
