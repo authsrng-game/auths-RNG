@@ -185,10 +185,12 @@
 
 		// dealer AI: at higher tiers, sometimes doesn't play his best card
 		const deviateChance = [0, 0.15, 0.3, 0.45][Math.min(s.tier, 3)];
-		let dealerCard = hand.dealerBest;
+		let dealerCard;
 		if (rnd() < deviateChance) {
 			const sorted = [...hand.dealerHand].sort((a, b) => a - b);
 			dealerCard = sorted[Math.floor(rnd() * sorted.length)];
+		} else {
+			dealerCard = hand.dealerBest;
 		}
 
 		// return cards to discard
@@ -196,23 +198,21 @@
 
 		// simple correctness heuristic for tier ramping
 		const shouldCall = playerCard >= 9;
-		let correct = false;
 		let outcome; // 'win' | 'lose' | 'fold'
+		let correct;
 
 		if (action === 'fold') {
 			outcome = 'fold';
 			correct = !shouldCall;
 		} else {
-			const won = playerCard > dealerCard;
-			outcome = won ? 'win' : 'lose';
-			correct = shouldCall === won ? shouldCall : correct;
+			outcome = playerCard > dealerCard ? 'win' : 'lose';
 			correct = shouldCall; // called and it matched the "should call" heuristic
 		}
 
 		s.handsPlayed++;
 		if (correct) s.correctReads++;
 
-		let resultText = '';
+		let resultText;
 		let reward = null;
 
 		if (outcome === 'fold') {
