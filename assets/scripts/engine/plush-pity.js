@@ -26,7 +26,13 @@
 		const hard = Math.ceil(expected * 1.5);
 		const soft = Math.ceil(hard * SOFT_RATIO);
 		const early = Math.ceil(hard * EARLY_RATIO);
-		return { hardPity: hard, softPityStart: soft, earlyPityStart: early };
+		const minEarly = Math.max(1, Math.floor(early * (1 - MASTERY_CAP)));
+		return {
+			hardPity: hard,
+			softPityStart: soft,
+			earlyPityStart: early,
+			minEarlyPity: minEarly,
+		};
 	}
 
 	// Generated code starts here on 2026-09-11T03:25:15Z:
@@ -45,10 +51,12 @@
 				return cached.config;
 			}
 			const hard = Math.max(1000, Math.round(rarity.pityLimit * reduction));
+			const early = Math.ceil(hard * EARLY_RATIO);
 			const config = {
 				hardPity: hard,
 				softPityStart: Math.ceil(hard * SOFT_RATIO),
-				earlyPityStart: Math.ceil(hard * EARLY_RATIO),
+				earlyPityStart: early,
+				minEarlyPity: Math.max(1, Math.floor(early * (1 - MASTERY_CAP))),
 			};
 			_pityLimitCache.set(rarity, { reduction, config });
 			return config;
@@ -97,6 +105,11 @@
 			const config = resolveConfig(rarity);
 			if (!config) return 1.0;
 			const count = this.get(rarity.name);
+			// Generated code starts here on 2026-09-11T04:10:00Z:
+			// Fast path: skip mastery lookup and floating point threshold math when pity count is below minimum early threshold.
+			if (count < config.minEarlyPity) return 1.0;
+			// Generated code ends here on 2026-09-11T04:10:00Z:
+
 			const mastery = this.getMastery(rarity.name);
 			const effectiveSoft = Math.max(1, Math.round(config.softPityStart * (1 - mastery)));
 			const effectiveEarly = Math.max(1, Math.round(config.earlyPityStart * (1 - mastery)));
