@@ -428,18 +428,22 @@
 		          <div class="status-msg" id="actionStatus"></div>`;
 				}
 
+				// Generated code starts here on 2026-09-11T03:30:00Z:
 				const theme = profile.theme || { bannerType: 'none', accentColor: '#dcdcdc' };
 				let bannerStyle;
+				const c1 = HEX_COLOR_RE.test(theme.bannerColor1 || '') ? theme.bannerColor1 : null;
+				const c2 = HEX_COLOR_RE.test(theme.bannerColor2 || '') ? theme.bannerColor2 : null;
 				if (profile.bannerImageUrl) {
-					bannerStyle = `background-image:url('https://accounts.authsrng.xyz${profile.bannerImageUrl}');background-size:cover;background-position:center;`;
-				} else if (theme.bannerType === 'solid' && theme.bannerColor1) {
-					bannerStyle = `background:${theme.bannerColor1};`;
-				} else if (theme.bannerType === 'gradient' && theme.bannerColor1 && theme.bannerColor2) {
-					bannerStyle = `background:linear-gradient(135deg, ${theme.bannerColor1}, ${theme.bannerColor2});`;
+					bannerStyle = `background-image:url('https://accounts.authsrng.xyz${escHtml(profile.bannerImageUrl)}');background-size:cover;background-position:center;`;
+				} else if (theme.bannerType === 'solid' && c1) {
+					bannerStyle = `background:${c1};`;
+				} else if (theme.bannerType === 'gradient' && c1 && c2) {
+					bannerStyle = `background:linear-gradient(135deg, ${c1}, ${c2});`;
 				} else {
 					bannerStyle = 'background:#131313;';
 				}
 				const accent = HEX_COLOR_RE.test(theme.accentColor || '') ? theme.accentColor : '#dcdcdc';
+				// Generated code ends here on 2026-09-11T03:30:00Z:
 
 				outer.innerHTML = `
 					<div class="profile-banner" style="${bannerStyle}"></div>

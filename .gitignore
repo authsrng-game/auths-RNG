@@ -6,3 +6,4 @@ node_modules
 .env.local
 analysis/report
 assets/scripts/archive/in-between/promo.html
+.jules

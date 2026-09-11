@@ -29,21 +29,38 @@
 		return { hardPity: hard, softPityStart: soft, earlyPityStart: early };
 	}
 
+	// Generated code starts here on 2026-09-11T03:25:15Z:
+	// Memoize static pity configuration to avoid ~300 object allocations per roll.
+	const _pityConfigCache = new WeakMap();
+	const _pityLimitCache = new WeakMap();
 	function resolveConfig(rarity) {
+		if (!rarity) return null;
 		if (rarity.pityLimit != null) {
 			const reduction =
 				typeof root.getPityCompressionReduction === 'function'
 					? root.getPityCompressionReduction(rarity.name)
 					: 1;
+			const cached = _pityLimitCache.get(rarity);
+			if (cached && cached.reduction === reduction) {
+				return cached.config;
+			}
 			const hard = Math.max(1000, Math.round(rarity.pityLimit * reduction));
-			return {
+			const config = {
 				hardPity: hard,
 				softPityStart: Math.ceil(hard * SOFT_RATIO),
 				earlyPityStart: Math.ceil(hard * EARLY_RATIO),
 			};
+			_pityLimitCache.set(rarity, { reduction, config });
+			return config;
 		}
-		return derivePityConfig(chanceOf(rarity));
+		let cached = _pityConfigCache.get(rarity);
+		if (cached === undefined) {
+			cached = derivePityConfig(chanceOf(rarity));
+			_pityConfigCache.set(rarity, cached);
+		}
+		return cached;
 	}
+	// Generated code ends here on 2026-09-11T03:25:15Z:
 
 	class PityTracker {
 		constructor() {
