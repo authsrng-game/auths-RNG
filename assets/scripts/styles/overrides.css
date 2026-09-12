@@ -2692,10 +2692,13 @@ br + .image-column {
 	border-radius: 20px;
 }
 
+/* Generated code starts here on 2026-06-18T00:35:00Z: */
 .page-dot {
 	width: 8px;
 	min-width: 8px;
 	height: 8px;
+	padding: 0;
+	border: none;
 	border-radius: 50%;
 	background: var(--border-color);
 	cursor: pointer;
@@ -2706,6 +2709,13 @@ br + .image-column {
 		width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
 		border-radius 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
+.page-dot:focus-visible {
+	outline: 2px solid var(--text-color);
+	outline-offset: 2px;
+}
+
+/* Generated code ends here on 2026-06-18T00:35:00Z: */
 
 .page-dot::after {
 	content: '';

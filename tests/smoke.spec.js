@@ -75,4 +75,16 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(page.locator('#nextPage')).toHaveAttribute('aria-label', 'Next page');
 	});
 	// Generated code ends here on 2026-06-18T00:30:00Z:
+
+	// Generated code starts here on 2026-06-18T00:35:00Z:
+	test('page dots and close buttons have accessible aria-labels', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const firstDot = page.locator('.page-dot').first();
+		await expect(firstDot).toHaveAttribute('aria-label', 'Page 1');
+		await expect(firstDot).toHaveAttribute('aria-current', 'page');
+
+		const closeBtn = page.locator('#indexClose');
+		await expect(closeBtn).toHaveAttribute('aria-label', 'Close');
+	});
+	// Generated code ends here on 2026-06-18T00:35:00Z:
 });
