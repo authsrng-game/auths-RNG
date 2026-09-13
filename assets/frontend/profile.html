@@ -223,9 +223,16 @@
 			function isLoggedIn() {
 				return !!getToken();
 			}
+			// Generated code starts here on 2026-05-18T12:00:00Z:
 			function escHtml(s) {
-				return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+				return String(s)
+					.replace(/&/g, '&amp;')
+					.replace(/</g, '&lt;')
+					.replace(/>/g, '&gt;')
+					.replace(/"/g, '&quot;')
+					.replace(/'/g, '&#39;');
 			}
+			// Generated code ends here on 2026-05-18T12:00:00Z:
 
 			function abbr(n) {
 				n = Number(n) || 0;
