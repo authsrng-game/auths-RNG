@@ -18,30 +18,49 @@ console.log(performance.now());
 	}
 
 	// ── Parser ────────────────────────────────────────────────────────────
+	// AI-generated code starts here on 2026-06-18T01:00:00Z:
+	// Static regular expressions hoisted to module scope to avoid re-compilation per line.
+	const HEX = '#[0-9a-fA-F]{3,8}';
+	const COLOR_REGEX = new RegExp(`^color:\\s*(${HEX})\\s*$`, 'i');
+	const SWITCH_COLOR_REGEX = new RegExp(`^switch\\s+color:\\s*(${HEX})\\s*$`, 'i');
+	const TRANSITION_COLOR_REGEX = new RegExp(`^transition\\s+color:\\s*(${HEX})\\s*$`, 'i');
+	const PULSE_REGEX = new RegExp(
+		`^pulse\\s*\\(\\s*(\\d*\\.?\\d+)\\s*,\\s*(\\d*\\.?\\d+)\\s*,\\s*(\\d*\\.?\\d+)\\s*\\):\\s*(${HEX})\\s*$`,
+		'i'
+	);
+	const WAIT_REGEX = /^wait:\s*(\d*\.?\d+)\s*$/i;
+
+	// AST cache for parsed rarity style strings to avoid redundant parsing in inventory lists and animation loops.
+	const parseCache = new Map();
+
 	// Returns an array of command objects from a style string.
 	function parseCommands(src) {
-		src = stripComments(src);
+		if (!src) return [];
+		const cached = parseCache.get(src);
+		if (cached) return cached;
+
+		const stripped = stripComments(src);
 		let i = 0;
 
 		function skipWS() {
-			while (i < src.length && /\s/.test(src[i])) i++;
+			while (i < stripped.length && /\s/.test(stripped[i])) i++;
 		}
 
 		function parseBlock() {
 			const block = [];
-			while (i < src.length) {
+			while (i < stripped.length) {
 				skipWS();
-				if (i >= src.length || src[i] === '}') break;
+				if (i >= stripped.length || stripped[i] === '}') break;
 
 				// loop { ... }
-				if (/^loop\b/.test(src.slice(i))) {
+				if (/^loop\b/.test(stripped.slice(i))) {
 					i += 4;
 					skipWS();
-					if (src[i] === '{') {
+					if (stripped[i] === '{') {
 						i++; // consume {
 						const inner = parseBlock();
 						skipWS();
-						if (src[i] === '}') i++; // consume }
+						if (stripped[i] === '}') i++; // consume }
 						block.push({ type: 'loop', body: inner });
 						continue;
 					}
@@ -49,9 +68,9 @@ console.log(performance.now());
 
 				// read one line
 				const ls = i;
-				while (i < src.length && src[i] !== '\n') i++;
-				const line = src.slice(ls, i).trim();
-				if (src[i] === '\n') i++;
+				while (i < stripped.length && stripped[i] !== '\n') i++;
+				const line = stripped.slice(ls, i).trim();
+				if (stripped[i] === '\n') i++;
 				if (!line) continue;
 
 				const cmd = parseLine(line);
@@ -60,33 +79,28 @@ console.log(performance.now());
 			return block;
 		}
 
-		return parseBlock();
+		const res = parseBlock();
+		parseCache.set(src, res);
+		return res;
 	}
-
-	const HEX = '#[0-9a-fA-F]{3,8}';
 
 	function parseLine(line) {
 		let m;
 
 		// color: #HEX
-		m = line.match(new RegExp(`^color:\\s*(${HEX})\\s*$`, 'i'));
+		m = line.match(COLOR_REGEX);
 		if (m) return { type: 'color', hex: m[1] };
 
 		// switch color: #HEX  (alias for color, kept as a semantic alias)
-		m = line.match(new RegExp(`^switch\\s+color:\\s*(${HEX})\\s*$`, 'i'));
+		m = line.match(SWITCH_COLOR_REGEX);
 		if (m) return { type: 'color', hex: m[1] };
 
 		// transition color: #HEX
-		m = line.match(new RegExp(`^transition\\s+color:\\s*(${HEX})\\s*$`, 'i'));
+		m = line.match(TRANSITION_COLOR_REGEX);
 		if (m) return { type: 'transition', hex: m[1] };
 
 		// pulse (fadeIn, hold, fadeOut): #HEX
-		m = line.match(
-			new RegExp(
-				`^pulse\\s*\\(\\s*(\\d*\\.?\\d+)\\s*,\\s*(\\d*\\.?\\d+)\\s*,\\s*(\\d*\\.?\\d+)\\s*\\):\\s*(${HEX})\\s*$`,
-				'i'
-			)
-		);
+		m = line.match(PULSE_REGEX);
 		if (m)
 			return {
 				type: 'pulse',
@@ -97,11 +111,12 @@ console.log(performance.now());
 			};
 
 		// wait: N
-		m = line.match(/^wait:\s*(\d*\.?\d+)\s*$/i);
+		m = line.match(WAIT_REGEX);
 		if (m) return { type: 'wait', seconds: +m[1] };
 
 		return null; // unknown line — silently skip
 	}
+	// AI-generated code ends here on 2026-06-18T01:00:00Z.
 
 	// ── Runtime ────────────────────────────────────────────────────────────
 	const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
