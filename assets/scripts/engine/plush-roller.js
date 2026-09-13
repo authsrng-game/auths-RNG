@@ -2,6 +2,7 @@
 	const SCALE = 1000000000n;
 	const MULT_PRECISION = 1000000n;
 	const NOTICEABLE_DENOM = 100n;
+	const SCALE_REDUCED = SCALE / MULT_PRECISION;
 
 	/*
 
@@ -102,8 +103,16 @@
 					mult *= this.resistance.getMultiplier(r);
 				}
 
-				const multBig = BigInt(Math.max(0, Math.round(mult * Number(MULT_PRECISION))));
-				let w = (SCALE * multBig) / (denom * MULT_PRECISION);
+				// Generated code starts here on 2026-09-12T01:15:00Z:
+				// Fast path for mult === 1.0 and simplified BigInt division to avoid large BigInt multiplications inside hot loop.
+				let w;
+				if (mult === 1.0) {
+					w = SCALE / denom;
+				} else {
+					const multBig = BigInt(Math.max(0, Math.round(mult * Number(MULT_PRECISION))));
+					w = (SCALE_REDUCED * multBig) / denom;
+				}
+				// Generated code ends here on 2026-09-12T01:15:00Z:
 				const minW = denom < 10000n ? 1n : 0n;
 				if (w < minW) w = minW;
 
