@@ -87,4 +87,14 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(closeBtn).toHaveAttribute('aria-label', 'Close');
 	});
 	// Generated code ends here on 2026-06-18T00:35:00Z:
+
+	// Generated code starts here on 2026-06-18T00:40:00Z:
+	test('confirm modal has accessible dialog attributes', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const confirmModal = page.locator('#confirmModal');
+		await expect(confirmModal).toHaveAttribute('role', 'dialog');
+		await expect(confirmModal).toHaveAttribute('aria-modal', 'true');
+		await expect(confirmModal).toHaveAttribute('aria-labelledby', 'modalTitle');
+	});
+	// Generated code ends here on 2026-06-18T00:40:00Z:
 });
