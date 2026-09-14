@@ -14,82 +14,117 @@ on:
   fork:
   watch:
     types: [started]
-  workflow_run:
-    workflows: ['*']
-    types: [completed]
-  deployment_status:
 
 jobs:
   discord:
     runs-on: ubuntu-latest
+
     steps:
       - name: send push to discord
         if: github.event_name == 'push'
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          MESSAGE: ${{ github.event.head_commit.message }}
         run: |
+          jq -n \
+            --arg content "<@1227759305852190801> push: auths-RNG@${{ github.ref_name }}
+          commit: ${{ github.sha }}
+          url: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+          author: ${{ github.actor }}
+          message: $MESSAGE" \
+            '{content: $content}' |
           curl -H "Content-Type: application/json" \
             -X POST \
-            -d "{\"content\": \"push: auths-RNG@${{ github.ref_name }}\ncommit: ${{ github.sha }}\nurl: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}\nauthor: ${{ github.actor }}\nmessage: ${{ github.event.head_commit.message }}\"}" \
-            ${{ secrets.DISCORD_WEBHOOK }}
+            -d @- \
+            "$WEBHOOK"
 
       - name: send PR event to discord
         if: github.event_name == 'pull_request'
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          TITLE: ${{ github.event.pull_request.title }}
         run: |
+          jq -n \
+            --arg content "<@1227759305852190801> pr ${{ github.event.action }}: #${{ github.event.pull_request.number }} $TITLE
+          url: ${{ github.event.pull_request.html_url }}
+          author: ${{ github.actor }}" \
+            '{content: $content}' |
           curl -H "Content-Type: application/json" \
             -X POST \
-            -d "{\"content\": \"pr ${{ github.event.action }}: #${{ github.event.pull_request.number }} ${{ github.event.pull_request.title }}\nurl: ${{ github.event.pull_request.html_url }}\nauthor: ${{ github.actor }}\"}" \
-            ${{ secrets.DISCORD_WEBHOOK }}
+            -d @- \
+            "$WEBHOOK"
 
       - name: send issue event to discord
         if: github.event_name == 'issues'
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          TITLE: ${{ github.event.issue.title }}
         run: |
+          jq -n \
+            --arg content "<@1227759305852190801> issue ${{ github.event.action }}: #${{ github.event.issue.number }} $TITLE
+          url: ${{ github.event.issue.html_url }}
+          author: ${{ github.actor }}" \
+            '{content: $content}' |
           curl -H "Content-Type: application/json" \
             -X POST \
-            -d "{\"content\": \"issue ${{ github.event.action }}: #${{ github.event.issue.number }} ${{ github.event.issue.title }}\nurl: ${{ github.event.issue.html_url }}\nauthor: ${{ github.actor }}\"}" \
-            ${{ secrets.DISCORD_WEBHOOK }}
+            -d @- \
+            "$WEBHOOK"
 
       - name: send issue comment to discord
         if: github.event_name == 'issue_comment'
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          BODY: ${{ github.event.comment.body }}
         run: |
+          jq -n \
+            --arg content "<@1227759305852190801> new comment on #${{ github.event.issue.number }}
+          url: ${{ github.event.comment.html_url }}
+          author: ${{ github.actor }}
+          comment: $BODY" \
+            '{content: $content}' |
           curl -H "Content-Type: application/json" \
             -X POST \
-            -d "{\"content\": \"comment on #${{ github.event.issue.number }} ${{ github.event.issue.title }}\nurl: ${{ github.event.comment.html_url }}\nauthor: ${{ github.actor }}\"}" \
-            ${{ secrets.DISCORD_WEBHOOK }}
+            -d @- \
+            "$WEBHOOK"
 
       - name: send release to discord
         if: github.event_name == 'release'
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
+          jq -n \
+            --arg content "<@1227759305852190801> release published: ${{ github.event.release.tag_name }}
+          url: ${{ github.event.release.html_url }}" \
+            '{content: $content}' |
           curl -H "Content-Type: application/json" \
             -X POST \
-            -d "{\"content\": \"release published: ${{ github.event.release.tag_name }}\nurl: ${{ github.event.release.html_url }}\"}" \
-            ${{ secrets.DISCORD_WEBHOOK }}
+            -d @- \
+            "$WEBHOOK"
+
       - name: send fork to discord
         if: github.event_name == 'fork'
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
+          jq -n \
+            --arg content "<@1227759305852190801> repo forked by ${{ github.actor }}
+          url: ${{ github.event.forkee.html_url }}" \
+            '{content: $content}' |
           curl -H "Content-Type: application/json" \
             -X POST \
-            -d "{\"content\": \"repo forked by ${{ github.actor }}\nurl: ${{ github.event.forkee.html_url }}\"}" \
-            ${{ secrets.DISCORD_WEBHOOK }}
+            -d @- \
+            "$WEBHOOK"
 
       - name: send star to discord
         if: github.event_name == 'watch'
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
+          jq -n \
+            --arg content "<@1227759305852190801> star added by ${{ github.actor }}
+          repo: ${{ github.repository }}" \
+            '{content: $content}' |
           curl -H "Content-Type: application/json" \
             -X POST \
-            -d "{\"content\": \"star added by ${{ github.actor }}\nrepo: ${{ github.repository }}\"}" \
-            ${{ secrets.DISCORD_WEBHOOK }}
-
-      - name: send workflow run result to discord
-        if: github.event_name == 'workflow_run'
-        run: |
-          curl -H "Content-Type: application/json" \
-            -X POST \
-            -d "{\"content\": \"workflow '${{ github.event.workflow_run.name }}' ${{ github.event.workflow_run.conclusion }}\nbranch: ${{ github.event.workflow_run.head_branch }}\nurl: ${{ github.event.workflow_run.html_url }}\"}" \
-            ${{ secrets.DISCORD_WEBHOOK }}
-
-      - name: send deployment status to discord
-        if: github.event_name == 'deployment_status'
-        run: |
-          curl -H "Content-Type: application/json" \
-            -X POST \
-            -d "{\"content\": \"deployment ${{ github.event.deployment_status.state }}: ${{ github.event.deployment.environment }}\nurl: ${{ github.event.deployment_status.target_url }}\"}" \
-            ${{ secrets.DISCORD_WEBHOOK }}
+            -d @- \
+            "$WEBHOOK"
