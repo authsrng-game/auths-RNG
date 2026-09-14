@@ -373,9 +373,11 @@
 					);
 				} catch (_) {}
 
+				// Generated code starts here on 2026-03-31T00:00:00Z:
 				const avatarHtml = profile.avatarUrl
-					? `<img class="avatar" src="https://accounts.authsrng.xyz${profile.avatarUrl}">`
+					? `<img class="avatar" src="https://accounts.authsrng.xyz${escHtml(profile.avatarUrl)}">`
 					: `<div class="avatar-placeholder">${escHtml(profile.username.charAt(0).toUpperCase())}</div>`;
+				// Generated code ends here on 2026-03-31T00:00:00Z:
 
 				const pronounsHtml = profile.pronouns
 					? `<span style="font-size:0.75em;opacity:0.5;margin-left:6px;">(${escHtml(profile.pronouns)})</span>`
