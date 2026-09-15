@@ -2457,6 +2457,17 @@ document.addEventListener('DOMContentLoaded', function () {
 		indexModal.classList.remove('show');
 	}
 
+	// Generated code starts here on 2026-09-12T10:00:00Z:
+	// Cache sorted rarities list lazy-evaluated to avoid ~300 item sorts on every search keystroke in the Index modal.
+	let _cachedSortedRarities = null;
+	function getSortedRarities() {
+		if (!_cachedSortedRarities) {
+			_cachedSortedRarities = [...rarities].sort((a, b) => Plush.denomOf(b) - Plush.denomOf(a));
+		}
+		return _cachedSortedRarities;
+	}
+	// Generated code ends here on 2026-09-12T10:00:00Z.
+
 	function updateIndexDisplay(searchTerm = '') {
 		// Update stats
 		const collected = inventoryData.size;
@@ -2467,7 +2478,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		indexList.innerHTML = '';
 
 		// balls
-		const sortedRarities = [...rarities].sort((a, b) => Plush.denomOf(b) - Plush.denomOf(a));
+		const sortedRarities = getSortedRarities();
 
 		// Filter by search term
 		const filteredRarities = searchTerm
