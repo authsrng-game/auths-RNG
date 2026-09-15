@@ -6,6 +6,17 @@ console.log(performance.now());
 	const API = 'https://leaderboard.authsrng.xyz/api/leaderboard';
 	const SUBMIT_INTERVAL = 15 * 60 * 1000;
 
+	// Generated code starts here on 2026-06-18T01:30:00Z:
+	function escHtml(s) {
+		return String(s)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+	}
+	// Generated code ends here on 2026-06-18T01:30:00Z:
+
 	function getRarest() {
 		try {
 			const inv = JSON.parse(localStorage.getItem('rarityInventory') || '{}');
@@ -146,7 +157,7 @@ console.log(performance.now());
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
       <span style="font-size:0.85em;opacity:0.8;">
         leaderboard: <span style="color:#88dd88;">on</span>
-        <span style="opacity:0.4;"> — ${username}</span>
+        <span style="opacity:0.4;"> — ${escHtml(username)}</span>
       </span>
       <button id="disableLbBtn" class="small" style="opacity:0.5;">opt out</button>
     </div>
