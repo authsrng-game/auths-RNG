@@ -97,4 +97,15 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(confirmModal).toHaveAttribute('aria-labelledby', 'modalTitle');
 	});
 	// Generated code ends here on 2026-06-18T00:40:00Z:
+
+	// Generated code starts here on 2026-06-18T01:00:00Z:
+	test('shop upgrade buttons and data transfer buttons have accessible aria-labels', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+		await expect(page.locator('#buyLuckBtn')).toHaveAttribute('aria-label', 'Upgrade luck boost');
+		await expect(page.locator('#exportSettingsBtn')).toHaveAttribute('aria-label', 'Copy settings');
+		await expect(page.locator('#exportSaveBtn')).toHaveAttribute('aria-label', 'Copy save data');
+	});
+	// Generated code ends here on 2026-06-18T01:00:00Z:
 });
