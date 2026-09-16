@@ -90,21 +90,32 @@
 		return wrap;
 	}
 
+	// Generated code starts here on 2026-09-12T14:00:00Z:
+	// Cache tip icon elements and avoid redundant getComputedStyle layout flushes on periodic scans.
 	function tryPlace(tip) {
 		const container = tip.container();
 		if (!container) return;
 
-		if (tip.pos !== 'inline' && getComputedStyle(container).position === 'static') {
-			container.style.position = 'relative';
+		let icon = tip._icon;
+		if (!icon || !container.contains(icon)) {
+			icon = container.querySelector(`:scope > .info-tip[data-tip-id="${tip.id}"]`);
+			if (!icon) {
+				icon = createIcon(tip);
+				container.appendChild(icon);
+			}
+			tip._icon = icon;
+			if (
+				tip.pos !== 'inline' &&
+				container.style.position !== 'relative' &&
+				getComputedStyle(container).position === 'static'
+			) {
+				container.style.position = 'relative';
+			}
 		}
 
-		let icon = container.querySelector(`:scope > .info-tip[data-tip-id="${tip.id}"]`);
-		if (!icon) {
-			icon = createIcon(tip);
-			container.appendChild(icon);
-		}
 		icon.style.display = isVisible(container) ? '' : 'none';
 	}
+	// Generated code ends here on 2026-09-12T14:00:00Z:
 
 	function scanAll() {
 		TOOLTIPS.forEach(tryPlace);
