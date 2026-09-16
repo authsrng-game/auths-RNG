@@ -318,6 +318,19 @@
 				twitch: 'twitch',
 			};
 
+			// Generated code starts here on 2026-05-18T12:00:00Z:
+			// Sanitizes URLs to prevent XSS via dangerous schemes (e.g. javascript:, data:)
+			function safeUrl(url) {
+				if (!url) return '';
+				try {
+					const parsed = new URL(url, window.location.origin);
+					if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+						return parsed.href;
+					}
+				} catch (_) {}
+				return '';
+			}
+
 			function buildSocialLinksHtml(socialLinks, freeformLink) {
 				const items = [];
 
@@ -326,9 +339,10 @@
 					if (!entry || !entry.handle) return;
 					const icon = SOCIAL_ICONS[platform];
 					const label = escHtml(entry.handle);
-					if (entry.url) {
+					const validUrl = safeUrl(entry.url);
+					if (validUrl) {
 						items.push(
-							`<a class="social-chip" href="${escHtml(entry.url)}" target="_blank" rel="noopener noreferrer">${icon}<span>${label}</span></a>`
+							`<a class="social-chip" href="${escHtml(validUrl)}" target="_blank" rel="noopener noreferrer">${icon}<span>${label}</span></a>`
 						);
 					} else {
 						items.push(
@@ -337,15 +351,17 @@
 					}
 				});
 
-				if (freeformLink && freeformLink.url) {
+				const validFreeformUrl = freeformLink && safeUrl(freeformLink.url);
+				if (validFreeformUrl) {
 					items.push(
-						`<a class="social-chip" href="${escHtml(freeformLink.url)}" target="_blank" rel="noopener noreferrer"><span>${escHtml(freeformLink.label)}</span></a>`
+						`<a class="social-chip" href="${escHtml(validFreeformUrl)}" target="_blank" rel="noopener noreferrer"><span>${escHtml(freeformLink.label || validFreeformUrl)}</span></a>`
 					);
 				}
 
 				if (!items.length) return '';
 				return `<div class="social-links">${items.join('')}</div>`;
 			}
+			// Generated code ends here on 2026-05-18T12:00:00Z:
 
 			async function init() {
 				const outer = document.getElementById('container');
