@@ -108,4 +108,14 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(page.locator('#exportSaveBtn')).toHaveAttribute('aria-label', 'Copy save data');
 	});
 	// Generated code ends here on 2026-06-18T01:00:00Z:
+
+	// Generated code starts here on 2026-09-16T00:34:27Z:
+	test('theme editor button has accessible aria-label', async ({ page }) => {
+		await page.goto(BASE_URL);
+		await expect(page.locator('#openThemeEditorBtn')).toHaveAttribute(
+			'aria-label',
+			'Open theme editor'
+		);
+	});
+	// Generated code ends here on 2026-09-16T00:34:27Z:
 });
