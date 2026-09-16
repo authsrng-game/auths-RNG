@@ -150,15 +150,13 @@
 			const wasPity = this.pity.isHardPity(result);
 			const isHotPulse = this.streak.isInHotPulse();
 
-			for (let i = 0; i < rarities.length; i++) {
-				const r = rarities[i];
-				if (!this.pity.isEligible(r)) continue;
-				if (r.name === result.name) {
-					this.pity.reset(r.name, wasPity);
-				} else {
-					this.pity.increment(r.name);
-				}
+			// Generated code starts here on 2026-09-12T12:00:00Z:
+			// Increment global pity step and reset chosen item in O(1).
+			this.pity.advance();
+			if (this.pity.isEligible(result)) {
+				this.pity.reset(result.name, wasPity);
 			}
+			// Generated code ends here on 2026-09-12T12:00:00Z:
 
 			this.streak.record(rarityTier(result), result.name, rarityTier(result) >= 3);
 			this.momentum.record();
