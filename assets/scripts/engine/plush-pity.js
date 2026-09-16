@@ -71,17 +71,25 @@
 	// Generated code ends here on 2026-09-11T03:25:15Z:
 
 	class PityTracker {
+		// Generated code starts here on 2026-09-12T12:00:00Z:
+		// Refactored PityTracker to use O(1) step offsets instead of mutating ~550 Map items per roll.
 		constructor() {
-			this._counters = new Map();
+			this._step = 0;
+			this._lastResetStep = new Map();
 			this._mastery = new Map();
 		}
 
+		advance() {
+			this._step++;
+		}
+
 		increment(name) {
-			this._counters.set(name, (this._counters.get(name) || 0) + 1);
+			const current = this.get(name);
+			this._lastResetStep.set(name, this._step - (current + 1));
 		}
 
 		reset(name, wasHardPity) {
-			this._counters.set(name, 0);
+			this._lastResetStep.set(name, this._step);
 			if (!wasHardPity) {
 				const m = this._mastery.get(name) || 0;
 				this._mastery.set(name, Math.min(m + MASTERY_GAIN, MASTERY_CAP));
@@ -94,8 +102,11 @@
 		}
 
 		get(name) {
-			return this._counters.get(name) || 0;
+			const lastReset = this._lastResetStep.get(name);
+			if (lastReset === undefined) return 0;
+			return this._step - lastReset;
 		}
+		// Generated code ends here on 2026-09-12T12:00:00Z:
 
 		getMastery(name) {
 			return this._mastery.get(name) || 0;
@@ -155,10 +166,13 @@
 			};
 		}
 
+		// Generated code starts here on 2026-09-12T12:00:00Z:
+		// Maintain full 100% backward compatibility with serialized save data formats.
 		serialize() {
 			const counters = {};
-			this._counters.forEach(function (v, k) {
-				counters[k] = v;
+			const step = this._step;
+			this._lastResetStep.forEach(function (lastReset, k) {
+				counters[k] = step - lastReset;
 			});
 			const mastery = {};
 			this._mastery.forEach(function (v, k) {
@@ -168,14 +182,15 @@
 		}
 
 		deserialize(data) {
-			if (data.counters) {
-				this._counters = new Map(Object.entries(data.counters));
-				this._mastery = new Map(Object.entries(data.mastery || {}));
-			} else {
-				this._counters = new Map(Object.entries(data));
-				this._mastery = new Map();
+			this._step = 0;
+			this._lastResetStep = new Map();
+			const counters = data.counters || data;
+			for (const [k, v] of Object.entries(counters || {})) {
+				this._lastResetStep.set(k, -v);
 			}
+			this._mastery = new Map(Object.entries(data.mastery || {}));
 		}
+		// Generated code ends here on 2026-09-12T12:00:00Z:
 	}
 
 	root.PityTracker = PityTracker;
