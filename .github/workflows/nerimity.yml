@@ -27,15 +27,21 @@ jobs:
         if: github.event_name == 'push'
         env:
           WEBHOOK: ${{ secrets.NERI_WEBHOOK }}
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
           MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           jq -n \
-            --arg content "push: auths-RNG@${{ github.ref_name }}
-          commit: ${{ github.sha }}
-          url: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
-          author: ${{ github.actor }}
-          message: $MESSAGE" \
-            '{content: $content}' |
+            --arg ref "$REF_NAME" \
+            --arg sha "$SHA" \
+            --arg server "$SERVER_URL" \
+            --arg repo "$REPOSITORY" \
+            --arg actor "$ACTOR" \
+            --arg msg "$MESSAGE" \
+            '{content: ("push: auths-RNG@" + $ref + "\ncommit: " + $sha + "\nurl: " + $server + "/" + $repo + "/commit/" + $sha + "\nauthor: " + $actor + "\nmessage: " + $msg)}' |
           curl -H "Content-Type: application/json" \
             -X POST \
             -d @- \
@@ -45,13 +51,19 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           WEBHOOK: ${{ secrets.NERI_WEBHOOK }}
+          ACTION: ${{ github.event.action }}
+          NUMBER: ${{ github.event.pull_request.number }}
           TITLE: ${{ github.event.pull_request.title }}
+          HTML_URL: ${{ github.event.pull_request.html_url }}
+          ACTOR: ${{ github.actor }}
         run: |
           jq -n \
-            --arg content "pr ${{ github.event.action }}: #${{ github.event.pull_request.number }} $TITLE
-          url: ${{ github.event.pull_request.html_url }}
-          author: ${{ github.actor }}" \
-            '{content: $content}' |
+            --arg action "$ACTION" \
+            --arg number "$NUMBER" \
+            --arg title "$TITLE" \
+            --arg url "$HTML_URL" \
+            --arg actor "$ACTOR" \
+            '{content: ("pr " + $action + ": #" + $number + " " + $title + "\nurl: " + $url + "\nauthor: " + $actor)}' |
           curl -H "Content-Type: application/json" \
             -X POST \
             -d @- \
@@ -61,13 +73,19 @@ jobs:
         if: github.event_name == 'issues'
         env:
           WEBHOOK: ${{ secrets.NERI_WEBHOOK }}
+          ACTION: ${{ github.event.action }}
+          NUMBER: ${{ github.event.issue.number }}
           TITLE: ${{ github.event.issue.title }}
+          HTML_URL: ${{ github.event.issue.html_url }}
+          ACTOR: ${{ github.actor }}
         run: |
           jq -n \
-            --arg content "issue ${{ github.event.action }}: #${{ github.event.issue.number }} $TITLE
-          url: ${{ github.event.issue.html_url }}
-          author: ${{ github.actor }}" \
-            '{content: $content}' |
+            --arg action "$ACTION" \
+            --arg number "$NUMBER" \
+            --arg title "$TITLE" \
+            --arg url "$HTML_URL" \
+            --arg actor "$ACTOR" \
+            '{content: ("issue " + $action + ": #" + $number + " " + $title + "\nurl: " + $url + "\nauthor: " + $actor)}' |
           curl -H "Content-Type: application/json" \
             -X POST \
             -d @- \
@@ -77,13 +95,17 @@ jobs:
         if: github.event_name == 'issue_comment'
         env:
           WEBHOOK: ${{ secrets.NERI_WEBHOOK }}
+          NUMBER: ${{ github.event.issue.number }}
           TITLE: ${{ github.event.issue.title }}
+          HTML_URL: ${{ github.event.comment.html_url }}
+          ACTOR: ${{ github.actor }}
         run: |
           jq -n \
-            --arg content "comment on #${{ github.event.issue.number }} $TITLE
-          url: ${{ github.event.comment.html_url }}
-          author: ${{ github.actor }}" \
-            '{content: $content}' |
+            --arg number "$NUMBER" \
+            --arg title "$TITLE" \
+            --arg url "$HTML_URL" \
+            --arg actor "$ACTOR" \
+            '{content: ("comment on #" + $number + " " + $title + "\nurl: " + $url + "\nauthor: " + $actor)}' |
           curl -H "Content-Type: application/json" \
             -X POST \
             -d @- \
@@ -93,11 +115,13 @@ jobs:
         if: github.event_name == 'release'
         env:
           WEBHOOK: ${{ secrets.NERI_WEBHOOK }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+          HTML_URL: ${{ github.event.release.html_url }}
         run: |
           jq -n \
-            --arg content "release published: ${{ github.event.release.tag_name }}
-          url: ${{ github.event.release.html_url }}" \
-            '{content: $content}' |
+            --arg tag "$TAG_NAME" \
+            --arg url "$HTML_URL" \
+            '{content: ("release published: " + $tag + "\nurl: " + $url)}' |
           curl -H "Content-Type: application/json" \
             -X POST \
             -d @- \
@@ -107,11 +131,13 @@ jobs:
         if: github.event_name == 'fork'
         env:
           WEBHOOK: ${{ secrets.NERI_WEBHOOK }}
+          ACTOR: ${{ github.actor }}
+          HTML_URL: ${{ github.event.forkee.html_url }}
         run: |
           jq -n \
-            --arg content "repo forked by ${{ github.actor }}
-          url: ${{ github.event.forkee.html_url }}" \
-            '{content: $content}' |
+            --arg actor "$ACTOR" \
+            --arg url "$HTML_URL" \
+            '{content: ("repo forked by " + $actor + "\nurl: " + $url)}' |
           curl -H "Content-Type: application/json" \
             -X POST \
             -d @- \
@@ -121,11 +147,13 @@ jobs:
         if: github.event_name == 'watch'
         env:
           WEBHOOK: ${{ secrets.NERI_WEBHOOK }}
+          ACTOR: ${{ github.actor }}
+          REPOSITORY: ${{ github.repository }}
         run: |
           jq -n \
-            --arg content "star added by ${{ github.actor }}
-          repo: ${{ github.repository }}" \
-            '{content: $content}' |
+            --arg actor "$ACTOR" \
+            --arg repo "$REPOSITORY" \
+            '{content: ("star added by " + $actor + "\nrepo: " + $repo)}' |
           curl -H "Content-Type: application/json" \
             -X POST \
             -d @- \
@@ -135,12 +163,17 @@ jobs:
         if: github.event_name == 'workflow_run'
         env:
           WEBHOOK: ${{ secrets.NERI_WEBHOOK }}
+          NAME: ${{ github.event.workflow_run.name }}
+          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HTML_URL: ${{ github.event.workflow_run.html_url }}
         run: |
           jq -n \
-            --arg content "workflow '${{ github.event.workflow_run.name }}' ${{ github.event.workflow_run.conclusion }}
-          branch: ${{ github.event.workflow_run.head_branch }}
-          url: ${{ github.event.workflow_run.html_url }}" \
-            '{content: $content}' |
+            --arg name "$NAME" \
+            --arg conclusion "$CONCLUSION" \
+            --arg branch "$HEAD_BRANCH" \
+            --arg url "$HTML_URL" \
+            '{content: ("workflow '" + $name + "' " + $conclusion + "\nbranch: " + $branch + "\nurl: " + $url)}' |
           curl -H "Content-Type: application/json" \
             -X POST \
             -d @- \
@@ -150,11 +183,15 @@ jobs:
         if: github.event_name == 'deployment_status'
         env:
           WEBHOOK: ${{ secrets.NERI_WEBHOOK }}
+          STATE: ${{ github.event.deployment_status.state }}
+          ENVIRONMENT: ${{ github.event.deployment.environment }}
+          TARGET_URL: ${{ github.event.deployment_status.target_url }}
         run: |
           jq -n \
-            --arg content "deployment ${{ github.event.deployment_status.state }}: ${{ github.event.deployment.environment }}
-          url: ${{ github.event.deployment_status.target_url }}" \
-            '{content: $content}' |
+            --arg state "$STATE" \
+            --arg env "$ENVIRONMENT" \
+            --arg url "$TARGET_URL" \
+            '{content: ("deployment " + $state + ": " + $env + "\nurl: " + $url)}' |
           curl -H "Content-Type: application/json" \
             -X POST \
             -d @- \
