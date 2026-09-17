@@ -38,6 +38,10 @@
 		}
 
 		getMultiplier(rarity) {
+			// Generated code starts here on 2026-09-12T15:30:00Z:
+			// Fast path: avoid Map lookup per item when no resistance cooldowns are active.
+			if (this._active.size === 0) return 1.0;
+			// Generated code ends here on 2026-09-12T15:30:00Z:
 			const remaining = this._active.get(rarity.name);
 			if (!remaining) return 1.0;
 			const progress = remaining / COOLDOWN_ROLLS;
