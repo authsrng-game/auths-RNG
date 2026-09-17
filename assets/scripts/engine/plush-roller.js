@@ -43,21 +43,31 @@
 		return 4;
 	}
 
-	// Generated code starts here on 2026-09-11T03:25:15Z:
-	// Memoize BigInt denominator values to avoid ~300 conversions per roll.
-	const _denomBigCache = new WeakMap();
-	function denomBig(r) {
-		let cached = _denomBigCache.get(r);
+	// Generated code starts here on 2026-09-12T15:30:00Z:
+	// Memoize BigInt denominator, noticeable flag, and minW values to avoid repeated conversions and comparisons per roll.
+	const _rarityMetaCache = new WeakMap();
+	function getRarityMeta(r) {
+		let cached = _rarityMetaCache.get(r);
 		if (cached !== undefined) return cached;
+		let denom;
 		if (r.denomEpic && root.Epic) {
-			cached = root.Epic.from(r.denomEpic).toBigInt();
+			denom = root.Epic.from(r.denomEpic).toBigInt();
 		} else {
-			cached = BigInt(Math.round(1 / r.chance));
+			denom = BigInt(Math.round(1 / r.chance));
 		}
-		_denomBigCache.set(r, cached);
+		cached = {
+			denom: denom,
+			noticeable: denom >= NOTICEABLE_DENOM,
+			minW: denom < 10000n ? 1n : 0n,
+		};
+		_rarityMetaCache.set(r, cached);
 		return cached;
 	}
-	// Generated code ends here on 2026-09-11T03:25:15Z:
+
+	function denomBig(r) {
+		return getRarityMeta(r).denom;
+	}
+	// Generated code ends here on 2026-09-12T15:30:00Z:
 
 	class PlushRoller {
 		constructor(rng) {
@@ -83,28 +93,31 @@
 			const momentumMult = this.momentum.getMultiplier();
 			const fortuneMult = this._pendingFortuneMult || 1.0;
 
+			// Generated code starts here on 2026-09-12T15:30:00Z:
+			// Precalculate constant base multipliers outside loop to eliminate 2,000+ per-item floating point multiplications per roll.
+			const baseNonNoticeableMult = streakMult * momentumMult;
+			const baseNoticeableMult =
+				baseNonNoticeableMult * (luckBoostActive ? 4.0 : 1.0) * luckMultiplier * fortuneMult;
+			const hasMagnet = shopUpgrades.magnet > 0;
+			const magnetFactor = hasMagnet ? 1 + shopUpgrades.magnet * 0.1 : 1.0;
+
 			for (let i = 0; i < rarities.length; i++) {
 				const r = rarities[i];
-				const denom = denomBig(r);
-				const noticeable = denom >= NOTICEABLE_DENOM;
+				const meta = getRarityMeta(r);
+				const denom = meta.denom;
+				const noticeable = meta.noticeable;
 
-				let mult = streakMult * momentumMult;
-				if (luckBoostActive && noticeable) mult *= 4;
-				if (noticeable) mult *= luckMultiplier;
-				if (noticeable) mult *= fortuneMult;
-
-				if (shopUpgrades.magnet > 0 && !inventoryData.has(r.name) && noticeable) {
-					mult *= 1 + shopUpgrades.magnet * 0.1;
-				}
-
+				let mult;
 				if (noticeable) {
+					mult = baseNoticeableMult;
+					if (hasMagnet && !inventoryData.has(r.name)) mult *= magnetFactor;
 					mult *= this.pity.getMultiplier(r);
-					mult *= this.streak.getDryRunMultiplier(r.name, r.chance || 1 / Number(denom));
+					mult *= this.streak.getDryRunMultiplier(r.name, r.chance, denom);
 					mult *= this.resistance.getMultiplier(r);
+				} else {
+					mult = baseNonNoticeableMult;
 				}
 
-				// Generated code starts here on 2026-09-12T01:15:00Z:
-				// Fast path for mult === 1.0 and simplified BigInt division to avoid large BigInt multiplications inside hot loop.
 				let w;
 				if (mult === 1.0) {
 					w = SCALE / denom;
@@ -112,13 +125,12 @@
 					const multBig = BigInt(Math.max(0, Math.round(mult * Number(MULT_PRECISION))));
 					w = (SCALE_REDUCED * multBig) / denom;
 				}
-				// Generated code ends here on 2026-09-12T01:15:00Z:
-				const minW = denom < 10000n ? 1n : 0n;
-				if (w < minW) w = minW;
+				if (w < meta.minW) w = meta.minW;
 
 				weights[i] = w;
 				totalWeight += w;
 			}
+			// Generated code ends here on 2026-09-12T15:30:00Z:
 
 			return { weights: weights, totalWeight: totalWeight };
 		}
