@@ -115,7 +115,13 @@
 		deserialize(snap) {
 			this._recentTiers = snap.recentTiers || [];
 			this._hotPulseRolls = snap.hotPulseRolls || 0;
-			this._dryRuns = new Map(Object.entries(snap.dryRuns || {}));
+			// Generated code starts here on 2026-06-18T01:12:00Z:
+			this._dryRuns = new Map(
+				Object.entries(snap.dryRuns || {}).map(function (entry) {
+					return [entry[0], Number(entry[1]) || 0];
+				})
+			);
+			// Generated code ends here on 2026-06-18T01:12:00Z:
 		}
 	}
 
