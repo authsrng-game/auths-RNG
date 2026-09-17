@@ -1371,7 +1371,13 @@ Last release date on nightly: ${nightlyRDate}`;
 		<script src="assets/scripts/services/rescue.js" defer></script>
 
 		<!-- Notification Center -->
-		<button id="notifBell" title="notifications" aria-label="open notifications">
+		<button
+			id="notifBell"
+			title="notifications"
+			aria-label="open notifications"
+			aria-expanded="false"
+			aria-controls="notifPanel"
+		>
 			🔔
 			<span id="notifBadge" class="notif-badge"></span>
 		</button>
@@ -1380,8 +1386,14 @@ Last release date on nightly: ${nightlyRDate}`;
 			<div class="notif-panel-header">
 				<span class="notif-panel-title">notifications</span>
 				<div class="notif-panel-btns">
-					<button class="small" id="notifMarkAllRead">mark all read</button>
-					<button class="small" id="notifClearAll">clear all</button>
+					<!-- Generated code starts here on 2026-09-16T00:45:00Z: -->
+					<button class="small" id="notifMarkAllRead" aria-label="Mark all notifications as read">
+						mark all read
+					</button>
+					<button class="small" id="notifClearAll" aria-label="Clear all notifications">
+						clear all
+					</button>
+					<!-- Generated code ends here on 2026-09-16T00:45:00Z: -->
 				</div>
 			</div>
 			<div id="notifList"></div>

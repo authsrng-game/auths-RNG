@@ -118,4 +118,48 @@ test.describe('auths-RNG smoke tests', () => {
 		);
 	});
 	// Generated code ends here on 2026-09-16T00:34:27Z:
+
+	// Generated code starts here on 2026-09-16T00:45:00Z:
+	test('notification center has proper aria attributes and keyboard interaction', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+		const bell = page.locator('#notifBell');
+		const panel = page.locator('#notifPanel');
+
+		await expect(bell).toHaveAttribute('aria-expanded', 'false');
+		await expect(bell).toHaveAttribute('aria-controls', 'notifPanel');
+		await expect(page.locator('#notifMarkAllRead')).toHaveAttribute(
+			'aria-label',
+			'Mark all notifications as read'
+		);
+		await expect(page.locator('#notifClearAll')).toHaveAttribute(
+			'aria-label',
+			'Clear all notifications'
+		);
+
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
+		await page.goto(BASE_URL);
+
+		const saContainer = page.locator('.sa-container');
+		if (await saContainer.isVisible()) {
+			await saContainer.click({ force: true });
+			await page.waitForTimeout(500);
+		}
+
+		await page.evaluate(() => {
+			const bellEl = document.getElementById('notifBell');
+			if (bellEl) bellEl.click();
+		});
+		await expect(bell).toHaveAttribute('aria-expanded', 'true');
+		await expect(panel).toHaveClass(/open/);
+
+		await page.keyboard.press('Escape');
+		await expect(bell).toHaveAttribute('aria-expanded', 'false');
+		await expect(panel).not.toHaveClass(/open/);
+	});
+	// Generated code ends here on 2026-09-16T00:45:00Z:
 });
