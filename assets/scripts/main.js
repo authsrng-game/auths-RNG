@@ -1542,18 +1542,29 @@ function initNotifCenter() {
 	const clearBtn = document.getElementById('notifClearAll');
 	if (!bell || !panel) return;
 
+	// Generated code starts here on 2026-09-16T00:45:00Z:
+	const setPanelOpenState = (isOpen) => {
+		notifPanelOpen = isOpen;
+		panel.classList.toggle('open', isOpen);
+		bell.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+		if (isOpen) renderNotifList();
+	};
+
 	bell.addEventListener('click', (e) => {
 		e.stopPropagation();
-		notifPanelOpen = !notifPanelOpen;
-		panel.classList.toggle('open', notifPanelOpen);
-		if (notifPanelOpen) renderNotifList();
+		setPanelOpenState(!notifPanelOpen);
 	});
 
 	document.addEventListener('pointerdown', (e) => {
 		if (!notifPanelOpen) return;
 		if (!panel.contains(e.target) && !bell.contains(e.target)) {
-			notifPanelOpen = false;
-			panel.classList.remove('open');
+			setPanelOpenState(false);
+		}
+	});
+
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape' && notifPanelOpen) {
+			setPanelOpenState(false);
 		}
 	});
 
@@ -1561,6 +1572,7 @@ function initNotifCenter() {
 	if (clearBtn) clearBtn.addEventListener('click', notifClearAll);
 
 	updateNotifBadge();
+	// Generated code ends here on 2026-09-16T00:45:00Z:
 }
 
 function consumeAnomaly() {
