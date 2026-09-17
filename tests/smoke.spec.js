@@ -98,4 +98,20 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(result.balance3).toBe(result.balance1);
 	});
 	// Generated code ends here on 2026-06-18T01:00:00Z:
+
+	// Generated code starts here on 2026-06-18T01:10:00Z:
+	test('StreakTracker deserializes dryRuns values as numbers', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const result = await page.evaluate(() => {
+			const tracker = new window.StreakTracker();
+			tracker.deserialize({
+				dryRuns: { Rare: '5' },
+			});
+			tracker.record(1, 'Rare', false);
+			return tracker.serialize().dryRuns.Rare;
+		});
+
+		expect(result).toBe(6);
+	});
+	// Generated code ends here on 2026-06-18T01:10:00Z:
 });
