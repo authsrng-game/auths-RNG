@@ -19,8 +19,14 @@
 	function hideOverlay(id) {
 		el(id).classList.remove('show');
 	}
+	// Generated code starts here on 2026-09-16T00:00:00Z:
 	function escHtml(s) {
-		return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+		return String(s)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
 	}
 
 	function escAttr(s) {
@@ -31,6 +37,7 @@
 			.replace(/"/g, '&quot;')
 			.replace(/'/g, '&#39;');
 	}
+	// Generated code ends here on 2026-09-16T00:00:00Z:
 
 	function fmtLastSeenShort(ts) {
 		const s = Math.floor((Date.now() - ts) / 1000);
@@ -104,8 +111,8 @@
 				html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-color);">
           <span>${escHtml(r.username)}</span>
           <div style="display:flex;gap:4px;">
-            <button class="small accept-req" data-id="${r.id}">accept</button>
-            <button class="small decline-req" data-id="${r.id}" style="opacity:0.6;">decline</button>
+            <button class="small accept-req" data-id="${escAttr(r.id)}">accept</button>
+            <button class="small decline-req" data-id="${escAttr(r.id)}" style="opacity:0.6;">decline</button>
           </div></div>`;
 			});
 		}
@@ -115,7 +122,7 @@
 			data.outgoing.forEach((r) => {
 				html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-color);">
           <span style="opacity:0.7;">${escHtml(r.username)}</span>
-          <button class="small decline-req" data-id="${r.id}" style="opacity:0.5;">cancel</button></div>`;
+          <button class="small decline-req" data-id="${escAttr(r.id)}" style="opacity:0.5;">cancel</button></div>`;
 			});
 		}
 
@@ -136,8 +143,8 @@
           </div>
           <div style="display:flex;align-items:center;gap:8px;font-size:0.75em;">
             ${seenLabel}
-            <button class="small report-friend" data-username="${escHtml(f.username)}" style="opacity:0.5;">report</button>
-            <button class="small remove-friend" data-username="${escHtml(f.username)}" style="opacity:0.5;">remove</button>
+            <button class="small report-friend" data-username="${escAttr(f.username)}" style="opacity:0.5;">report</button>
+            <button class="small remove-friend" data-username="${escAttr(f.username)}" style="opacity:0.5;">remove</button>
           </div></div>`;
 			});
 		}
@@ -235,7 +242,7 @@
 				const nameLabel = t.isGroup
 					? `👥 ${escHtml(t.withUsername)} <span style="opacity:0.5;font-size:0.85em;">(${t.participantCount})</span>`
 					: escHtml(t.withUsername);
-				html += `<div class="thread-row" data-thread="${t.threadId}" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border-color);cursor:pointer;${t.unread ? 'font-weight:bold;' : 'opacity:0.75;'}">
+				html += `<div class="thread-row" data-thread="${escAttr(t.threadId)}" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border-color);cursor:pointer;${t.unread ? 'font-weight:bold;' : 'opacity:0.75;'}">
           ${t.isGroup ? avatarHtml(null, null, 30) : avatarHtml(t.withUsername, t.withAvatarUrl, 30)}
           <div style="flex:1;min-width:0;">
             <div style="display:flex;justify-content:space-between;">
@@ -346,7 +353,7 @@
 				const reactionPills = Object.keys(reactionCounts)
 					.map(
 						(e) =>
-							`<span class="msg-reaction-pill${e === myReaction ? ' mine' : ''}" data-msgid="${m.id}" data-emoji="${e}" style="cursor:pointer;font-size:0.85em;border:1px solid var(--border-color);border-radius:20px;padding:1px 7px;margin-right:4px;${e === myReaction ? 'border-color:var(--accent-color);' : ''}">${e} ${reactionCounts[e]}</span>`
+							`<span class="msg-reaction-pill${e === myReaction ? ' mine' : ''}" data-msgid="${escAttr(m.id)}" data-emoji="${escAttr(e)}" style="cursor:pointer;font-size:0.85em;border:1px solid var(--border-color);border-radius:20px;padding:1px 7px;margin-right:4px;${e === myReaction ? 'border-color:var(--accent-color);' : ''}">${escHtml(e)} ${reactionCounts[e]}</span>`
 					)
 					.join('');
 
@@ -357,7 +364,7 @@
           <div style="font-size:0.9em;white-space:pre-wrap;margin-bottom:6px;">${escHtml(m.body)}</div>
           <div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap;">
             ${reactionPills}
-            <span class="msg-react-add" data-msgid="${m.id}" style="cursor:pointer;font-size:0.8em;opacity:0.4;padding:1px 6px;">+</span>
+            <span class="msg-react-add" data-msgid="${escAttr(m.id)}" style="cursor:pointer;font-size:0.8em;opacity:0.4;padding:1px 6px;">+</span>
           </div></div>`;
 			});
 
