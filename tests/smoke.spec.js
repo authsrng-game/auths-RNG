@@ -67,4 +67,35 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(count).toBe(1);
 	});
 	// Generated code ends here on 2026-06-18T00:28:00Z:
+
+	// Generated code starts here on 2026-06-18T01:00:00Z:
+	test('FortuneBank balance does not double-decay on multiple reads', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const result = await page.evaluate(() => {
+			/* global window */
+			const bank = new window.FortuneBank();
+			const startTime = 1000000;
+			for (let i = 0; i < 300; i++) {
+				bank.deposit(startTime);
+			}
+			const initialBalance = bank.serialize().balance;
+
+			const oneHourLater = startTime + 3600000;
+			const origNow = Date.now;
+			Date.now = () => oneHourLater;
+
+			const balance1 = bank.balance();
+			const balance2 = bank.balance();
+			const balance3 = bank.balance();
+
+			Date.now = origNow;
+
+			return { initialBalance, balance1, balance2, balance3 };
+		});
+
+		expect(result.balance1).toBeCloseTo(result.initialBalance - 1 / 12, 5);
+		expect(result.balance2).toBe(result.balance1);
+		expect(result.balance3).toBe(result.balance1);
+	});
+	// Generated code ends here on 2026-06-18T01:00:00Z:
 });
