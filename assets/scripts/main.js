@@ -1226,6 +1226,8 @@ setInterval(() => {
 	}
 }, 1000);
 
+// Generated code starts here on 2026-09-17T00:00:00Z:
+// Fast-path inventory item updates: preserve running RarityStyle animation loops, attach dblclick sell handler once, and manage new-roll highlight timers to eliminate per-roll allocation and DOM thrashing overhead.
 function updateItem(d) {
 	const { rarityObj, count, liElement } = d;
 	const denom = Plush.denomOf(rarityObj);
@@ -1233,18 +1235,18 @@ function updateItem(d) {
 	liElement.textContent =
 		count > 1 ? `${rarityObj.name} (1/${denom}) x${count}` : `${rarityObj.name} (1/${denom})`;
 
-	if (liElement._rarityStyleAC) {
-		liElement._rarityStyleAC.abort();
-		liElement._rarityStyleAC = null;
-	}
-	liElement.style.color = '';
-	liElement.style.transition = '';
-	if (rarityObj.style && window.RarityStyle) {
-		liElement._rarityStyleAC = window.RarityStyle.apply(liElement, rarityObj.style);
+	if (!liElement._rarityStyleAC || liElement._rarityStyleAC.signal.aborted) {
+		if (rarityObj.style && window.RarityStyle) {
+			liElement._rarityStyleAC = window.RarityStyle.apply(liElement, rarityObj.style);
+		}
 	}
 
 	liElement.classList.add('new-roll');
-	setTimeout(() => liElement.classList.remove('new-roll'), 2000);
+	if (liElement._newRollTimer) clearTimeout(liElement._newRollTimer);
+	liElement._newRollTimer = setTimeout(() => {
+		liElement.classList.remove('new-roll');
+		liElement._newRollTimer = null;
+	}, 2000);
 
 	const key = rarityObj.name;
 	const soldData = soldOutRarities.get(key);
@@ -1254,55 +1256,53 @@ function updateItem(d) {
 		liElement.classList.remove('sold-out');
 	}
 
-	// Remove previous sell handler before adding a new one (prevents listener accumulation)
-	if (liElement._sellHandler) {
-		liElement.removeEventListener('dblclick', liElement._sellHandler);
-	}
+	if (!liElement._sellHandler) {
+		liElement._sellHandler = function sellHandler() {
+			const currentData = inventoryData.get(rarityObj.name);
+			if (!currentData) return;
 
-	liElement._sellHandler = function sellHandler() {
-		const currentData = inventoryData.get(rarityObj.name);
-		if (!currentData) return;
+			const soldData = soldOutRarities.get(key);
+			const alreadySold = soldData ? soldData.count : 0;
+			const availableToSell = currentData.count - alreadySold;
 
-		const soldData = soldOutRarities.get(key);
-		const alreadySold = soldData ? soldData.count : 0;
-		const availableToSell = currentData.count - alreadySold;
-
-		if (availableToSell <= 0) {
-			window.showAlert('all copies already sold out!');
-			return;
-		}
-
-		const snapCount = currentData.count;
-		const snapAvailable = availableToSell;
-		const pointsEarned = calculateRarityPoints(rarityObj) * snapAvailable;
-
-		showConfirmModal(
-			'sell rarity?',
-			`sell ${snapAvailable}x ${rarityObj.name} for ${formatNum(pointsEarned)} points? (you keep the rarity)`,
-			() => {
-				const freshData = inventoryData.get(rarityObj.name);
-				if (!freshData) return;
-				const freshSold = soldOutRarities.get(key);
-				const freshAlready = freshSold ? freshSold.count : 0;
-				const actualAvailable = freshData.count - freshAlready;
-				if (actualAvailable <= 0) {
-					window.showAlert('nothing left to sell!');
-					return;
-				}
-				const actualEarned = calculateRarityPoints(rarityObj) * actualAvailable;
-				points += actualEarned;
-				soldOutRarities.set(key, { count: freshData.count });
-				updatePointsDisplay();
-				updateShopUI();
-				saveAllData();
-				updateItem(freshData);
-				recalcLuckMultiplier();
-				updateLuckDisplay();
+			if (availableToSell <= 0) {
+				window.showAlert('all copies already sold out!');
+				return;
 			}
-		);
-	};
-	liElement.addEventListener('dblclick', liElement._sellHandler);
+
+			const snapCount = currentData.count;
+			const snapAvailable = availableToSell;
+			const pointsEarned = calculateRarityPoints(rarityObj) * snapAvailable;
+
+			showConfirmModal(
+				'sell rarity?',
+				`sell ${snapAvailable}x ${rarityObj.name} for ${formatNum(pointsEarned)} points? (you keep the rarity)`,
+				() => {
+					const freshData = inventoryData.get(rarityObj.name);
+					if (!freshData) return;
+					const freshSold = soldOutRarities.get(key);
+					const freshAlready = freshSold ? freshSold.count : 0;
+					const actualAvailable = freshData.count - freshAlready;
+					if (actualAvailable <= 0) {
+						window.showAlert('nothing left to sell!');
+						return;
+					}
+					const actualEarned = calculateRarityPoints(rarityObj) * actualAvailable;
+					points += actualEarned;
+					soldOutRarities.set(key, { count: freshData.count });
+					updatePointsDisplay();
+					updateShopUI();
+					saveAllData();
+					updateItem(freshData);
+					recalcLuckMultiplier();
+					updateLuckDisplay();
+				}
+			);
+		};
+		liElement.addEventListener('dblclick', liElement._sellHandler);
+	}
 }
+// Generated code ends here on 2026-09-17T00:00:00Z:
 
 function getRandomRarity() {
 	return Plush.roll(rarities, globalLuckMultiplier, inventoryData, shopUpgrades, luckBoostActive);
