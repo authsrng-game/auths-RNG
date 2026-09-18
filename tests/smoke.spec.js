@@ -162,4 +162,15 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(panel).not.toHaveClass(/open/);
 	});
 	// Generated code ends here on 2026-09-16T00:45:00Z:
+
+	// Generated code starts here on 2026-09-16T12:00:00Z:
+	test('index modal has accessible dialog attributes and search aria-label', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const indexModal = page.locator('#indexModal');
+		await expect(indexModal).toHaveAttribute('role', 'dialog');
+		await expect(indexModal).toHaveAttribute('aria-modal', 'true');
+		await expect(indexModal).toHaveAttribute('aria-labelledby', 'indexModalTitle');
+		await expect(page.locator('#indexSearch')).toHaveAttribute('aria-label', 'Search rarities');
+	});
+	// Generated code ends here on 2026-09-16T12:00:00Z:
 });
