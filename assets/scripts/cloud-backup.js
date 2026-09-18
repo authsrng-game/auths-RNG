@@ -64,7 +64,11 @@ console.log(performance.now());
 		try {
 			const parsedBundle = JSON.parse(env.p);
 			// Generated code starts here on 2026-03-29T00:00:00Z:
-			if (typeof parsedBundle !== 'object' || parsedBundle === null || Array.isArray(parsedBundle)) {
+			if (
+				typeof parsedBundle !== 'object' ||
+				parsedBundle === null ||
+				Array.isArray(parsedBundle)
+			) {
 				return { error: 'invalid save format' };
 			}
 			const sanitized = {};
