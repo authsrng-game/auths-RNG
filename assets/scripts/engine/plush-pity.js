@@ -134,13 +134,27 @@
 		}
 
 		deserialize(data) {
+			// Generated code starts here on 2026-06-18T01:30:00Z:
 			if (data.counters) {
-				this._counters = new Map(Object.entries(data.counters));
-				this._mastery = new Map(Object.entries(data.mastery || {}));
+				this._counters = new Map(
+					Object.entries(data.counters).map(function (entry) {
+						return [entry[0], Number(entry[1]) || 0];
+					})
+				);
+				this._mastery = new Map(
+					Object.entries(data.mastery || {}).map(function (entry) {
+						return [entry[0], Number(entry[1]) || 0];
+					})
+				);
 			} else {
-				this._counters = new Map(Object.entries(data));
+				this._counters = new Map(
+					Object.entries(data || {}).map(function (entry) {
+						return [entry[0], Number(entry[1]) || 0];
+					})
+				);
 				this._mastery = new Map();
 			}
+			// Generated code ends here on 2026-06-18T01:30:00Z:
 		}
 	}
 
