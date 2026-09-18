@@ -62,7 +62,19 @@ console.log(performance.now());
 		if (env.t !== 'save') return { error: 'wrong type' };
 		if (uid_hash(env.p) !== env.h) return { error: 'tampered or corrupted' };
 		try {
-			return { bundle: JSON.parse(env.p) };
+			const parsedBundle = JSON.parse(env.p);
+			// Generated code starts here on 2026-03-29T00:00:00Z:
+			if (typeof parsedBundle !== 'object' || parsedBundle === null || Array.isArray(parsedBundle)) {
+				return { error: 'invalid save format' };
+			}
+			const sanitized = {};
+			for (const key of Object.keys(parsedBundle)) {
+				if (SAVE_KEYS.includes(key) && typeof parsedBundle[key] === 'string') {
+					sanitized[key] = parsedBundle[key];
+				}
+			}
+			return { bundle: sanitized };
+			// Generated code ends here on 2026-03-29T00:00:00Z:
 		} catch {
 			return { error: 'bad json' };
 		}
