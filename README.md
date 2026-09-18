@@ -40,6 +40,7 @@ Inspired by Roblox RNG games like Sol's RNG and Juke's RNG.
 | Main | https://authsrng.xyz | Stable, official releases. This is the game right here. |
 | Nightly | https://nightly.authsrng.xyz | Bleeding edge dev branch, updated on every commit (the name is just a vibe, it doesn't actually build nightly sadly). |
 | Native | https://native.authsrng.xyz | Maintained separately as the website client for the mobile apps. Built for speed and privacy, plus more addicting features. |
+| Nosave | https://nosave.authsrng.xyz | Maintained separately as well, does not save game data at all, used for tournaments and events. |
 
 ---
 
