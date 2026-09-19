@@ -42,9 +42,12 @@
 		}
 
 		deserialize(snap) {
-			this._combo = snap.combo || 0;
-			this._lastRollAt = snap.lastRollAt || 0;
-			this._peakCombo = snap.peakCombo || 0;
+			snap = snap || {};
+			// Generated code starts here on 2026-06-18T02:00:00Z:
+			this._combo = Number(snap.combo) || 0;
+			this._lastRollAt = Number(snap.lastRollAt) || 0;
+			this._peakCombo = Number(snap.peakCombo) || 0;
+			// Generated code ends here on 2026-06-18T02:00:00Z:
 		}
 	}
 
