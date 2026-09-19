@@ -114,4 +114,29 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(result).toBe(6);
 	});
 	// Generated code ends here on 2026-06-18T01:10:00Z:
+
+	// Generated code starts here on 2026-06-18T01:30:00Z:
+	test('PityTracker deserializes counters and mastery values as numbers', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const result = await page.evaluate(() => {
+			const tracker = new window.PityTracker();
+			tracker.deserialize({
+				counters: { Common: '5' },
+				mastery: { Common: '0.0015' },
+			});
+			tracker.increment('Common');
+			return {
+				counter: tracker.get('Common'),
+				counterType: typeof tracker.get('Common'),
+				mastery: tracker.getMastery('Common'),
+				masteryType: typeof tracker.getMastery('Common'),
+			};
+		});
+
+		expect(result.counter).toBe(6);
+		expect(result.counterType).toBe('number');
+		expect(result.mastery).toBe(0.0015);
+		expect(result.masteryType).toBe('number');
+	});
+	// Generated code ends here on 2026-06-18T01:30:00Z:
 });
