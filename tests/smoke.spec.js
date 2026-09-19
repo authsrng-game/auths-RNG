@@ -173,4 +173,13 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(page.locator('#indexSearch')).toHaveAttribute('aria-label', 'Search rarities');
 	});
 	// Generated code ends here on 2026-09-16T12:00:00Z:
+
+	// Generated code starts here on 2026-06-18T01:30:00Z:
+	test('account button is a button element with an accessible aria-label', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const accountBtn = page.locator('#accountBtn');
+		await expect(accountBtn).toHaveAttribute('type', 'button');
+		await expect(accountBtn).toHaveAttribute('aria-label', 'Account details and login');
+	});
+	// Generated code ends here on 2026-06-18T01:30:00Z:
 });
