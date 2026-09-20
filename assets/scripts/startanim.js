@@ -462,10 +462,48 @@ window.addEventListener('DOMContentLoaded', () => {
 	}
 
 	function animCustom(bg, fg, wakeText) {
-		// Generated code starts here on 2026-09-19T09:30:00Z:
-		// Custom JS execution disabled for security to prevent DOM XSS / Code Injection from untrusted themes.
-		animDefault(bg, fg, wakeText);
-		// Generated code ends here on 2026-09-19T09:30:00Z:
+		// Generated code starts here on 2026-09-19T09:45:00Z:
+		if (!config.customCode?.trim()) return;
+		if (!config.customCodeApproved) {
+			animDefault(bg, fg, wakeText);
+			return;
+		}
+		const container = buildContainer(bg);
+		const tap = document.createElement('div');
+		tap.className = 'sa-tap';
+		tap.textContent = wakeText;
+		container.appendChild(tap);
+		try {
+			new Function('container', 'bg', 'fg', 'wakeText', 'speedMs', 'dismiss', config.customCode)(
+				container,
+				bg,
+				fg,
+				wakeText,
+				speedMs,
+				() => dismiss(container)
+			);
+		} catch (e) {
+			const err = document.createElement('div');
+			Object.assign(err.style, {
+				position: 'absolute',
+				bottom: '20%',
+				left: '50%',
+				transform: 'translateX(-50%)',
+				color: '#ff6666',
+				fontFamily: 'monospace',
+				fontSize: '0.8em',
+				background: 'rgba(0,0,0,0.85)',
+				padding: '8px 12px',
+				borderRadius: '3px',
+				maxWidth: '80%',
+				textAlign: 'center',
+				zIndex: '1',
+			});
+			err.textContent = 'error: ' + e.message;
+			container.appendChild(err);
+			setTimeout(() => dismiss(container), 3000);
+		}
+		// Generated code ends here on 2026-09-19T09:45:00Z:
 	}
 
 	window._saRunPreview = function (cfg, previewBg, previewFg, onDone) {

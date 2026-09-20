@@ -517,6 +517,7 @@
 	let undoStack = [];
 	let undoDebounceTimer = null;
 	let suppressUndoCapture = false;
+	let _lastCustomCodeApproved = false;
 
 	function snapshotEditorState() {
 		return JSON.stringify(readEditor());
@@ -712,6 +713,7 @@
 					speed: el('te-sa-speed') ? el('te-sa-speed').value : 'normal',
 					skipOnReturn: el('te-sa-skipOnReturn') ? el('te-sa-skipOnReturn').checked : false,
 					customCode: el('te-sa-customCode') ? el('te-sa-customCode').value : '',
+					customCodeApproved: _lastCustomCodeApproved,
 				},
 			},
 		};
@@ -857,6 +859,7 @@
 		if (el('te-sa-skipOnReturn'))
 			el('te-sa-skipOnReturn').checked = s.startAnim?.skipOnReturn ?? false;
 		if (el('te-sa-customCode')) el('te-sa-customCode').value = s.startAnim?.customCode ?? '';
+		_lastCustomCodeApproved = !!s.startAnim?.customCodeApproved;
 		syncStartAnimUI();
 		if (el('te-blurBorderOpacity')) {
 			el('te-blurBorderOpacity').value = s.blurBorderOpacity ?? 8;
@@ -1579,6 +1582,7 @@
 			if (!n) return;
 			n.addEventListener('input', () => {
 				if (id === 'te-radius') el('te-radiusVal').textContent = n.value;
+				if (id === 'te-sa-customCode') _lastCustomCodeApproved = true;
 				if (id.startsWith('te-sa-')) syncStartAnimUI();
 				if (id === 'te-borderWidth') el('te-borderWidthVal').textContent = n.value;
 				if (id === 'te-textSize') el('te-textSizeVal').textContent = n.value;
@@ -1860,7 +1864,24 @@
 					window.showAlert('invalid theme json');
 					return;
 				}
+				// Generated code starts here on 2026-09-19T09:45:00Z:
 				const migrated = migratePreset(parsed);
+				const sa = migrated.settings?.startAnim;
+				if (sa?.preset === 'custom' && sa?.customCode?.trim()) {
+					const snippet = sa.customCode.slice(0, 150) + (sa.customCode.length > 150 ? '...' : '');
+					const ok = await window.showConfirm(
+						'WARNING: This imported theme contains a custom start animation script:\n\n' +
+							snippet +
+							'\n\nDo you trust and allow this custom script to run?',
+						'warning: custom script'
+					);
+					if (ok) {
+						migrated.settings.startAnim.customCodeApproved = true;
+					} else {
+						migrated.settings.startAnim.customCodeApproved = false;
+					}
+				}
+				// Generated code ends here on 2026-09-19T09:45:00Z:
 				writeEditor(migrated);
 				livePreview();
 				resetUndoStack();
