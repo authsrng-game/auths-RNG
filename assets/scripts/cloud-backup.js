@@ -128,7 +128,11 @@ console.log(performance.now());
 			const data = await r.json();
 			if (!r.ok) {
 				// Generated code starts here on 2026-03-29T12:00:00Z:
-				console.warn('[cloud-backup] backup request rejected:', { status: r.status, error: data.error, silent });
+				console.warn('[cloud-backup] backup request rejected:', {
+					status: r.status,
+					error: data.error,
+					silent,
+				});
 				// Generated code ends here on 2026-03-29T12:00:00Z:
 				if (!silent) setStatus('error: ' + (data.error || r.status), '#ff8888');
 				return false;
@@ -157,7 +161,10 @@ console.log(performance.now());
 			const data = await r.json();
 			if (!r.ok || !data.payload) {
 				// Generated code starts here on 2026-03-29T12:00:00Z:
-				console.warn('[cloud-backup] restore request rejected:', { status: r.status, error: data.error });
+				console.warn('[cloud-backup] restore request rejected:', {
+					status: r.status,
+					error: data.error,
+				});
 				// Generated code ends here on 2026-03-29T12:00:00Z:
 				setStatus('error: ' + (data.error || 'no backup found'), '#ff8888');
 				return;
@@ -191,7 +198,10 @@ console.log(performance.now());
 			const data = await r.json();
 			if (!r.ok) {
 				// Generated code starts here on 2026-03-29T12:00:00Z:
-				console.warn('[cloud-backup] delete request rejected:', { status: r.status, error: data.error });
+				console.warn('[cloud-backup] delete request rejected:', {
+					status: r.status,
+					error: data.error,
+				});
 				// Generated code ends here on 2026-03-29T12:00:00Z:
 				setStatus('error: ' + (data.error || r.status), '#ff8888');
 				return;
