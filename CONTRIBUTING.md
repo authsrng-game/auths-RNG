@@ -24,7 +24,15 @@ Then enter the repository folder:
 cd auths-RNG
 ```
 
-### 3. Create a branch
+### 3. Install dependencies
+
+Install project dependencies with pnpm (optional):
+
+```bash
+pnpm install
+```
+
+### 4. Create a branch
 
 Create a new branch for your changes:
 
@@ -38,13 +46,13 @@ Use a name that describes what you're working on. For example:
 git checkout -b fix-mobile-ui
 ```
 
-### 4. Make your changes
+### 5. Make your changes
 
 Work on your feature, fix, improvement, or whatever you're contributing.
 
 Try to keep your changes focused. A small, well-explained change is much easier to review than a huge one that changes everything at once.
 
-### 5. Commit your changes
+### 6. Commit your changes
 
 Write a clear commit message that explains what you changed:
 
@@ -60,7 +68,7 @@ git commit -m "stuff"
 
 Nobody knows what "stuff" means. Not even future you.
 
-### 6. Push your branch
+### 7. Push your branch
 
 Push your changes to your fork:
 
@@ -68,7 +76,7 @@ Push your changes to your fork:
 git push origin feature/your-feature-name
 ```
 
-### 7. Open a pull request
+### 8. Open a pull request
 
 Open a pull request from your fork's branch into the main repository.
 
@@ -86,7 +94,7 @@ In your PR description, explain:
 Before submitting a PR, please keep these in mind:
 
 - **Explain your changes clearly.** Give context about what changed and why.
-- **Test your changes.** Make sure the game still works and your changes don't introduce bugs.
+- **Test and lint your changes.** Run `pnpm exec eslint .` and `pnpm exec stylelint "assets/scripts/styles/*.css"` to check for lint errors, and run smoke tests with `npx playwright test tests/smoke.spec.js --project=chromium`. You can also just play the game normally.
 - **Keep commits focused.** Avoid mixing unrelated changes together.
 - **Follow the existing code style.** Match the project's formatting, naming conventions, and structure.
 - **Avoid changing unrelated files.** Only modify files needed for your change.
