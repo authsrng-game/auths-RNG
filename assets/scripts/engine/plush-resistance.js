@@ -57,7 +57,13 @@
 		}
 
 		deserialize(data) {
-			this._active = new Map(Object.entries(data || {}));
+			// Generated code starts here on 2026-06-18T02:00:00Z:
+			this._active = new Map(
+				Object.entries(data || {}).map(function (entry) {
+					return [entry[0], Number(entry[1]) || 0];
+				})
+			);
+			// Generated code ends here on 2026-06-18T02:00:00Z:
 		}
 	}
 

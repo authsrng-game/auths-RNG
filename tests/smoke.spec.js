@@ -139,4 +139,47 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(result.masteryType).toBe('number');
 	});
 	// Generated code ends here on 2026-06-18T01:30:00Z:
+
+	// Generated code starts here on 2026-06-18T02:00:00Z:
+	test('MomentumTracker deserializes combo, lastRollAt and peakCombo as numbers', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const result = await page.evaluate(() => {
+			const tracker = new window.MomentumTracker();
+			const now = 10000;
+			tracker.deserialize({
+				combo: '5',
+				lastRollAt: '9000',
+				peakCombo: '5',
+			});
+			tracker.record(now);
+			return {
+				combo: tracker.combo(),
+				comboType: typeof tracker.combo(),
+				serialized: tracker.serialize(),
+			};
+		});
+
+		expect(result.combo).toBe(6);
+		expect(result.comboType).toBe('number');
+		expect(result.serialized.combo).toBe(6);
+		expect(result.serialized.lastRollAt).toBe(10000);
+	});
+
+	test('ResistanceTracker deserializes active cooldowns as numbers', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const result = await page.evaluate(() => {
+			const tracker = new window.ResistanceTracker();
+			tracker.deserialize({
+				Legendary: '10',
+			});
+			return {
+				remaining: tracker.remaining('Legendary'),
+				remainingType: typeof tracker.remaining('Legendary'),
+			};
+		});
+
+		expect(result.remaining).toBe(10);
+		expect(result.remainingType).toBe('number');
+	});
+	// Generated code ends here on 2026-06-18T02:00:00Z:
 });
