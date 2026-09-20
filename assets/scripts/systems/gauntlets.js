@@ -410,16 +410,36 @@ console.log(performance.now());
 		return Math.floor(Date.now() / (2 * 24 * 60 * 60 * 1000));
 	}
 
+	// Generated code starts here on 2026-09-17T18:00:00Z:
+	// Cache rarity objects in a Map and memoize global rotation rarities to avoid ~20,000 linear array searches and redundant Fisher-Yates shuffles per render cycle.
+	let _rarityMap = null;
+	function getRarityByName(name) {
+		if (typeof rarities === 'undefined' || !Array.isArray(rarities)) return null;
+		if (!_rarityMap || _rarityMap.size !== rarities.length) {
+			_rarityMap = new Map(rarities.map((r) => [r.name, r]));
+		}
+		return _rarityMap.get(name) || null;
+	}
+
+	let _lastGlobalRot = -1;
+	let _cachedGlobalRarities = null;
+
 	function getGlobalRarities() {
 		const rot = rotIdx();
+		if (_lastGlobalRot === rot && _cachedGlobalRarities) {
+			return _cachedGlobalRarities;
+		}
 		// shuffle a copy of the pool with the seeded RNG, then take first 3
 		const indices = Array.from({ length: GLOBAL_POOL.length }, (_, i) => i);
 		for (let i = indices.length - 1; i > 0; i--) {
 			const j = Math.floor(seededRand(rot * 97 + i * 31) * (i + 1));
 			[indices[i], indices[j]] = [indices[j], indices[i]];
 		}
-		return indices.slice(0, 3).map((i) => GLOBAL_POOL[i]);
+		_cachedGlobalRarities = indices.slice(0, 3).map((i) => GLOBAL_POOL[i]);
+		_lastGlobalRot = rot;
+		return _cachedGlobalRarities;
 	}
+	// Generated code ends here on 2026-09-17T18:00:00Z.
 
 	function getTierRarities(t) {
 		return t.isGlobal ? getGlobalRarities() : t.rarities;
@@ -639,8 +659,7 @@ console.log(performance.now());
 					const has = typeof inventoryData !== 'undefined' && inventoryData.has(name);
 					const chip = document.createElement('div');
 					chip.className = 'gauntlet-chip ' + (has ? 'chip-has' : 'chip-missing');
-					const rar =
-						typeof rarities !== 'undefined' ? rarities.find((r) => r.name === name) : null;
+					const rar = getRarityByName(name);
 					const den = rar ? '1/' + Math.round(1 / rar.chance).toLocaleString() : '?';
 					chip.textContent = (has ? '✓ ' : '') + name + ' · ' + den;
 					chipGrid.appendChild(chip);
