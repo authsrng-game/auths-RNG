@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: send PR event to discord
-        if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
+        if: github.event_name == 'pull_request'
         env:
           WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           TITLE: ${{ github.event.pull_request.title }}
@@ -51,7 +51,7 @@ jobs:
             "$WEBHOOK"
 
       - name: send issue comment to discord
-        if: github.event_name == 'issue_comment' && github.event.comment.user.type != 'Bot'
+        if: github.event_name == 'issue_comment'
         env:
           WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           BODY: ${{ github.event.comment.body }}

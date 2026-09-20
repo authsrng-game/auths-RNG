@@ -2,9 +2,7 @@ name: nerimity notify
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    types: [opened, reopened, closed]
+    branches: ['**']
   issues:
     types: [opened, closed, reopened]
   issue_comment:
@@ -43,28 +41,6 @@ jobs:
             -d @- \
             "$WEBHOOK"
 
-      - name: send PR event to nerimity
-        if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
-        env:
-          WEBHOOK: ${{ secrets.NERI_WEBHOOK }}
-          ACTION: ${{ github.event.action }}
-          NUMBER: ${{ github.event.pull_request.number }}
-          TITLE: ${{ github.event.pull_request.title }}
-          HTML_URL: ${{ github.event.pull_request.html_url }}
-          ACTOR: ${{ github.actor }}
-        run: |
-          jq -n \
-            --arg action "$ACTION" \
-            --arg number "$NUMBER" \
-            --arg title "$TITLE" \
-            --arg url "$HTML_URL" \
-            --arg actor "$ACTOR" \
-            '{content: ("pr " + $action + ": #" + $number + " " + $title + "\nurl: " + $url + "\nauthor: " + $actor)}' |
-          curl -H "Content-Type: application/json" \
-            -X POST \
-            -d @- \
-            "$WEBHOOK"
-
       - name: send issue event to nerimity
         if: github.event_name == 'issues'
         env:
@@ -88,7 +64,7 @@ jobs:
             "$WEBHOOK"
 
       - name: send issue comment to nerimity
-        if: github.event_name == 'issue_comment' && github.event.comment.user.type != 'Bot'
+        if: github.event_name == 'issue_comment'
         env:
           WEBHOOK: ${{ secrets.NERI_WEBHOOK }}
           NUMBER: ${{ github.event.issue.number }}
