@@ -182,4 +182,17 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(accountBtn).toHaveAttribute('aria-label', 'Account details and login');
 	});
 	// Generated code ends here on 2026-06-18T01:30:00Z:
+
+	// Generated code starts here on 2026-09-17T14:00:00Z:
+	test('roll choice modal has accessible dialog attributes and button labels', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const choiceModal = page.locator('#rollChoiceModal');
+		await expect(choiceModal).toHaveAttribute('role', 'dialog');
+		await expect(choiceModal).toHaveAttribute('aria-modal', 'true');
+		await expect(choiceModal).toHaveAttribute('aria-labelledby', 'rollChoiceRarity');
+		await expect(page.locator('#rollChoiceSell')).toHaveAttribute('aria-label', 'Sell rarity');
+		await expect(page.locator('#rollChoiceKeep')).toHaveAttribute('aria-label', 'Keep rarity');
+		await expect(page.locator('#rollChoicePass')).toHaveAttribute('aria-label', 'Pass rarity');
+	});
+	// Generated code ends here on 2026-09-17T14:00:00Z:
 });
