@@ -26,7 +26,7 @@ cd auths-RNG
 
 ### 3. Install dependencies
 
-Install project dependencies with pnpm:
+Install project dependencies with pnpm (optional):
 
 ```bash
 pnpm install
@@ -94,7 +94,7 @@ In your PR description, explain:
 Before submitting a PR, please keep these in mind:
 
 - **Explain your changes clearly.** Give context about what changed and why.
-- **Test and lint your changes.** Run `pnpm exec eslint .` and `pnpm exec stylelint "assets/scripts/styles/*.css"` to check for lint errors, and run smoke tests with `npx playwright test tests/smoke.spec.js --project=chromium`.
+- **Test and lint your changes.** Run `pnpm exec eslint .` and `pnpm exec stylelint "assets/scripts/styles/*.css"` to check for lint errors, and run smoke tests with `npx playwright test tests/smoke.spec.js --project=chromium`. You can also just play the game normally.
 - **Keep commits focused.** Avoid mixing unrelated changes together.
 - **Follow the existing code style.** Match the project's formatting, naming conventions, and structure.
 - **Avoid changing unrelated files.** Only modify files needed for your change.
