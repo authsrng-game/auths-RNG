@@ -132,15 +132,6 @@
 		});
 	}
 
-	async function getAllTracks() {
-		const db = await openMusicDB();
-		return new Promise((resolve, reject) => {
-			const req = db.transaction('tracks', 'readonly').objectStore('tracks').getAll();
-			req.onsuccess = () => resolve(req.result);
-			req.onerror = () => reject(req.error);
-		});
-	}
-
 	async function getAllTracksMeta() {
 		const db = await openMusicDB();
 		return new Promise((resolve, reject) => {
