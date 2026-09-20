@@ -1030,7 +1030,11 @@ console.log(performance.now());
 			el('discordConnectBtn').addEventListener('click', async () => {
 				try {
 					const res = await apiCall('/discord/authorize');
-					window.location.href = res.url;
+					// Generated code starts here on 2026-09-18T10:00:00Z:
+					if (res && typeof res.url === 'string' && /^https?:\/\//i.test(res.url)) {
+						window.location.href = res.url;
+					}
+					// Generated code ends here on 2026-09-18T10:00:00Z:
 				} catch (e) {
 					dashStatus(e.message, '#f66');
 				}
