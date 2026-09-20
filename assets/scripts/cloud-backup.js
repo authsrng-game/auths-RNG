@@ -153,13 +153,6 @@ console.log(performance.now());
 			});
 			const data = await r.json();
 			if (!r.ok) {
-				// Generated code starts here on 2026-03-29T12:00:00Z:
-				console.warn('[cloud-backup] backup request rejected:', {
-					status: r.status,
-					error: data.error,
-					silent,
-				});
-				// Generated code ends here on 2026-03-29T12:00:00Z:
 				if (!silent) setStatus('error: ' + (data.error || r.status), '#ff8888');
 				return false;
 			}
@@ -168,9 +161,6 @@ console.log(performance.now());
 			if (!silent) setStatus('backed up at ' + new Date(data.ts).toLocaleString(), '#88dd88');
 			return true;
 		} catch (e) {
-			// Generated code starts here on 2026-03-29T12:00:00Z:
-			console.error('[cloud-backup] backup request failed:', e, { silent });
-			// Generated code ends here on 2026-03-29T12:00:00Z:
 			if (!silent) setStatus('backup failed: ' + e.message, '#ff8888');
 			return false;
 		}
@@ -186,20 +176,11 @@ console.log(performance.now());
 			const r = await fetch(API, { headers: authHeaders() });
 			const data = await r.json();
 			if (!r.ok || !data.payload) {
-				// Generated code starts here on 2026-03-29T12:00:00Z:
-				console.warn('[cloud-backup] restore request rejected:', {
-					status: r.status,
-					error: data.error,
-				});
-				// Generated code ends here on 2026-03-29T12:00:00Z:
 				setStatus('error: ' + (data.error || 'no backup found'), '#ff8888');
 				return;
 			}
 			const result = decode(data.payload);
 			if (result.error) {
-				// Generated code starts here on 2026-03-29T12:00:00Z:
-				console.warn('[cloud-backup] restore payload decode failed:', result.error);
-				// Generated code ends here on 2026-03-29T12:00:00Z:
 				setStatus('restore error: ' + result.error, '#ff8888');
 				return;
 			}
@@ -207,9 +188,6 @@ console.log(performance.now());
 			setStatus('restored! reloading...', '#88dd88');
 			setTimeout(() => location.reload(), 600);
 		} catch (e) {
-			// Generated code starts here on 2026-03-29T12:00:00Z:
-			console.error('[cloud-backup] restore request failed:', e);
-			// Generated code ends here on 2026-03-29T12:00:00Z:
 			setStatus('restore failed: ' + e.message, '#ff8888');
 		}
 	}
@@ -223,12 +201,6 @@ console.log(performance.now());
 			const r = await fetch(API, { method: 'DELETE', headers: authHeaders() });
 			const data = await r.json();
 			if (!r.ok) {
-				// Generated code starts here on 2026-03-29T12:00:00Z:
-				console.warn('[cloud-backup] delete request rejected:', {
-					status: r.status,
-					error: data.error,
-				});
-				// Generated code ends here on 2026-03-29T12:00:00Z:
 				setStatus('error: ' + (data.error || r.status), '#ff8888');
 				return;
 			}
@@ -236,9 +208,6 @@ console.log(performance.now());
 			setLastBackupDisplay(null);
 			setStatus('cloud backup deleted.', '#aaa');
 		} catch (e) {
-			// Generated code starts here on 2026-03-29T12:00:00Z:
-			console.error('[cloud-backup] delete request failed:', e);
-			// Generated code ends here on 2026-03-29T12:00:00Z:
 			setStatus('delete failed: ' + e.message, '#ff8888');
 		}
 	}
