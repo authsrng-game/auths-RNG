@@ -17,28 +17,31 @@ console.log(performance.now());
 	}
 	// Generated code ends here on 2026-06-18T01:30:00Z:
 
-	function getRarest() {
+	function getInventoryArray() {
 		try {
-			const inv = JSON.parse(localStorage.getItem('rarityInventory') || '{}');
-			const rarities = window.RARITIES || window.rarities || [];
-			let best = { name: null, denom: 0 };
-			for (const r of rarities) {
-				if (!inv[r.name]) continue;
-				const denom = r.denom || r.denominator || (r.chance ? Math.round(1 / r.chance) : 0);
-				if (denom > best.denom) best = { name: r.name, denom };
-			}
-			if (best.name) return best;
-		} catch (_) {}
-		return {
-			name: localStorage.getItem('lbRarestName') || 'none',
-			denom: parseInt(localStorage.getItem('lbRarestDenom') || '0'),
-		};
+			return JSON.parse(localStorage.getItem('rarityInventory') || '[]');
+		} catch (_) {
+			return [];
+		}
+	}
+
+	function denomOf(item) {
+		return item.denom || (item.chance ? Math.round(1 / item.chance) : 0);
+	}
+
+	function getRarest(inv) {
+		let best = { name: null, denom: 0 };
+		for (const item of inv) {
+			const denom = denomOf(item);
+			if (denom > best.denom) best = { name: item.name, denom };
+		}
+		return best;
 	}
 
 	function buildPayload() {
-		const inv = JSON.parse(localStorage.getItem('rarityInventory') || '{}');
-		const totalRarities = Object.values(inv).reduce((s, v) => s + (parseInt(v) || 0), 0);
-		const rarest = getRarest();
+		const inv = getInventoryArray();
+		const totalRarities = inv.reduce((s, item) => s + (parseInt(item.count) || 0), 0);
+		const rarest = getRarest(inv);
 		let achievements = [];
 		try {
 			achievements = JSON.parse(localStorage.getItem('achievementsUnlocked') || '[]');
