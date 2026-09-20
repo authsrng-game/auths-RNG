@@ -47,6 +47,9 @@
 		'mutationBestResult',
 		'rarityTimestamps',
 		'notifications',
+		'themeEditorPresets',
+		'themeEditorActive',
+		'startAnimConfig',
 	];
 	// Generated code ends here on 2026-10-24T00:00:00Z:
 
