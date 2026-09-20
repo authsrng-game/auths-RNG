@@ -194,5 +194,15 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(page.locator('#rollChoiceKeep')).toHaveAttribute('aria-label', 'Keep rarity');
 		await expect(page.locator('#rollChoicePass')).toHaveAttribute('aria-label', 'Pass rarity');
 	});
-	// Generated code ends here on 2026-09-17T14:00:00Z:
+	// Generated code starts here on 2026-09-20T15:30:00Z:
+	test('credits page license link resolves to valid licenseview page', async ({ page }) => {
+		await page.goto(`${BASE_URL}/assets/frontend/credits.html`);
+		const link = page.locator('a:has-text("MIT licensed")');
+		await expect(link).toBeAttached();
+		const href = await link.getAttribute('href');
+		const targetUrl = new URL(href, `${BASE_URL}/assets/frontend/credits.html`).href;
+		const res = await page.goto(targetUrl);
+		expect(res.status()).toBe(200);
+	});
+	// Generated code ends here on 2026-09-20T15:30:00Z:
 });
