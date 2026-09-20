@@ -1792,8 +1792,12 @@ Last release date on nightly: ${nightlyRDate}`;
 			<button class="well-result-close" onclick="closeWellResult()">okay</button>
 		</div>
 
+		<!-- Generated code starts here on 2026-09-17T14:00:00Z: -->
 		<div
 			id="rollChoiceModal"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="rollChoiceRarity"
 			style="
 				display: none;
 				position: fixed;
@@ -1811,13 +1815,20 @@ Last release date on nightly: ${nightlyRDate}`;
 					style="font-size: 0.8em; opacity: 0.5; margin-bottom: 20px"
 				></div>
 				<div style="display: flex; gap: 10px; justify-content: center">
-					<button id="rollChoiceSell" class="small" style="color: #ffb86b">sell</button>
-					<button id="rollChoiceKeep" class="small" style="color: #88cc88">keep</button>
-					<button id="rollChoicePass" class="small" style="opacity: 0.5">pass</button>
+					<button id="rollChoiceSell" class="small" style="color: #ffb86b" aria-label="Sell rarity">
+						sell
+					</button>
+					<button id="rollChoiceKeep" class="small" style="color: #88cc88" aria-label="Keep rarity">
+						keep
+					</button>
+					<button id="rollChoicePass" class="small" style="opacity: 0.5" aria-label="Pass rarity">
+						pass
+					</button>
 				</div>
 				<div id="rollChoiceSellAmt" style="font-size: 0.75em; opacity: 0.4; margin-top: 10px"></div>
 			</div>
 		</div>
+		<!-- Generated code ends here on 2026-09-17T14:00:00Z: -->
 
 		<div id="activePotionsDisplay" class="active-potions-display" style="display: none">
 			<div class="active-potions-title">active potions</div>
