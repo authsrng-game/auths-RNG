@@ -277,6 +277,67 @@ Last release date on nightly: ${nightlyRDate}`;
 		<div class="site-header lazy">
 			<div class="header-chip">update 9.7</div>
 			<h1>welcome to auth's RNG!</h1>
+			<style>
+				.header-chip {
+					position: relative;
+					--glow-x: 50%;
+					--glow-y: 50%;
+					--glow-opacity: 0;
+					isolation: isolate;
+				}
+
+				.header-chip::before {
+					content: '';
+					position: absolute;
+					inset: -1px;
+					border-radius: inherit;
+					padding: 1px;
+					background: radial-gradient(
+						120px circle at var(--glow-x) var(--glow-y),
+						rgb(220 220 220 / 90%),
+						rgb(220 220 220 / 25%) 40%,
+						transparent 70%
+					);
+					-webkit-mask:
+						linear-gradient(#000 0 0) content-box,
+						linear-gradient(#000 0 0);
+					-webkit-mask-composite: xor;
+					mask-composite: exclude;
+					opacity: var(--glow-opacity);
+					transition: opacity 0.25s ease;
+					pointer-events: none;
+					z-index: 1;
+				}
+			</style>
+			<script>
+				(function () {
+					const chip = document.querySelector('.header-chip');
+					if (!chip) return;
+
+					const PROX_RADIUS = 160; // px away it starts reacting
+
+					function onMove(e) {
+						const rect = chip.getBoundingClientRect();
+						const cx = rect.left + rect.width / 2;
+						const cy = rect.top + rect.height / 2;
+						const dx = e.clientX - cx;
+						const dy = e.clientY - cy;
+						const dist = Math.hypot(dx, dy);
+
+						// position the glow relative to the chip, clamped to its box
+						const localX = Math.min(Math.max(e.clientX - rect.left, 0), rect.width);
+						const localY = Math.min(Math.max(e.clientY - rect.top, 0), rect.height);
+						chip.style.setProperty('--glow-x', localX + 'px');
+						chip.style.setProperty('--glow-y', localY + 'px');
+
+						const edgeDist = Math.max(0, dist - Math.max(rect.width, rect.height) / 2);
+						const strength = Math.max(0, 1 - edgeDist / PROX_RADIUS);
+						chip.style.setProperty('--glow-opacity', strength.toFixed(3));
+					}
+
+					window.addEventListener('mousemove', onMove, { passive: true });
+				})();
+			</script>
 			<p class="header-msg" id="randomMessage"></p>
 			<div class="header-links">
 				<a
@@ -2264,10 +2325,6 @@ Last release date on nightly: ${nightlyRDate}`;
 		<script src="assets/scripts/systems/mutations.js" defer></script>
 		<script src="assets/scripts/systems/expeditions.js" defer></script>
 		<script src="assets/scripts/systems/dealer.js" defer></script>
-
-		<script>
-			// TAGS
-		</script>
 
 		<style>
 			#updatePopup {
