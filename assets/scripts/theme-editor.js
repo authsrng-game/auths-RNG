@@ -1870,9 +1870,9 @@
 				if (sa?.preset === 'custom' && sa?.customCode?.trim()) {
 					const snippet = sa.customCode.slice(0, 150) + (sa.customCode.length > 150 ? '...' : '');
 					const ok = await window.showConfirm(
-						'WARNING: This imported theme contains a custom start animation script:\n\n' +
+						'WARNING: this imported theme contains a custom start animation script:\n\n' +
 							snippet +
-							'\n\nDo you trust and allow this custom script to run?',
+							'\n\ndo you trust and allow this custom script to run??',
 						'warning: custom script'
 					);
 					if (ok) {
