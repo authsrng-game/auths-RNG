@@ -2,11 +2,11 @@ name: nerimity notify
 
 on:
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
-    types: [opened, reopened, closed, synchronize, edited]
+    types: [opened, reopened, closed]
   issues:
-    types: [opened, closed, reopened, edited]
+    types: [opened, closed, reopened]
   issue_comment:
     types: [created]
   release:
@@ -14,10 +14,6 @@ on:
   fork:
   watch:
     types: [started]
-  workflow_run:
-    workflows: ['*']
-    types: [completed]
-  deployment_status:
 
 jobs:
   nerimity:
@@ -48,7 +44,7 @@ jobs:
             "$WEBHOOK"
 
       - name: send PR event to nerimity
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
         env:
           WEBHOOK: ${{ secrets.NERI_WEBHOOK }}
           ACTION: ${{ github.event.action }}
@@ -92,7 +88,7 @@ jobs:
             "$WEBHOOK"
 
       - name: send issue comment to nerimity
-        if: github.event_name == 'issue_comment'
+        if: github.event_name == 'issue_comment' && github.event.comment.user.type != 'Bot'
         env:
           WEBHOOK: ${{ secrets.NERI_WEBHOOK }}
           NUMBER: ${{ github.event.issue.number }}
@@ -154,44 +150,6 @@ jobs:
             --arg actor "$ACTOR" \
             --arg repo "$REPOSITORY" \
             '{content: ("star added by " + $actor + "\nrepo: " + $repo)}' |
-          curl -H "Content-Type: application/json" \
-            -X POST \
-            -d @- \
-            "$WEBHOOK"
-
-      - name: send workflow run result to nerimity
-        if: github.event_name == 'workflow_run'
-        env:
-          WEBHOOK: ${{ secrets.NERI_WEBHOOK }}
-          NAME: ${{ github.event.workflow_run.name }}
-          CONCLUSION: ${{ github.event.workflow_run.conclusion }}
-          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
-          HTML_URL: ${{ github.event.workflow_run.html_url }}
-        run: |
-          jq -n \
-            --arg name "$NAME" \
-            --arg conclusion "$CONCLUSION" \
-            --arg branch "$HEAD_BRANCH" \
-            --arg url "$HTML_URL" \
-            '{content: ("workflow '" + $name + "' " + $conclusion + "\nbranch: " + $branch + "\nurl: " + $url)}' |
-          curl -H "Content-Type: application/json" \
-            -X POST \
-            -d @- \
-            "$WEBHOOK"
-
-      - name: send deployment status to nerimity
-        if: github.event_name == 'deployment_status'
-        env:
-          WEBHOOK: ${{ secrets.NERI_WEBHOOK }}
-          STATE: ${{ github.event.deployment_status.state }}
-          ENVIRONMENT: ${{ github.event.deployment.environment }}
-          TARGET_URL: ${{ github.event.deployment_status.target_url }}
-        run: |
-          jq -n \
-            --arg state "$STATE" \
-            --arg env "$ENVIRONMENT" \
-            --arg url "$TARGET_URL" \
-            '{content: ("deployment " + $state + ": " + $env + "\nurl: " + $url)}' |
           curl -H "Content-Type: application/json" \
             -X POST \
             -d @- \

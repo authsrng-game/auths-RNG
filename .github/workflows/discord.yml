@@ -1,12 +1,10 @@
 name: discord notify
 
 on:
-  push:
-    branches: ['**']
   pull_request:
-    types: [opened, reopened, closed, synchronize, edited]
+    types: [opened, reopened, closed]
   issues:
-    types: [opened, closed, reopened, edited]
+    types: [opened, closed, reopened]
   issue_comment:
     types: [created]
   release:
@@ -20,26 +18,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: send push to discord
-        if: github.event_name == 'push'
-        env:
-          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          MESSAGE: ${{ github.event.head_commit.message }}
-        run: |
-          jq -n \
-            --arg content "<@1227759305852190801> push: auths-RNG@${{ github.ref_name }}
-          commit: ${{ github.sha }}
-          url: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
-          author: ${{ github.actor }}
-          message: $MESSAGE" \
-            '{content: $content}' |
-          curl -H "Content-Type: application/json" \
-            -X POST \
-            -d @- \
-            "$WEBHOOK"
-
       - name: send PR event to discord
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.pull_request.draft == false
         env:
           WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           TITLE: ${{ github.event.pull_request.title }}
@@ -71,7 +51,7 @@ jobs:
             "$WEBHOOK"
 
       - name: send issue comment to discord
-        if: github.event_name == 'issue_comment'
+        if: github.event_name == 'issue_comment' && github.event.comment.user.type != 'Bot'
         env:
           WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
           BODY: ${{ github.event.comment.body }}
