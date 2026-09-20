@@ -585,7 +585,7 @@ const messages = [
 	'I HATE YOU AUTH',
 	'shhhhh dont wake up the authalings',
 	'the authalings dont go out much',
-	'dont feed the authalings or they will be spoiled'
+	'dont feed the authalings or they will be spoiled',
 ];
 
 const randomIndex = Math.floor(Math.random() * messages.length);
