@@ -9,3 +9,8 @@
 **Bug:** `StreakTracker.prototype.deserialize` constructed a `Map` from `Object.entries(snap.dryRuns)` without converting values to numbers. If dryRun counters were stored or passed as strings, `this._dryRuns.get(name) + 1` caused string concatenation (e.g. `"5" + 1 = "51"`) instead of numeric addition.
 **Learning:** `Object.entries()` preserves string types on object values if deserialized from sources where values might be strings; Map state classes must explicitly coerce numeric properties with `Number(val)` during `deserialize`.
 **Prevention:** Always convert object entry values to expected types when initializing Map state during deserialization.
+
+## 2026-06-18 - Top-level `let` Declarations vs `window` Property Access
+**Bug:** `runes.js` attempted to grant 50M anomalies on upgrade via `window.anomalies = (window.anomalies || 0) + 50000000;`. Because `anomalies` was declared with `let anomalies = 0;` at the script top-level in `main.js`, it was not attached as a property of `window`, resulting in `window.anomalies` creating an isolated property while the actual `anomalies` state variable remained unchanged and unsaved.
+**Learning:** In non-module scripts, top-level `let` and `const` declarations do NOT create properties on `window` (unlike `var` or `function`). Writing to `window.varName` fails to modify top-level `let` variables.
+**Prevention:** Access global state variables directly by identifier (e.g., `anomalies`) rather than through `window.anomalies` unless explicitly assigned to `window`.

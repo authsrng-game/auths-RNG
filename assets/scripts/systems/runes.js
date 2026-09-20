@@ -369,10 +369,13 @@
 			startDopamineAttack();
 		}
 		if (key === 'doubleClover') {
+			// Generated code starts here on 2026-06-18T03:00:00Z:
 			if (typeof anomalies !== 'undefined') {
-				window.anomalies = (window.anomalies || 0) + 50000000;
+				anomalies += 50000000;
 				if (typeof updateAnomalyUI === 'function') updateAnomalyUI();
+				if (typeof saveAllData === 'function') saveAllData();
 			}
+			// Generated code ends here on 2026-06-18T03:00:00Z:
 			if (typeof recalcLuckMultiplier === 'function') recalcLuckMultiplier();
 			if (typeof showAnomalyPopup === 'function')
 				showAnomalyPopup('🍀 double clover: 50M anomalies + 4x luck!');

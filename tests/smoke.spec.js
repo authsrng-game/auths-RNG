@@ -182,4 +182,33 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(result.remainingType).toBe('number');
 	});
 	// Generated code ends here on 2026-06-18T02:00:00Z:
+
+	// Generated code starts here on 2026-06-18T03:00:00Z:
+	test('doubleClover rune upgrade correctly increases state anomalies variable', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('runesUnlocked', '1');
+			localStorage.setItem('runeBlocks', '100000');
+		});
+		await page.goto(BASE_URL);
+		const result = await page.evaluate(() => {
+			/* global anomalies */
+			const initialAnomalies = typeof anomalies !== 'undefined' ? anomalies : null;
+			if (typeof window.renderRunes === 'function') {
+				window.renderRunes();
+			}
+			const buyBtn = document.querySelector('.rune-buy-btn[data-key="doubleClover"]');
+			if (buyBtn) buyBtn.click();
+
+			const updatedAnomalies = typeof anomalies !== 'undefined' ? anomalies : null;
+			const windowAnomalies = window.anomalies;
+			const savedAnomalies = localStorage.getItem('anomalies');
+
+			return { initialAnomalies, updatedAnomalies, windowAnomalies, savedAnomalies };
+		});
+
+		expect(result.updatedAnomalies).toBe(result.initialAnomalies + 50000000);
+		expect(result.windowAnomalies).toBeUndefined();
+		expect(result.savedAnomalies).toBe(String(result.initialAnomalies + 50000000));
+	});
+	// Generated code ends here on 2026-06-18T03:00:00Z:
 });
