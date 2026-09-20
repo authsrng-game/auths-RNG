@@ -2480,6 +2480,8 @@ document.addEventListener('DOMContentLoaded', function () {
 	}
 	// Generated code ends here on 2026-09-12T10:00:00Z.
 
+	// Generated code starts here on 2026-09-21T00:00:00Z:
+	// Batch DOM element insertions with DocumentFragment and hoist lowercasing outside filter loop to eliminate layout thrashing during Index search.
 	function updateIndexDisplay(searchTerm = '') {
 		// Update stats
 		const collected = inventoryData.size;
@@ -2492,12 +2494,13 @@ document.addEventListener('DOMContentLoaded', function () {
 		// balls
 		const sortedRarities = getSortedRarities();
 
-		// Filter by search term
-		const filteredRarities = searchTerm
+		// Filter by search term with lowercasing hoisted
+		const lowerTerm = searchTerm ? searchTerm.toLowerCase() : '';
+		const filteredRarities = lowerTerm
 			? sortedRarities.filter((rarity) => {
 					const isUnlocked = inventoryData.has(rarity.name);
 					// Only search unlocked rarities by name
-					return isUnlocked && rarity.name.toLowerCase().includes(searchTerm.toLowerCase());
+					return isUnlocked && rarity.name.toLowerCase().includes(lowerTerm);
 				})
 			: sortedRarities;
 
@@ -2511,6 +2514,8 @@ document.addEventListener('DOMContentLoaded', function () {
 			indexList.appendChild(noResults);
 			return;
 		}
+
+		const fragment = document.createDocumentFragment();
 
 		filteredRarities.forEach((rarity) => {
 			const isUnlocked = inventoryData.has(rarity.name);
@@ -2546,9 +2551,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			item.appendChild(leftSide);
 			item.appendChild(rightSide);
-			indexList.appendChild(item);
+			fragment.appendChild(item);
 		});
+
+		indexList.appendChild(fragment);
 	}
+	// Generated code ends here on 2026-09-21T00:00:00Z:
 
 	// Event listeners
 	indexBtn.addEventListener('click', openIndex);
