@@ -5,6 +5,7 @@
 	var SNAPSHOT_KEY = '_syncSnapshot';
 	var API = 'https://backup.authsrng.xyz/api/sync';
 
+	// Generated code starts here on 2026-10-24T00:00:00Z:
 	var SYNC_KEYS = [
 		'rarityInventory',
 		'totalRolls',
@@ -28,9 +29,17 @@
 		'starmapData',
 		'starmapUnlocked',
 		'runesData',
+		'runesUnlocked',
 		'runeBlocks',
 		'runeGift',
 		'runeUpgrades',
+		'expeditionData',
+		'expeditionsUnlocked',
+		'dealerData',
+		'dealerUnlocked',
+		'catShrineUnlocked',
+		'catShrineEquipped',
+		'catShrineToggle',
 		'mutationTrust',
 		'mutationTrustOwned',
 		'mutationTrustActive',
@@ -39,6 +48,7 @@
 		'rarityTimestamps',
 		'notifications',
 	];
+	// Generated code ends here on 2026-10-24T00:00:00Z:
 
 	var retryDelay = 2000;
 	var MAX_RETRY_DELAY = 60000;

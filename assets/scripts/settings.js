@@ -1893,6 +1893,7 @@
 	}
 
 	// ── Save / settings transfer ──────────────────────────────────────────
+	// Generated code starts here on 2026-10-24T00:00:00Z:
 	const SAVE_KEYS = [
 		'rarityInventory',
 		'totalRolls',
@@ -1911,7 +1912,31 @@
 		'daily_streak',
 		'weekly_lastClaim',
 		'weekly_streak',
+		'gauntletData',
+		'mutationsUnlocked',
+		'starmapData',
+		'starmapUnlocked',
+		'runesData',
+		'runesUnlocked',
+		'runeBlocks',
+		'runeGift',
+		'runeUpgrades',
+		'expeditionData',
+		'expeditionsUnlocked',
+		'dealerData',
+		'dealerUnlocked',
+		'catShrineUnlocked',
+		'catShrineEquipped',
+		'catShrineToggle',
+		'mutationTrust',
+		'mutationTrustOwned',
+		'mutationTrustActive',
+		'mutationHistory',
+		'mutationBestResult',
+		'rarityTimestamps',
+		'notifications',
 	];
+	// Generated code ends here on 2026-10-24T00:00:00Z:
 
 	function simpleHash(str) {
 		let h = 0;

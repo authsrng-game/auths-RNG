@@ -5,6 +5,7 @@ console.log(performance.now());
 (function () {
 	const API = 'https://backup.authsrng.xyz/api/backup';
 
+	// Generated code starts here on 2026-10-24T00:00:00Z:
 	const SAVE_KEYS = [
 		'rarityInventory',
 		'totalRolls',
@@ -25,7 +26,29 @@ console.log(performance.now());
 		'weekly_streak',
 		'gauntletData',
 		'mutationsUnlocked',
+		'starmapData',
+		'starmapUnlocked',
+		'runesData',
+		'runesUnlocked',
+		'runeBlocks',
+		'runeGift',
+		'runeUpgrades',
+		'expeditionData',
+		'expeditionsUnlocked',
+		'dealerData',
+		'dealerUnlocked',
+		'catShrineUnlocked',
+		'catShrineEquipped',
+		'catShrineToggle',
+		'mutationTrust',
+		'mutationTrustOwned',
+		'mutationTrustActive',
+		'mutationHistory',
+		'mutationBestResult',
+		'rarityTimestamps',
+		'notifications',
 	];
+	// Generated code ends here on 2026-10-24T00:00:00Z:
 
 	function uid_hash(str) {
 		let h = 0;
