@@ -1736,6 +1736,9 @@ async function resetInventory() {
 	localStorage.removeItem('mutationHistory');
 	localStorage.removeItem('mutationBestResult');
 	localStorage.removeItem('runesData');
+	// Generated code starts here on 2026-03-29T12:00:00Z:
+	localStorage.removeItem('runesUnlocked');
+	// Generated code ends here on 2026-03-29T12:00:00Z:
 	localStorage.removeItem('runeBlocks');
 	localStorage.removeItem('runeGift');
 	localStorage.removeItem('runeUpgrades');
@@ -1743,6 +1746,11 @@ async function resetInventory() {
 	localStorage.removeItem('expeditionsUnlocked');
 	localStorage.removeItem('dealerData');
 	localStorage.removeItem('dealerUnlocked');
+	// Generated code starts here on 2026-03-29T12:00:00Z:
+	localStorage.removeItem('catShrineUnlocked');
+	localStorage.removeItem('catShrineEquipped');
+	localStorage.removeItem('catShrineToggle');
+	// Generated code ends here on 2026-03-29T12:00:00Z:
 	rarityTimestamps = new Map();
 	window.rarityTimestamps = rarityTimestamps;
 	notifications = [];
