@@ -586,14 +586,18 @@ function updateLuckDisplay() {
 	if (duplicateRollsLeft > 0) parts.push(`duplicate: ${duplicateRollsLeft} rolls left`);
 
 	// starmap bonus
+	// Generated code starts here on 2026-09-22T00:00:00Z:
+	// Use cached getStarmapConstellationsCount to avoid reading localStorage and parsing JSON in updateLuckDisplay.
 	const starmapMult =
 		typeof window.getStarmapLuckBonus === 'function' ? window.getStarmapLuckBonus() : 1;
-	if (starmapMult > 1)
-		parts.push(
-			`starmap: +${formatMult(starmapMult - 1)}x (${
-				JSON.parse(localStorage.getItem('starmapData') || '{}').constellations?.length || 0
-			} constellations)`
-		);
+	if (starmapMult > 1) {
+		const constCount =
+			typeof window.getStarmapConstellationsCount === 'function'
+				? window.getStarmapConstellationsCount()
+				: JSON.parse(localStorage.getItem('starmapData') || '{}').constellations?.length || 0;
+		parts.push(`starmap: +${formatMult(starmapMult - 1)}x (${constCount} constellations)`);
+	}
+	// Generated code ends here on 2026-09-22T00:00:00Z:
 
 	breakdownEl.textContent = parts.length ? parts.join(' • ') : 'base luck (no modifiers active)';
 }

@@ -67,15 +67,48 @@
 		return d.compressionTiers || 0; // count of sequential tiers purchased
 	}
 
-	window.getPityCompressionReduction = function (rarityName) {
-		const d = getData();
-		const owned = getCompressionTiersOwned(d);
+	// Generated code starts here on 2026-09-22T00:00:00Z:
+	// In-memory cache for starmapData and hot-path calculations (pity compression & luck multiplier) to eliminate redundant localStorage reads and JSON parses per roll.
+	let _cachedData = null;
+	let _cachedCompressionReduction = null;
+	let _cachedLuckBonus = null;
+
+	function updateCachedCalculations() {
+		if (!_cachedData) return;
+		const owned = getCompressionTiersOwned(_cachedData);
 		let mult = 1;
 		for (let i = 0; i < owned && i < COMPRESSION_TIERS.length; i++) {
 			mult *= COMPRESSION_TIERS[i].mult;
 		}
-		return mult;
+		_cachedCompressionReduction = mult;
+		_cachedLuckBonus = 1 + (_cachedData.permanentLuckStacks || 0) * 0.25 + (_cachedData.voidMarketLuck || 0);
+	}
+
+	window.getPityCompressionReduction = function (rarityName) {
+		if (_cachedCompressionReduction === null) {
+			getData();
+		}
+		return _cachedCompressionReduction;
 	};
+
+	window.getStarmapLuckBonus = function () {
+		if (_cachedLuckBonus === null) {
+			getData();
+		}
+		return _cachedLuckBonus;
+	};
+
+	window.getStarmapConstellationsCount = function () {
+		return (getData().constellations || []).length;
+	};
+
+	window.reloadStarmapCache = function () {
+		_cachedData = null;
+		_cachedCompressionReduction = null;
+		_cachedLuckBonus = null;
+		return getData();
+	};
+	// Generated code ends here on 2026-09-22T00:00:00Z:
 
 	function buyCompressionTier() {
 		const d = getData();
@@ -96,29 +129,47 @@
 	window.buyCompressionTier = buyCompressionTier;
 
 	// ── data helpers ─────────────────────────────────────────────────────
-	function loadData() {
+	// Generated code starts here on 2026-09-22T00:00:00Z:
+	// Refactored data helpers to maintain in-memory cached state.
+	function loadData(force = false) {
+		if (_cachedData && !force) return _cachedData;
 		try {
-			return JSON.parse(localStorage.getItem(STARMAP_KEY) || '{}');
+			const parsed = JSON.parse(localStorage.getItem(STARMAP_KEY) || '{}');
+			_cachedData = Object.assign(
+				{
+					constellations: [],
+					voidShards: 0,
+					lastShardCalc: Date.now(),
+					shopPurchases: {},
+					permanentLuckStacks: 0,
+					voidMarketLuck: 0,
+				},
+				parsed
+			);
 		} catch {
-			return {};
-		}
-	}
-	function saveData(d) {
-		localStorage.setItem(STARMAP_KEY, JSON.stringify(d));
-	}
-	function getData() {
-		return Object.assign(
-			{
+			_cachedData = {
 				constellations: [],
 				voidShards: 0,
 				lastShardCalc: Date.now(),
 				shopPurchases: {},
 				permanentLuckStacks: 0,
 				voidMarketLuck: 0,
-			},
-			loadData()
-		);
+			};
+		}
+		updateCachedCalculations();
+		return _cachedData;
 	}
+
+	function saveData(d) {
+		_cachedData = d;
+		updateCachedCalculations();
+		localStorage.setItem(STARMAP_KEY, JSON.stringify(d));
+	}
+
+	function getData() {
+		return loadData();
+	}
+	// Generated code ends here on 2026-09-22T00:00:00Z:
 
 	// ── shard generation ─────────────────────────────────────────────────
 	function shardsPerHourForStar(chance) {
@@ -220,11 +271,6 @@
 		});
 	}
 
-	// ── exposed globally ─────────────────────────────────────────────────
-	window.getStarmapLuckBonus = function () {
-		const d = getData();
-		return 1 + (d.permanentLuckStacks || 0) * 0.25 + (d.voidMarketLuck || 0);
-	};
 
 	// Called by gauntlets.js applyReward or the crystallize buttonnnnnnnnnnnnnnnnnnnn
 	window.crystallize = function () {
