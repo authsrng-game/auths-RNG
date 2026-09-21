@@ -205,4 +205,14 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(res.status()).toBe(200);
 	});
 	// Generated code ends here on 2026-09-20T15:30:00Z:
+
+	// Generated code starts here on 2026-09-22T00:00:00Z:
+	test('sort select has an associated label and aria-label', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const sortSelect = page.locator('#sortSelect');
+		await expect(sortSelect).toHaveAttribute('aria-label', 'Sort inventory items');
+		const label = page.locator('label[for="sortSelect"]');
+		await expect(label).toBeVisible();
+	});
+	// Generated code ends here on 2026-09-22T00:00:00Z:
 });
