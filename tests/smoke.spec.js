@@ -215,4 +215,36 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(label).toBeVisible();
 	});
 	// Generated code ends here on 2026-09-22T00:00:00Z:
+
+	// Generated code starts here on 2026-03-29T12:00:00Z:
+	test('resetInventory removes system unlock keys from localStorage', async ({ page }) => {
+		await page.goto(BASE_URL);
+		await page.evaluate(() => {
+			globalThis.localStorage.setItem('runesUnlocked', '1');
+			globalThis.localStorage.setItem('catShrineUnlocked', '1');
+			globalThis.localStorage.setItem('catShrineEquipped', 'https://cataas.com/cat/test');
+			globalThis.localStorage.setItem('catShrineToggle', '1');
+		});
+		await page.evaluate(async () => {
+			globalThis.showConfirm = () => Promise.resolve(true);
+			globalThis.showAlert = () => Promise.resolve();
+			globalThis.location.reload = () => {};
+			const resetBtn = globalThis.document.getElementById('resetBtn');
+			if (resetBtn) resetBtn.click();
+		});
+		await page.waitForTimeout(500);
+		const keys = await page.evaluate(() => {
+			return {
+				runes: globalThis.localStorage.getItem('runesUnlocked'),
+				catShrine: globalThis.localStorage.getItem('catShrineUnlocked'),
+				catEquipped: globalThis.localStorage.getItem('catShrineEquipped'),
+				catToggle: globalThis.localStorage.getItem('catShrineToggle'),
+			};
+		});
+		expect(keys.runes).toBeNull();
+		expect(keys.catShrine).toBeNull();
+		expect(keys.catEquipped).toBeNull();
+		expect(keys.catToggle).toBeNull();
+	});
+	// Generated code ends here on 2026-03-29T12:00:00Z:
 });
