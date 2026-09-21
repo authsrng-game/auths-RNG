@@ -154,6 +154,9 @@ console.log(performance.now());
 			const data = await r.json();
 			if (!r.ok) {
 				if (!silent) setStatus('error: ' + (data.error || r.status), '#ff8888');
+				// Generated code starts here on 2026-03-31T12:00:00Z:
+				else console.warn('[cloud-backup] silent auto-backup rejected:', data.error || r.status);
+				// Generated code ends here on 2026-03-31T12:00:00Z:
 				return false;
 			}
 			localStorage.setItem('lastCloudBackup', data.ts);
@@ -162,6 +165,9 @@ console.log(performance.now());
 			return true;
 		} catch (e) {
 			if (!silent) setStatus('backup failed: ' + e.message, '#ff8888');
+			// Generated code starts here on 2026-03-31T12:00:00Z:
+			else console.warn('[cloud-backup] silent auto-backup failed:', e.message);
+			// Generated code ends here on 2026-03-31T12:00:00Z:
 			return false;
 		}
 	}
