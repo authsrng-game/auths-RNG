@@ -320,6 +320,11 @@
 		}
 	}
 
+	function applyCustomRollText(text) {
+		const btn = el('rollBtn');
+		if (btn) btn.textContent = text.trim() || 'roll';
+	}
+
 	// ── Seasonal particles ────────────────────────────────────────────────
 	function startSeasonalParticles(season, density) {
 		if (particleInterval) {
