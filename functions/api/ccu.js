@@ -6,19 +6,6 @@ export async function onRequest(context) {
 		'Access-Control-Allow-Origin': '*',
 	};
 
-	// Generated code starts here on 2026-03-31T00:00:00Z:
-	if (request.method === 'OPTIONS') {
-		return new Response(null, {
-			status: 204,
-			headers: {
-				...headers,
-				'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-				'Access-Control-Allow-Headers': 'Content-Type',
-			},
-		});
-	}
-	// Generated code ends here on 2026-03-31T00:00:00Z:
-
 	if (request.method === 'POST') {
 		const url = new URL(request.url);
 		const sid = url.searchParams.get('sid');
