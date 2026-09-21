@@ -81,7 +81,8 @@
 			mult *= COMPRESSION_TIERS[i].mult;
 		}
 		_cachedCompressionReduction = mult;
-		_cachedLuckBonus = 1 + (_cachedData.permanentLuckStacks || 0) * 0.25 + (_cachedData.voidMarketLuck || 0);
+		_cachedLuckBonus =
+			1 + (_cachedData.permanentLuckStacks || 0) * 0.25 + (_cachedData.voidMarketLuck || 0);
 	}
 
 	window.getPityCompressionReduction = function (rarityName) {
@@ -270,7 +271,6 @@
 			ctx.fill();
 		});
 	}
-
 
 	// Called by gauntlets.js applyReward or the crystallize buttonnnnnnnnnnnnnnnnnnnn
 	window.crystallize = function () {
