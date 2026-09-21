@@ -211,4 +211,32 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(result.savedAnomalies).toBe(String(result.initialAnomalies + 50000000));
 	});
 	// Generated code ends here on 2026-06-18T03:00:00Z:
+
+	// Generated code starts here on 2026-09-21T12:55:00Z:
+	test('updateActivePotionsDisplay handles missing or custom potionData safely and shows correct multiplier', async ({ page }) => {
+		const errors = [];
+		page.on('pageerror', (err) => {
+			if (!err.message.includes('Failed to fetch')) {
+				errors.push(err.message);
+			}
+		});
+
+		await page.addInitScript(() => {
+			const futureTime = Date.now() + 60000;
+			localStorage.setItem(
+				'activePotions',
+				JSON.stringify({
+					active: [{ type: '_g_easy', endTime: futureTime, multiplier: 2.5 }],
+					duplicateLeft: 0,
+				})
+			);
+		});
+
+		await page.goto(BASE_URL);
+
+		const text = await page.locator('#activePotionsList').innerText();
+		expect(errors).toHaveLength(0);
+		expect(text).toContain('2.5x luck');
+	});
+	// Generated code ends here on 2026-09-21T12:55:00Z:
 });

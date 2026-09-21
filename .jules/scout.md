@@ -14,3 +14,8 @@
 **Bug:** `runes.js` attempted to grant 50M anomalies on upgrade via `window.anomalies = (window.anomalies || 0) + 50000000;`. Because `anomalies` was declared with `let anomalies = 0;` at the script top-level in `main.js`, it was not attached as a property of `window`, resulting in `window.anomalies` creating an isolated property while the actual `anomalies` state variable remained unchanged and unsaved.
 **Learning:** In non-module scripts, top-level `let` and `const` declarations do NOT create properties on `window` (unlike `var` or `function`). Writing to `window.varName` fails to modify top-level `let` variables.
 **Prevention:** Access global state variables directly by identifier (e.g., `anomalies`) rather than through `window.anomalies` unless explicitly assigned to `window`.
+
+## 2026-09-21 - Unhandled Undefined Lookup in Active Potion Display
+**Bug:** `updateActivePotionsDisplay()` in `main.js` accessed `data.emoji` and `data.mult` directly from `potionData[p.type]`. When `activePotions` contained potion types not statically registered in `potionData` at initial script execution (such as gauntlet luck potions like `_g_easy` loaded from `localStorage` before `gauntlets.js` ran), `data` was `undefined`, causing an uncaught `TypeError` that broke potion UI rendering and displays `1x luck` instead of `p.multiplier`.
+**Learning:** UI rendering functions that map stored state to static lookup dictionaries must safely handle missing dictionary keys and prefer inline state values (`p.multiplier`) over static metadata (`data.mult`).
+**Prevention:** Use optional chaining (`data?.emoji || fallback`) and nullish coalescing (`p.multiplier ?? data?.mult ?? fallback`) when rendering state-backed lookup items.

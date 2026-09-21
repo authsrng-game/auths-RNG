@@ -467,11 +467,15 @@ function updateActivePotionsDisplay() {
 	activePotions.forEach((p) => {
 		const data = potionData[p.type];
 		const timeLeft = Math.ceil((p.endTime - Date.now()) / 1000);
+		// Generated code starts here on 2026-09-21T12:55:00Z:
+		const emoji = data?.emoji || '🏆';
+		const mult = p.multiplier ?? data?.mult ?? 1;
+		// Generated code ends here on 2026-09-21T12:55:00Z:
 
 		const div = document.createElement('div');
 		div.className = 'active-potion';
 		div.innerHTML = `
-      <div class="active-potion-name">${data.emoji} ${data.mult}x luck</div>
+      <div class="active-potion-name">${emoji} ${mult}x luck</div>
       <div class="active-potion-timer">${timeLeft}s remaining</div>
     `;
 		list.appendChild(div);
