@@ -87,11 +87,19 @@ console.log(performance.now());
 		el.style.color = color || '';
 	}
 
+	// Generated code starts here on 2026-06-18T14:15:00Z:
+	function parseTimestamp(ts) {
+		if (!ts) return null;
+		return !isNaN(ts) ? Number(ts) : ts;
+	}
+
 	function setLastBackupDisplay(ts) {
 		const el = document.getElementById('cloudLastBackup');
 		if (!el) return;
-		el.textContent = ts ? 'last backup: ' + new Date(ts).toLocaleString() : 'no backup yet';
+		const parsed = parseTimestamp(ts);
+		el.textContent = parsed ? 'last backup: ' + new Date(parsed).toLocaleString() : 'no backup yet';
 	}
+	// Generated code ends here on 2026-06-18T14:15:00Z:
 
 	function authHeaders() {
 		const token = window.AuthAccount ? window.AuthAccount.getToken() : null;
@@ -209,10 +217,13 @@ console.log(performance.now());
 			return;
 		}
 
+		// Generated code starts here on 2026-06-18T14:15:00Z:
 		const lastTs = localStorage.getItem('lastCloudBackup');
-		const lastStr = lastTs
-			? 'last backup: ' + new Date(parseInt(lastTs)).toLocaleString()
+		const parsedTs = parseTimestamp(lastTs);
+		const lastStr = parsedTs
+			? 'last backup: ' + new Date(parsedTs).toLocaleString()
 			: 'no backup yet';
+		// Generated code ends here on 2026-06-18T14:15:00Z:
 		const iv = getAutoInterval();
 
 		section.innerHTML = `
