@@ -23,7 +23,15 @@ test.describe('auths-RNG smoke tests', () => {
 	test('no failed network requests', async ({ page }) => {
 		const failed = [];
 		page.on('response', (res) => {
-			if (res.status() >= 400 && !res.url().includes('api.github.com')) failed.push(`${res.status()} ${res.url()}`);
+			let host;
+			try {
+				host = new URL(res.url()).hostname;
+			} catch {
+				host = '';
+			}
+			if (res.status() >= 400 && host !== 'api.github.com') {
+				failed.push(`${res.status()} ${res.url()}`);
+			}
 		});
 		await page.goto(BASE_URL);
 		await page.waitForTimeout(2000);
