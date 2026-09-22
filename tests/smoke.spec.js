@@ -239,4 +239,26 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(text).toContain('2.5x luck');
 	});
 	// Generated code ends here on 2026-09-21T12:55:00Z:
+
+	// Generated code starts here on 2026-06-18T14:00:00Z:
+	test('Cloud Backup displays correct date for ISO timestamp strings', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('cloudBackupEnabled', 'true');
+			localStorage.setItem('lastCloudBackup', '2026-06-18T12:34:56.000Z');
+		});
+
+		await page.goto(BASE_URL);
+
+		const text = await page.evaluate(() => {
+			localStorage.setItem('cloudBackupEnabled', 'true');
+			localStorage.setItem('lastCloudBackup', '2026-06-18T12:34:56.000Z');
+			window.AuthAccount = { isLoggedIn: () => true };
+			document.dispatchEvent(new CustomEvent('authchange'));
+			return document.getElementById('cloudLastBackup')?.innerText || '';
+		});
+
+		expect(text).not.toContain('1970');
+		expect(text).toContain('2026');
+	});
+	// Generated code ends here on 2026-06-18T14:00:00Z:
 });

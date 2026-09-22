@@ -19,3 +19,8 @@
 **Bug:** `updateActivePotionsDisplay()` in `main.js` accessed `data.emoji` and `data.mult` directly from `potionData[p.type]`. When `activePotions` contained potion types not statically registered in `potionData` at initial script execution (such as gauntlet luck potions like `_g_easy` loaded from `localStorage` before `gauntlets.js` ran), `data` was `undefined`, causing an uncaught `TypeError` that broke potion UI rendering and displays `1x luck` instead of `p.multiplier`.
 **Learning:** UI rendering functions that map stored state to static lookup dictionaries must safely handle missing dictionary keys and prefer inline state values (`p.multiplier`) over static metadata (`data.mult`).
 **Prevention:** Use optional chaining (`data?.emoji || fallback`) and nullish coalescing (`p.multiplier ?? data?.mult ?? fallback`) when rendering state-backed lookup items.
+
+## 2026-06-18 - ISO Date String Parsing with parseInt Coercion
+**Bug:** `buildUI()` in `cloud-backup.js` parsed `localStorage.getItem('lastCloudBackup')` using `parseInt(lastTs)` before passing it to `new Date()`. When the backup timestamp was stored as an ISO 8601 string (e.g., `"2026-06-18T12:34:56.000Z"` returned by the API), `parseInt` extracted only the leading year (`2026`), causing `new Date(2026)` to evaluate to 2026 ms after the Unix Epoch (`1970-01-01`).
+**Learning:** `parseInt()` on an ISO date string extracts the leading digits as integer milliseconds since epoch, causing dates to reset to 1970. Date parsing from stored strings must check if the value is numeric (`!isNaN(val) ? Number(val) : val`) before passing it to `new Date()`.
+**Prevention:** Avoid calling `parseInt()` directly on string timestamps that can be either numeric millisecond strings or ISO date strings.
