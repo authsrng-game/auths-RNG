@@ -247,4 +247,14 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(keys.catToggle).toBeNull();
 	});
 	// Generated code ends here on 2026-03-29T12:00:00Z:
+
+	// Generated code starts here on 2026-09-23T10:00:00Z:
+	test('wishing well controls have accessible aria-labels', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const wellInput = page.locator('#wellInput');
+		await expect(wellInput).toHaveAttribute('aria-label', 'Points to wish');
+		const quickBtn = page.locator('.well-quick-btn').first();
+		await expect(quickBtn).toHaveAttribute('aria-label', 'Set wish amount to 10 points');
+	});
+	// Generated code ends here on 2026-09-23T10:00:00Z:
 });
