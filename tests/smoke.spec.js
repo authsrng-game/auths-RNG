@@ -261,4 +261,32 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(text).toContain('2026');
 	});
 	// Generated code ends here on 2026-06-18T14:00:00Z:
+
+	// Generated code starts here on 2026-06-18T15:00:00Z:
+	test('Leaderboard submit correctly parses array-formatted rarityInventory', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem(
+				'rarityInventory',
+				JSON.stringify([
+					{ name: 'Common', chance: 0.5, count: 10 },
+					{ name: 'Rare', chance: 0.01, count: 2 },
+				])
+			);
+		});
+
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(() => {
+			if (!window.LeaderboardSubmit) return null;
+			const payload = window.LeaderboardSubmit.buildPayload();
+			const rarest = window.LeaderboardSubmit.getRarest();
+			return { payload, rarest };
+		});
+
+		expect(result).not.toBeNull();
+		expect(result.payload.rarities).toBe(12);
+		expect(result.rarest.name).toBe('Rare');
+		expect(result.rarest.denom).toBe(100);
+	});
+	// Generated code ends here on 2026-06-18T15:00:00Z:
 });

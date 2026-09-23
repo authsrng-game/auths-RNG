@@ -24,3 +24,8 @@
 **Bug:** `buildUI()` in `cloud-backup.js` parsed `localStorage.getItem('lastCloudBackup')` using `parseInt(lastTs)` before passing it to `new Date()`. When the backup timestamp was stored as an ISO 8601 string (e.g., `"2026-06-18T12:34:56.000Z"` returned by the API), `parseInt` extracted only the leading year (`2026`), causing `new Date(2026)` to evaluate to 2026 ms after the Unix Epoch (`1970-01-01`).
 **Learning:** `parseInt()` on an ISO date string extracts the leading digits as integer milliseconds since epoch, causing dates to reset to 1970. Date parsing from stored strings must check if the value is numeric (`!isNaN(val) ? Number(val) : val`) before passing it to `new Date()`.
 **Prevention:** Avoid calling `parseInt()` directly on string timestamps that can be either numeric millisecond strings or ISO date strings.
+
+## 2026-06-18 - Storage Format Mismatch in Rarity Inventory Deserialization
+**Bug:** `leaderboard-submit.js` assumed `rarityInventory` in `localStorage` was an Object mapping `{ [name]: count }`, but `main.js` stores `rarityInventory` as an Array of objects `[{ name, chance, count }]`. Array lookups like `inv[r.name]` evaluated to `undefined` and `Object.values(inv)` returned objects whose `parseInt` evaluated to `NaN` -> `0`, causing leaderboard submission payloads to report `rarities: 0` and `rarestName: 'none'`.
+**Learning:** Secondary consumers of `localStorage` state must verify whether array or object schemas are written by primary state-saving scripts (`main.js`) and gracefully support both formats (`Array.isArray(inv)`).
+**Prevention:** Always check `Array.isArray()` when reading complex structured state from `localStorage` before attempting object property access or array-based reductions.
