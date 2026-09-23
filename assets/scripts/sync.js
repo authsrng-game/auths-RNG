@@ -152,6 +152,7 @@
 					return;
 				}
 				if (!r.ok) throw new Error('push failed with status ' + r.status);
+				cancelSyncBanner();
 				var snap = loadSnapshot();
 				Object.keys(snapshotUpdate).forEach(function (key) {
 					snap[key] = snapshotUpdate[key];
@@ -161,6 +162,9 @@
 			// Generated code starts here on 2026-03-31T20:00:00Z:
 			.catch(function (err) {
 				console.warn('[sync] push failed:', err ? err.message || err : 'unknown error');
+				queueSyncBanner(
+					"couldn't reach the server! your progress will sync once you're back online"
+				);
 				Object.keys(snapshotUpdate).forEach(function (key) {
 					if (!(key in dirty)) dirty[key] = snapshotUpdate[key];
 				});
@@ -192,6 +196,68 @@
 	}
 
 	var overlayEl = null;
+
+	var syncBannerEl = null;
+	var syncBannerHideTimer = null;
+	var syncBannerShowTimer = null;
+	var SYNC_BANNER_DEBOUNCE = 1500;
+
+	function queueSyncBanner(msg) {
+		if (syncBannerShowTimer) return;
+		syncBannerShowTimer = setTimeout(function () {
+			syncBannerShowTimer = null;
+			showSyncBannerNow(msg);
+		}, SYNC_BANNER_DEBOUNCE);
+	}
+
+	function showSyncBannerNow(msg) {
+		if (syncBannerHideTimer) {
+			clearTimeout(syncBannerHideTimer);
+			syncBannerHideTimer = null;
+		}
+		if (!syncBannerEl) {
+			syncBannerEl = document.createElement('div');
+			syncBannerEl.id = 'syncOfflineBanner';
+			syncBannerEl.style.cssText =
+				'position:fixed;top:0;left:0;width:100%;background:#3a0a0a;color:#f88;' +
+				'font-family:monospace;font-size:11px;padding:6px 8px;z-index:2147483647;' +
+				'text-align:center;pointer-events:none;opacity:0;' +
+				'transition:opacity 0.25s ease;border-bottom:1px solid #5a1a1a;';
+			var attach = function () {
+				document.body.appendChild(syncBannerEl);
+				syncBannerEl.textContent = msg;
+				requestAnimationFrame(function () {
+					requestAnimationFrame(function () {
+						if (syncBannerEl) syncBannerEl.style.opacity = '1';
+					});
+				});
+			};
+			if (document.body) attach();
+			else document.addEventListener('DOMContentLoaded', attach, { once: true });
+			return;
+		}
+		syncBannerEl.textContent = msg;
+		syncBannerEl.style.opacity = '1';
+	}
+
+	function cancelSyncBanner() {
+		if (syncBannerShowTimer) {
+			clearTimeout(syncBannerShowTimer);
+			syncBannerShowTimer = null;
+		}
+		hideSyncBanner();
+	}
+
+	function hideSyncBanner() {
+		if (!syncBannerEl) return;
+		syncBannerEl.style.opacity = '0';
+		syncBannerHideTimer = setTimeout(function () {
+			if (syncBannerEl && syncBannerEl.parentNode) {
+				syncBannerEl.parentNode.removeChild(syncBannerEl);
+			}
+			syncBannerEl = null;
+		}, 300);
+	}
 
 	function createOverlay() {
 		if (overlayEl || !document.body) return;
@@ -286,6 +352,7 @@
 			xhr.send(null);
 		} catch (e) {
 			console.warn('[sync] pull network error:', e ? e.message || e : 'unknown error');
+			queueSyncBanner("couldn't connect to the server! playing offline");
 			return;
 		}
 
@@ -298,6 +365,7 @@
 
 		if (xhr.status !== 200) {
 			console.warn('[sync] pull request failed with status:', xhr.status);
+			queueSyncBanner('sync unavailable right now! using local data...');
 			return;
 		}
 
@@ -339,6 +407,7 @@
 			}
 		});
 
+		cancelSyncBanner();
 		saveSnapshot(newSnapshot);
 	}
 
@@ -385,6 +454,14 @@
 			snap[e.key] = e.newValue;
 		}
 		saveSnapshot(snap);
+	});
+
+	window.addEventListener('offline', function () {
+		if (getToken()) queueSyncBanner('no internet connection! playing offline');
+	});
+	window.addEventListener('online', function () {
+		cancelSyncBanner();
+		flushDirty();
 	});
 
 	init();
