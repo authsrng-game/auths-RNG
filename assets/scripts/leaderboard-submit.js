@@ -97,11 +97,19 @@ console.log(performance.now());
 		}
 	}
 
+	// Generated code starts here on 2026-03-31T15:00:00Z:
 	async function deleteEntry() {
 		try {
-			await fetch(API, { method: 'DELETE', headers: authHeaders() });
-		} catch (_) {}
+			const r = await fetch(API, { method: 'DELETE', headers: authHeaders() });
+			if (!r.ok) {
+				const data = await r.json().catch(() => ({}));
+				console.warn('[leaderboard] delete entry rejected:', data.error || r.status);
+			}
+		} catch (e) {
+			console.warn('[leaderboard] delete entry request failed:', e.message || e);
+		}
 	}
+	// Generated code ends here on 2026-03-31T15:00:00Z:
 
 	let autoTimer = null;
 

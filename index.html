@@ -377,7 +377,11 @@ Last release date on nightly: ${nightlyRDate}`;
 							<p id="luckBoostBadge" style="display: none"></p>
 						</div>
 						<div class="roll-toolbar">
-							<button id="autoRollBtn">auto roll (OFF)</button>
+							<!-- Generated code starts here on 2026-09-24T10:00:00Z: -->
+							<button id="autoRollBtn" aria-pressed="false" aria-label="Toggle auto roll">
+								auto roll (OFF)
+							</button>
+							<!-- Generated code ends here on 2026-09-24T10:00:00Z: -->
 							<div class="rarity-trail" id="rarityTrail"></div>
 						</div>
 					</div>
@@ -1949,6 +1953,9 @@ Last release date on nightly: ${nightlyRDate}`;
 					toggleBtn.classList.toggle('active');
 					const isActive = toggleBtn.classList.contains('active');
 					toggleBtn.textContent = isActive ? 'auto roll (ON)' : 'auto roll (OFF)';
+					// Generated code starts here on 2026-09-24T10:00:00Z:
+					toggleBtn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+					// Generated code ends here on 2026-09-24T10:00:00Z:
 
 					if (isActive) {
 						nextRollAt = Date.now() + getAutoRollDelay();
