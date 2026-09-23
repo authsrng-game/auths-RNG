@@ -7,8 +7,6 @@ on:
     types: [opened, reopened, closed]
   issues:
     types: [opened, closed, reopened]
-  issue_comment:
-    types: [created]
   release:
     types: [published]
   fork:
@@ -64,23 +62,6 @@ jobs:
             --arg content "<@1227759305852190801> issue ${{ github.event.action }}: #${{ github.event.issue.number }} $TITLE
           url: ${{ github.event.issue.html_url }}
           author: ${{ github.actor }}" \
-            '{content: $content}' |
-          curl -H "Content-Type: application/json" \
-            -X POST \
-            -d @- \
-            "$WEBHOOK"
-
-      - name: send issue comment to discord
-        if: github.event_name == 'issue_comment'
-        env:
-          WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          BODY: ${{ github.event.comment.body }}
-        run: |
-          jq -n \
-            --arg content "new comment on #${{ github.event.issue.number }}
-          url: ${{ github.event.comment.html_url }}
-          author: ${{ github.actor }}
-          comment: $BODY" \
             '{content: $content}' |
           curl -H "Content-Type: application/json" \
             -X POST \
