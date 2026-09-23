@@ -267,7 +267,9 @@ test.describe('auths-RNG smoke tests', () => {
 	// Generated code ends here on 2026-09-23T10:00:00Z:
 
 	// Generated code starts here on 2026-03-31T12:00:00Z:
-	test('starmap cosmetic unlock state syncs with starmapData and migrates legacy key', async ({ page }) => {
+	test('starmap cosmetic unlock state syncs with starmapData and migrates legacy key', async ({
+		page,
+	}) => {
 		await page.goto(BASE_URL);
 		await page.evaluate(() => {
 			globalThis.localStorage.setItem('cosmeticUnlock_star_trail', '1');

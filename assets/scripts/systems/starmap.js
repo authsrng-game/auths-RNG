@@ -541,7 +541,12 @@
 		el.className = 'starmap-market-item';
 
 		const bought = d.shopPurchases?.[item.id] || 0;
-		const isBought = item.type === 'rarity_unlock' ? isVoidUnlocked(item.id) : item.type === 'cosmetic' ? isCosmeticUnlocked(item.id) : bought > 0;
+		const isBought =
+			item.type === 'rarity_unlock'
+				? isVoidUnlocked(item.id)
+				: item.type === 'cosmetic'
+					? isCosmeticUnlocked(item.id)
+					: bought > 0;
 		const maxed = (item.oneTime && isBought) || (item.maxStack && bought >= item.maxStack);
 		const canAfford = shards >= item.cost;
 		const disabled = maxed || !canAfford;
