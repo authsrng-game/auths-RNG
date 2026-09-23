@@ -310,4 +310,26 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(escapedText).not.toContain('<img src=x onerror=alert(1)>');
 	});
 	// Generated code ends here on 2026-03-31T00:00:00Z:
+
+	// Generated code starts here on 2026-10-24T00:00:00Z:
+	test('legacy mutationTrust array migrates forward to mutationHistory', async ({ page }) => {
+		const dummyHistory = [
+			{ a: 'Common', b: 'Uncommon', result: 'Rare', good: true, ts: Date.now() },
+		];
+		await page.addInitScript((history) => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('mutationsUnlocked', '1');
+			localStorage.setItem('mutationTrust', JSON.stringify(history));
+		}, dummyHistory);
+		await page.goto(BASE_URL);
+
+		const migratedHistory = await page.evaluate(() => {
+			return localStorage.getItem('mutationHistory');
+		});
+
+		expect(migratedHistory).not.toBeNull();
+		expect(JSON.parse(migratedHistory)).toEqual(dummyHistory);
+	});
+	// Generated code ends here on 2026-10-24T00:00:00Z:
 });
