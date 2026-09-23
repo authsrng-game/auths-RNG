@@ -300,6 +300,10 @@
 		);
 	}
 
+	function totalElementalRunes() {
+		return ELEMENTS.reduce((s, el) => s + (runesData.elementals[el] || 0), 0);
+	}
+
 	function getExchangeRate() {
 		return upgrades.moreBlocks ? 10 : 1.25;
 	}

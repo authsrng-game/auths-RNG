@@ -541,8 +541,7 @@
 		el.className = 'starmap-market-item';
 
 		const bought = d.shopPurchases?.[item.id] || 0;
-		const isBought = item.type === 'rarity_unlock' ? isVoidUnlocked(item.id) : item.type === 'cosmetic' ? isCosmeticUnlocked(item.id) : bought > 0;
-		const maxed = (item.oneTime && isBought) || (item.maxStack && bought >= item.maxStack);
+		const maxed = (item.oneTime && bought > 0) || (item.maxStack && bought >= item.maxStack);
 		const canAfford = shards >= item.cost;
 		const disabled = maxed || !canAfford;
 
@@ -580,8 +579,10 @@
 			window.applyStarmapLuck?.();
 			showAnomalyPopup?.('✦ +0.25x permanent luck!');
 		} else if (item.type === 'rarity_unlock') {
+			localStorage.setItem('voidUnlock_' + item.id, '1');
 			showAnomalyPopup?.(`✦ ${item.name} unlocked!`);
 		} else if (item.type === 'cosmetic') {
+			localStorage.setItem('cosmeticUnlock_' + item.id, '1');
 			showAnomalyPopup?.(`✦ ${item.name} unlocked!`);
 			if (item.id === 'star_trail') initStarTrail();
 		} else if (item.type === 'anomalies') {
@@ -597,40 +598,11 @@
 		renderStarmap();
 	}
 
-	// Generated code starts here on 2026-03-31T12:00:00Z:
-	function isVoidUnlocked(id) {
-		const d = getData();
-		if (d.shopPurchases?.[id]) return true;
-		if (localStorage.getItem('voidUnlock_' + id) === '1') {
-			d.shopPurchases = d.shopPurchases || {};
-			d.shopPurchases[id] = 1;
-			saveData(d);
-			return true;
-		}
-		return false;
-	}
-
-	function isCosmeticUnlocked(id) {
-		const d = getData();
-		if (d.shopPurchases?.[id]) return true;
-		if (localStorage.getItem('cosmeticUnlock_' + id) === '1') {
-			d.shopPurchases = d.shopPurchases || {};
-			d.shopPurchases[id] = 1;
-			saveData(d);
-			return true;
-		}
-		return false;
-	}
-
-	function isStarTrailUnlocked() {
-		return isCosmeticUnlocked('star_trail');
-	}
-
 	function initStarTrail() {
 		if (window._starTrailActive) return;
 		window._starTrailActive = true;
 		document.addEventListener('mousemove', (e) => {
-			if (!isStarTrailUnlocked()) return;
+			if (!localStorage.getItem('cosmeticUnlock_star_trail')) return;
 			const dot = document.createElement('div');
 			dot.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;width:3px;height:3px;
         background:rgba(200,200,255,0.75);border-radius:50%;pointer-events:none;z-index:2147483640;
@@ -643,10 +615,6 @@
 			setTimeout(() => dot.remove(), 560);
 		});
 	}
-
-	window.isVoidUnlocked = isVoidUnlocked;
-	window.isCosmeticUnlocked = isCosmeticUnlocked;
-	// Generated code ends here on 2026-03-31T12:00:00Z:
 
 	function fmt(n) {
 		return typeof window.formatNum === 'function' ? window.formatNum(n) : String(Math.round(n));
@@ -665,7 +633,7 @@
 	window.renderStarmap = renderStarmap;
 
 	// init star trail if already owned
-	if (isStarTrailUnlocked()) initStarTrail();
+	if (localStorage.getItem('cosmeticUnlock_star_trail')) initStarTrail();
 
 	// wait for DOM
 	function tryInit(n) {
