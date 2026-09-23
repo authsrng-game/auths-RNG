@@ -8,16 +8,24 @@ console.log(performance.now());
 
 	const $ = (id) => document.getElementById(id);
 
-	//config
+	/**
+	 * Maintenance schedules and thresholds.
+	 * Cleanup is divided into 3 tiers to minimize main-thread jank during fast auto-rolling:
+	 * - Light (5s): Trims fast-growing DOM items (spinner decoy elements, particles/trail pills).
+	 * - Medium (30s): Cleans UI state (highlights, container layout drift).
+	 * - Heavy (120s): Manages persistence limits (notification trimming, localStorage quota checks).
+	 */
 	const LIGHT_PASS_INTERVAL_VISIBLE_MS = 5000;
 	const LIGHT_PASS_INTERVAL_HIDDEN_MS = 20000;
 	const MEDIUM_PASS_INTERVAL_MS = 30000;
 	const HEAVY_PASS_INTERVAL_MS = 120000;
+	/** Keeps only active DOM elements to avoid accumulation during continuous auto-rolls. */
 	const STALE_SPINNER_CHILD_THRESHOLD = 2;
 	const TRAIL_PILL_MAX = 40;
 	const PAGE_HEIGHT_DRIFT_THRESHOLD_PX = 80;
 	const NOTIF_TRIM_MAX = 150;
 	const NOTIF_STALE_READ_MS = 7 * 24 * 60 * 60 * 1000;
+	/** Warn before reaching 5MB browser quota to prevent silent save failure. */
 	const LOCALSTORAGE_WARN_BYTES = 3.5 * 1024 * 1024;
 	const LOCALSTORAGE_GROWTH_NOISE_FLOOR_KB = 5;
 	const LOCALSTORAGE_GROWTH_WARN_STREAK = 3;
