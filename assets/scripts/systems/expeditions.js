@@ -16,19 +16,33 @@
 		return localStorage.getItem('expeditionsUnlocked') === '1';
 	}
 
-	function loadData() {
+	// Generated code starts here on 2026-09-22T00:00:00Z:
+	// In-memory cache for expedition state to eliminate redundant synchronous localStorage reads and JSON parses during UI render loops.
+	let _cachedExpedData = null;
+
+	function loadData(force = false) {
+		if (_cachedExpedData && !force) return _cachedExpedData;
 		try {
-			return Object.assign(
+			_cachedExpedData = Object.assign(
 				{ active: null, cooldownUntil: 0 },
 				JSON.parse(localStorage.getItem(EXPED_KEY) || '{}')
 			);
 		} catch {
-			return { active: null, cooldownUntil: 0 };
+			_cachedExpedData = { active: null, cooldownUntil: 0 };
 		}
+		return _cachedExpedData;
 	}
+
 	function saveData(d) {
+		_cachedExpedData = d;
 		localStorage.setItem(EXPED_KEY, JSON.stringify(d));
 	}
+
+	window.reloadExpeditionsCache = function () {
+		_cachedExpedData = null;
+		return loadData(true);
+	};
+	// Generated code ends here on 2026-09-22T00:00:00Z:
 
 	function fmtTime(ms) {
 		return typeof window.formatWellTime === 'function'
