@@ -37,11 +37,20 @@
 	let giftWealthInterval = null;
 	let linkAnimationActive = false;
 
-	function isUnlocked() {
-		return localStorage.getItem(RUNES_KEY) === '1';
+	// Generated code starts here on 2026-09-22T00:00:00Z:
+	// In-memory cache for runes unlock state to avoid synchronous localStorage reads on every RNG roll in tryDropRune.
+	let _unlockedCache = null;
+
+	function isUnlocked(force = false) {
+		if (force || _unlockedCache === null) {
+			_unlockedCache = localStorage.getItem(RUNES_KEY) === '1';
+		}
+		return _unlockedCache;
 	}
+	// Generated code ends here on 2026-09-22T00:00:00Z:
 
 	function loadData() {
+		_unlockedCache = localStorage.getItem(RUNES_KEY) === '1';
 		try {
 			const d = JSON.parse(localStorage.getItem(RUNES_DATA_KEY) || '{}');
 			runesData = {
@@ -420,7 +429,7 @@
 		const container = document.getElementById('runesContainer');
 		if (!container) return;
 
-		if (!isUnlocked()) {
+		if (!isUnlocked(true)) {
 			container.innerHTML = `
         <div style="text-align:center;opacity:0.4;margin-top:48px;">
           <div style="font-size:2.2em;margin-bottom:14px;">🔷</div>

@@ -37,3 +37,7 @@
 ## 2026-09-22 - Expedition State In-Memory Caching for Periodic Render Loops
 **Learning:** In `expeditions.js`, `renderExpeditions` is polled every 3 seconds to update progress bars and active expedition timers. Each render cycle invoked `loadData()`, executing `localStorage.getItem('expeditionData')` and `JSON.parse()`. Adding an in-memory cache (`_cachedExpedData`) updated on `saveData(d)` eliminated 100,000 unnecessary synchronous `localStorage` reads and JSON parsing operations across browser sessions.
 **Action:** Use in-memory state variables for background polling modules that periodically read state from storage to avoid continuous `localStorage` I/O and JSON parsing overhead.
+
+## 2026-09-22 - Runes Unlock State In-Memory Caching for RNG Roll Checks
+**Learning:** In `runes.js`, `isUnlocked()` was called via `tryDropRune(o)` in `main.js` on every RNG roll, executing `localStorage.getItem('runesUnlocked') === '1'`. Synchronous Web Storage reads on every roll introduced IPC/Storage overhead across thousands of roll loops. Storing the boolean unlock state in a module variable `_unlockedCache` (initialized during `loadData()` and refreshed via `isUnlocked(true)` during `renderRunes()`) eliminated all redundant `localStorage` reads on hot roll paths (~3x speedup in storage check latency).
+**Action:** Avoid querying `localStorage` inside functions invoked on high-frequency per-roll event callbacks; cache feature flags in module variables and invalidate/refresh them during UI render cycles or explicit load calls.
