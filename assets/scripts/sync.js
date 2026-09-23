@@ -160,14 +160,14 @@
 			})
 			// Generated code starts here on 2026-03-31T20:00:00Z:
 			.catch(function (err) {
-				console.warn('[sync] push failed:', err ? (err.message || err) : 'unknown error');
+				console.warn('[sync] push failed:', err ? err.message || err : 'unknown error');
 				Object.keys(snapshotUpdate).forEach(function (key) {
 					if (!(key in dirty)) dirty[key] = snapshotUpdate[key];
 				});
 				retryDelay = Math.min(retryDelay * 2, MAX_RETRY_DELAY);
 				scheduleFlush(retryDelay);
 			});
-			// Generated code ends here on 2026-03-31T20:00:00Z:
+		// Generated code ends here on 2026-03-31T20:00:00Z:
 	}
 
 	function patchStorage() {
@@ -285,7 +285,7 @@
 			xhr.setRequestHeader('Authorization', 'Bearer ' + token);
 			xhr.send(null);
 		} catch (e) {
-			console.warn('[sync] pull network error:', e ? (e.message || e) : 'unknown error');
+			console.warn('[sync] pull network error:', e ? e.message || e : 'unknown error');
 			return;
 		}
 
@@ -305,7 +305,7 @@
 		try {
 			data = JSON.parse(xhr.responseText);
 		} catch (e) {
-			console.warn('[sync] pull JSON parse error:', e ? (e.message || e) : 'unknown error');
+			console.warn('[sync] pull JSON parse error:', e ? e.message || e : 'unknown error');
 			return;
 		}
 		// Generated code ends here on 2026-03-31T20:00:00Z:
