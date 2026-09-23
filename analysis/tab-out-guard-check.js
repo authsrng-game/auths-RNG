@@ -18,31 +18,31 @@ function walk(dir, out = []) {
 const root = path.resolve(process.argv[2] || '.');
 const files = walk(root);
 
-console.log('== tab-out guard check ==\n');
-console.log(
-	'files with setInterval/requestAnimationFrame but no visibilitychange handling in the same file.'
-);
-console.log(
-	'not all of these need a guard (e.g. one-shot fades, short timeouts), read before fixing.\n'
+const treeHasVisibilityHandling = files.some((f) =>
+	/visibilitychange/.test(fs.readFileSync(f, 'utf8'))
 );
 
-let flagged = 0;
+const flagged = [];
 
 for (const file of files) {
 	const content = fs.readFileSync(file, 'utf8');
-
-	const hasTimer =
-		/\bsetInterval\s*\(/.test(content) || /\brequestAnimationFrame\s*\(/.test(content);
-	if (!hasTimer) continue;
-
-	const hasVisibilityGuard = /visibilitychange/.test(content);
-	if (hasVisibilityGuard) continue;
-
 	const intervalCount = (content.match(/\bsetInterval\s*\(/g) || []).length;
 	const rafCount = (content.match(/\brequestAnimationFrame\s*\(/g) || []).length;
+	if (intervalCount + rafCount === 0) continue;
 
-	flagged++;
-	console.log(`${path.relative(root, file)}  (setInterval: ${intervalCount}, rAF: ${rafCount})`);
+	flagged.push({
+		file: path.relative(root, file),
+		setIntervalCount: intervalCount,
+		requestAnimationFrameCount: rafCount,
+	});
 }
 
-if (!flagged) console.log('nothing flagged.');
+const result = {
+	anyVisibilityHandlingInTree: treeHasVisibilityHandling,
+	note: treeHasVisibilityHandling
+		? 'visibilitychange exists somewhere in this tree, files below may already be covered by a central handler, verify before treating as a gap'
+		: 'no visibilitychange handling found anywhere in this tree, every file below is a real candidate',
+	timerFilesWithNoLocalGuard: flagged,
+};
+
+console.log(JSON.stringify(result, null, 2));

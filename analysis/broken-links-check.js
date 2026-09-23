@@ -21,6 +21,7 @@ function isLocalPath(p) {
 	if (p.startsWith('mailto:') || p.startsWith('tel:') || p.startsWith('data:')) return false;
 	if (p.startsWith('#')) return false;
 	if (p.startsWith('javascript:')) return false;
+	if (p.includes('${')) return false;
 	return true;
 }
 

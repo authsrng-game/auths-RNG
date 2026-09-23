@@ -1,0 +1,9 @@
+This folder contains the static analyzer for auth's RNG.
+You can run it via the fish shell with the command:
+
+./analysis/analyze.fish
+
+Great for finding bugs, but don't trust everything you see
+that gets reported! Always verify before fixing.
+
+This static analyzer gets improved over time.

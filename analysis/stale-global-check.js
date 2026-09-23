@@ -18,20 +18,30 @@ function walk(dir, out = []) {
 const root = path.resolve(process.argv[2] || '.');
 const files = walk(root);
 
-// window.foo = <value>  where value isn't null/undefined
 const setPattern = /\bwindow\.([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*([^;]+);/g;
-// separately track window.foo = null / undefined as a clear
 const clearPattern = /\bwindow\.([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*(?:null|undefined)\s*;/g;
-// window.foo checked truthy somewhere (if/&&/ternary) - signals code expects it to go falsy again
 const conditionalPattern =
 	/(?:if\s*\(\s*|&&\s*|\?\s*)window\.([A-Za-z_$][A-Za-z0-9_$]*)\b(?!\s*=[^=])/g;
 
-const sets = new Map(); // prop -> [{file, line}]
-const clears = new Set(); // prop names that get cleared somewhere
-const conditionals = new Map(); // prop -> [{file, line}]
+const sets = new Map();
+const clears = new Set();
+const conditionals = new Map();
+
+const functionDeclPattern = /\bfunction\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\(/g;
+const constFunctionPattern =
+	/\b(?:const|let|var)\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*=\s*(?:async\s*)?(?:function\b|\([^)]*\)\s*=>|[A-Za-z_$][A-Za-z0-9_$]*\s*=>)/g;
 
 for (const file of files) {
 	const content = fs.readFileSync(file, 'utf8');
+
+	const functionLikeNames = new Set();
+	functionDeclPattern.lastIndex = 0;
+	let fdm;
+	while ((fdm = functionDeclPattern.exec(content))) functionLikeNames.add(fdm[1]);
+	constFunctionPattern.lastIndex = 0;
+	let cfm;
+	while ((cfm = constFunctionPattern.exec(content))) functionLikeNames.add(cfm[1]);
+
 	const lines = content.split('\n');
 
 	lines.forEach((line, idx) => {
@@ -43,9 +53,11 @@ for (const file of files) {
 		let sm;
 		while ((sm = setPattern.exec(line))) {
 			const [, prop, value] = sm;
-			if (/^(null|undefined)$/.test(value.trim())) continue; // that's a clear, already counted
-			// skip function/object/class assignments, those are usually one-time exports not stateful data
-			if (/^(function|\(|async|class|\{)/.test(value.trim())) continue;
+			const trimmedValue = value.trim();
+			if (/^(null|undefined)$/.test(trimmedValue)) continue;
+			if (/^(function|\(|async|class|\{)/.test(trimmedValue)) continue;
+			if (/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(trimmedValue) && functionLikeNames.has(trimmedValue))
+				continue;
 			if (!sets.has(prop)) sets.set(prop, []);
 			sets.get(prop).push({ file, line: idx + 1 });
 		}
@@ -62,22 +74,17 @@ for (const file of files) {
 
 console.log('== stale window global check ==\n');
 console.log('window.* properties assigned a real value, checked elsewhere as if they can go falsy');
-console.log(
-	'again (if/&&), but never reset to null/undefined anywhere. worth checking whether stale'
-);
-console.log(
-	'state survives a mode switch (this is the exact shape of the customAudioBuffer bug).\n'
-);
+console.log('again (if/&&), but never reset to null/undefined anywhere.\n');
 
 let flagged = 0;
 
 for (const [prop, sites] of sets) {
-	if (!conditionals.has(prop)) continue; // nothing ever treats it as nullable, not the pattern we want
+	if (!conditionals.has(prop)) continue;
 	if (clears.has(prop)) continue;
 
 	flagged++;
 	console.log(
-		`window.${prop} — assigned ${sites.length}x, checked conditionally ${conditionals.get(prop).length}x, never cleared:`
+		`window.${prop} - assigned ${sites.length}x, checked conditionally ${conditionals.get(prop).length}x, never cleared:`
 	);
 	sites.forEach((s) => console.log(`  set:   ${path.relative(root, s.file)}:${s.line}`));
 	conditionals
