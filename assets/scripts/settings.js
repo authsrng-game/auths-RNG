@@ -474,11 +474,22 @@
 			);
 		}
 
+		// Generated code starts here on 2026-03-31T00:00:00Z:
+		function escHtml(s) {
+			return String(s ?? '')
+				.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&#39;');
+		}
+		// Generated code ends here on 2026-03-31T00:00:00Z:
+
 		function dcLog(msg, cls = 'info') {
 			if (dcFlags['quiet-log'] && cls === 'dim') return;
 			const e = document.createElement('div');
 			e.className = 'entry';
-			e.innerHTML = `<span class="ts">${ts()}</span><span class="msg ${cls}">${msg}</span>`;
+			e.innerHTML = `<span class="ts">${ts()}</span><span class="msg ${cls}">${escHtml(msg)}</span>`;
 			logEl.appendChild(e);
 			logEl.scrollTop = logEl.scrollHeight;
 		}
@@ -538,7 +549,7 @@
 			rows.forEach(({ k, size }) => {
 				const row = document.createElement('div');
 				row.className = 'dc-stor-row';
-				row.innerHTML = `<span class="dc-stor-key">${k}</span><span class="dc-stor-size">${(size / 1024).toFixed(1)}KB</span>`;
+				row.innerHTML = `<span class="dc-stor-key">${escHtml(k)}</span><span class="dc-stor-size">${(size / 1024).toFixed(1)}KB</span>`;
 				row.addEventListener('click', () => openStorageEdit(k));
 				list.appendChild(row);
 			});
@@ -622,8 +633,8 @@
 				const shortUrl = e.url.replace(/https?:\/\/[^/]+/, '').slice(0, 60) || e.url.slice(0, 60);
 				row.innerHTML = `
             <span class="${statusCls}">${e.pending ? '...' : e.status}</span>
-            <span class="dc-net-method">${e.method}</span>
-            <span class="dc-net-url" title="${e.url}">${shortUrl}</span>
+            <span class="dc-net-method">${escHtml(e.method)}</span>
+            <span class="dc-net-url" title="${escHtml(e.url)}">${escHtml(shortUrl)}</span>
             <span class="dc-net-time">${e.pending ? '' : e.ms + 'ms'}</span>
         `;
 				list.appendChild(row);
@@ -753,8 +764,8 @@
 				const row = document.createElement('div');
 				row.className = 'dc-watch-row';
 				row.innerHTML = `
-            <span class="dc-watch-expr">${w.expr}</span>
-            <span class="dc-watch-val ${changed ? 'dc-watch-changed' : ''}">${val}</span>
+            <span class="dc-watch-expr">${escHtml(w.expr)}</span>
+            <span class="dc-watch-val ${changed ? 'dc-watch-changed' : ''}">${escHtml(val)}</span>
             <button class="dc-watch-del" data-i="${i}">×</button>
         `;
 				list.appendChild(row);

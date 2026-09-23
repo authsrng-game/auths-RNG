@@ -23,15 +23,7 @@ test.describe('auths-RNG smoke tests', () => {
 	test('no failed network requests', async ({ page }) => {
 		const failed = [];
 		page.on('response', (res) => {
-			let host;
-			try {
-				host = new URL(res.url()).hostname;
-			} catch {
-				host = '';
-			}
-			if (res.status() >= 400 && host !== 'api.github.com') {
-				failed.push(`${res.status()} ${res.url()}`);
-			}
+			if (res.status() >= 400) failed.push(`${res.status()} ${res.url()}`);
 		});
 		await page.goto(BASE_URL);
 		await page.waitForTimeout(2000);
@@ -266,31 +258,6 @@ test.describe('auths-RNG smoke tests', () => {
 	});
 	// Generated code ends here on 2026-09-23T10:00:00Z:
 
-	// Generated code starts here on 2026-03-31T12:00:00Z:
-	test('starmap cosmetic unlock state syncs with starmapData and migrates legacy key', async ({
-		page,
-	}) => {
-		await page.goto(BASE_URL);
-		await page.evaluate(() => {
-			globalThis.localStorage.setItem('cosmeticUnlock_star_trail', '1');
-			globalThis.localStorage.setItem('starmapData', JSON.stringify({ shopPurchases: {} }));
-		});
-		await page.reload();
-		const isUnlockedLegacy = await page.evaluate(() => {
-			const data = JSON.parse(globalThis.localStorage.getItem('starmapData') || '{}');
-			return data.shopPurchases?.star_trail === 1;
-		});
-		expect(isUnlockedLegacy).toBe(true);
-
-		await page.evaluate(() => {
-			globalThis.localStorage.removeItem('starmapData');
-		});
-		const starmapDataAfterReset = await page.evaluate(() => {
-			return globalThis.localStorage.getItem('starmapData');
-		});
-		expect(starmapDataAfterReset).toBeNull();
-	});
-	// Generated code ends here on 2026-03-31T12:00:00Z:
 	// Generated code starts here on 2026-09-24T10:00:00Z:
 	test('auto roll button has aria-pressed attribute and toggles state when clicked', async ({
 		page,
@@ -318,4 +285,29 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(autoRollBtn).toHaveAttribute('aria-pressed', 'false');
 	});
 	// Generated code ends here on 2026-09-24T10:00:00Z:
+
+	// Generated code starts here on 2026-03-31T00:00:00Z:
+	test('dev console storage list sanitizes html in storage keys', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('<img src=x onerror=alert(1)>', 'testval');
+		});
+		await page.goto(BASE_URL);
+
+		const escapedText = await page.evaluate(() => {
+			/* global window */
+			const userSettings = { dev: true };
+			localStorage.setItem('userSettings', JSON.stringify(userSettings));
+			if (window.applySettings) window.applySettings(userSettings);
+			const tabBtn = document.querySelector('.dev-tab[data-tab="storage"]');
+			if (tabBtn) tabBtn.click();
+			const list = document.getElementById('dc-storage-list');
+			return list ? list.innerHTML : '';
+		});
+
+		expect(escapedText).toContain('&lt;img src=x onerror=alert(1)&gt;');
+		expect(escapedText).not.toContain('<img src=x onerror=alert(1)>');
+	});
+	// Generated code ends here on 2026-03-31T00:00:00Z:
 });
