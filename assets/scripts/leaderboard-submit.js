@@ -6,17 +6,29 @@ console.log(performance.now());
 	const API = 'https://leaderboard.authsrng.xyz/api/leaderboard';
 	const SUBMIT_INTERVAL = 15 * 60 * 1000;
 
+	// Generated code starts here on 2026-06-18T15:15:00Z:
 	function getRarest() {
 		try {
-			const inv = JSON.parse(localStorage.getItem('rarityInventory') || '{}');
-			const rarities = window.RARITIES || window.rarities || [];
-			let best = { name: null, denom: 0 };
-			for (const r of rarities) {
-				if (!inv[r.name]) continue;
-				const denom = r.denom || r.denominator || (r.chance ? Math.round(1 / r.chance) : 0);
-				if (denom > best.denom) best = { name: r.name, denom };
+			const inv = JSON.parse(localStorage.getItem('rarityInventory') || '[]');
+			if (Array.isArray(inv)) {
+				let best = { name: null, denom: 0 };
+				for (const item of inv) {
+					if (!item || !item.name || !item.count) continue;
+					const denom =
+						item.denom || item.denominator || (item.chance ? Math.round(1 / item.chance) : 0);
+					if (denom > best.denom) best = { name: item.name, denom };
+				}
+				if (best.name) return best;
+			} else if (typeof inv === 'object' && inv !== null) {
+				const rarities = window.RARITIES || window.rarities || [];
+				let best = { name: null, denom: 0 };
+				for (const r of rarities) {
+					if (!inv[r.name]) continue;
+					const denom = r.denom || r.denominator || (r.chance ? Math.round(1 / r.chance) : 0);
+					if (denom > best.denom) best = { name: r.name, denom };
+				}
+				if (best.name) return best;
 			}
-			if (best.name) return best;
 		} catch (_) {}
 		return {
 			name: localStorage.getItem('lbRarestName') || 'none',
@@ -25,8 +37,15 @@ console.log(performance.now());
 	}
 
 	function buildPayload() {
-		const inv = JSON.parse(localStorage.getItem('rarityInventory') || '{}');
-		const totalRarities = Object.values(inv).reduce((s, v) => s + (parseInt(v) || 0), 0);
+		let totalRarities = 0;
+		try {
+			const inv = JSON.parse(localStorage.getItem('rarityInventory') || '[]');
+			if (Array.isArray(inv)) {
+				totalRarities = inv.reduce((s, v) => s + (parseInt(v.count) || 0), 0);
+			} else if (typeof inv === 'object' && inv !== null) {
+				totalRarities = Object.values(inv).reduce((s, v) => s + (parseInt(v) || 0), 0);
+			}
+		} catch (_) {}
 		const rarest = getRarest();
 		let achievements = [];
 		try {
@@ -42,6 +61,7 @@ console.log(performance.now());
 			achievements,
 		};
 	}
+	// Generated code ends here on 2026-06-18T15:15:00Z:
 
 	function isEnabled() {
 		return localStorage.getItem('lbEnabled') === 'true';
@@ -181,6 +201,8 @@ console.log(performance.now());
 			startAuto();
 		});
 	}
+
+	window.LeaderboardSubmit = { buildPayload, getRarest };
 
 	document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })();
