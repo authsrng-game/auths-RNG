@@ -151,20 +151,23 @@
 					document.dispatchEvent(new CustomEvent('syncAuthExpired'));
 					return;
 				}
-				if (!r.ok) throw new Error('push failed');
+				if (!r.ok) throw new Error('push failed with status ' + r.status);
 				var snap = loadSnapshot();
 				Object.keys(snapshotUpdate).forEach(function (key) {
 					snap[key] = snapshotUpdate[key];
 				});
 				saveSnapshot(snap);
 			})
-			.catch(function () {
+			// Generated code starts here on 2026-03-31T20:00:00Z:
+			.catch(function (err) {
+				console.warn('[sync] push failed:', err ? (err.message || err) : 'unknown error');
 				Object.keys(snapshotUpdate).forEach(function (key) {
 					if (!(key in dirty)) dirty[key] = snapshotUpdate[key];
 				});
 				retryDelay = Math.min(retryDelay * 2, MAX_RETRY_DELAY);
 				scheduleFlush(retryDelay);
 			});
+			// Generated code ends here on 2026-03-31T20:00:00Z:
 	}
 
 	function patchStorage() {
@@ -276,11 +279,13 @@
 		if (!token) return;
 
 		var xhr = new XMLHttpRequest();
+		// Generated code starts here on 2026-03-31T20:00:00Z:
 		try {
 			xhr.open('GET', API + '/pull', false);
 			xhr.setRequestHeader('Authorization', 'Bearer ' + token);
 			xhr.send(null);
-		} catch (_) {
+		} catch (e) {
+			console.warn('[sync] pull network error:', e ? (e.message || e) : 'unknown error');
 			return;
 		}
 
@@ -291,14 +296,19 @@
 			return;
 		}
 
-		if (xhr.status !== 200) return;
+		if (xhr.status !== 200) {
+			console.warn('[sync] pull request failed with status:', xhr.status);
+			return;
+		}
 
 		var data;
 		try {
 			data = JSON.parse(xhr.responseText);
-		} catch (_) {
+		} catch (e) {
+			console.warn('[sync] pull JSON parse error:', e ? (e.message || e) : 'unknown error');
 			return;
 		}
+		// Generated code ends here on 2026-03-31T20:00:00Z:
 		if (!data || !data.fields) return;
 
 		var fields = data.fields;
