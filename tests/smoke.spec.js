@@ -257,4 +257,32 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(quickBtn).toHaveAttribute('aria-label', 'Set wish amount to 10 points');
 	});
 	// Generated code ends here on 2026-09-23T10:00:00Z:
+
+	// Generated code starts here on 2026-09-24T10:00:00Z:
+	test('auto roll button has aria-pressed attribute and toggles state when clicked', async ({
+		page,
+	}) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
+		await page.goto(BASE_URL);
+
+		const autoRollBtn = page.locator('#autoRollBtn');
+		await expect(autoRollBtn).toHaveAttribute('aria-label', 'Toggle auto roll');
+		await expect(autoRollBtn).toHaveAttribute('aria-pressed', 'false');
+
+		await page.evaluate(() => {
+			const b = document.getElementById('autoRollBtn');
+			if (b) b.click();
+		});
+		await expect(autoRollBtn).toHaveAttribute('aria-pressed', 'true');
+
+		await page.evaluate(() => {
+			const b = document.getElementById('autoRollBtn');
+			if (b) b.click();
+		});
+		await expect(autoRollBtn).toHaveAttribute('aria-pressed', 'false');
+	});
+	// Generated code ends here on 2026-09-24T10:00:00Z:
 });
