@@ -58,7 +58,21 @@
 
 	function loadHistory() {
 		try {
-			return JSON.parse(localStorage.getItem(MUTATION_HISTORY_KEY) || '[]');
+			const current = localStorage.getItem(MUTATION_HISTORY_KEY);
+			if (current !== null) {
+				return JSON.parse(current);
+			}
+			// Generated code starts here on 2026-10-24T00:00:00Z:
+			const legacy = localStorage.getItem('mutationTrust');
+			if (legacy !== null) {
+				const parsed = JSON.parse(legacy);
+				if (Array.isArray(parsed)) {
+					saveHistory(parsed);
+					return parsed;
+				}
+			}
+			// Generated code ends here on 2026-10-24T00:00:00Z:
+			return [];
 		} catch {
 			return [];
 		}
@@ -357,4 +371,8 @@
 			renderMutations();
 		else if (n > 0) setTimeout(() => tryInit(n - 1), 200);
 	}
+
+	// Generated code starts here on 2026-10-24T00:00:00Z:
+	loadHistory();
+	// Generated code ends here on 2026-10-24T00:00:00Z:
 })();
