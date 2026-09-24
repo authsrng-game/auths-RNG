@@ -16,6 +16,7 @@
 	// ── State ──────────────────────────────────────────────────────────────
 	let particles = [];
 	let particleInterval = null;
+	let particleRaf = null;
 	let devInterval = null;
 	let rgbInterval = null;
 	let wackyInterval = null;
@@ -321,10 +322,15 @@
 	}
 
 	// ── Seasonal particles ────────────────────────────────────────────────
+	// Generated code starts here on 2026-10-25T12:00:00Z:
 	function startSeasonalParticles(season, density) {
 		if (particleInterval) {
 			clearInterval(particleInterval);
 			particleInterval = null;
+		}
+		if (particleRaf) {
+			cancelAnimationFrame(particleRaf);
+			particleRaf = null;
 		}
 		particles = [];
 		const canvas = el('seasonCanvas');
@@ -384,9 +390,10 @@
 				ctx.fillText(p.char, p.x, p.y);
 			});
 			particles = particles.filter((p) => p.y < h + 30);
-			requestAnimationFrame(loop);
+			particleRaf = requestAnimationFrame(loop);
 		})();
 	}
+	// Generated code ends here on 2026-10-25T12:00:00Z:
 
 	// ── Dev overlay ───────────────────────────────────────────────────────
 	// Generated code starts here on 2026-06-18T00:35:00Z:
