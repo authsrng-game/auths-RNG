@@ -211,12 +211,13 @@ console.log(performance.now());
 				{ type: 'unlock_expeditions', label: 'unlock expeditions ⏳!!!' },
 			],
 		},
+		// Generated code starts here on 2026-03-31T12:00:00Z:
 		{
 			id: 'insane',
 			name: 'insane',
 			emoji: '💀',
 			minRolls: 3000,
-			rarities: ['Breakdown', 'Depression', 'Supergalaxy', 'Pulsar'],
+			rarities: ['Breakdown', 'panic!', 'kill me', 'Pulsar'],
 			rewards: [
 				{ type: 'points', amount: 100000, label: '100,000 pts' },
 				{ type: 'anomaly', amount: 100, label: '100 anomalies' },
@@ -228,7 +229,7 @@ console.log(performance.now());
 			name: 'godlike',
 			emoji: '✨',
 			minRolls: 6000,
-			rarities: ['Psychosis', 'CHARGED', 'SCHIZOPHRENIC'],
+			rarities: ['Psychosis', 'Extinction', 'SCHIZOPHRENIC'],
 			rewards: [
 				{ type: 'points', amount: 500000, label: '500,000 pts' },
 				{ type: 'anomaly', amount: 1000, label: '1,000 anomalies' },
@@ -252,13 +253,14 @@ console.log(performance.now());
 			name: 'snowy',
 			emoji: '❄️',
 			minRolls: 20000,
-			rarities: ['Cosmic', 'Neurosis', 'Trauma', 'Mania'],
+			rarities: ['Cosmic', 'Neurosis', 'anxiety...', 'Mania'],
 			rewards: [
 				{ type: 'points', amount: 1200000, label: '1,200,000 pts' },
 				{ type: 'anomaly', amount: 3000, label: '3,000 anomalies' },
 				{ type: 'luck', mult: 7, dur: 360, label: '6m 7x luck' },
 			],
 		},
+		// Generated code ends here on 2026-03-31T12:00:00Z:
 		{
 			id: 'eon',
 			name: 'eon',
