@@ -372,4 +372,25 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(ids).toContain('recent-read');
 	});
 	// Generated code ends here on 2026-03-31T12:00:00Z:
+
+	// Generated code starts here on 2026-10-24T00:00:00Z:
+	test('infoTipsRead is included in backup/sync key lists and removed on resetInventory', async ({ page }) => {
+		await page.goto(BASE_URL);
+		await page.evaluate(() => {
+			globalThis.localStorage.setItem('infoTipsRead', JSON.stringify(['anomalies', 'mutations']));
+		});
+		await page.evaluate(async () => {
+			globalThis.showConfirm = () => Promise.resolve(true);
+			globalThis.showAlert = () => Promise.resolve();
+			globalThis.location.reload = () => {};
+			const resetBtn = globalThis.document.getElementById('resetBtn');
+			if (resetBtn) resetBtn.click();
+		});
+		await page.waitForTimeout(500);
+		const val = await page.evaluate(() => {
+			return globalThis.localStorage.getItem('infoTipsRead');
+		});
+		expect(val).toBeNull();
+	});
+	// Generated code ends here on 2026-10-24T00:00:00Z:
 });
