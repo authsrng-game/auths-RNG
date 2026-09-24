@@ -289,4 +289,49 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(result.rarest.denom).toBe(100);
 	});
 	// Generated code ends here on 2026-06-18T15:00:00Z:
+
+	// Generated code starts here on 2026-09-22T00:00:00Z:
+	test('renderHistory escapes HTML characters in rarity names in mutation log', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('mutationsUnlocked', '1');
+			localStorage.setItem(
+				'rarityInventory',
+				JSON.stringify([
+					{ name: 'Common', chance: 0.5, count: 1 },
+					{ name: 'Uncommon', chance: 0.25, count: 1 },
+				])
+			);
+			localStorage.setItem(
+				'mutationHistory',
+				JSON.stringify([
+					{
+						a: '<b id="injectedA">test</b>',
+						b: 'Common',
+						result: '<b id="injectedRes">test</b>',
+						good: true,
+						ts: Date.now(),
+					},
+				])
+			);
+		});
+
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(() => {
+			if (typeof window.renderMutations === 'function') {
+				window.renderMutations();
+			}
+			const injectedA = !!document.getElementById('injectedA');
+			const injectedRes = !!document.getElementById('injectedRes');
+			const formula = document.querySelector('.mh-formula')?.innerHTML || '';
+			const resText = document.querySelector('.mh-result')?.innerHTML || '';
+			return { injectedA, injectedRes, formula, resText };
+		});
+
+		expect(result.injectedA).toBe(false);
+		expect(result.injectedRes).toBe(false);
+		expect(result.formula).toContain('&lt;b id="injectedA"&gt;test&lt;/b&gt;');
+		expect(result.resText).toContain('&lt;b id="injectedRes"&gt;test&lt;/b&gt;');
+	});
+	// Generated code ends here on 2026-09-22T00:00:00Z:
 });
