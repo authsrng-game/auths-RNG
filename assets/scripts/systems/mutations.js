@@ -94,8 +94,8 @@
 				const d = new Date(e.ts);
 				const time = `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
 				return `<div class="mutation-history-entry ${e.good ? 'mh-good' : 'mh-bad'}">
-      <div class="mh-formula">${e.a} + ${e.b}</div>
-      <div class="mh-result">${e.good ? '✨' : '💀'} ${e.result}</div>
+      <div class="mh-formula">${escHtml(e.a)} + ${escHtml(e.b)}</div>
+      <div class="mh-result">${e.good ? '✨' : '💀'} ${escHtml(e.result)}</div>
       <div class="mh-time">${time}</div>
     </div>`;
 			})
@@ -338,7 +338,7 @@
 			resultEl.innerHTML = `
       <div class="mutation-result ${wasGood ? 'result-good' : 'result-bad'}">
         <div class="mutation-result-quality">${wasGood ? '✨ better!' : '💀 worse...'}</div>
-        <div class="mutation-result-name">${result.name}</div>
+        <div class="mutation-result-name">${escHtml(result.name)}</div>
         <div class="mutation-result-chance">1/${denom.toLocaleString()}</div>
         <div class="mutation-trust-delta ${trustDelta >= 0 ? 'trust-gain' : 'trust-loss'}">${sign}${trustDelta} trust</div>
       </div>`;
