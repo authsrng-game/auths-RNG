@@ -332,4 +332,27 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(JSON.parse(migratedHistory)).toEqual(dummyHistory);
 	});
 	// Generated code ends here on 2026-10-24T00:00:00Z:
+
+	// Generated code starts here on 2026-03-31T20:00:00Z:
+	test('corrupted shopUpgrades in localStorage logs error with [main] prefix', async ({ page }) => {
+		const consoleLogs = [];
+		page.on('console', (msg) => {
+			if (msg.type() === 'error') {
+				consoleLogs.push(msg.text());
+			}
+		});
+
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('shopUpgrades', 'invalid-json-{');
+		});
+		await page.goto(BASE_URL);
+
+		const logFound = consoleLogs.some((text) =>
+			text.includes('[main] failed to parse shop upgrades:')
+		);
+		expect(logFound).toBe(true);
+	});
+	// Generated code ends here on 2026-03-31T20:00:00Z:
 });

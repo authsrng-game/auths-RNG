@@ -1635,18 +1635,23 @@ function renderSortedInventory(mode) {
 const savedPoints = localStorage.getItem(POINTS_KEY);
 if (savedPoints !== null) points = parseInt(savedPoints, 10) || 0;
 
+// Generated code starts here on 2026-03-31T20:00:00Z:
 const savedUpgrades = localStorage.getItem(SHOP_UPGRADES_KEY);
 if (savedUpgrades) {
 	try {
 		shopUpgrades = JSON.parse(savedUpgrades);
-	} catch {}
+	} catch (e) {
+		console.error('[main] failed to parse shop upgrades:', e);
+	}
 }
 
 const savedSoldOut = localStorage.getItem(SOLD_OUT_KEY);
 if (savedSoldOut) {
 	try {
 		soldOutRarities = new Map(JSON.parse(savedSoldOut));
-	} catch {}
+	} catch (e) {
+		console.error('[main] failed to parse sold out rarities:', e);
+	}
 }
 
 shopLuckMultiplier = 1 + shopUpgrades.luck * 0.1;
@@ -1662,7 +1667,9 @@ if (savedPotions) {
 			const v = loaded[key];
 			playerPotions[key] = typeof v === 'number' && !isNaN(v) ? v : 0;
 		}
-	} catch {}
+	} catch (e) {
+		console.error('[main] failed to parse potions:', e);
+	}
 }
 
 const savedActive = localStorage.getItem(ACTIVE_POTIONS_KEY);
@@ -1673,15 +1680,20 @@ if (savedActive) {
 		duplicateRollsLeft = data.duplicateLeft || 0;
 		recalcPotionLuck();
 		updateActivePotionsDisplay();
-	} catch {}
+	} catch (e) {
+		console.error('[main] failed to parse active potions:', e);
+	}
 }
 
 const savedTimestamps = localStorage.getItem(RARITY_TIMESTAMPS_KEY);
 if (savedTimestamps) {
 	try {
 		rarityTimestamps = new Map(JSON.parse(savedTimestamps));
-	} catch {}
+	} catch (e) {
+		console.error('[main] failed to parse rarity timestamps:', e);
+	}
 }
+// Generated code ends here on 2026-03-31T20:00:00Z:
 window.rarityTimestamps = rarityTimestamps;
 
 // Called by starmap.js after crystallizing — clears inventory, keeps everything else
