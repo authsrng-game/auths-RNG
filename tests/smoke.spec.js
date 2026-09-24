@@ -332,4 +332,44 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(JSON.parse(migratedHistory)).toEqual(dummyHistory);
 	});
 	// Generated code ends here on 2026-10-24T00:00:00Z:
+
+	// Generated code starts here on 2026-03-31T12:00:00Z:
+	test('forceCleanup trims read notifications older than 7 days while retaining unread or recent ones', async ({
+		page,
+	}) => {
+		const now = Date.now();
+		const eightDaysAgo = now - 8 * 24 * 60 * 60 * 1000;
+		const oneDayAgo = now - 1 * 24 * 60 * 60 * 1000;
+
+		const testNotifications = [
+			{ id: 'stale-read', read: true, ts: eightDaysAgo, msg: 'Old read' },
+			{ id: 'stale-unread', read: false, ts: eightDaysAgo, msg: 'Old unread' },
+			{ id: 'recent-read', read: true, ts: oneDayAgo, msg: 'Recent read' },
+		];
+
+		await page.addInitScript((items) => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('notifications', JSON.stringify(items));
+		}, testNotifications);
+
+		await page.goto(BASE_URL);
+
+		await page.evaluate(() => {
+			if (typeof window.forceCleanup === 'function') {
+				window.forceCleanup();
+			}
+		});
+
+		const remaining = await page.evaluate(() => {
+			const raw = localStorage.getItem('notifications');
+			return raw ? JSON.parse(raw) : [];
+		});
+
+		const ids = remaining.map((n) => n.id);
+		expect(ids).not.toContain('stale-read');
+		expect(ids).toContain('stale-unread');
+		expect(ids).toContain('recent-read');
+	});
+	// Generated code ends here on 2026-03-31T12:00:00Z:
 });
