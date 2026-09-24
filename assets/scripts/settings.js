@@ -1935,6 +1935,7 @@
 		'themeEditorPresets',
 		'themeEditorActive',
 		'startAnimConfig',
+		'_plush_v3',
 	];
 	// Generated code ends here on 2026-10-24T00:00:00Z:
 
