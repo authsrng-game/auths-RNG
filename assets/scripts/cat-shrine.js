@@ -151,8 +151,11 @@
 		localStorage.setItem(EQUIP_KEY, url);
 		let pin = document.getElementById('catShrinePin');
 		if (!pin) {
-			pin = document.createElement('div');
+			// Generated code starts here on 2026-03-31T00:00:00Z:
+			pin = document.createElement('button');
+			pin.type = 'button';
 			pin.id = 'catShrinePin';
+			pin.setAttribute('aria-label', 'Unequip emotional support cat');
 			pin.title = 'click to unequip your emotional support cat';
 			pin.addEventListener('click', unequipCat);
 			document.body.appendChild(pin);
@@ -160,6 +163,8 @@
 		pin.innerHTML = '';
 		const img = document.createElement('img');
 		img.src = url;
+		img.alt = '';
+		// Generated code ends here on 2026-03-31T00:00:00Z:
 		pin.appendChild(img);
 		pin.style.display = 'block';
 	}
