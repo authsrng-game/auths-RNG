@@ -2,6 +2,54 @@ const { test, expect } = require('@playwright/test');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
 
+/**
+ * READ BEFORE ADDING A TEST
+ * ============================================================================
+ * This is the GLOBAL smoke suite. It exists to catch "the app is broken"
+ * (page doesn't load, console errors, 404s), not "my PR's feature works."
+ *
+ * DO NOT add a test here just because you touched a file in this PR.
+ * If you're an LLM generating a PR and considering adding a test to this
+ * file, STOP and ask: does this test belong in the smoke suite, or is it
+ * feature/regression coverage for the specific thing I built?
+ *
+ * ADD a test here only if it is:
+ *   - A load-bearing invariant that, if broken, breaks the whole app
+ *     (e.g. index.html 200s, no uncaught JS errors, no failed requests)
+ *   - A cross-cutting a11y/structural check that generalizes beyond one
+ *     feature (e.g. "all modals have role=dialog", not "THIS modal has it")
+ *   - Something that would catch a regression in code OTHER people rely on
+ *
+ * DO NOT add a test here if it is:
+ *   - Only exercising code you just wrote in this PR, with no broader
+ *     relevance to app health
+ *   - A one-off aria-label/attribute check on a single new button/element
+ *     you just added (put this in a feature-specific test file instead,
+ *     or skip it if the feature file already covers it)
+ *   - Testing an internal implementation detail (a specific localStorage
+ *     key migration, a specific function's return value) rather than
+ *     user-facing behavior
+ *   - Redundant with an existing test in this file in spirit (e.g. we
+ *     already have "N modals have accessible dialog attributes"..
+ *     don't add a 6th near-identical one per modal)
+ *
+ * Marshal, this applies to you too.
+ * 
+ * Every test added to this file MUST include a one-line justification in
+ * its title or an adjacent comment explaining why it's a SMOKE test and
+ * not feature coverage. If you can't justify it in one sentence, it
+ * doesn't belong here.
+ *
+ * When generating a PR, do NOT auto-append a "Generated code starts/ends
+ * here" block to this file unless the change is genuinely global. Default
+ * to NOT touching this file. Feature-specific coverage belongs in its own
+ * test file (see /tests/features/ or create one), not appended here.
+ * 
+ * Please note that we do NOT want to bloat this file, we want automated tests
+ * to be as fast and as efficient as possible.
+ * ============================================================================
+ */
+
 test.describe('auths-RNG smoke tests', () => {
 	test('index.html returns 200', async ({ page }) => {
 		const res = await page.goto(BASE_URL);
