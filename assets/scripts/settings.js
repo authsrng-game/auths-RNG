@@ -18,6 +18,9 @@
 	let particleInterval = null;
 	let particleRaf = null;
 	let devInterval = null;
+	// Generated code starts here on 2026-04-01T00:00:00Z:
+	let watchInterval = null;
+	// Generated code ends here on 2026-04-01T00:00:00Z:
 	let rgbInterval = null;
 	let wackyInterval = null;
 	let visibilitySeasonListenerAdded = false;
@@ -407,6 +410,12 @@
 				clearInterval(devInterval);
 				devInterval = null;
 			}
+			// Generated code starts here on 2026-04-01T00:00:00Z:
+			if (watchInterval) {
+				clearInterval(watchInterval);
+				watchInterval = null;
+			}
+			// Generated code ends here on 2026-04-01T00:00:00Z:
 			return;
 		}
 
@@ -798,10 +807,14 @@
 			if (e.key === 'Enter') document.getElementById('dc-watch-add')?.click();
 		});
 
-		setInterval(() => {
-			const watchTab = document.getElementById('dct-watch');
-			if (watchTab && watchTab.style.display !== 'none' && watchExprs.length) renderWatchList();
-		}, 500);
+		// Generated code starts here on 2026-04-01T00:00:00Z:
+		if (!watchInterval) {
+			watchInterval = setInterval(() => {
+				const watchTab = document.getElementById('dct-watch');
+				if (watchTab && watchTab.style.display !== 'none' && watchExprs.length) renderWatchList();
+			}, 500);
+		}
+		// Generated code ends here on 2026-04-01T00:00:00Z:
 
 		// dragging to moving
 		(function () {
