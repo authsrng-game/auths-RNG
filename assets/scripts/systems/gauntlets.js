@@ -229,7 +229,7 @@ console.log(performance.now());
 			name: 'godlike',
 			emoji: '✨',
 			minRolls: 6000,
-			rarities: ['Psychosis', 'Extinction', 'SCHIZOPHRENIC'],
+			rarities: ['Event Horizon', 'Neurosis', 'Cosmic'],
 			rewards: [
 				{ type: 'points', amount: 500000, label: '500,000 pts' },
 				{ type: 'anomaly', amount: 1000, label: '1,000 anomalies' },
