@@ -355,4 +355,103 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(logFound).toBe(true);
 	});
 	// Generated code ends here on 2026-03-31T20:00:00Z:
+	// Generated code starts here on 2026-03-29T12:00:00Z:
+	test('point printer passive generation reconciles points on elapsed time', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem(
+				'shopUpgrades',
+				JSON.stringify({ luck: 0, speed: 0, pointMult: 0, printer: 5, magnet: 0, duplicate: 0 })
+			);
+			localStorage.setItem('shopPoints', '100');
+		});
+		await page.goto(BASE_URL);
+
+		const pointsAfterElapse = await page.evaluate(() => {
+			// Simulate 10 seconds passing in background
+			eval('lastPrinterTick = Date.now() - 10000');
+			document.dispatchEvent(new Event('visibilitychange'));
+			return eval('points');
+		});
+
+		expect(pointsAfterElapse).toBe(150);
+	});
+	// Generated code ends here on 2026-03-29T12:00:00Z:
+	// Generated code starts here on 2026-03-31T00:00:00Z:
+	test('isValidCatUrl validates cataas.com https URLs correctly', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const results = await page.evaluate(() => {
+			return {
+				validCat: window.isValidCatUrl('https://cataas.com/cat/12345'),
+				validSubdomain: window.isValidCatUrl('https://www.cataas.com/cat/12345'),
+				invalidScheme: window.isValidCatUrl('javascript:alert(1)'),
+				invalidHost: window.isValidCatUrl('https://evil.com/cat/12345'),
+				httpScheme: window.isValidCatUrl('http://cataas.com/cat/12345'),
+			};
+		});
+		expect(results.validCat).toBe(true);
+		expect(results.validSubdomain).toBe(true);
+		expect(results.invalidScheme).toBe(false);
+		expect(results.invalidHost).toBe(false);
+		expect(results.httpScheme).toBe(false);
+	});
+	// Generated code ends here on 2026-03-31T00:00:00Z:
+	// Generated code starts here on 2026-03-31T12:00:00Z:
+	test('forceCleanup trims read notifications older than 7 days while retaining unread or recent ones', async ({
+		page,
+	}) => {
+		const now = Date.now();
+		const eightDaysAgo = now - 8 * 24 * 60 * 60 * 1000;
+		const oneDayAgo = now - 1 * 24 * 60 * 60 * 1000;
+
+		const testNotifications = [
+			{ id: 'stale-read', read: true, ts: eightDaysAgo, msg: 'Old read' },
+			{ id: 'stale-unread', read: false, ts: eightDaysAgo, msg: 'Old unread' },
+			{ id: 'recent-read', read: true, ts: oneDayAgo, msg: 'Recent read' },
+		];
+
+		await page.addInitScript((items) => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('notifications', JSON.stringify(items));
+		}, testNotifications);
+
+		await page.goto(BASE_URL);
+
+		await page.evaluate(() => {
+			if (typeof window.forceCleanup === 'function') {
+				window.forceCleanup();
+			}
+		});
+
+		const remaining = await page.evaluate(() => {
+			const raw = localStorage.getItem('notifications');
+			return raw ? JSON.parse(raw) : [];
+		});
+
+		const ids = remaining.map((n) => n.id);
+		expect(ids).not.toContain('stale-read');
+		expect(ids).toContain('stale-unread');
+		expect(ids).toContain('recent-read');
+	});
+	// Generated code ends here on 2026-03-31T12:00:00Z:
+
+	// Generated code starts here on 2026-03-31T15:00:00Z:
+	test('arrow key navigation is ignored when focused on an input element', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
+		await page.goto(BASE_URL);
+
+		const currentPageBefore = await page.evaluate(() => window._currentPage);
+		const wellInput = page.locator('#wellInput');
+		await wellInput.focus();
+		await page.keyboard.press('ArrowRight');
+		const currentPageAfter = await page.evaluate(() => window._currentPage);
+
+		expect(currentPageAfter).toBe(currentPageBefore);
+	});
+	// Generated code ends here on 2026-03-31T15:00:00Z:
 });
