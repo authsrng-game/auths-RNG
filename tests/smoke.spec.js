@@ -34,7 +34,7 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
  *     don't add a 6th near-identical one per modal)
  *
  * Marshal, this applies to you too.
- * 
+ *
  * Every test added to this file MUST include a one-line justification in
  * its title or an adjacent comment explaining why it's a SMOKE test and
  * not feature coverage. If you can't justify it in one sentence, it
@@ -44,7 +44,7 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
  * here" block to this file unless the change is genuinely global. Default
  * to NOT touching this file. Feature-specific coverage belongs in its own
  * test file (see /tests/features/ or create one), not appended here.
- * 
+ *
  * Please note that we do NOT want to bloat this file, we want automated tests
  * to be as fast and as efficient as possible.
  * ============================================================================
