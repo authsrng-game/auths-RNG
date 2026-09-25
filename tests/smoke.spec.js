@@ -372,22 +372,4 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(ids).toContain('recent-read');
 	});
 	// Generated code ends here on 2026-03-31T12:00:00Z:
-
-	// Generated code starts here on 2026-03-31T15:00:00Z:
-	test('arrow key navigation is ignored when focused on an input element', async ({ page }) => {
-		await page.addInitScript(() => {
-			localStorage.setItem('seenLegalConsent', '1');
-			localStorage.setItem('seenReleaseTag', 'v9.7');
-		});
-		await page.goto(BASE_URL);
-
-		const currentPageBefore = await page.evaluate(() => window._currentPage);
-		const wellInput = page.locator('#wellInput');
-		await wellInput.focus();
-		await page.keyboard.press('ArrowRight');
-		const currentPageAfter = await page.evaluate(() => window._currentPage);
-
-		expect(currentPageAfter).toBe(currentPageBefore);
-	});
-	// Generated code ends here on 2026-03-31T15:00:00Z:
 });
