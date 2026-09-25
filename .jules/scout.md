@@ -29,3 +29,8 @@
 **Bug:** `leaderboard-submit.js` assumed `rarityInventory` in `localStorage` was an Object mapping `{ [name]: count }`, but `main.js` stores `rarityInventory` as an Array of objects `[{ name, chance, count }]`. Array lookups like `inv[r.name]` evaluated to `undefined` and `Object.values(inv)` returned objects whose `parseInt` evaluated to `NaN` -> `0`, causing leaderboard submission payloads to report `rarities: 0` and `rarestName: 'none'`.
 **Learning:** Secondary consumers of `localStorage` state must verify whether array or object schemas are written by primary state-saving scripts (`main.js`) and gracefully support both formats (`Array.isArray(inv)`).
 **Prevention:** Always check `Array.isArray()` when reading complex structured state from `localStorage` before attempting object property access or array-based reductions.
+
+## 2026-09-25 - Unexposed IIFE Closure Functions in Cross-Module Auto-Mutate Feature
+**Bug:** `startAutoMutate()` in `trust-cosmetics.js` attempted to invoke `window.getInventoryRarities?.()` and private closure helpers (`mutate`, `getRarityIndex`, etc.) defined inside the IIFE of `mutations.js`. Because `mutations.js` did not expose these functions globally, auto-mutations failed to execute.
+**Learning:** Cross-file system interactions in non-module IIFE scripts must expose required helpers on a dedicated global namespace object (e.g., `window.MutationSystem`).
+**Prevention:** Always verify that functions referenced across separate IIFE script files are explicitly exposed on `window`.

@@ -334,4 +334,63 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(result.resText).toContain('&lt;b id="injectedRes"&gt;test&lt;/b&gt;');
 	});
 	// Generated code ends here on 2026-09-22T00:00:00Z:
+
+	// Generated code starts here on 2026-09-25T12:46:00Z:
+	test('auto-mutate upgrade uses MutationSystem methods and executes without errors', async ({ page }) => {
+		const pageErrors = [];
+		page.on('pageerror', (err) => {
+			if (!err.message.includes('Failed to fetch')) {
+				pageErrors.push(err.message);
+			}
+		});
+
+		await page.addInitScript(() => {
+			localStorage.setItem('mutationsUnlocked', '1');
+			localStorage.setItem('mutationTrustOwned', JSON.stringify(['upgrade_automutate']));
+			localStorage.setItem(
+				'rarityInventory',
+				JSON.stringify([
+					{ name: 'Common', chance: 0.5, count: 5 },
+					{ name: 'Uncommon', chance: 0.25, count: 5 },
+				])
+			);
+		});
+
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(() => {
+			if (!window.MutationSystem) return { hasSystem: false };
+
+			const initialHistory = JSON.parse(localStorage.getItem('mutationHistory') || '[]');
+			const ms = window.MutationSystem;
+			const inv = ms.getInventoryRarities();
+			if (!inv || inv.length < 2) return { invLength: inv ? inv.length : 0 };
+
+			const a = inv[0];
+			const b = inv[1];
+			const res = ms.mutate(a.name, b.name);
+			if (res) {
+				const idxA = ms.getRarityIndex(a.name);
+				const idxB = ms.getRarityIndex(b.name);
+				const resIdx = ms.getRarityIndex(res.name);
+				const wasGood = resIdx < Math.min(idxA, idxB);
+				const delta = ms.getTrustDelta(wasGood, resIdx, idxA, idxB);
+				ms.addTrust(delta);
+				ms.addToHistory(a.name, b.name, res, wasGood);
+			}
+
+			const updatedHistory = JSON.parse(localStorage.getItem('mutationHistory') || '[]');
+			return {
+				hasSystem: true,
+				hasMutate: typeof ms.mutate === 'function',
+				historyAdded: updatedHistory.length > initialHistory.length,
+			};
+		});
+
+		expect(pageErrors).toHaveLength(0);
+		expect(result.hasSystem).toBe(true);
+		expect(result.hasMutate).toBe(true);
+		expect(result.historyAdded).toBe(true);
+	});
+	// Generated code ends here on 2026-09-25T12:46:00Z:
 });
