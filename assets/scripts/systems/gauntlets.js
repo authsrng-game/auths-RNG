@@ -229,7 +229,7 @@ console.log(performance.now());
 			name: 'godlike',
 			emoji: '✨',
 			minRolls: 6000,
-			rarities: ['luminal', 'francium', 'Delusion'],
+			rarities: ['Event Horizon', 'Neurosis', 'Cosmic'],
 			rewards: [
 				{ type: 'points', amount: 500000, label: '500,000 pts' },
 				{ type: 'anomaly', amount: 1000, label: '1,000 anomalies' },
@@ -241,7 +241,7 @@ console.log(performance.now());
 			name: 'inferno',
 			emoji: '🔥',
 			minRolls: 10000,
-			rarities: ['Galactic', 'rare rarity :3', 'Disorder'],
+			rarities: ['anxiety...', 'Gravitational', 'Mania'],
 			rewards: [
 				{ type: 'points', amount: 1000000, label: '1,000,000 pts' },
 				{ type: 'anomaly', amount: 1800, label: '1,800 anomalies' },
@@ -253,7 +253,7 @@ console.log(performance.now());
 			name: 'snowy',
 			emoji: '❄️',
 			minRolls: 20000,
-			rarities: ['Cosmic', 'Neurosis', 'anxiety...', 'Mania'],
+			rarities: ['luminal', 'Dissociative', 'Interstellar'],
 			rewards: [
 				{ type: 'points', amount: 1200000, label: '1,200,000 pts' },
 				{ type: 'anomaly', amount: 3000, label: '3,000 anomalies' },
