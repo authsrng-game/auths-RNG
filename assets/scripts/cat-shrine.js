@@ -63,12 +63,32 @@
 		});
 	}
 
+	// Generated code starts here on 2026-03-31T00:00:00Z:
+	function isValidCatUrl(url) {
+		if (typeof url !== 'string') return false;
+		try {
+			const parsed = new URL(url, window.location.href);
+			return (
+				parsed.protocol === 'https:' &&
+				(parsed.hostname === 'cataas.com' || parsed.hostname === 'www.cataas.com')
+			);
+		} catch (_) {
+			return false;
+		}
+	}
+	window.isValidCatUrl = isValidCatUrl;
+	// Generated code ends here on 2026-03-31T00:00:00Z:
+
 	async function fetchNewCat() {
 		const res = await fetch('https://cataas.com/cat?json=true');
 		if (!res.ok) throw new Error('cat fetch failed');
 		const data = await res.json();
-		if (!data.id) throw new Error('no cat id returned');
-		return `https://cataas.com/cat/${data.id}`;
+		// Generated code starts here on 2026-03-31T00:00:00Z:
+		if (!data.id || typeof data.id !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(data.id)) {
+			throw new Error('invalid cat id returned');
+		}
+		return `https://cataas.com/cat/${encodeURIComponent(data.id)}`;
+		// Generated code ends here on 2026-03-31T00:00:00Z:
 	}
 
 	async function refreshGrid() {
@@ -110,6 +130,7 @@
 		grid.innerHTML = '';
 		const equipped = localStorage.getItem(EQUIP_KEY);
 		cats.forEach((cat) => {
+			if (!isValidCatUrl(cat.url)) return;
 			const cell = document.createElement('div');
 			cell.className = 'cat-cell' + (equipped === cat.url ? ' equipped' : '');
 			const img = document.createElement('img');
@@ -148,6 +169,7 @@
 	}
 
 	function equipCat(url) {
+		if (!isValidCatUrl(url)) return;
 		localStorage.setItem(EQUIP_KEY, url);
 		let pin = document.getElementById('catShrinePin');
 		if (!pin) {
@@ -214,7 +236,8 @@
 		refreshGrid();
 
 		const equipped = localStorage.getItem(EQUIP_KEY);
-		if (equipped && localStorage.getItem('catShrineToggle') === '1') equipCat(equipped);
+		if (equipped && isValidCatUrl(equipped) && localStorage.getItem('catShrineToggle') === '1')
+			equipCat(equipped);
 
 		setInterval(checkUnlock, 5000);
 	}
