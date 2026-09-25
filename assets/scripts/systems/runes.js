@@ -284,16 +284,30 @@
 		}
 	}
 
+	let lastWealthTick = Date.now();
+	function processWealthGift() {
+		if (gift === 'wealth') {
+			const now = Date.now();
+			const elapsedSeconds = Math.floor((now - lastWealthTick) / 1000);
+			if (elapsedSeconds > 0) {
+				const cappedSeconds = Math.min(elapsedSeconds, 86400);
+				lastWealthTick += cappedSeconds * 1000;
+				if (typeof points !== 'undefined' && typeof updatePointsDisplay === 'function') {
+					points += 200000 * cappedSeconds;
+					updatePointsDisplay();
+					if (typeof saveAllData === 'function') saveAllData();
+				}
+			}
+		} else {
+			lastWealthTick = Date.now();
+		}
+	}
+
 	function startWealthGift() {
 		if (giftWealthInterval) clearInterval(giftWealthInterval);
 		if (gift !== 'wealth') return;
-		giftWealthInterval = setInterval(() => {
-			if (typeof points !== 'undefined' && typeof updatePointsDisplay === 'function') {
-				points += 200000;
-				updatePointsDisplay();
-				if (typeof saveAllData === 'function') saveAllData();
-			}
-		}, 1000);
+		lastWealthTick = Date.now();
+		giftWealthInterval = setInterval(processWealthGift, 1000);
 	}
 
 	function getGiftLuckMultiplier() {
@@ -384,16 +398,38 @@
 		}
 	}
 
+	let lastAnomalyMachineTick = Date.now();
+	function processAnomalyMachine() {
+		if (upgrades.anomalyMachine) {
+			const now = Date.now();
+			const elapsedTicks = Math.floor((now - lastAnomalyMachineTick) / 2000);
+			if (elapsedTicks > 0) {
+				const cappedTicks = Math.min(elapsedTicks, 43200);
+				lastAnomalyMachineTick += cappedTicks * 2000;
+				if (typeof anomalies !== 'undefined') {
+					anomalies += 50 * cappedTicks;
+					if (typeof updateAnomalyUI === 'function') updateAnomalyUI();
+					if (typeof saveAllData === 'function') saveAllData();
+				}
+			}
+		} else {
+			lastAnomalyMachineTick = Date.now();
+		}
+	}
+
 	function startAnomalyMachine() {
 		if (anomalyMachineInterval) clearInterval(anomalyMachineInterval);
-		anomalyMachineInterval = setInterval(() => {
-			if (typeof anomalies !== 'undefined') {
-				anomalies += 50;
-				if (typeof updateAnomalyUI === 'function') updateAnomalyUI();
-				if (typeof saveAllData === 'function') saveAllData();
-			}
-		}, 2000);
+		if (!upgrades.anomalyMachine) return;
+		lastAnomalyMachineTick = Date.now();
+		anomalyMachineInterval = setInterval(processAnomalyMachine, 2000);
 	}
+
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'visible') {
+			processWealthGift();
+			processAnomalyMachine();
+		}
+	});
 
 	function startDopamineAttack() {
 		if (dopamineAttackInterval) clearInterval(dopamineAttackInterval);
