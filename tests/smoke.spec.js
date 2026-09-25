@@ -333,6 +333,25 @@ test.describe('auths-RNG smoke tests', () => {
 	});
 	// Generated code ends here on 2026-10-24T00:00:00Z:
 
+	// Generated code starts here on 2026-03-31T00:00:00Z:
+	test('isValidCatUrl validates cataas.com https URLs correctly', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const results = await page.evaluate(() => {
+			return {
+				validCat: window.isValidCatUrl('https://cataas.com/cat/12345'),
+				validSubdomain: window.isValidCatUrl('https://www.cataas.com/cat/12345'),
+				invalidScheme: window.isValidCatUrl('javascript:alert(1)'),
+				invalidHost: window.isValidCatUrl('https://evil.com/cat/12345'),
+				httpScheme: window.isValidCatUrl('http://cataas.com/cat/12345'),
+			};
+		});
+		expect(results.validCat).toBe(true);
+		expect(results.validSubdomain).toBe(true);
+		expect(results.invalidScheme).toBe(false);
+		expect(results.invalidHost).toBe(false);
+		expect(results.httpScheme).toBe(false);
+	});
+	// Generated code ends here on 2026-03-31T00:00:00Z:
 	// Generated code starts here on 2026-03-31T12:00:00Z:
 	test('forceCleanup trims read notifications older than 7 days while retaining unread or recent ones', async ({
 		page,
