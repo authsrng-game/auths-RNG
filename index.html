@@ -2308,10 +2308,20 @@ Last release date on nightly: ${nightlyRDate}`;
 					}
 				}
 
+				// Generated code starts here on 2026-03-31T15:00:00Z:
 				document.addEventListener('keydown', (e) => {
+					if (
+						e.target.tagName === 'INPUT' ||
+						e.target.tagName === 'TEXTAREA' ||
+						e.target.tagName === 'SELECT' ||
+						e.target.isContentEditable
+					) {
+						return;
+					}
 					if (e.key === 'ArrowLeft') goToPage(currentPage - 1);
 					if (e.key === 'ArrowRight') goToPage(currentPage + 1);
 				});
+				// Generated code ends here on 2026-03-31T15:00:00Z:
 
 				window.lockedPages = lockedPages;
 				window.goToPage = goToPage;
