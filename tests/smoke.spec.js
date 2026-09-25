@@ -333,6 +333,23 @@ test.describe('auths-RNG smoke tests', () => {
 	});
 	// Generated code ends here on 2026-10-24T00:00:00Z:
 
+	// Generated code starts here on 2026-03-31T00:00:00Z:
+	test('cat shrine pinned widget has accessible button element and aria-label', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('catShrineUnlocked', '1');
+			localStorage.setItem('catShrineToggle', '1');
+			localStorage.setItem('catShrineEquipped', 'https://cataas.com/cat/test');
+		});
+		await page.goto(BASE_URL);
+
+		const pin = page.locator('#catShrinePin');
+		await expect(pin).toBeVisible();
+		await expect(pin).toHaveAttribute('type', 'button');
+		await expect(pin).toHaveAttribute('aria-label', 'Unequip emotional support cat');
+	});
+	// Generated code ends here on 2026-03-31T00:00:00Z:
 	// Generated code starts here on 2026-03-31T20:00:00Z:
 	test('corrupted shopUpgrades in localStorage logs error with [main] prefix', async ({ page }) => {
 		const consoleLogs = [];
