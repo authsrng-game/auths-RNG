@@ -1,5 +1,24 @@
 console.log(performance.now());
 
+// Generated code starts here on 2026-03-31T20:00:00Z:
+window.addEventListener('unhandledrejection', (event) => {
+	console.error('[main] Unhandled promise rejection:', {
+		reason: event.reason,
+		promise: event.promise,
+	});
+});
+
+window.addEventListener('error', (event) => {
+	console.error('[main] Uncaught runtime error:', {
+		message: event.message,
+		filename: event.filename,
+		lineno: event.lineno,
+		colno: event.colno,
+		error: event.error,
+	});
+});
+// Generated code ends here on 2026-03-31T20:00:00Z:
+
 const rollBtn = document.getElementById('rollBtn'),
 	spinner = document.getElementById('spinner'),
 	inventoryList = document.getElementById('inventoryList'),
