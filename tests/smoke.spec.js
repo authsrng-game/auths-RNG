@@ -333,6 +333,29 @@ test.describe('auths-RNG smoke tests', () => {
 	});
 	// Generated code ends here on 2026-10-24T00:00:00Z:
 
+	// Generated code starts here on 2026-03-29T12:00:00Z:
+	test('point printer passive generation reconciles points on elapsed time', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem(
+				'shopUpgrades',
+				JSON.stringify({ luck: 0, speed: 0, pointMult: 0, printer: 5, magnet: 0, duplicate: 0 })
+			);
+			localStorage.setItem('shopPoints', '100');
+		});
+		await page.goto(BASE_URL);
+
+		const pointsAfterElapse = await page.evaluate(() => {
+			// Simulate 10 seconds passing in background
+			eval('lastPrinterTick = Date.now() - 10000');
+			document.dispatchEvent(new Event('visibilitychange'));
+			return eval('points');
+		});
+
+		expect(pointsAfterElapse).toBe(150);
+	});
+	// Generated code ends here on 2026-03-29T12:00:00Z:
 	// Generated code starts here on 2026-03-31T00:00:00Z:
 	test('isValidCatUrl validates cataas.com https URLs correctly', async ({ page }) => {
 		await page.goto(BASE_URL);
