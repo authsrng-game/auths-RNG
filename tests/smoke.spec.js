@@ -334,7 +334,9 @@ test.describe('auths-RNG smoke tests', () => {
 	// Generated code ends here on 2026-10-24T00:00:00Z:
 
 	// Generated code starts here on 2026-03-31T00:00:00Z:
-	test('cat shrine pinned widget has accessible button element and aria-label', async ({ page }) => {
+	test('cat shrine pinned widget has accessible button element and aria-label', async ({
+		page,
+	}) => {
 		await page.addInitScript(() => {
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('seenReleaseTag', 'v9.7');
