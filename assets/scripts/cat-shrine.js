@@ -236,7 +236,8 @@
 		refreshGrid();
 
 		const equipped = localStorage.getItem(EQUIP_KEY);
-		if (equipped && isValidCatUrl(equipped) && localStorage.getItem('catShrineToggle') === '1') equipCat(equipped);
+		if (equipped && isValidCatUrl(equipped) && localStorage.getItem('catShrineToggle') === '1')
+			equipCat(equipped);
 
 		setInterval(checkUnlock, 5000);
 	}
