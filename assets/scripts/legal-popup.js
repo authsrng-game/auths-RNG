@@ -60,12 +60,14 @@ console.log(performance.now());
 	document.head.appendChild(style);
 	const popup = document.createElement('div');
 	popup.id = 'legalConsentPopup';
+	// Generated code starts here on 2026-03-31T00:00:00Z:
 	popup.innerHTML = `
     <div id="legalConsentInner">
-      <p>by continuing, you agree to the game's <a href="/boring/legal" target="_blank">privacy policy and terms of service</a>. you have rights, and your privacy is ensured!</p>
+      <p>by continuing, you agree to the game's <a href="/boring/legal" target="_blank" rel="noopener noreferrer">privacy policy and terms of service</a>. you have rights, and your privacy is ensured!</p>
       <button id="legalConsentDismiss">okay, got it!!</button>
     </div>
   `;
+	// Generated code ends here on 2026-03-31T00:00:00Z:
 	document.body.appendChild(popup); // why do i have to make so many JS scripts ahhhhhhhhhhhh
 	const dismissBtn = document.getElementById('legalConsentDismiss');
 	dismissBtn?.addEventListener('click', function () {
