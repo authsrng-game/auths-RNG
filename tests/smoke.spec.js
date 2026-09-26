@@ -372,12 +372,34 @@ test.describe('auths-RNG smoke tests', () => {
 		}, dummyHistory);
 		await page.goto(BASE_URL);
 
-		const migratedHistory = await page.evaluate(() => {
-			return localStorage.getItem('mutationHistory');
+		const result = await page.evaluate(() => {
+			return {
+				history: localStorage.getItem('mutationHistory'),
+				oldKey: localStorage.getItem('mutationTrust'),
+			};
 		});
 
-		expect(migratedHistory).not.toBeNull();
-		expect(JSON.parse(migratedHistory)).toEqual(dummyHistory);
+		expect(result.history).not.toBeNull();
+		expect(JSON.parse(result.history)).toEqual(dummyHistory);
+		expect(result.oldKey).toBeNull();
+	});
+
+	test('getTrust handles non-numeric mutationTrust value safely without NaN', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('mutationTrust', 'invalid_number');
+		});
+		await page.goto(BASE_URL);
+
+		const trustVal = await page.evaluate(() => {
+			const el = document.getElementById('mutationTrustAmt');
+			return el ? el.textContent : null;
+		});
+
+		if (trustVal !== null) {
+			expect(trustVal).not.toBe('NaN');
+		}
 	});
 	// Generated code ends here on 2026-10-24T00:00:00Z:
 
