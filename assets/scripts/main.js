@@ -1228,46 +1228,27 @@ document.getElementById('buyPointBtn').addEventListener('click', () => {
 	}
 });
 
-// Generated code starts here on 2026-03-29T12:00:00Z:
-// Point printer passive generation based on measured elapsed time
+// Point printer passive generation
 let _lastShopUIPoints = -1;
-let lastPrinterTick = Date.now();
 
-function processPrinterPoints() {
+setInterval(() => {
 	if (shopUpgrades.printer > 0) {
-		const now = Date.now();
-		const elapsedSeconds = Math.floor((now - lastPrinterTick) / 1000);
-		if (elapsedSeconds > 0) {
-			const cappedSeconds = Math.min(elapsedSeconds, 86400);
-			lastPrinterTick += cappedSeconds * 1000;
-			points += shopUpgrades.printer * cappedSeconds;
-			updatePointsDisplay();
+		points += shopUpgrades.printer;
+		updatePointsDisplay();
 
-			const luckCost = Math.floor(25 + shopUpgrades.luck * shopUpgrades.luck * 15);
-			const speedCost = Math.floor(50 + shopUpgrades.speed * shopUpgrades.speed * 55);
-			const pointCost = Math.floor(100 + shopUpgrades.pointMult * shopUpgrades.pointMult * 35);
-			const magnetCost = 500 + (shopUpgrades.magnet || 0) * 1000;
-			const printerCost = 1000 + (shopUpgrades.printer || 0) * (shopUpgrades.printer || 0) * 500;
-			const dupeCost = 800 + (shopUpgrades.duplicate || 0) * (shopUpgrades.duplicate || 0) * 400;
+		const luckCost = Math.floor(25 + shopUpgrades.luck * shopUpgrades.luck * 15);
+		const speedCost = Math.floor(50 + shopUpgrades.speed * shopUpgrades.speed * 55);
+		const pointCost = Math.floor(100 + shopUpgrades.pointMult * shopUpgrades.pointMult * 35);
+		const magnetCost = 500 + (shopUpgrades.magnet || 0) * 1000;
+		const printerCost = 1000 + (shopUpgrades.printer || 0) * (shopUpgrades.printer || 0) * 500;
+		const dupeCost = 800 + (shopUpgrades.duplicate || 0) * (shopUpgrades.duplicate || 0) * 400;
 
-			const thresholds = [luckCost, speedCost, pointCost, magnetCost, printerCost, dupeCost];
-			const crossed = thresholds.some((t) => points >= t !== _lastShopUIPoints >= t);
-			if (crossed || _lastShopUIPoints < 0) updateShopUI();
-			_lastShopUIPoints = points;
-		}
-	} else {
-		lastPrinterTick = Date.now();
+		const thresholds = [luckCost, speedCost, pointCost, magnetCost, printerCost, dupeCost];
+		const crossed = thresholds.some((t) => points >= t !== _lastShopUIPoints >= t);
+		if (crossed || _lastShopUIPoints < 0) updateShopUI();
+		_lastShopUIPoints = points;
 	}
-}
-
-setInterval(processPrinterPoints, 1000);
-
-document.addEventListener('visibilitychange', () => {
-	if (document.visibilityState === 'visible') {
-		processPrinterPoints();
-	}
-});
-// Generated code ends here on 2026-03-29T12:00:00Z:
+}, 1000);
 
 // Generated code starts here on 2026-09-17T00:00:00Z:
 // Fast-path inventory item updates: preserve running RarityStyle animation loops, attach dblclick sell handler once, and manage new-roll highlight timers to eliminate per-roll allocation and DOM thrashing overhead.
@@ -1685,23 +1666,18 @@ function renderSortedInventory(mode) {
 const savedPoints = localStorage.getItem(POINTS_KEY);
 if (savedPoints !== null) points = parseInt(savedPoints, 10) || 0;
 
-// Generated code starts here on 2026-03-31T20:00:00Z:
 const savedUpgrades = localStorage.getItem(SHOP_UPGRADES_KEY);
 if (savedUpgrades) {
 	try {
 		shopUpgrades = JSON.parse(savedUpgrades);
-	} catch (e) {
-		console.error('[main] failed to parse shop upgrades:', e);
-	}
+	} catch {}
 }
 
 const savedSoldOut = localStorage.getItem(SOLD_OUT_KEY);
 if (savedSoldOut) {
 	try {
 		soldOutRarities = new Map(JSON.parse(savedSoldOut));
-	} catch (e) {
-		console.error('[main] failed to parse sold out rarities:', e);
-	}
+	} catch {}
 }
 
 shopLuckMultiplier = 1 + shopUpgrades.luck * 0.1;
@@ -1717,9 +1693,7 @@ if (savedPotions) {
 			const v = loaded[key];
 			playerPotions[key] = typeof v === 'number' && !isNaN(v) ? v : 0;
 		}
-	} catch (e) {
-		console.error('[main] failed to parse potions:', e);
-	}
+	} catch {}
 }
 
 const savedActive = localStorage.getItem(ACTIVE_POTIONS_KEY);
@@ -1730,20 +1704,15 @@ if (savedActive) {
 		duplicateRollsLeft = data.duplicateLeft || 0;
 		recalcPotionLuck();
 		updateActivePotionsDisplay();
-	} catch (e) {
-		console.error('[main] failed to parse active potions:', e);
-	}
+	} catch {}
 }
 
 const savedTimestamps = localStorage.getItem(RARITY_TIMESTAMPS_KEY);
 if (savedTimestamps) {
 	try {
 		rarityTimestamps = new Map(JSON.parse(savedTimestamps));
-	} catch (e) {
-		console.error('[main] failed to parse rarity timestamps:', e);
-	}
+	} catch {}
 }
-// Generated code ends here on 2026-03-31T20:00:00Z:
 window.rarityTimestamps = rarityTimestamps;
 
 // Called by starmap.js after crystallizing — clears inventory, keeps everything else
@@ -1812,6 +1781,7 @@ async function resetInventory() {
 	localStorage.removeItem('catShrineUnlocked');
 	localStorage.removeItem('catShrineEquipped');
 	localStorage.removeItem('catShrineToggle');
+	localStorage.removeItem('infoTipsRead');
 	// Generated code ends here on 2026-03-29T12:00:00Z:
 	rarityTimestamps = new Map();
 	window.rarityTimestamps = rarityTimestamps;

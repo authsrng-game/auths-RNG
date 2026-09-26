@@ -8,6 +8,8 @@
 	const MUTATION_HISTORY_MAX = 50;
 
 	const TRUST_KEY = 'mutationTrust';
+	const TRUST_OWNED_KEY = 'mutationTrustOwned';
+	const TRUST_ACTIVE_KEY = 'mutationTrustActive';
 
 	document.addEventListener('click', (e) => {
 		const dot = e.target.closest('.page-dot[data-page="3"]');
@@ -360,6 +362,17 @@
 	}
 
 	window.renderMutations = renderMutations;
+
+	function tryInit(n) {
+		if (!isUnlocked()) return;
+		if (
+			typeof inventoryData !== 'undefined' &&
+			inventoryData instanceof Map &&
+			inventoryData.size > 0
+		)
+			renderMutations();
+		else if (n > 0) setTimeout(() => tryInit(n - 1), 200);
+	}
 
 	// Generated code starts here on 2026-10-24T00:00:00Z:
 	loadHistory();

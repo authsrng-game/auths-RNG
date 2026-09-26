@@ -50,6 +50,7 @@
 		'themeEditorPresets',
 		'themeEditorActive',
 		'startAnimConfig',
+		'infoTipsRead',
 	];
 	// Generated code ends here on 2026-10-24T00:00:00Z:
 
