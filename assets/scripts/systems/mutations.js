@@ -347,6 +347,19 @@
 
 	window.renderMutations = renderMutations;
 
+	// Generated code starts here on 2026-09-25T12:46:00Z:
+	window.MutationSystem = {
+		getInventoryRarities,
+		mutate,
+		getRarityIndex,
+		getTrustDelta,
+		addTrust,
+		addToHistory,
+		renderHistory,
+		renderTrustBalance,
+	};
+	// Generated code ends here on 2026-09-25T12:46:00Z:
+
 	function tryInit(n) {
 		if (!isUnlocked()) return;
 		if (

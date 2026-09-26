@@ -30,6 +30,10 @@
 **Learning:** Secondary consumers of `localStorage` state must verify whether array or object schemas are written by primary state-saving scripts (`main.js`) and gracefully support both formats (`Array.isArray(inv)`).
 **Prevention:** Always check `Array.isArray()` when reading complex structured state from `localStorage` before attempting object property access or array-based reductions.
 
+## 2026-09-25 - Unexposed IIFE Closure Functions in Cross-Module Auto-Mutate Feature
+**Bug:** `startAutoMutate()` in `trust-cosmetics.js` attempted to invoke `window.getInventoryRarities?.()` and private closure helpers (`mutate`, `getRarityIndex`, etc.) defined inside the IIFE of `mutations.js`. Because `mutations.js` did not expose these functions globally, auto-mutations failed to execute.
+**Learning:** Cross-file system interactions in non-module IIFE scripts must expose required helpers on a dedicated global namespace object (e.g., `window.MutationSystem`).
+**Prevention:** Always verify that functions referenced across separate IIFE script files are explicitly exposed on `window`.
 ## 2026-06-18 - Uncleared Component Items in DOM Re-renders
 **Bug:** `render()` in `system-notify.js` called `list.insertAdjacentHTML('beforeend', html)` to insert system messages into `#notifList` without removing existing `.sysmsg-item` elements first. Every re-render (such as marking an item read or receiving an `authchange` event) appended duplicate copies of all system messages to the notification list.
 **Learning:** Functions that append elements to shared parent containers using `insertAdjacentHTML('beforeend', ...)` must clean up previously appended elements (`list.querySelectorAll('.sysmsg-item').forEach(el => el.remove())`) before inserting fresh HTML.
