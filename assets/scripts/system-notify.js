@@ -40,7 +40,7 @@
 			const data = await apiCall('/system-messages');
 			messages = data.messages || [];
 			render();
-		// Generated code starts here on 2026-03-31T20:00:00Z:
+			// Generated code starts here on 2026-03-31T20:00:00Z:
 		} catch (err) {
 			console.warn('[system-notify] failed to load system messages:', err);
 		}
@@ -92,7 +92,7 @@
 						if (m) m.read = true;
 						el.classList.remove('unread');
 						render();
-					// Generated code starts here on 2026-03-31T20:00:00Z:
+						// Generated code starts here on 2026-03-31T20:00:00Z:
 					} catch (err) {
 						console.warn('[system-notify] failed to mark message read:', id, err);
 					}
