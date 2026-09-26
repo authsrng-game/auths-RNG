@@ -125,7 +125,7 @@ See AGENTS.md.
 
 ## How to style (frontend)
 
-See meta/STYLES.md.
+See documentation/STYLES.md.
 
 ## Anonymous contributions
 
@@ -155,4 +155,4 @@ index 1234567..89abcde 100644
 
 ---
 
-For more information, see the meta/ folder.
+For more information, see the documentation/ folder.

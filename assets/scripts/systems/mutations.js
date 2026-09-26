@@ -26,7 +26,8 @@
 	});
 
 	function getTrust() {
-		return parseInt(localStorage.getItem(TRUST_KEY) || '0');
+		const val = parseInt(localStorage.getItem(TRUST_KEY) || '0', 10);
+		return Number.isNaN(val) ? 0 : val;
 	}
 	function setTrust(v) {
 		localStorage.setItem(TRUST_KEY, String(Math.max(0, v)));
@@ -66,6 +67,7 @@
 				const parsed = JSON.parse(legacy);
 				if (Array.isArray(parsed)) {
 					saveHistory(parsed);
+					localStorage.removeItem('mutationTrust');
 					return parsed;
 				}
 			}
