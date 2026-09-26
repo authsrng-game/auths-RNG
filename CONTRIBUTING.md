@@ -94,7 +94,7 @@ In your PR description, explain:
 Before submitting a PR, please keep these in mind:
 
 - **Explain your changes clearly.** Give context about what changed and why.
-- **Test, lint, and type-check your changes.** Run `pnpm exec eslint .`, `pnpm exec stylelint "**/*.css"`, and `pnpm exec tsc --noEmit` to check for lint and TypeScript errors. To run smoke tests, ensure Playwright Chromium is installed (`npx playwright install chromium --with-deps`), serve the repo locally on port 8080 (`python3 -m http.server 8080`), and run `npx playwright test tests/smoke.spec.js --project=chromium`. You can also just play the game normally.
+- **Test and lint your changes.** Run `pnpm exec eslint .` and `pnpm exec stylelint "**/*.css"` to check for lint errors. To run smoke tests, ensure Playwright Chromium is installed (`npx playwright install chromium --with-deps`), serve the repo locally on port 8080 (`python3 -m http.server 8080`), and run `npx playwright test tests/smoke.spec.js --project=chromium`. You can also just play the game normally.
 - **Keep commits focused.** Avoid mixing unrelated changes together.
 - **Follow the existing code style.** Match the project's formatting, naming conventions, and structure.
 - **Avoid changing unrelated files.** Only modify files needed for your change.
@@ -125,7 +125,7 @@ See AGENTS.md.
 
 ## How to style (frontend)
 
-See meta/STYLES.md.
+See documentation/STYLES.md.
 
 ## Anonymous contributions
 
@@ -155,4 +155,4 @@ index 1234567..89abcde 100644
 
 ---
 
-For more information, see the meta/ folder.
+For more information, see the documentation/ folder.

@@ -169,10 +169,16 @@
 	}
 
 	let trailCleanup = null;
+	let autoMutateInterval = null;
 
+	// Generated code starts here on 2026-03-31T00:00:00Z:
 	function startAutoMutate() {
 		if (!getOwned().includes('upgrade_automutate')) return;
-		setInterval(() => {
+		if (autoMutateInterval) {
+			clearInterval(autoMutateInterval);
+			autoMutateInterval = null;
+		}
+		autoMutateInterval = setInterval(() => {
 			const inv = window.getInventoryRarities?.();
 			if (!inv || inv.length < 2) return;
 			const shuffle = [...inv].sort(
@@ -196,6 +202,7 @@
 			if (typeof saveAllData === 'function') saveAllData();
 		}, 20000);
 	}
+	// Generated code ends here on 2026-03-31T00:00:00Z:
 
 	function initTrail(id) {
 		if (trailCleanup) {
