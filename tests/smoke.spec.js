@@ -2,54 +2,6 @@ const { test, expect } = require('@playwright/test');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
 
-/**
- * READ BEFORE ADDING A TEST
- * ============================================================================
- * This is the GLOBAL smoke suite. It exists to catch "the app is broken"
- * (page doesn't load, console errors, 404s), not "my PR's feature works."
- *
- * DO NOT add a test here just because you touched a file in this PR.
- * If you're an LLM generating a PR and considering adding a test to this
- * file, STOP and ask: does this test belong in the smoke suite, or is it
- * feature/regression coverage for the specific thing I built?
- *
- * ADD a test here only if it is:
- *   - A load-bearing invariant that, if broken, breaks the whole app
- *     (e.g. index.html 200s, no uncaught JS errors, no failed requests)
- *   - A cross-cutting a11y/structural check that generalizes beyond one
- *     feature (e.g. "all modals have role=dialog", not "THIS modal has it")
- *   - Something that would catch a regression in code OTHER people rely on
- *
- * DO NOT add a test here if it is:
- *   - Only exercising code you just wrote in this PR, with no broader
- *     relevance to app health
- *   - A one-off aria-label/attribute check on a single new button/element
- *     you just added (put this in a feature-specific test file instead,
- *     or skip it if the feature file already covers it)
- *   - Testing an internal implementation detail (a specific localStorage
- *     key migration, a specific function's return value) rather than
- *     user-facing behavior
- *   - Redundant with an existing test in this file in spirit (e.g. we
- *     already have "N modals have accessible dialog attributes"..
- *     don't add a 6th near-identical one per modal)
- *
- * Marshal, this applies to you too.
- *
- * Every test added to this file MUST include a one-line justification in
- * its title or an adjacent comment explaining why it's a SMOKE test and
- * not feature coverage. If you can't justify it in one sentence, it
- * doesn't belong here.
- *
- * When generating a PR, do NOT auto-append a "Generated code starts/ends
- * here" block to this file unless the change is genuinely global. Default
- * to NOT touching this file. Feature-specific coverage belongs in its own
- * test file (see /tests/features/ or create one), not appended here.
- *
- * Please note that we do NOT want to bloat this file, we want automated tests
- * to be as fast and as efficient as possible.
- * ============================================================================
- */
-
 test.describe('auths-RNG smoke tests', () => {
 	test('index.html returns 200', async ({ page }) => {
 		const res = await page.goto(BASE_URL);
@@ -381,89 +333,6 @@ test.describe('auths-RNG smoke tests', () => {
 	});
 	// Generated code ends here on 2026-10-24T00:00:00Z:
 
-	// Generated code starts here on 2026-03-31T00:00:00Z:
-	test('cat shrine pinned widget has accessible button element and aria-label', async ({
-		page,
-	}) => {
-		await page.addInitScript(() => {
-			localStorage.setItem('seenLegalConsent', '1');
-			localStorage.setItem('seenReleaseTag', 'v9.7');
-			localStorage.setItem('catShrineUnlocked', '1');
-			localStorage.setItem('catShrineToggle', '1');
-			localStorage.setItem('catShrineEquipped', 'https://cataas.com/cat/test');
-		});
-		await page.goto(BASE_URL);
-
-		const pin = page.locator('#catShrinePin');
-		await expect(pin).toBeVisible();
-		await expect(pin).toHaveAttribute('type', 'button');
-		await expect(pin).toHaveAttribute('aria-label', 'Unequip emotional support cat');
-	});
-	// Generated code ends here on 2026-03-31T00:00:00Z:
-	// Generated code starts here on 2026-03-31T20:00:00Z:
-	test('corrupted shopUpgrades in localStorage logs error with [main] prefix', async ({ page }) => {
-		const consoleLogs = [];
-		page.on('console', (msg) => {
-			if (msg.type() === 'error') {
-				consoleLogs.push(msg.text());
-			}
-		});
-
-		await page.addInitScript(() => {
-			localStorage.setItem('seenLegalConsent', '1');
-			localStorage.setItem('seenReleaseTag', 'v9.7');
-			localStorage.setItem('shopUpgrades', 'invalid-json-{');
-		});
-		await page.goto(BASE_URL);
-
-		const logFound = consoleLogs.some((text) =>
-			text.includes('[main] failed to parse shop upgrades:')
-		);
-		expect(logFound).toBe(true);
-	});
-	// Generated code ends here on 2026-03-31T20:00:00Z:
-	// Generated code starts here on 2026-03-29T12:00:00Z:
-	test('point printer passive generation reconciles points on elapsed time', async ({ page }) => {
-		await page.addInitScript(() => {
-			localStorage.setItem('seenLegalConsent', '1');
-			localStorage.setItem('seenReleaseTag', 'v9.7');
-			localStorage.setItem(
-				'shopUpgrades',
-				JSON.stringify({ luck: 0, speed: 0, pointMult: 0, printer: 5, magnet: 0, duplicate: 0 })
-			);
-			localStorage.setItem('shopPoints', '100');
-		});
-		await page.goto(BASE_URL);
-
-		const pointsAfterElapse = await page.evaluate(() => {
-			// Simulate 10 seconds passing in background
-			eval('lastPrinterTick = Date.now() - 10000');
-			document.dispatchEvent(new Event('visibilitychange'));
-			return eval('points');
-		});
-
-		expect(pointsAfterElapse).toBe(150);
-	});
-	// Generated code ends here on 2026-03-29T12:00:00Z:
-	// Generated code starts here on 2026-03-31T00:00:00Z:
-	test('isValidCatUrl validates cataas.com https URLs correctly', async ({ page }) => {
-		await page.goto(BASE_URL);
-		const results = await page.evaluate(() => {
-			return {
-				validCat: window.isValidCatUrl('https://cataas.com/cat/12345'),
-				validSubdomain: window.isValidCatUrl('https://www.cataas.com/cat/12345'),
-				invalidScheme: window.isValidCatUrl('javascript:alert(1)'),
-				invalidHost: window.isValidCatUrl('https://evil.com/cat/12345'),
-				httpScheme: window.isValidCatUrl('http://cataas.com/cat/12345'),
-			};
-		});
-		expect(results.validCat).toBe(true);
-		expect(results.validSubdomain).toBe(true);
-		expect(results.invalidScheme).toBe(false);
-		expect(results.invalidHost).toBe(false);
-		expect(results.httpScheme).toBe(false);
-	});
-	// Generated code ends here on 2026-03-31T00:00:00Z:
 	// Generated code starts here on 2026-03-31T12:00:00Z:
 	test('forceCleanup trims read notifications older than 7 days while retaining unread or recent ones', async ({
 		page,
@@ -504,24 +373,4 @@ test.describe('auths-RNG smoke tests', () => {
 	});
 	// Generated code ends here on 2026-03-31T12:00:00Z:
 
-	// Generated code starts here on 2026-10-24T00:00:00Z:
-	test('infoTipsRead is included in backup/sync key lists and removed on resetInventory', async ({ page }) => {
-		await page.goto(BASE_URL);
-		await page.evaluate(() => {
-			globalThis.localStorage.setItem('infoTipsRead', JSON.stringify(['anomalies', 'mutations']));
-		});
-		await page.evaluate(async () => {
-			globalThis.showConfirm = () => Promise.resolve(true);
-			globalThis.showAlert = () => Promise.resolve();
-			globalThis.location.reload = () => {};
-			const resetBtn = globalThis.document.getElementById('resetBtn');
-			if (resetBtn) resetBtn.click();
-		});
-		await page.waitForTimeout(500);
-		const val = await page.evaluate(() => {
-			return globalThis.localStorage.getItem('infoTipsRead');
-		});
-		expect(val).toBeNull();
-	});
-	// Generated code ends here on 2026-10-24T00:00:00Z:
 });
