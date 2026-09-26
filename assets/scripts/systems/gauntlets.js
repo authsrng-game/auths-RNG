@@ -229,7 +229,8 @@ console.log(performance.now());
 			name: 'godlike',
 			emoji: '✨',
 			minRolls: 6000,
-			rarities: ['Psychosis', 'Extinction', 'SCHIZOPHRENIC'],
+			// ~1/15,000–1/20,000 rarities (~20k base rolls avg), scaling 6k minRolls between insane (3k) and inferno (10k)
+			rarities: ['Redshifted', 'Bipolar', 'Catatonia'],
 			rewards: [
 				{ type: 'points', amount: 500000, label: '500,000 pts' },
 				{ type: 'anomaly', amount: 1000, label: '1,000 anomalies' },
