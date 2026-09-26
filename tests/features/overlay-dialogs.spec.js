@@ -21,11 +21,17 @@ test.describe('overlay dialog accessibility', () => {
 
 		await expect(page.locator('#authOverlay')).toHaveAttribute('role', 'dialog');
 		await expect(page.locator('#authOverlay')).toHaveAttribute('aria-modal', 'true');
-		await expect(page.locator('#authOverlay')).toHaveAttribute('aria-label', 'Account authentication');
+		await expect(page.locator('#authOverlay')).toHaveAttribute(
+			'aria-label',
+			'Account authentication'
+		);
 
 		await expect(page.locator('#accountInfoOverlay')).toHaveAttribute('role', 'dialog');
 		await expect(page.locator('#accountInfoOverlay')).toHaveAttribute('aria-modal', 'true');
-		await expect(page.locator('#accountInfoOverlay')).toHaveAttribute('aria-label', 'Account details');
+		await expect(page.locator('#accountInfoOverlay')).toHaveAttribute(
+			'aria-label',
+			'Account details'
+		);
 
 		await expect(page.locator('#backupKeysOverlay')).toHaveAttribute('role', 'dialog');
 		await expect(page.locator('#backupKeysOverlay')).toHaveAttribute('aria-modal', 'true');
@@ -33,7 +39,10 @@ test.describe('overlay dialog accessibility', () => {
 
 		await expect(page.locator('#migrationPopup')).toHaveAttribute('role', 'dialog');
 		await expect(page.locator('#migrationPopup')).toHaveAttribute('aria-modal', 'true');
-		await expect(page.locator('#migrationPopup')).toHaveAttribute('aria-label', 'Account migration info');
+		await expect(page.locator('#migrationPopup')).toHaveAttribute(
+			'aria-label',
+			'Account migration info'
+		);
 
 		await expect(page.locator('#syncLoadingOverlay')).toHaveAttribute('role', 'status');
 		await expect(page.locator('#syncLoadingOverlay')).toHaveAttribute('aria-label', 'Syncing data');
