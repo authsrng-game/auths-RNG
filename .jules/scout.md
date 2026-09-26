@@ -29,3 +29,8 @@
 **Bug:** `leaderboard-submit.js` assumed `rarityInventory` in `localStorage` was an Object mapping `{ [name]: count }`, but `main.js` stores `rarityInventory` as an Array of objects `[{ name, chance, count }]`. Array lookups like `inv[r.name]` evaluated to `undefined` and `Object.values(inv)` returned objects whose `parseInt` evaluated to `NaN` -> `0`, causing leaderboard submission payloads to report `rarities: 0` and `rarestName: 'none'`.
 **Learning:** Secondary consumers of `localStorage` state must verify whether array or object schemas are written by primary state-saving scripts (`main.js`) and gracefully support both formats (`Array.isArray(inv)`).
 **Prevention:** Always check `Array.isArray()` when reading complex structured state from `localStorage` before attempting object property access or array-based reductions.
+
+## 2026-06-18 - Uncleared Component Items in DOM Re-renders
+**Bug:** `render()` in `system-notify.js` called `list.insertAdjacentHTML('beforeend', html)` to insert system messages into `#notifList` without removing existing `.sysmsg-item` elements first. Every re-render (such as marking an item read or receiving an `authchange` event) appended duplicate copies of all system messages to the notification list.
+**Learning:** Functions that append elements to shared parent containers using `insertAdjacentHTML('beforeend', ...)` must clean up previously appended elements (`list.querySelectorAll('.sysmsg-item').forEach(el => el.remove())`) before inserting fresh HTML.
+**Prevention:** Always remove existing elements matching the component class before invoking `insertAdjacentHTML` during re-renders.
