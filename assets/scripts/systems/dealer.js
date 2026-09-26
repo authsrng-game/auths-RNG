@@ -100,17 +100,34 @@
 		return SESSION_DURATION - (Date.now() - (s.startedAt || Date.now()));
 	}
 
-	function loadData() {
+	// Generated code starts here on 2026-10-26T00:00:00Z:
+	// In-memory caching for dealer state to avoid synchronous localStorage reads and JSON parses on periodic updates and hot paths.
+	let _cachedDealerData = null;
+
+	function loadData(force = false) {
+		if (_cachedDealerData && !force) return _cachedDealerData;
 		try {
 			const d = JSON.parse(localStorage.getItem(DEALER_KEY) || '{}');
-			return Object.assign({ cooldownUntil: 0, session: null, metWelcome: false, log: [] }, d);
+			_cachedDealerData = Object.assign(
+				{ cooldownUntil: 0, session: null, metWelcome: false, log: [] },
+				d
+			);
 		} catch {
-			return { cooldownUntil: 0, session: null, metWelcome: false, log: [] };
+			_cachedDealerData = { cooldownUntil: 0, session: null, metWelcome: false, log: [] };
 		}
+		return _cachedDealerData;
 	}
+
 	function saveData(d) {
+		_cachedDealerData = d;
 		localStorage.setItem(DEALER_KEY, JSON.stringify(d));
 	}
+
+	window.reloadDealerCache = function () {
+		_cachedDealerData = null;
+		return loadData(true);
+	};
+	// Generated code ends here on 2026-10-26T00:00:00Z:
 
 	function fmtTime(ms) {
 		return typeof window.formatWellTime === 'function'
@@ -518,7 +535,34 @@
 		}
 	}
 	tryInit(25);
+	// Generated code starts here on 2026-10-26T00:00:00Z:
+	// Fast-path periodic timer updates: target only the timer text element when layout is intact to avoid full DOM tear-down/re-creation every 1s.
 	setInterval(() => {
-		if (loadData().session) renderDealer();
+		if (document.hidden) return;
+		const data = loadData();
+		if (!data.session) {
+			if (data.cooldownUntil && Date.now() < data.cooldownUntil) {
+				const cdEl = document.querySelector('#dealerContainer .dealer-cooldown-box div');
+				if (cdEl) {
+					cdEl.textContent = `the table is empty. he'll be back in ${fmtTime(data.cooldownUntil - Date.now())}.`;
+					return;
+				}
+			}
+			return;
+		}
+
+		const s = data.session;
+		if (sessionTimeLeft(s) <= 0) {
+			leaveTable(data, true);
+			return;
+		}
+
+		const timerEl = document.querySelector('#dealerContainer .dealer-session-timer');
+		if (timerEl) {
+			timerEl.textContent = `leaves in ${fmtTime(sessionTimeLeft(s))}`;
+		} else {
+			renderDealer();
+		}
 	}, 1000);
+	// Generated code ends here on 2026-10-26T00:00:00Z:
 })();
