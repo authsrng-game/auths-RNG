@@ -98,7 +98,8 @@
 	};
 
 	function getTrust() {
-		return parseInt(localStorage.getItem(TRUST_KEY) || '0');
+		const val = parseInt(localStorage.getItem(TRUST_KEY) || '0', 10);
+		return Number.isNaN(val) ? 0 : val;
 	}
 	function setTrust(v) {
 		localStorage.setItem(TRUST_KEY, String(Math.max(0, v)));
@@ -169,16 +170,10 @@
 	}
 
 	let trailCleanup = null;
-	let autoMutateInterval = null;
 
-	// Generated code starts here on 2026-03-31T00:00:00Z:
 	function startAutoMutate() {
 		if (!getOwned().includes('upgrade_automutate')) return;
-		if (autoMutateInterval) {
-			clearInterval(autoMutateInterval);
-			autoMutateInterval = null;
-		}
-		autoMutateInterval = setInterval(() => {
+		setInterval(() => {
 			const inv = window.getInventoryRarities?.();
 			if (!inv || inv.length < 2) return;
 			const shuffle = [...inv].sort(
@@ -202,7 +197,6 @@
 			if (typeof saveAllData === 'function') saveAllData();
 		}, 20000);
 	}
-	// Generated code ends here on 2026-03-31T00:00:00Z:
 
 	function initTrail(id) {
 		if (trailCleanup) {

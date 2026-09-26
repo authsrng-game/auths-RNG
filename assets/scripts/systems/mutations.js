@@ -8,6 +8,8 @@
 	const MUTATION_HISTORY_MAX = 50;
 
 	const TRUST_KEY = 'mutationTrust';
+	const TRUST_OWNED_KEY = 'mutationTrustOwned';
+	const TRUST_ACTIVE_KEY = 'mutationTrustActive';
 
 	document.addEventListener('click', (e) => {
 		const dot = e.target.closest('.page-dot[data-page="3"]');
@@ -26,7 +28,8 @@
 	});
 
 	function getTrust() {
-		return parseInt(localStorage.getItem(TRUST_KEY) || '0');
+		const val = parseInt(localStorage.getItem(TRUST_KEY) || '0', 10);
+		return Number.isNaN(val) ? 0 : val;
 	}
 	function setTrust(v) {
 		localStorage.setItem(TRUST_KEY, String(Math.max(0, v)));
@@ -66,6 +69,7 @@
 				const parsed = JSON.parse(legacy);
 				if (Array.isArray(parsed)) {
 					saveHistory(parsed);
+					localStorage.removeItem('mutationTrust');
 					return parsed;
 				}
 			}
@@ -358,6 +362,17 @@
 	}
 
 	window.renderMutations = renderMutations;
+
+	function tryInit(n) {
+		if (!isUnlocked()) return;
+		if (
+			typeof inventoryData !== 'undefined' &&
+			inventoryData instanceof Map &&
+			inventoryData.size > 0
+		)
+			renderMutations();
+		else if (n > 0) setTimeout(() => tryInit(n - 1), 200);
+	}
 
 	// Generated code starts here on 2026-10-24T00:00:00Z:
 	loadHistory();

@@ -50,6 +50,7 @@
 		'themeEditorPresets',
 		'themeEditorActive',
 		'startAnimConfig',
+		'infoTipsRead',
 	];
 	// Generated code ends here on 2026-10-24T00:00:00Z:
 
@@ -119,6 +120,14 @@
 		return SYNC_KEYS.indexOf(key) !== -1;
 	}
 
+	var PUSH_CHUNK_SIZE = 30;
+
+	function chunkArray(arr, size) {
+		var out = [];
+		for (var i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+		return out;
+	}
+
 	function flushDirty() {
 		var keys = Object.keys(dirty);
 		if (!keys.length) return;
@@ -128,14 +137,26 @@
 			return;
 		}
 
-		var snapshotUpdate = {};
-		var entries = keys.map(function (key) {
-			snapshotUpdate[key] = dirty[key];
-			return { key: key, value: dirty[key] };
-		});
+		var pending = dirty;
 		dirty = Object.create(null);
 
-		fetch(API + '/push', {
+		var keyChunks = chunkArray(keys, PUSH_CHUNK_SIZE);
+
+		keyChunks.reduce(function (p, chunkKeys) {
+			return p.then(function () {
+				return pushChunk(token, chunkKeys, pending);
+			});
+		}, Promise.resolve());
+	}
+
+	function pushChunk(token, chunkKeys, pending) {
+		var snapshotUpdate = {};
+		var entries = chunkKeys.map(function (key) {
+			snapshotUpdate[key] = pending[key];
+			return { key: key, value: pending[key] };
+		});
+
+		return fetch(API + '/push', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -159,7 +180,6 @@
 				});
 				saveSnapshot(snap);
 			})
-			// Generated code starts here on 2026-03-31T20:00:00Z:
 			.catch(function (err) {
 				console.warn('[sync] push failed:', err ? err.message || err : 'unknown error');
 				queueSyncBanner(
@@ -171,7 +191,6 @@
 				retryDelay = Math.min(retryDelay * 2, MAX_RETRY_DELAY);
 				scheduleFlush(retryDelay);
 			});
-		// Generated code ends here on 2026-03-31T20:00:00Z:
 	}
 
 	function patchStorage() {
