@@ -40,7 +40,11 @@
 			const data = await apiCall('/system-messages');
 			messages = data.messages || [];
 			render();
-		} catch (_) {}
+		// Generated code starts here on 2026-03-31T20:00:00Z:
+		} catch (err) {
+			console.warn('[system-notify] failed to load system messages:', err);
+		}
+		// Generated code ends here on 2026-03-31T20:00:00Z:
 	}
 
 	function render() {
@@ -88,7 +92,11 @@
 						if (m) m.read = true;
 						el.classList.remove('unread');
 						render();
-					} catch (_) {}
+					// Generated code starts here on 2026-03-31T20:00:00Z:
+					} catch (err) {
+						console.warn('[system-notify] failed to mark message read:', id, err);
+					}
+					// Generated code ends here on 2026-03-31T20:00:00Z:
 				},
 				{ once: true }
 			);
