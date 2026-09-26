@@ -2096,8 +2096,14 @@ function startWellCooldownTimer() {
 
 const sortSelect = document.getElementById('sortSelect');
 
+let nextRollAllowedAt = 0;
+
 rollBtn.addEventListener('click', () => {
 	if (isCutscenePlaying) return;
+	const now = Date.now();
+	if (now < nextRollAllowedAt) return;
+	nextRollAllowedAt = now + Math.max(250, rollSpeed * 1000);
+
 	rollBtn.disabled = true;
 	if (window.setCursorRolling) window.setCursorRolling(true);
 
