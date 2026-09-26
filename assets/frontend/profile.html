@@ -458,7 +458,9 @@
 				let bannerStyle;
 				const c1 = HEX_COLOR_RE.test(theme.bannerColor1 || '') ? theme.bannerColor1 : null;
 				const c2 = HEX_COLOR_RE.test(theme.bannerColor2 || '') ? theme.bannerColor2 : null;
-				const validBannerUrl = profile.bannerImageUrl ? safeUrl('https://accounts.authsrng.xyz' + profile.bannerImageUrl) : '';
+				const validBannerUrl = profile.bannerImageUrl
+					? safeUrl('https://accounts.authsrng.xyz' + profile.bannerImageUrl)
+					: '';
 				if (validBannerUrl) {
 					bannerStyle = `background-image:url('${escHtml(validBannerUrl)}');background-size:cover;background-position:center;`;
 				} else if (theme.bannerType === 'solid' && c1) {

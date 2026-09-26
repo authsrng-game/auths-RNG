@@ -6,7 +6,9 @@ const { test, expect } = require('@playwright/test');
 const BASE_URL = 'http://localhost:8080/';
 
 test.describe('gauntlets system completion logic', () => {
-	test('easy tier completion respects rarity presence and acquisition timestamps', async ({ page }) => {
+	test('easy tier completion respects rarity presence and acquisition timestamps', async ({
+		page,
+	}) => {
 		await page.goto(BASE_URL);
 
 		// Step 1: Set totalRolls and empty gauntletData, reload page

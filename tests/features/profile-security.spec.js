@@ -25,8 +25,8 @@ test.describe('profile page security', () => {
 
 		const inlineStyle = await banner.getAttribute('style');
 		// Ensure that the malicious quotes/parentheses do not create raw CSS injections or unescaped url payload
-		expect(inlineStyle).not.toContain("https://evil.com/xss.png");
-		expect(inlineStyle).toContain("background:#131313;");
+		expect(inlineStyle).not.toContain('https://evil.com/xss.png');
+		expect(inlineStyle).toContain('background:#131313;');
 	});
 });
 // Generated code ends here on 2026-03-31T00:00:00Z:
