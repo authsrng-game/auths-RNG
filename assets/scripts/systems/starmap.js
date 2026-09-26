@@ -630,6 +630,19 @@
 		if (el) el.textContent = fmt(Math.floor(d.voidShards)) + ' ✦';
 	}, 60000);
 
+	// Generated code starts here on 2026-09-26T00:00:00Z:
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'visible') {
+			const d = getData();
+			if (!d.constellations?.length) return;
+			accrueShards(d);
+			saveData(d);
+			const el = document.getElementById('starmapShardCount');
+			if (el) el.textContent = fmt(Math.floor(d.voidShards)) + ' ✦';
+		}
+	});
+	// Generated code ends here on 2026-09-26T00:00:00Z:
+
 	window.renderStarmap = renderStarmap;
 
 	// init star trail if already owned
