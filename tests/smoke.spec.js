@@ -394,5 +394,4 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(ids).toContain('recent-read');
 	});
 	// Generated code ends here on 2026-03-31T12:00:00Z:
-
 });
