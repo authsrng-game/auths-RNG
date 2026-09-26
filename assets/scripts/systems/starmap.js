@@ -598,11 +598,25 @@
 		renderStarmap();
 	}
 
+	// Generated code starts here on 2026-03-31T20:00:00Z:
+	function isStarTrailUnlocked() {
+		if (localStorage.getItem('cosmeticUnlock_star_trail') === '1') return true;
+		try {
+			const parsed = JSON.parse(localStorage.getItem(STARMAP_KEY) || '{}');
+			if (parsed?.shopPurchases?.star_trail) {
+				localStorage.setItem('cosmeticUnlock_star_trail', '1');
+				return true;
+			}
+		} catch (_) {}
+		return false;
+	}
+	// Generated code ends here on 2026-03-31T20:00:00Z:
+
 	function initStarTrail() {
 		if (window._starTrailActive) return;
 		window._starTrailActive = true;
 		document.addEventListener('mousemove', (e) => {
-			if (!localStorage.getItem('cosmeticUnlock_star_trail')) return;
+			if (!isStarTrailUnlocked()) return;
 			const dot = document.createElement('div');
 			dot.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;width:3px;height:3px;
         background:rgba(200,200,255,0.75);border-radius:50%;pointer-events:none;z-index:2147483640;
@@ -646,7 +660,7 @@
 	window.renderStarmap = renderStarmap;
 
 	// init star trail if already owned
-	if (localStorage.getItem('cosmeticUnlock_star_trail')) initStarTrail();
+	if (isStarTrailUnlocked()) initStarTrail();
 
 	// wait for DOM
 	function tryInit(n) {
