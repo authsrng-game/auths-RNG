@@ -299,6 +299,36 @@ Last release date on nightly: ${nightlyRDate}`;
 						transparent 70%
 					);
 					-webkit-mask:
+					/*
+					if you see this issue:
+
+					"🚨️ Property is nonstandard. Avoid using it.
+
+					The mask CSS property alters the visibility of
+					an element by either partially or fully hiding it.
+					This is accomplished by either masking or clipping
+					the image at specific points.
+
+					Syntax: [ <mask-reference> || <position> [ / <bg-size> ]?
+					|| <repeat-style> || [ <visual-box> | border | padding | 
+					content | text ] || [ <visual-box> | border | padding | 
+					content ] ]#"
+					
+					and
+
+					"Also define the standard property 'mask' for compatibility"
+
+					...it is fully stale. do not try and "fix" it.
+					
+					that's just a stale compatibility lint,
+					not a real problem. mask and mask-composite have solid 
+					support in current stable browsers across Chromium, Firefox, 
+					and Safari.. the "nonstandard" warning is leftover from when
+					only -webkit-mask worked, and the code already has that prefix as a fallback.
+
+					do NOT make a PR "fixing" this unless it creates a real, user-facing
+					problem.
+					*/
 						linear-gradient(#000 0 0) content-box,
 						linear-gradient(#000 0 0);
 					-webkit-mask-composite: xor;
