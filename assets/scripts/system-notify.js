@@ -75,6 +75,9 @@
 			)
 			.join('');
 
+		// Generated code starts here on 2026-06-18T16:05:00Z:
+		list.querySelectorAll('.sysmsg-item').forEach((el) => el.remove());
+		// Generated code ends here on 2026-06-18T16:05:00Z:
 		list.insertAdjacentHTML('beforeend', html);
 
 		list.querySelectorAll('.sysmsg-item.unread').forEach((el) => {

@@ -393,4 +393,46 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(result.historyAdded).toBe(true);
 	});
 	// Generated code ends here on 2026-09-25T12:46:00Z:
+	// Generated code starts here on 2026-06-18T16:00:00Z:
+	test('system-notify render does not duplicate sysmsg-item elements in notifList', async ({ page }) => {
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(async () => {
+			const origFetch = window.fetch;
+			window.fetch = async (url, opts) => {
+				if (typeof url === 'string' && url.includes('/system-messages')) {
+					return {
+						ok: true,
+						json: async () => ({
+							messages: [
+								{ id: '1', from: 'System', subject: 'Hello', body: 'World', ts: Date.now(), read: false },
+							],
+						}),
+					};
+				}
+				return origFetch(url, opts);
+			};
+
+			window.AuthAccount = {
+				isLoggedIn: () => true,
+				getToken: () => 'fake-token',
+			};
+
+			document.dispatchEvent(new CustomEvent('authchange'));
+			await new Promise((resolve) => setTimeout(resolve, 200));
+
+			const countFirstRender = document.querySelectorAll('.sysmsg-item').length;
+
+			document.dispatchEvent(new CustomEvent('authchange'));
+			await new Promise((resolve) => setTimeout(resolve, 200));
+
+			const countSecondRender = document.querySelectorAll('.sysmsg-item').length;
+
+			return { countFirstRender, countSecondRender };
+		});
+
+		expect(result.countFirstRender).toBe(1);
+		expect(result.countSecondRender).toBe(1);
+	});
+	// Generated code ends here on 2026-06-18T16:00:00Z:
 });
