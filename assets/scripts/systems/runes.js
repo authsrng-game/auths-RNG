@@ -15,11 +15,6 @@
 		earth: '🌍',
 		wizardry: '🔮',
 	};
-	const RUNE_DROP_CHANCES = [
-		{ weight: 1, label: 'rare' },
-		{ weight: (1 / 70) * 30, label: 'mid-rare' },
-		{ weight: (1 / 140) * 30, label: 'common' },
-	];
 
 	let runesData = { counts: {}, elementals: {}, totalDropped: 0 };
 	let blocks = 0;
@@ -315,10 +310,6 @@
 
 	function exchangeRunesToBlocks(count) {
 		if (totalRunes() < count) return;
-		const total =
-			(runesData.counts.rare || 0) +
-			(runesData.counts['mid-rare'] || 0) +
-			(runesData.counts.common || 0);
 		let remaining = count;
 		for (const tier of ['common', 'mid-rare', 'rare']) {
 			const use = Math.min(runesData.counts[tier] || 0, remaining);

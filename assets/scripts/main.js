@@ -1,5 +1,24 @@
 console.log(performance.now());
 
+// Generated code starts here on 2026-03-31T20:00:00Z:
+window.addEventListener('unhandledrejection', (event) => {
+	console.error('[main] Unhandled promise rejection:', {
+		reason: event.reason,
+		promise: event.promise,
+	});
+});
+
+window.addEventListener('error', (event) => {
+	console.error('[main] Uncaught runtime error:', {
+		message: event.message,
+		filename: event.filename,
+		lineno: event.lineno,
+		colno: event.colno,
+		error: event.error,
+	});
+});
+// Generated code ends here on 2026-03-31T20:00:00Z:
+
 const rollBtn = document.getElementById('rollBtn'),
 	spinner = document.getElementById('spinner'),
 	inventoryList = document.getElementById('inventoryList'),
@@ -954,6 +973,7 @@ const achievementsList = [
 ];
 
 function updateAchievementsUI() {
+	updateLockedAchievements();
 	achievementsContainer.innerHTML = '';
 	achievementsList.forEach((ach) => {
 		const unlocked = achievementsUnlocked.has(ach.id);
@@ -1312,22 +1332,33 @@ function getRandomRarity() {
 	return Plush.roll(rarities, globalLuckMultiplier, inventoryData, shopUpgrades, luckBoostActive);
 }
 
+// Generated code starts here on 2026-10-25T00:00:00Z:
+// Maintain active list of locked achievements to avoid iterating over all 37 achievement items and evaluating Set lookups on every RNG roll.
+let _lockedAchievements = null;
+function updateLockedAchievements() {
+	_lockedAchievements = achievementsList.filter((ach) => !achievementsUnlocked.has(ach.id));
+}
+
 function checkAchievements(currentRarity) {
+	if (!_lockedAchievements) updateLockedAchievements();
+	if (_lockedAchievements.length === 0) return;
+
 	let newlyUnlocked = false;
-	achievementsList.forEach((ach) => {
-		if (!achievementsUnlocked.has(ach.id)) {
-			if (ach.check(currentRarity)) {
-				achievementsUnlocked.add(ach.id);
-				newlyUnlocked = true;
-			}
+	for (let i = _lockedAchievements.length - 1; i >= 0; i--) {
+		const ach = _lockedAchievements[i];
+		if (ach.check(currentRarity)) {
+			achievementsUnlocked.add(ach.id);
+			_lockedAchievements.splice(i, 1);
+			newlyUnlocked = true;
 		}
-	});
+	}
 	if (newlyUnlocked) {
 		if (window.playThemeSound) window.playThemeSound('achievement');
 		updateAchievementsUI();
 		saveAllData();
 	}
 }
+// Generated code ends here on 2026-10-25T00:00:00Z:
 
 function updateAnomalyUI() {
 	const el = document.getElementById('anomalyCount');
