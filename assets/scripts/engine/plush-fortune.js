@@ -17,6 +17,9 @@
 			if (gap <= 0) return;
 			const decay = gap * IDLE_DECAY_PER_MS;
 			this._balance = Math.max(0, this._balance - decay);
+			// Generated code starts here on 2026-06-18T01:05:00Z:
+			this._lastTouchedAt = now;
+			// Generated code ends here on 2026-06-18T01:05:00Z:
 		}
 
 		deposit(now) {

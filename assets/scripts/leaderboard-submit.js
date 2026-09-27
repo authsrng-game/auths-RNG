@@ -56,6 +56,7 @@ console.log(performance.now());
 			achievements,
 		};
 	}
+	// Generated code ends here on 2026-06-18T15:15:00Z:
 
 	function isEnabled() {
 		return localStorage.getItem('lbEnabled') === 'true';
@@ -203,6 +204,8 @@ console.log(performance.now());
 			startAuto();
 		});
 	}
+
+	window.LeaderboardSubmit = { buildPayload, getRarest };
 
 	document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
 })();

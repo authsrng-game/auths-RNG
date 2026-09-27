@@ -1,8 +1,6 @@
 name: discord notify
 
 on:
-  push:
-    branches: ['**']
   pull_request:
     types: [opened, reopened, closed]
   issues:
@@ -36,6 +34,7 @@ jobs:
             -d @- \
             "$WEBHOOK"
 
+    steps:
       - name: send PR event to discord
         if: github.event_name == 'pull_request'
         env:
