@@ -216,21 +216,7 @@ Last release date on nightly: ${nightlyRDate}`;
 		<script>
 			// ccu
 			const _sid = Math.random().toString(36).slice(2);
-			// Generated code starts here on 2026-03-31T22:00:00Z:
-			const _hb = () =>
-				fetch('https://authsrng.xyz/api/ccu?sid=' + _sid, { method: 'POST' })
-					.then((r) => {
-						if (!r.ok) {
-							console.warn('[ccu] heartbeat rejected:', { sid: _sid, status: r.status });
-						}
-					})
-					.catch((err) => {
-						console.warn('[ccu] heartbeat network error:', {
-							sid: _sid,
-							error: err?.message || err,
-						});
-					});
-			// Generated code ends here on 2026-03-31T22:00:00Z:
+			const _hb = () => fetch('https://authsrng.xyz/api/ccu?sid=' + _sid, { method: 'POST' });
 
 			if (
 				location.hostname !== 'nightly.authsrng.xyz' &&

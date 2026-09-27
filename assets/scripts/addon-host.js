@@ -108,9 +108,6 @@ const AddonManager = {
 	},
 
 	applyChanges() {
-		try {
-			sessionStorage.setItem('addonChangesJustApplied', '1');
-		} catch (_) {}
 		location.reload();
 	},
 
@@ -153,7 +150,6 @@ const AddonManager = {
 window.AddonManager = AddonManager;
 
 function initAddons() {
-	if (window.ADDON_HOST_NO_AUTOLOAD) return;
 	AddonManager.syncFromIndex().then(() => {
 		document.dispatchEvent(new CustomEvent('addonsReady'));
 	});
