@@ -394,4 +394,24 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(ids).toContain('recent-read');
 	});
 	// Generated code ends here on 2026-03-31T12:00:00Z:
+
+	// Generated code starts here on 2026-10-25T00:00:00Z:
+	test('page dot navigation dynamically updates aria-current attribute', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const dot0 = page.locator('.page-dot[data-page="0"]');
+		const dot1 = page.locator('.page-dot[data-page="1"]');
+
+		await expect(dot0).toHaveAttribute('aria-current', 'page');
+		await expect(dot1).not.toHaveAttribute('aria-current', 'page');
+
+		await page.evaluate(() => {
+			if (typeof window.goToPage === 'function') {
+				window.goToPage(1);
+			}
+		});
+
+		await expect(dot0).not.toHaveAttribute('aria-current', 'page');
+		await expect(dot1).toHaveAttribute('aria-current', 'page');
+	});
+	// Generated code ends here on 2026-10-25T00:00:00Z:
 });
