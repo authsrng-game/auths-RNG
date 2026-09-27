@@ -406,6 +406,17 @@
 		document.dispatchEvent(new CustomEvent('syncBootComplete'));
 	}
 
+	/**
+	 * Synchronizes local storage with server state using a 3-way diff against the last known snapshot.
+	 *
+	 * Reconciliation rules per key during pull:
+	 * 1. Unmodified local state (localVal matches snapshot):
+	 *    - Server state overwrites local storage and updates snapshot.
+	 * 2. Conflicting local state (localVal modified since last sync):
+	 *    - Monotonic max keys (e.g., totalRolls, totalPlaytime): Resolved with Math.max(local, server).
+	 *      If local state was higher, marks dirty to push the new peak back to the server.
+	 *    - Standard keys: Local state takes precedence and is marked dirty for next push.
+	 */
 	function pullSync() {
 		var token = getToken();
 		if (!token) return;
