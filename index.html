@@ -225,7 +225,10 @@ Last release date on nightly: ${nightlyRDate}`;
 						}
 					})
 					.catch((err) => {
-						console.warn('[ccu] heartbeat network error:', { sid: _sid, error: err?.message || err });
+						console.warn('[ccu] heartbeat network error:', {
+							sid: _sid,
+							error: err?.message || err,
+						});
 					});
 			// Generated code ends here on 2026-03-31T22:00:00Z:
 
