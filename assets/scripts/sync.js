@@ -4,6 +4,7 @@
 	var TOKEN_KEY = 'authToken';
 	var SNAPSHOT_KEY = '_syncSnapshot';
 	var API = 'https://backup.authsrng.xyz/api/sync';
+	var MONOTONIC_MAX_KEYS = { totalRolls: 1, totalPlaytime: 1 };
 
 	// Generated code starts here on 2026-10-24T00:00:00Z:
 	var SYNC_KEYS = [
@@ -421,8 +422,19 @@
 			} else if (localMatchesSnapshot && !hasServerVal) {
 				if (localVal !== null) newSnapshot[key] = localVal;
 			} else {
-				newSnapshot[key] = localVal;
-				markDirty(key, localVal);
+				if (MONOTONIC_MAX_KEYS[key] && hasServerVal) {
+					var localNum = parseInt(localVal, 10) || 0;
+					var serverNum = parseInt(serverVal, 10) || 0;
+					var winner = Math.max(localNum, serverNum);
+					if (String(winner) !== localVal) {
+						origSetItem.call(localStorage, key, String(winner));
+					}
+					newSnapshot[key] = String(winner);
+					if (String(winner) !== serverVal) markDirty(key, String(winner)); // only push if local actually had more
+				} else {
+					newSnapshot[key] = localVal;
+					markDirty(key, localVal);
+				}
 			}
 		});
 

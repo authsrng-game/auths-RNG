@@ -28,11 +28,12 @@ function notify(text) {
 	}
 }
 
-let lastActionAt = 0;
-function actionAllowed() {
+const lastActionAt = new Map();
+function actionAllowed(id) {
 	const now = Date.now();
-	if (now - lastActionAt < ACTION_COOLDOWN_MS) return false;
-	lastActionAt = now;
+	const last = lastActionAt.get(id) || 0;
+	if (now - last < ACTION_COOLDOWN_MS) return false;
+	lastActionAt.set(id, now);
 	return true;
 }
 
@@ -72,7 +73,7 @@ const AddonManager = {
 	},
 
 	install(entry) {
-		if (!actionAllowed()) return false;
+		if (!actionAllowed(entry.id)) return false;
 		const ids = getInstalledIds();
 		if (ids.includes(entry.id)) return true;
 		if (ids.length >= MAX_INSTALLED) {
@@ -86,9 +87,10 @@ const AddonManager = {
 	},
 
 	uninstall(id) {
-		if (!actionAllowed()) return false;
-		const ids = getInstalledIds().filter((x) => x !== id);
-		setInstalledIds(ids);
+		if (!actionAllowed(id)) return false;
+		const ids = getInstalledIds();
+		if (!ids.includes(id)) return true; // nothing to do, nothing to dispatch
+		setInstalledIds(ids.filter((x) => x !== id));
 		document.dispatchEvent(new CustomEvent('addonPendingChange'));
 		return true;
 	},
