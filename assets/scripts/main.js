@@ -638,6 +638,13 @@ function getCurrentTotalSeconds() {
 	return storedSeconds + Math.floor((Date.now() - sessionStart) / 1000);
 }
 
+window.getCurrentTotalSeconds = getCurrentTotalSeconds;
+Object.defineProperty(window, 'totalSeconds', {
+	get: getCurrentTotalSeconds,
+	configurable: true,
+	enumerable: true,
+});
+
 function flushPlaytime() {
 	storedSeconds = getCurrentTotalSeconds();
 	sessionStart = Date.now();
