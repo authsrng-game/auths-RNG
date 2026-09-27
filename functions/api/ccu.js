@@ -74,8 +74,8 @@ export async function onRequest(context) {
 	 * Then assume the weirdness is load-bearing until proven otherwise.
 	 *
 	 * "could theoretically happen" > shut up
-   * "I noticed something interesting" > SHUT UP
-	 * 
+	 * "I noticed something interesting" > SHUT UP
+	 *
 	 * =============================================================================
 	 *                         THIS COMMENT IS NOT A CHALLENGE.
 	 * =============================================================================
