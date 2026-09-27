@@ -30,5 +30,18 @@ export async function onRequest(context) {
 		return new Response(JSON.stringify({ ccu: list.keys.length }), { headers });
 	}
 
-	return new Response('Method not allowed', { status: 405 });
+	// Generated code starts here on 2026-03-31T00:00:00Z:
+	if (request.method === 'OPTIONS') {
+		return new Response(null, {
+			status: 204,
+			headers: {
+				...headers,
+				'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+				'Access-Control-Allow-Headers': 'Content-Type',
+			},
+		});
+	}
+
+	return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers });
+	// Generated code ends here on 2026-03-31T00:00:00Z:
 } // for da webgamedb!!!!!
