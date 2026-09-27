@@ -67,13 +67,13 @@ const AddonManager = {
 			ids.push(entry.id);
 			setInstalledIds(ids);
 		}
-		this.load(entry);
+		location.reload();
 	},
 
 	uninstall(id) {
 		const ids = getInstalledIds().filter((x) => x !== id);
 		setInstalledIds(ids);
-		this.unload(id);
+		location.reload();
 	},
 
 	isInstalled(id) {
