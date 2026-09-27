@@ -248,16 +248,21 @@
 			syncBannerEl = document.createElement('div');
 			syncBannerEl.id = 'syncOfflineBanner';
 			syncBannerEl.style.cssText =
-				'position:fixed;top:0;left:0;width:100%;background:#3a0a0a;color:#f88;' +
-				'font-family:monospace;font-size:11px;padding:6px 8px;z-index:2147483647;' +
-				'text-align:center;pointer-events:none;opacity:0;' +
-				'transition:opacity 0.25s ease;border-bottom:1px solid #5a1a1a;';
+				'position:fixed;bottom:66px;left:16px;max-width:260px;' +
+				'background:#1a0a0a;color:#f88;border:1px solid #5a1a1a;' +
+				'font-family:monospace;font-size:11px;padding:8px 12px;z-index:2147483647;' +
+				'text-align:left;pointer-events:none;opacity:0;border-radius:6px;' +
+				'box-shadow:0 4px 16px rgba(0,0,0,0.4);' +
+				'transition:opacity 0.25s ease, transform 0.25s ease;transform:translateY(6px);';
 			var attach = function () {
 				document.body.appendChild(syncBannerEl);
 				syncBannerEl.textContent = msg;
 				requestAnimationFrame(function () {
 					requestAnimationFrame(function () {
-						if (syncBannerEl) syncBannerEl.style.opacity = '1';
+						if (syncBannerEl && !notifPanelOpen) {
+							syncBannerEl.style.opacity = '1';
+							syncBannerEl.style.transform = 'translateY(0)';
+						}
 					});
 				});
 			};
@@ -266,7 +271,10 @@
 			return;
 		}
 		syncBannerEl.textContent = msg;
-		syncBannerEl.style.opacity = '1';
+		if (!notifPanelOpen) {
+			syncBannerEl.style.opacity = '1';
+			syncBannerEl.style.transform = 'translateY(0)';
+		}
 	}
 
 	function cancelSyncBanner() {
@@ -280,6 +288,7 @@
 	function hideSyncBanner() {
 		if (!syncBannerEl) return;
 		syncBannerEl.style.opacity = '0';
+		syncBannerEl.style.transform = 'translateY(6px)';
 		syncBannerHideTimer = setTimeout(function () {
 			if (syncBannerEl && syncBannerEl.parentNode) {
 				syncBannerEl.parentNode.removeChild(syncBannerEl);
@@ -287,6 +296,34 @@
 			syncBannerEl = null;
 		}, 300);
 	}
+
+	var notifPanelOpen = false;
+
+	function syncBannerVisibilityForNotif() {
+		if (!syncBannerEl) return;
+		if (notifPanelOpen) {
+			syncBannerEl.style.opacity = '0';
+			syncBannerEl.style.transform = 'translateY(6px)';
+		} else if (syncBannerEl.textContent) {
+			syncBannerEl.style.opacity = '1';
+			syncBannerEl.style.transform = 'translateY(0)';
+		}
+	}
+
+	function watchNotifPanel() {
+		var panel = document.getElementById('notifPanel');
+		if (!panel) {
+			document.addEventListener('DOMContentLoaded', watchNotifPanel, { once: true });
+			return;
+		}
+		var observer = new MutationObserver(function () {
+			notifPanelOpen = panel.classList.contains('open');
+			syncBannerVisibilityForNotif();
+		});
+		observer.observe(panel, { attributes: true, attributeFilter: ['class'] });
+	}
+
+	watchNotifPanel();
 
 	function createOverlay() {
 		if (overlayEl || !document.body) return;
