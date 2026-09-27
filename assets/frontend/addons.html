@@ -402,6 +402,30 @@
 				<br /><br />
 				changes take effect the next time you load the game.
 			</div>
+
+			<div
+				id="pendingBar"
+				style="
+					display: none;
+					position: fixed;
+					bottom: 20px;
+					left: 50%;
+					transform: translateX(-50%);
+					background: var(--panel-bg);
+					border: 1px solid var(--border-color);
+					border-radius: 8px;
+					padding: 12px 16px;
+					display: none;
+					align-items: center;
+					gap: 12px;
+					z-index: 2000;
+					box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+					font-size: 0.85em;
+				"
+			>
+				<span>addon changes pending, reload to apply</span>
+				<button class="install" id="applyChangesBtn">reload now</button>
+			</div>
 		</div>
 
 		<div class="modal-overlay" id="modalOverlay">
@@ -637,6 +661,25 @@
 							});
 					}
 				}
+
+				function updatePendingBar() {
+					const bar = document.getElementById('pendingBar');
+					if (!bar) return;
+					const pending = AddonManager.hasPendingChanges();
+					bar.style.display = pending ? 'flex' : 'none';
+				}
+
+				const applyBtn = document.getElementById('applyChangesBtn');
+				if (applyBtn) {
+					applyBtn.addEventListener('click', (e) => {
+						e.target.textContent = 'reloading...';
+						e.target.disabled = true;
+						AddonManager.applyChanges();
+					});
+				}
+
+				document.addEventListener('addonPendingChange', updatePendingBar);
+				updatePendingBar();
 
 				if (window.AddonManager) {
 					tryRender();

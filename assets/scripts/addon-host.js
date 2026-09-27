@@ -3,6 +3,8 @@
 const ADDON_ORIGIN = 'https://addons.authsrng.xyz';
 const INDEX_URL = `${ADDON_ORIGIN}/index.json`;
 const INSTALLED_KEY = 'installedAddonIds';
+const MAX_INSTALLED = 20;
+const ACTION_COOLDOWN_MS = 400;
 
 function getInstalledIds() {
 	try {
@@ -24,6 +26,14 @@ function notify(text) {
 	} else {
 		console.log('[addon]', text);
 	}
+}
+
+let lastActionAt = 0;
+function actionAllowed() {
+	const now = Date.now();
+	if (now - lastActionAt < ACTION_COOLDOWN_MS) return false;
+	lastActionAt = now;
+	return true;
 }
 
 const AddonManager = {
@@ -62,22 +72,43 @@ const AddonManager = {
 	},
 
 	install(entry) {
+		if (!actionAllowed()) return false;
 		const ids = getInstalledIds();
-		if (!ids.includes(entry.id)) {
-			ids.push(entry.id);
-			setInstalledIds(ids);
+		if (ids.includes(entry.id)) return true;
+		if (ids.length >= MAX_INSTALLED) {
+			notify(`you can have at most ${MAX_INSTALLED} addons installed at once`);
+			return false;
 		}
-		location.reload();
+		ids.push(entry.id);
+		setInstalledIds(ids);
+		document.dispatchEvent(new CustomEvent('addonPendingChange'));
+		return true;
 	},
 
 	uninstall(id) {
+		if (!actionAllowed()) return false;
 		const ids = getInstalledIds().filter((x) => x !== id);
 		setInstalledIds(ids);
-		location.reload();
+		document.dispatchEvent(new CustomEvent('addonPendingChange'));
+		return true;
 	},
 
 	isInstalled(id) {
 		return getInstalledIds().includes(id);
+	},
+
+	hasPendingChanges() {
+		const installed = new Set(getInstalledIds());
+		const active = new Set(this.active.keys());
+		if (installed.size !== active.size) return true;
+		for (const id of installed) {
+			if (!active.has(id)) return true;
+		}
+		return false;
+	},
+
+	applyChanges() {
+		location.reload();
 	},
 
 	async fetchIndex() {
