@@ -1230,25 +1230,45 @@ document.getElementById('buyPointBtn').addEventListener('click', () => {
 
 // Point printer passive generation
 let _lastShopUIPoints = -1;
+// Generated code starts here on 2026-03-31T20:00:00Z:
+window._lastPrinterTick = Date.now();
 
-setInterval(() => {
+function updatePrinterPoints() {
 	if (shopUpgrades.printer > 0) {
-		points += shopUpgrades.printer;
-		updatePointsDisplay();
+		const now = Date.now();
+		const elapsedMs = now - (window._lastPrinterTick || now);
+		const elapsedSeconds = Math.min(3600, Math.floor(elapsedMs / 1000));
 
-		const luckCost = Math.floor(25 + shopUpgrades.luck * shopUpgrades.luck * 15);
-		const speedCost = Math.floor(50 + shopUpgrades.speed * shopUpgrades.speed * 55);
-		const pointCost = Math.floor(100 + shopUpgrades.pointMult * shopUpgrades.pointMult * 35);
-		const magnetCost = 500 + (shopUpgrades.magnet || 0) * 1000;
-		const printerCost = 1000 + (shopUpgrades.printer || 0) * (shopUpgrades.printer || 0) * 500;
-		const dupeCost = 800 + (shopUpgrades.duplicate || 0) * (shopUpgrades.duplicate || 0) * 400;
+		if (elapsedSeconds > 0) {
+			window._lastPrinterTick = (window._lastPrinterTick || now) + elapsedSeconds * 1000;
+			points += shopUpgrades.printer * elapsedSeconds;
+			updatePointsDisplay();
 
-		const thresholds = [luckCost, speedCost, pointCost, magnetCost, printerCost, dupeCost];
-		const crossed = thresholds.some((t) => points >= t !== _lastShopUIPoints >= t);
-		if (crossed || _lastShopUIPoints < 0) updateShopUI();
-		_lastShopUIPoints = points;
+			const luckCost = Math.floor(25 + shopUpgrades.luck * shopUpgrades.luck * 15);
+			const speedCost = Math.floor(50 + shopUpgrades.speed * shopUpgrades.speed * 55);
+			const pointCost = Math.floor(100 + shopUpgrades.pointMult * shopUpgrades.pointMult * 35);
+			const magnetCost = 500 + (shopUpgrades.magnet || 0) * 1000;
+			const printerCost = 1000 + (shopUpgrades.printer || 0) * (shopUpgrades.printer || 0) * 500;
+			const dupeCost = 800 + (shopUpgrades.duplicate || 0) * (shopUpgrades.duplicate || 0) * 400;
+
+			const thresholds = [luckCost, speedCost, pointCost, magnetCost, printerCost, dupeCost];
+			const crossed = thresholds.some((t) => points >= t !== _lastShopUIPoints >= t);
+			if (crossed || _lastShopUIPoints < 0) updateShopUI();
+			_lastShopUIPoints = points;
+		}
+	} else {
+		window._lastPrinterTick = Date.now();
 	}
-}, 1000);
+}
+
+setInterval(updatePrinterPoints, 1000);
+
+document.addEventListener('visibilitychange', () => {
+	if (document.visibilityState === 'visible') {
+		updatePrinterPoints();
+	}
+});
+// Generated code ends here on 2026-03-31T20:00:00Z.
 
 // Generated code starts here on 2026-09-17T00:00:00Z:
 // Fast-path inventory item updates: preserve running RarityStyle animation loops, attach dblclick sell handler once, and manage new-roll highlight timers to eliminate per-roll allocation and DOM thrashing overhead.
