@@ -2271,7 +2271,17 @@ Last release date on nightly: ${nightlyRDate}`;
 					const activePage = document.getElementById(`page-${currentPage + 1}`);
 					if (activePage) container.style.height = activePage.scrollHeight + 'px';
 
-					dots.forEach((dot, i) => dot.classList.toggle('active', i === currentPage));
+					dots.forEach((dot, i) => {
+						const isActive = i === currentPage;
+						dot.classList.toggle('active', isActive);
+						// Generated code starts here on 2026-10-25T00:00:00Z:
+						if (isActive) {
+							dot.setAttribute('aria-current', 'page');
+						} else {
+							dot.removeAttribute('aria-current');
+						}
+						// Generated code ends here on 2026-10-25T00:00:00Z:
+					});
 
 					prevBtn.disabled = currentPage === 0;
 					nextBtn.disabled = currentPage === totalPages - 1;
