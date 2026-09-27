@@ -91,13 +91,18 @@
 
 			return daily;
 		}
-		getDryRunMultiplier(name, chance) {
+		// Generated code starts here on 2026-09-12T15:30:00Z:
+		// Fast path: skip Map lookups and chance divisions when dry runs map is empty or count is below threshold.
+		getDryRunMultiplier(name, chance, denom) {
+			if (this._dryRuns.size === 0) return 1.0;
 			const count = this._dryRuns.get(name) || 0;
 			if (count <= DRY_THRESHOLD) return 1.0;
+			if (!chance && denom) chance = 1 / Number(denom);
 			const denomFactor = chance ? Math.log10(Math.max(1 / chance, 10)) / 4 : 1;
 			const cap = Math.min(DRY_MULT_CAP * denomFactor, 4.0);
 			return 1.0 + Math.min((count - DRY_THRESHOLD) * DRY_MULT_PER_STEP, cap);
 		}
+		// Generated code ends here on 2026-09-12T15:30:00Z:
 		isInHotPulse() {
 			return this._hotPulseRolls > 0;
 		}

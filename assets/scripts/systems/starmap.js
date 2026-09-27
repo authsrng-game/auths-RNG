@@ -49,30 +49,128 @@
 		},
 	];
 
-	// ── data helpers ─────────────────────────────────────────────────────
-	function loadData() {
-		try {
-			return JSON.parse(localStorage.getItem(STARMAP_KEY) || '{}');
-		} catch {
-			return {};
+	const ETERNUM_UNLOCK_CONSTELLATIONS = 15; // needs real starmap investment first!!!!
+
+	const COMPRESSION_TIERS = [
+		{ id: 'comp_1', mult: 0.75, cost: 75000 },
+		{ id: 'comp_2', mult: 0.6, cost: 300000 },
+		{ id: 'comp_3', mult: 0.45, cost: 1200000 },
+		{ id: 'comp_4', mult: 0.3, cost: 4000000 },
+		{ id: 'comp_5', mult: 0.18, cost: 12000000 },
+	];
+
+	function isEternumUnlocked(d) {
+		return (d.constellations?.length || 0) >= ETERNUM_UNLOCK_CONSTELLATIONS;
+	}
+
+	function getCompressionTiersOwned(d) {
+		return d.compressionTiers || 0; // count of sequential tiers purchased
+	}
+
+	// Generated code starts here on 2026-09-22T00:00:00Z:
+	// In-memory cache for starmapData and hot-path calculations (pity compression & luck multiplier) to eliminate redundant localStorage reads and JSON parses per roll.
+	let _cachedData = null;
+	let _cachedCompressionReduction = null;
+	let _cachedLuckBonus = null;
+
+	function updateCachedCalculations() {
+		if (!_cachedData) return;
+		const owned = getCompressionTiersOwned(_cachedData);
+		let mult = 1;
+		for (let i = 0; i < owned && i < COMPRESSION_TIERS.length; i++) {
+			mult *= COMPRESSION_TIERS[i].mult;
 		}
+		_cachedCompressionReduction = mult;
+		_cachedLuckBonus =
+			1 + (_cachedData.permanentLuckStacks || 0) * 0.25 + (_cachedData.voidMarketLuck || 0);
 	}
-	function saveData(d) {
-		localStorage.setItem(STARMAP_KEY, JSON.stringify(d));
+
+	window.getPityCompressionReduction = function (rarityName) {
+		if (_cachedCompressionReduction === null) {
+			getData();
+		}
+		return _cachedCompressionReduction;
+	};
+
+	window.getStarmapLuckBonus = function () {
+		if (_cachedLuckBonus === null) {
+			getData();
+		}
+		return _cachedLuckBonus;
+	};
+
+	window.getStarmapConstellationsCount = function () {
+		return (getData().constellations || []).length;
+	};
+
+	window.reloadStarmapCache = function () {
+		_cachedData = null;
+		_cachedCompressionReduction = null;
+		_cachedLuckBonus = null;
+		return getData();
+	};
+	// Generated code ends here on 2026-09-22T00:00:00Z:
+
+	function buyCompressionTier() {
+		const d = getData();
+		accrueShards(d);
+		const owned = getCompressionTiersOwned(d);
+		const tier = COMPRESSION_TIERS[owned];
+		if (!tier) return; // maxed
+		if (Math.floor(d.voidShards) < tier.cost) {
+			window.showAlert?.(`need ${fmt(tier.cost)} void shards!`);
+			return;
+		}
+		d.voidShards -= tier.cost;
+		d.compressionTiers = owned + 1;
+		saveData(d);
+		showAnomalyPopup?.(`✦ pity compression tier ${owned + 1} acquired!`);
+		renderStarmap();
 	}
-	function getData() {
-		return Object.assign(
-			{
+	window.buyCompressionTier = buyCompressionTier;
+
+	// ── data helpers ─────────────────────────────────────────────────────
+	// Generated code starts here on 2026-09-22T00:00:00Z:
+	// Refactored data helpers to maintain in-memory cached state.
+	function loadData(force = false) {
+		if (_cachedData && !force) return _cachedData;
+		try {
+			const parsed = JSON.parse(localStorage.getItem(STARMAP_KEY) || '{}');
+			_cachedData = Object.assign(
+				{
+					constellations: [],
+					voidShards: 0,
+					lastShardCalc: Date.now(),
+					shopPurchases: {},
+					permanentLuckStacks: 0,
+					voidMarketLuck: 0,
+				},
+				parsed
+			);
+		} catch {
+			_cachedData = {
 				constellations: [],
 				voidShards: 0,
 				lastShardCalc: Date.now(),
 				shopPurchases: {},
 				permanentLuckStacks: 0,
 				voidMarketLuck: 0,
-			},
-			loadData()
-		);
+			};
+		}
+		updateCachedCalculations();
+		return _cachedData;
 	}
+
+	function saveData(d) {
+		_cachedData = d;
+		updateCachedCalculations();
+		localStorage.setItem(STARMAP_KEY, JSON.stringify(d));
+	}
+
+	function getData() {
+		return loadData();
+	}
+	// Generated code ends here on 2026-09-22T00:00:00Z:
 
 	// ── shard generation ─────────────────────────────────────────────────
 	function shardsPerHourForStar(chance) {
@@ -173,12 +271,6 @@
 			ctx.fill();
 		});
 	}
-
-	// ── exposed globally ─────────────────────────────────────────────────
-	window.getStarmapLuckBonus = function () {
-		const d = getData();
-		return 1 + (d.permanentLuckStacks || 0) * 0.25 + (d.voidMarketLuck || 0);
-	};
 
 	// Called by gauntlets.js applyReward or the crystallize buttonnnnnnnnnnnnnnnnnnnn
 	window.crystallize = function () {
@@ -338,6 +430,72 @@
 
 		VOID_MARKET.forEach((item) => market.appendChild(buildMarketItem(item, d, shards)));
 		container.appendChild(market);
+
+		// eternum
+
+		if (isEternumUnlocked(d)) {
+			const eternum = document.createElement('div');
+			eternum.className = 'starmap-section eternum-section';
+
+			const label = document.createElement('div');
+			label.className = 'starmap-section-label eternum-label';
+			label.textContent = '⟁ eternum ::: pity compression';
+			eternum.appendChild(label);
+
+			const desc = document.createElement('div');
+			desc.className = 'eternum-desc';
+			desc.textContent =
+				'compress the hard-pity ceiling on Void, Antimatter, and the rarities beyond. sequential, permanent, expensive.';
+			eternum.appendChild(desc);
+
+			const currentMult = window.getPityCompressionReduction();
+			const readout = document.createElement('div');
+			readout.className = 'eternum-readout';
+			readout.textContent = `current compression: ${Math.round((1 - currentMult) * 100)}% off hard pity`;
+			eternum.appendChild(readout);
+
+			const owned = getCompressionTiersOwned(d);
+			COMPRESSION_TIERS.forEach((tier, i) => {
+				const row = document.createElement('div');
+				const isOwned = i < owned;
+				const isNext = i === owned;
+				const isLocked = i > owned;
+				row.className =
+					'eternum-tier-row' +
+					(isOwned ? ' eternum-owned' : '') +
+					(isLocked ? ' eternum-locked' : '');
+				row.innerHTML = `
+      <div class="eternum-tier-info">
+        <div class="eternum-tier-name">compression tier ${i + 1}</div>
+        <div class="eternum-tier-desc">${Math.round((1 - tier.mult) * 100)}% reduction this tier</div>
+      </div>
+      <div class="eternum-tier-right">
+        ${
+					isOwned
+						? '<span class="eternum-owned-tag">owned</span>'
+						: `<div class="eternum-tier-cost">${fmt(tier.cost)} ✦</div>
+             <button class="small eternum-buy-btn" ${isNext ? '' : 'disabled'}>buy</button>`
+				}
+      </div>
+    `;
+				if (isNext) {
+					row.querySelector('.eternum-buy-btn')?.addEventListener('click', buyCompressionTier);
+				}
+				eternum.appendChild(row);
+			});
+
+			container.appendChild(eternum);
+		} else {
+			const teaseBox = document.createElement('div');
+			teaseBox.className = 'eternum-tease';
+			const remaining = ETERNUM_UNLOCK_CONSTELLATIONS - (d.constellations?.length || 0);
+			teaseBox.innerHTML = `
+    <div class="eternum-tease-icon">⟁</div>
+    <div class="eternum-tease-text">eternum sealed</div>
+    <div class="eternum-tease-sub">crystallize ${remaining} more constellation${remaining === 1 ? '' : 's'} to unlock</div>
+  `;
+			container.appendChild(teaseBox);
+		}
 	}
 
 	function buildConstellationCard(c) {
@@ -440,11 +598,25 @@
 		renderStarmap();
 	}
 
+	// Generated code starts here on 2026-03-31T20:00:00Z:
+	function isStarTrailUnlocked() {
+		if (localStorage.getItem('cosmeticUnlock_star_trail') === '1') return true;
+		try {
+			const parsed = JSON.parse(localStorage.getItem(STARMAP_KEY) || '{}');
+			if (parsed?.shopPurchases?.star_trail) {
+				localStorage.setItem('cosmeticUnlock_star_trail', '1');
+				return true;
+			}
+		} catch (_) {}
+		return false;
+	}
+	// Generated code ends here on 2026-03-31T20:00:00Z:
+
 	function initStarTrail() {
 		if (window._starTrailActive) return;
 		window._starTrailActive = true;
 		document.addEventListener('mousemove', (e) => {
-			if (!localStorage.getItem('cosmeticUnlock_star_trail')) return;
+			if (!isStarTrailUnlocked()) return;
 			const dot = document.createElement('div');
 			dot.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;width:3px;height:3px;
         background:rgba(200,200,255,0.75);border-radius:50%;pointer-events:none;z-index:2147483640;
@@ -472,10 +644,23 @@
 		if (el) el.textContent = fmt(Math.floor(d.voidShards)) + ' ✦';
 	}, 60000);
 
+	// Generated code starts here on 2026-09-26T00:00:00Z:
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'visible') {
+			const d = getData();
+			if (!d.constellations?.length) return;
+			accrueShards(d);
+			saveData(d);
+			const el = document.getElementById('starmapShardCount');
+			if (el) el.textContent = fmt(Math.floor(d.voidShards)) + ' ✦';
+		}
+	});
+	// Generated code ends here on 2026-09-26T00:00:00Z:
+
 	window.renderStarmap = renderStarmap;
 
 	// init star trail if already owned
-	if (localStorage.getItem('cosmeticUnlock_star_trail')) initStarTrail();
+	if (isStarTrailUnlocked()) initStarTrail();
 
 	// wait for DOM
 	function tryInit(n) {

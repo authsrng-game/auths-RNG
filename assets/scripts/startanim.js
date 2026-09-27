@@ -462,7 +462,12 @@ window.addEventListener('DOMContentLoaded', () => {
 	}
 
 	function animCustom(bg, fg, wakeText) {
+		// Generated code starts here on 2026-09-19T09:45:00Z:
 		if (!config.customCode?.trim()) return;
+		if (!config.customCodeApproved) {
+			animDefault(bg, fg, wakeText);
+			return;
+		}
 		const container = buildContainer(bg);
 		const tap = document.createElement('div');
 		tap.className = 'sa-tap';
@@ -498,6 +503,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			container.appendChild(err);
 			setTimeout(() => dismiss(container), 3000);
 		}
+		// Generated code ends here on 2026-09-19T09:45:00Z:
 	}
 
 	window._saRunPreview = function (cfg, previewBg, previewFg, onDone) {

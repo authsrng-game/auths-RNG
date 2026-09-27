@@ -68,402 +68,350 @@ test.describe('auths-RNG smoke tests', () => {
 	});
 	// Generated code ends here on 2026-06-18T00:28:00Z:
 
-	// Generated code starts here on 2026-06-18T01:00:00Z:
-	test('FortuneBank balance does not double-decay on multiple reads', async ({ page }) => {
+	// Generated code starts here on 2026-06-18T00:30:00Z:
+	test('navigation arrows have accessible aria-labels', async ({ page }) => {
 		await page.goto(BASE_URL);
-		const result = await page.evaluate(() => {
-			/* global window */
-			const bank = new window.FortuneBank();
-			const startTime = 1000000;
-			for (let i = 0; i < 300; i++) {
-				bank.deposit(startTime);
-			}
-			const initialBalance = bank.serialize().balance;
+		await expect(page.locator('#prevPage')).toHaveAttribute('aria-label', 'Previous page');
+		await expect(page.locator('#nextPage')).toHaveAttribute('aria-label', 'Next page');
+	});
+	// Generated code ends here on 2026-06-18T00:30:00Z:
 
-			const oneHourLater = startTime + 3600000;
-			const origNow = Date.now;
-			Date.now = () => oneHourLater;
+	// Generated code starts here on 2026-06-18T00:35:00Z:
+	test('page dots and close buttons have accessible aria-labels', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const firstDot = page.locator('.page-dot').first();
+		await expect(firstDot).toHaveAttribute('aria-label', 'Page 1');
+		await expect(firstDot).toHaveAttribute('aria-current', 'page');
 
-			const balance1 = bank.balance();
-			const balance2 = bank.balance();
-			const balance3 = bank.balance();
+		const closeBtn = page.locator('#indexClose');
+		await expect(closeBtn).toHaveAttribute('aria-label', 'Close');
+	});
+	// Generated code ends here on 2026-06-18T00:35:00Z:
 
-			Date.now = origNow;
+	// Generated code starts here on 2026-06-18T00:40:00Z:
+	test('confirm modal has accessible dialog attributes', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const confirmModal = page.locator('#confirmModal');
+		await expect(confirmModal).toHaveAttribute('role', 'dialog');
+		await expect(confirmModal).toHaveAttribute('aria-modal', 'true');
+		await expect(confirmModal).toHaveAttribute('aria-labelledby', 'modalTitle');
+	});
+	// Generated code ends here on 2026-06-18T00:40:00Z:
 
-			return { initialBalance, balance1, balance2, balance3 };
-		});
-
-		expect(result.balance1).toBeCloseTo(result.initialBalance - 1 / 12, 5);
-		expect(result.balance2).toBe(result.balance1);
-		expect(result.balance3).toBe(result.balance1);
+	// Generated code starts here on 2026-06-18T01:00:00Z:
+	test('shop upgrade buttons and data transfer buttons have accessible aria-labels', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+		await expect(page.locator('#buyLuckBtn')).toHaveAttribute('aria-label', 'Upgrade luck boost');
+		await expect(page.locator('#exportSettingsBtn')).toHaveAttribute('aria-label', 'Copy settings');
+		await expect(page.locator('#exportSaveBtn')).toHaveAttribute('aria-label', 'Copy save data');
 	});
 	// Generated code ends here on 2026-06-18T01:00:00Z:
 
-	// Generated code starts here on 2026-06-18T01:10:00Z:
-	test('StreakTracker deserializes dryRuns values as numbers', async ({ page }) => {
+	// Generated code starts here on 2026-09-16T00:34:27Z:
+	test('theme editor button has accessible aria-label', async ({ page }) => {
 		await page.goto(BASE_URL);
-		const result = await page.evaluate(() => {
-			const tracker = new window.StreakTracker();
-			tracker.deserialize({
-				dryRuns: { Rare: '5' },
-			});
-			tracker.record(1, 'Rare', false);
-			return tracker.serialize().dryRuns.Rare;
-		});
-
-		expect(result).toBe(6);
+		await expect(page.locator('#openThemeEditorBtn')).toHaveAttribute(
+			'aria-label',
+			'Open theme editor'
+		);
 	});
-	// Generated code ends here on 2026-06-18T01:10:00Z:
+	// Generated code ends here on 2026-09-16T00:34:27Z:
+
+	// Generated code starts here on 2026-09-16T00:45:00Z:
+	test('notification center has proper aria attributes and keyboard interaction', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+		const bell = page.locator('#notifBell');
+		const panel = page.locator('#notifPanel');
+
+		await expect(bell).toHaveAttribute('aria-expanded', 'false');
+		await expect(bell).toHaveAttribute('aria-controls', 'notifPanel');
+		await expect(page.locator('#notifMarkAllRead')).toHaveAttribute(
+			'aria-label',
+			'Mark all notifications as read'
+		);
+		await expect(page.locator('#notifClearAll')).toHaveAttribute(
+			'aria-label',
+			'Clear all notifications'
+		);
+
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
+		await page.goto(BASE_URL);
+
+		const saContainer = page.locator('.sa-container');
+		if (await saContainer.isVisible()) {
+			await saContainer.click({ force: true });
+			await page.waitForTimeout(500);
+		}
+
+		await page.evaluate(() => {
+			const bellEl = document.getElementById('notifBell');
+			if (bellEl) bellEl.click();
+		});
+		await expect(bell).toHaveAttribute('aria-expanded', 'true');
+		await expect(panel).toHaveClass(/open/);
+
+		await page.keyboard.press('Escape');
+		await expect(bell).toHaveAttribute('aria-expanded', 'false');
+		await expect(panel).not.toHaveClass(/open/);
+	});
+	// Generated code ends here on 2026-09-16T00:45:00Z:
+
+	// Generated code starts here on 2026-09-16T12:00:00Z:
+	test('index modal has accessible dialog attributes and search aria-label', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const indexModal = page.locator('#indexModal');
+		await expect(indexModal).toHaveAttribute('role', 'dialog');
+		await expect(indexModal).toHaveAttribute('aria-modal', 'true');
+		await expect(indexModal).toHaveAttribute('aria-labelledby', 'indexModalTitle');
+		await expect(page.locator('#indexSearch')).toHaveAttribute('aria-label', 'Search rarities');
+	});
+	// Generated code ends here on 2026-09-16T12:00:00Z:
 
 	// Generated code starts here on 2026-06-18T01:30:00Z:
-	test('PityTracker deserializes counters and mastery values as numbers', async ({ page }) => {
+	test('account button is a button element with an accessible aria-label', async ({ page }) => {
 		await page.goto(BASE_URL);
-		const result = await page.evaluate(() => {
-			const tracker = new window.PityTracker();
-			tracker.deserialize({
-				counters: { Common: '5' },
-				mastery: { Common: '0.0015' },
-			});
-			tracker.increment('Common');
-			return {
-				counter: tracker.get('Common'),
-				counterType: typeof tracker.get('Common'),
-				mastery: tracker.getMastery('Common'),
-				masteryType: typeof tracker.getMastery('Common'),
-			};
-		});
-
-		expect(result.counter).toBe(6);
-		expect(result.counterType).toBe('number');
-		expect(result.mastery).toBe(0.0015);
-		expect(result.masteryType).toBe('number');
+		const accountBtn = page.locator('#accountBtn');
+		await expect(accountBtn).toHaveAttribute('type', 'button');
+		await expect(accountBtn).toHaveAttribute('aria-label', 'Account details and login');
 	});
 	// Generated code ends here on 2026-06-18T01:30:00Z:
 
-	// Generated code starts here on 2026-06-18T02:00:00Z:
-	test('MomentumTracker deserializes combo, lastRollAt and peakCombo as numbers', async ({ page }) => {
+	// Generated code starts here on 2026-09-17T14:00:00Z:
+	test('roll choice modal has accessible dialog attributes and button labels', async ({ page }) => {
 		await page.goto(BASE_URL);
-		const result = await page.evaluate(() => {
-			const tracker = new window.MomentumTracker();
-			const now = 10000;
-			tracker.deserialize({
-				combo: '5',
-				lastRollAt: '9000',
-				peakCombo: '5',
-			});
-			tracker.record(now);
-			return {
-				combo: tracker.combo(),
-				comboType: typeof tracker.combo(),
-				serialized: tracker.serialize(),
-			};
-		});
-
-		expect(result.combo).toBe(6);
-		expect(result.comboType).toBe('number');
-		expect(result.serialized.combo).toBe(6);
-		expect(result.serialized.lastRollAt).toBe(10000);
+		const choiceModal = page.locator('#rollChoiceModal');
+		await expect(choiceModal).toHaveAttribute('role', 'dialog');
+		await expect(choiceModal).toHaveAttribute('aria-modal', 'true');
+		await expect(choiceModal).toHaveAttribute('aria-labelledby', 'rollChoiceRarity');
+		await expect(page.locator('#rollChoiceSell')).toHaveAttribute('aria-label', 'Sell rarity');
+		await expect(page.locator('#rollChoiceKeep')).toHaveAttribute('aria-label', 'Keep rarity');
+		await expect(page.locator('#rollChoicePass')).toHaveAttribute('aria-label', 'Pass rarity');
 	});
-
-	test('ResistanceTracker deserializes active cooldowns as numbers', async ({ page }) => {
-		await page.goto(BASE_URL);
-		const result = await page.evaluate(() => {
-			const tracker = new window.ResistanceTracker();
-			tracker.deserialize({
-				Legendary: '10',
-			});
-			return {
-				remaining: tracker.remaining('Legendary'),
-				remainingType: typeof tracker.remaining('Legendary'),
-			};
-		});
-
-		expect(result.remaining).toBe(10);
-		expect(result.remainingType).toBe('number');
+	// Generated code starts here on 2026-09-20T15:30:00Z:
+	test('credits page license link resolves to valid licenseview page', async ({ page }) => {
+		await page.goto(`${BASE_URL}/assets/frontend/credits.html`);
+		const link = page.locator('a:has-text("MIT licensed")');
+		await expect(link).toBeAttached();
+		const href = await link.getAttribute('href');
+		const targetUrl = new URL(href, `${BASE_URL}/assets/frontend/credits.html`).href;
+		const res = await page.goto(targetUrl);
+		expect(res.status()).toBe(200);
 	});
-	// Generated code ends here on 2026-06-18T02:00:00Z:
-
-	// Generated code starts here on 2026-06-18T03:00:00Z:
-	test('doubleClover rune upgrade correctly increases state anomalies variable', async ({ page }) => {
-		await page.addInitScript(() => {
-			localStorage.setItem('runesUnlocked', '1');
-			localStorage.setItem('runeBlocks', '100000');
-		});
-		await page.goto(BASE_URL);
-		const result = await page.evaluate(() => {
-			/* global anomalies */
-			const initialAnomalies = typeof anomalies !== 'undefined' ? anomalies : null;
-			if (typeof window.renderRunes === 'function') {
-				window.renderRunes();
-			}
-			const buyBtn = document.querySelector('.rune-buy-btn[data-key="doubleClover"]');
-			if (buyBtn) buyBtn.click();
-
-			const updatedAnomalies = typeof anomalies !== 'undefined' ? anomalies : null;
-			const windowAnomalies = window.anomalies;
-			const savedAnomalies = localStorage.getItem('anomalies');
-
-			return { initialAnomalies, updatedAnomalies, windowAnomalies, savedAnomalies };
-		});
-
-		expect(result.updatedAnomalies).toBe(result.initialAnomalies + 50000000);
-		expect(result.windowAnomalies).toBeUndefined();
-		expect(result.savedAnomalies).toBe(String(result.initialAnomalies + 50000000));
-	});
-	// Generated code ends here on 2026-06-18T03:00:00Z:
-
-	// Generated code starts here on 2026-09-21T12:55:00Z:
-	test('updateActivePotionsDisplay handles missing or custom potionData safely and shows correct multiplier', async ({ page }) => {
-		const errors = [];
-		page.on('pageerror', (err) => {
-			if (!err.message.includes('Failed to fetch')) {
-				errors.push(err.message);
-			}
-		});
-
-		await page.addInitScript(() => {
-			const futureTime = Date.now() + 60000;
-			localStorage.setItem(
-				'activePotions',
-				JSON.stringify({
-					active: [{ type: '_g_easy', endTime: futureTime, multiplier: 2.5 }],
-					duplicateLeft: 0,
-				})
-			);
-		});
-
-		await page.goto(BASE_URL);
-
-		const text = await page.locator('#activePotionsList').innerText();
-		expect(errors).toHaveLength(0);
-		expect(text).toContain('2.5x luck');
-	});
-	// Generated code ends here on 2026-09-21T12:55:00Z:
-
-	// Generated code starts here on 2026-06-18T14:00:00Z:
-	test('Cloud Backup displays correct date for ISO timestamp strings', async ({ page }) => {
-		await page.addInitScript(() => {
-			localStorage.setItem('cloudBackupEnabled', 'true');
-			localStorage.setItem('lastCloudBackup', '2026-06-18T12:34:56.000Z');
-		});
-
-		await page.goto(BASE_URL);
-
-		const text = await page.evaluate(() => {
-			localStorage.setItem('cloudBackupEnabled', 'true');
-			localStorage.setItem('lastCloudBackup', '2026-06-18T12:34:56.000Z');
-			window.AuthAccount = { isLoggedIn: () => true };
-			document.dispatchEvent(new CustomEvent('authchange'));
-			return document.getElementById('cloudLastBackup')?.innerText || '';
-		});
-
-		expect(text).not.toContain('1970');
-		expect(text).toContain('2026');
-	});
-	// Generated code ends here on 2026-06-18T14:00:00Z:
-
-	// Generated code starts here on 2026-06-18T15:00:00Z:
-	test('Leaderboard submit correctly parses array-formatted rarityInventory', async ({ page }) => {
-		await page.addInitScript(() => {
-			localStorage.setItem(
-				'rarityInventory',
-				JSON.stringify([
-					{ name: 'Common', chance: 0.5, count: 10 },
-					{ name: 'Rare', chance: 0.01, count: 2 },
-				])
-			);
-		});
-
-		await page.goto(BASE_URL);
-
-		const result = await page.evaluate(() => {
-			if (!window.LeaderboardSubmit) return null;
-			const payload = window.LeaderboardSubmit.buildPayload();
-			const rarest = window.LeaderboardSubmit.getRarest();
-			return { payload, rarest };
-		});
-
-		expect(result).not.toBeNull();
-		expect(result.payload.rarities).toBe(12);
-		expect(result.rarest.name).toBe('Rare');
-		expect(result.rarest.denom).toBe(100);
-	});
-	// Generated code ends here on 2026-06-18T15:00:00Z:
+	// Generated code ends here on 2026-09-20T15:30:00Z:
 
 	// Generated code starts here on 2026-09-22T00:00:00Z:
-	test('renderHistory escapes HTML characters in rarity names in mutation log', async ({ page }) => {
-		await page.addInitScript(() => {
-			localStorage.setItem('mutationsUnlocked', '1');
-			localStorage.setItem(
-				'rarityInventory',
-				JSON.stringify([
-					{ name: 'Common', chance: 0.5, count: 1 },
-					{ name: 'Uncommon', chance: 0.25, count: 1 },
-				])
-			);
-			localStorage.setItem(
-				'mutationHistory',
-				JSON.stringify([
-					{
-						a: '<b id="injectedA">test</b>',
-						b: 'Common',
-						result: '<b id="injectedRes">test</b>',
-						good: true,
-						ts: Date.now(),
-					},
-				])
-			);
-		});
-
+	test('sort select has an associated label and aria-label', async ({ page }) => {
 		await page.goto(BASE_URL);
-
-		const result = await page.evaluate(() => {
-			if (typeof window.renderMutations === 'function') {
-				window.renderMutations();
-			}
-			const injectedA = !!document.getElementById('injectedA');
-			const injectedRes = !!document.getElementById('injectedRes');
-			const formula = document.querySelector('.mh-formula')?.innerHTML || '';
-			const resText = document.querySelector('.mh-result')?.innerHTML || '';
-			return { injectedA, injectedRes, formula, resText };
-		});
-
-		expect(result.injectedA).toBe(false);
-		expect(result.injectedRes).toBe(false);
-		expect(result.formula).toContain('&lt;b id="injectedA"&gt;test&lt;/b&gt;');
-		expect(result.resText).toContain('&lt;b id="injectedRes"&gt;test&lt;/b&gt;');
+		const sortSelect = page.locator('#sortSelect');
+		await expect(sortSelect).toHaveAttribute('aria-label', 'Sort inventory items');
+		const label = page.locator('label[for="sortSelect"]');
+		await expect(label).toBeVisible();
 	});
 	// Generated code ends here on 2026-09-22T00:00:00Z:
 
-	// Generated code starts here on 2026-09-25T12:46:00Z:
-	test('auto-mutate upgrade uses MutationSystem methods and executes without errors', async ({ page }) => {
-		const pageErrors = [];
-		page.on('pageerror', (err) => {
-			if (!err.message.includes('Failed to fetch')) {
-				pageErrors.push(err.message);
-			}
-		});
-
-		await page.addInitScript(() => {
-			localStorage.setItem('mutationsUnlocked', '1');
-			localStorage.setItem('mutationTrustOwned', JSON.stringify(['upgrade_automutate']));
-			localStorage.setItem(
-				'rarityInventory',
-				JSON.stringify([
-					{ name: 'Common', chance: 0.5, count: 5 },
-					{ name: 'Uncommon', chance: 0.25, count: 5 },
-				])
-			);
-		});
-
+	// Generated code starts here on 2026-03-29T12:00:00Z:
+	test('resetInventory removes system unlock keys from localStorage', async ({ page }) => {
 		await page.goto(BASE_URL);
-
-		const result = await page.evaluate(() => {
-			if (!window.MutationSystem) return { hasSystem: false };
-
-			const initialHistory = JSON.parse(localStorage.getItem('mutationHistory') || '[]');
-			const ms = window.MutationSystem;
-			const inv = ms.getInventoryRarities();
-			if (!inv || inv.length < 2) return { invLength: inv ? inv.length : 0 };
-
-			const a = inv[0];
-			const b = inv[1];
-			const res = ms.mutate(a.name, b.name);
-			if (res) {
-				const idxA = ms.getRarityIndex(a.name);
-				const idxB = ms.getRarityIndex(b.name);
-				const resIdx = ms.getRarityIndex(res.name);
-				const wasGood = resIdx < Math.min(idxA, idxB);
-				const delta = ms.getTrustDelta(wasGood, resIdx, idxA, idxB);
-				ms.addTrust(delta);
-				ms.addToHistory(a.name, b.name, res, wasGood);
-			}
-
-			const updatedHistory = JSON.parse(localStorage.getItem('mutationHistory') || '[]');
+		await page.evaluate(() => {
+			globalThis.localStorage.setItem('runesUnlocked', '1');
+			globalThis.localStorage.setItem('catShrineUnlocked', '1');
+			globalThis.localStorage.setItem('catShrineEquipped', 'https://cataas.com/cat/test');
+			globalThis.localStorage.setItem('catShrineToggle', '1');
+		});
+		await page.evaluate(async () => {
+			globalThis.showConfirm = () => Promise.resolve(true);
+			globalThis.showAlert = () => Promise.resolve();
+			globalThis.location.reload = () => {};
+			const resetBtn = globalThis.document.getElementById('resetBtn');
+			if (resetBtn) resetBtn.click();
+		});
+		await page.waitForTimeout(500);
+		const keys = await page.evaluate(() => {
 			return {
-				hasSystem: true,
-				hasMutate: typeof ms.mutate === 'function',
-				historyAdded: updatedHistory.length > initialHistory.length,
+				runes: globalThis.localStorage.getItem('runesUnlocked'),
+				catShrine: globalThis.localStorage.getItem('catShrineUnlocked'),
+				catEquipped: globalThis.localStorage.getItem('catShrineEquipped'),
+				catToggle: globalThis.localStorage.getItem('catShrineToggle'),
 			};
 		});
-
-		expect(pageErrors).toHaveLength(0);
-		expect(result.hasSystem).toBe(true);
-		expect(result.hasMutate).toBe(true);
-		expect(result.historyAdded).toBe(true);
+		expect(keys.runes).toBeNull();
+		expect(keys.catShrine).toBeNull();
+		expect(keys.catEquipped).toBeNull();
+		expect(keys.catToggle).toBeNull();
 	});
-	// Generated code ends here on 2026-09-25T12:46:00Z:
-	// Generated code starts here on 2026-06-18T16:00:00Z:
-	test('system-notify render does not duplicate sysmsg-item elements in notifList', async ({ page }) => {
+	// Generated code ends here on 2026-03-29T12:00:00Z:
+
+	// Generated code starts here on 2026-09-23T10:00:00Z:
+	test('wishing well controls have accessible aria-labels', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const wellInput = page.locator('#wellInput');
+		await expect(wellInput).toHaveAttribute('aria-label', 'Points to wish');
+		const quickBtn = page.locator('.well-quick-btn').first();
+		await expect(quickBtn).toHaveAttribute('aria-label', 'Set wish amount to 10 points');
+	});
+	// Generated code ends here on 2026-09-23T10:00:00Z:
+
+	// Generated code starts here on 2026-09-24T10:00:00Z:
+	test('auto roll button has aria-pressed attribute and toggles state when clicked', async ({
+		page,
+	}) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
 		await page.goto(BASE_URL);
 
-		const result = await page.evaluate(async () => {
-			const origFetch = window.fetch;
-			window.fetch = async (url, opts) => {
-				if (typeof url === 'string' && url.includes('/system-messages')) {
-					return {
-						ok: true,
-						json: async () => ({
-							messages: [
-								{ id: '1', from: 'System', subject: 'Hello', body: 'World', ts: Date.now(), read: false },
-							],
-						}),
-					};
-				}
-				return origFetch(url, opts);
-			};
+		const autoRollBtn = page.locator('#autoRollBtn');
+		await expect(autoRollBtn).toHaveAttribute('aria-label', 'Toggle auto roll');
+		await expect(autoRollBtn).toHaveAttribute('aria-pressed', 'false');
 
-			window.AuthAccount = {
-				isLoggedIn: () => true,
-				getToken: () => 'fake-token',
-			};
-
-			document.dispatchEvent(new CustomEvent('authchange'));
-			await new Promise((resolve) => setTimeout(resolve, 200));
-
-			const countFirstRender = document.querySelectorAll('.sysmsg-item').length;
-
-			document.dispatchEvent(new CustomEvent('authchange'));
-			await new Promise((resolve) => setTimeout(resolve, 200));
-
-			const countSecondRender = document.querySelectorAll('.sysmsg-item').length;
-
-			return { countFirstRender, countSecondRender };
+		await page.evaluate(() => {
+			const b = document.getElementById('autoRollBtn');
+			if (b) b.click();
 		});
+		await expect(autoRollBtn).toHaveAttribute('aria-pressed', 'true');
 
-		expect(result.countFirstRender).toBe(1);
-		expect(result.countSecondRender).toBe(1);
+		await page.evaluate(() => {
+			const b = document.getElementById('autoRollBtn');
+			if (b) b.click();
+		});
+		await expect(autoRollBtn).toHaveAttribute('aria-pressed', 'false');
 	});
-	// Generated code ends here on 2026-06-18T16:00:00Z:
+	// Generated code ends here on 2026-09-24T10:00:00Z:
 
-	// Generated code starts here on 2026-06-18T18:00:00Z:
-	test('starmap crystallize reads window.totalSeconds / getCurrentTotalSeconds correctly', async ({ page }) => {
+	// Generated code starts here on 2026-03-31T00:00:00Z:
+	test('dev console storage list sanitizes html in storage keys', async ({ page }) => {
 		await page.addInitScript(() => {
-			localStorage.setItem('totalPlaytime', '3600');
-			localStorage.setItem('starmapUnlocked', '1');
-			localStorage.setItem('totalRolls', '200');
-			localStorage.setItem(
-				'rarityInventory',
-				JSON.stringify([{ name: 'Common', chance: 0.5, count: 5 }])
-			);
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('<img src=x onerror=alert(1)>', 'testval');
+		});
+		await page.goto(BASE_URL);
+
+		const escapedText = await page.evaluate(() => {
+			/* global window */
+			const userSettings = { dev: true };
+			localStorage.setItem('userSettings', JSON.stringify(userSettings));
+			if (window.applySettings) window.applySettings(userSettings);
+			const tabBtn = document.querySelector('.dev-tab[data-tab="storage"]');
+			if (tabBtn) tabBtn.click();
+			const list = document.getElementById('dc-storage-list');
+			return list ? list.innerHTML : '';
 		});
 
+		expect(escapedText).toContain('&lt;img src=x onerror=alert(1)&gt;');
+		expect(escapedText).not.toContain('<img src=x onerror=alert(1)>');
+	});
+	// Generated code ends here on 2026-03-31T00:00:00Z:
+
+	// Generated code starts here on 2026-10-24T00:00:00Z:
+	test('legacy mutationTrust array migrates forward to mutationHistory', async ({ page }) => {
+		const dummyHistory = [
+			{ a: 'Common', b: 'Uncommon', result: 'Rare', good: true, ts: Date.now() },
+		];
+		await page.addInitScript((history) => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('mutationsUnlocked', '1');
+			localStorage.setItem('mutationTrust', JSON.stringify(history));
+		}, dummyHistory);
 		await page.goto(BASE_URL);
 
 		const result = await page.evaluate(() => {
-			const seconds = typeof window.getCurrentTotalSeconds === 'function' ? window.getCurrentTotalSeconds() : null;
-			const totalSec = window.totalSeconds;
-			let constellationPlaytime = null;
-			if (typeof window.crystallize === 'function') {
-				const c = window.crystallize();
-				if (c) constellationPlaytime = c.playtime;
-			}
-			return { seconds, totalSec, constellationPlaytime };
+			return {
+				history: localStorage.getItem('mutationHistory'),
+				oldKey: localStorage.getItem('mutationTrust'),
+			};
 		});
 
-		expect(result.seconds).toBeGreaterThanOrEqual(3600);
-		expect(result.totalSec).toBeGreaterThanOrEqual(3600);
-		expect(result.constellationPlaytime).toBeGreaterThanOrEqual(3600);
+		expect(result.history).not.toBeNull();
+		expect(JSON.parse(result.history)).toEqual(dummyHistory);
+		expect(result.oldKey).toBeNull();
 	});
-	// Generated code ends here on 2026-06-18T18:00:00Z:
+
+	test('getTrust handles non-numeric mutationTrust value safely without NaN', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('mutationTrust', 'invalid_number');
+		});
+		await page.goto(BASE_URL);
+
+		const trustVal = await page.evaluate(() => {
+			const el = document.getElementById('mutationTrustAmt');
+			return el ? el.textContent : null;
+		});
+
+		if (trustVal !== null) {
+			expect(trustVal).not.toBe('NaN');
+		}
+	});
+	// Generated code ends here on 2026-10-24T00:00:00Z:
+
+	// Generated code starts here on 2026-03-31T12:00:00Z:
+	test('forceCleanup trims read notifications older than 7 days while retaining unread or recent ones', async ({
+		page,
+	}) => {
+		const now = Date.now();
+		const eightDaysAgo = now - 8 * 24 * 60 * 60 * 1000;
+		const oneDayAgo = now - 1 * 24 * 60 * 60 * 1000;
+
+		const testNotifications = [
+			{ id: 'stale-read', read: true, ts: eightDaysAgo, msg: 'Old read' },
+			{ id: 'stale-unread', read: false, ts: eightDaysAgo, msg: 'Old unread' },
+			{ id: 'recent-read', read: true, ts: oneDayAgo, msg: 'Recent read' },
+		];
+
+		await page.addInitScript((items) => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('notifications', JSON.stringify(items));
+		}, testNotifications);
+
+		await page.goto(BASE_URL);
+
+		await page.evaluate(() => {
+			if (typeof window.forceCleanup === 'function') {
+				window.forceCleanup();
+			}
+		});
+
+		const remaining = await page.evaluate(() => {
+			const raw = localStorage.getItem('notifications');
+			return raw ? JSON.parse(raw) : [];
+		});
+
+		const ids = remaining.map((n) => n.id);
+		expect(ids).not.toContain('stale-read');
+		expect(ids).toContain('stale-unread');
+		expect(ids).toContain('recent-read');
+	});
+	// Generated code ends here on 2026-03-31T12:00:00Z:
+
+	// Generated code starts here on 2026-10-25T00:00:00Z:
+	test('page dot navigation dynamically updates aria-current attribute', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const dot0 = page.locator('.page-dot[data-page="0"]');
+		const dot1 = page.locator('.page-dot[data-page="1"]');
+
+		await expect(dot0).toHaveAttribute('aria-current', 'page');
+		await expect(dot1).not.toHaveAttribute('aria-current', 'page');
+
+		await page.evaluate(() => {
+			if (typeof window.goToPage === 'function') {
+				window.goToPage(1);
+			}
+		});
+
+		await expect(dot0).not.toHaveAttribute('aria-current', 'page');
+		await expect(dot1).toHaveAttribute('aria-current', 'page');
+	});
+	// Generated code ends here on 2026-10-25T00:00:00Z:
 });

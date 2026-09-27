@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>you idiot</title>
+		<style>
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				background: #0a0806;
+				height: 100%;
+			}
+			canvas {
+				display: block;
+			}
+			#caption {
+				position: fixed;
+				left: 18px;
+				bottom: 16px;
+				color: rgba(230, 210, 190, 0.55);
+				font-family: Georgia, 'Times New Roman', serif;
+				font-size: 12px;
+				letter-spacing: 0.06em;
+				pointer-events: none;
+				opacity: 0;
+				transition: opacity 3s ease;
+				text-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
+			}
+		</style>
+	</head>
+	<body>
+		an angel lost its wings
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+					"three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+				}
+			}
+		</script>
+
+		<script type="module">
+			import * as THREE from 'three';
+			import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+			// renderer scene camera
+
+			const renderer = new THREE.WebGLRenderer({
+				antialias: false,
+				powerPreference: 'high-performance',
+			});
+			renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.domElement.style.filter = 'saturate(0.72) contrast(1.1) brightness(0.92) sepia(0.1)';
+			document.body.appendChild(renderer.domElement);
+
+			const scene = new THREE.Scene();
+			const FOG_COLOR = 0x4a3a30;
+			scene.fog = new THREE.FogExp2(FOG_COLOR, 0.016);
+
+			const camera = new THREE.PerspectiveCamera(
+				48,
+				window.innerWidth / window.innerHeight,
+				0.5,
+				600
+			);
+			camera.position.set(38, 16, 46);
+
+			const controls = new OrbitControls(camera, renderer.domElement);
+			controls.target.set(0, 8, 0);
+			controls.enableDamping = true;
+			controls.dampingFactor = 0.04;
+			controls.autoRotate = true;
+			controls.autoRotateSpeed = 0.35;
+			controls.minDistance = 12;
+			controls.maxDistance = 90;
+			controls.maxPolarAngle = Math.PI * 0.49;
+
+			window.addEventListener('resize', () => {
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+				renderer.setSize(window.innerWidth, window.innerHeight);
+			});
+
+			// low-res canvas texture helpers
+
+			function makeCanvas(w, h) {
+				const c = document.createElement('canvas');
+				c.width = w;
+				c.height = h;
+				return c;
+			}
+
+			function lowResTexture(canvas, repeatX = 1, repeatY = 1) {
+				const tex = new THREE.CanvasTexture(canvas);
+				tex.wrapS = THREE.RepeatWrapping;
+				tex.wrapT = THREE.RepeatWrapping;
+				tex.repeat.set(repeatX, repeatY);
+				tex.magFilter = THREE.LinearFilter;
+				tex.minFilter = THREE.LinearMipmapLinearFilter;
+				tex.anisotropy = 1;
+				tex.generateMipmaps = true;
+				return tex;
+			}
+
+			function buildingTexture(baseHex, litChance, damaged) {
+				const w = 24,
+					h = 48;
+				const cv = makeCanvas(w, h);
+				const ctx = cv.getContext('2d');
+				ctx.fillStyle = baseHex;
+				ctx.fillRect(0, 0, w, h);
+
+				// baked ambient occlusion: darker near base
+				const grad = ctx.createLinearGradient(0, h, 0, h * 0.4);
+				grad.addColorStop(0, 'rgba(0,0,0,0.55)');
+				grad.addColorStop(1, 'rgba(0,0,0,0)');
+				ctx.fillStyle = grad;
+				ctx.fillRect(0, 0, w, h);
+
+				// window grid
+				const cols = 4,
+					rows = 9;
+				const cw = w / cols,
+					ch = h / rows;
+				for (let r = 0; r < rows; r++) {
+					for (let c = 0; c < cols; c++) {
+						const lit = Math.random() < litChance;
+						ctx.fillStyle = lit ? 'rgba(255,170,90,0.9)' : 'rgba(10,8,10,0.75)';
+						ctx.fillRect(c * cw + 1, r * ch + 1, cw - 2, ch - 3);
+					}
+				}
+
+				if (damaged) {
+					ctx.globalAlpha = 0.55;
+					for (let i = 0; i < 10; i++) {
+						const x = Math.random() * w,
+							y = Math.random() * h;
+						const rad = 3 + Math.random() * 6;
+						const sg = ctx.createRadialGradient(x, y, 0, x, y, rad);
+						sg.addColorStop(0, 'rgba(15,10,8,0.9)');
+						sg.addColorStop(1, 'rgba(15,10,8,0)');
+						ctx.fillStyle = sg;
+						ctx.beginPath();
+						ctx.arc(x, y, rad, 0, Math.PI * 2);
+						ctx.fill();
+					}
+					ctx.globalAlpha = 1;
+				}
+
+				return lowResTexture(cv, 1, 1);
+			}
+
+			function groundTexture() {
+				const s = 96;
+				const cv = makeCanvas(s, s);
+				const ctx = cv.getContext('2d');
+				ctx.fillStyle = '#3a342f';
+				ctx.fillRect(0, 0, s, s);
+				for (let i = 0; i < 400; i++) {
+					const x = Math.random() * s,
+						y = Math.random() * s;
+					const v = Math.random() * 30 - 15;
+					ctx.fillStyle = `rgba(${20 + v},${18 + v},${16 + v},0.25)`;
+					ctx.fillRect(x, y, 1.5, 1.5);
+				}
+				ctx.strokeStyle = 'rgba(10,10,10,0.4)';
+				ctx.lineWidth = 1;
+				ctx.beginPath();
+				ctx.moveTo(0, s / 2);
+				ctx.lineTo(s, s / 2);
+				ctx.stroke();
+				ctx.beginPath();
+				ctx.moveTo(s / 2, 0);
+				ctx.lineTo(s / 2, s);
+				ctx.stroke();
+				return lowResTexture(cv, 40, 40);
+			}
+
+			function radialSpriteTexture(colorStops) {
+				const s = 32;
+				const cv = makeCanvas(s, s);
+				const ctx = cv.getContext('2d');
+				const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+				colorStops.forEach(([stop, col]) => g.addColorStop(stop, col));
+				ctx.fillStyle = g;
+				ctx.fillRect(0, 0, s, s);
+				const tex = new THREE.CanvasTexture(cv);
+				tex.magFilter = THREE.LinearFilter;
+				return tex;
+			}
+
+			const fireTex = radialSpriteTexture([
+				[0, 'rgba(255,244,200,1)'],
+				[0.25, 'rgba(255,170,60,0.95)'],
+				[0.6, 'rgba(220,70,20,0.55)'],
+				[1, 'rgba(220,70,20,0)'],
+			]);
+
+			const smokeTex = radialSpriteTexture([
+				[0, 'rgba(60,55,50,0.55)'],
+				[0.5, 'rgba(40,36,32,0.35)'],
+				[1, 'rgba(30,26,24,0)'],
+			]);
+
+			// sky
+
+			const skyGeo = new THREE.SphereGeometry(400, 24, 16);
+			const posAttr = skyGeo.attributes.position;
+			const colors = [];
+			const topColor = new THREE.Color(0x2a2622);
+			const horizonColor = new THREE.Color(0xb06a3a);
+			const glowColor = new THREE.Color(0xff8c42);
+			const tmp = new THREE.Color();
+			for (let i = 0; i < posAttr.count; i++) {
+				const y = posAttr.getY(i) / 400;
+				const x = posAttr.getX(i) / 400;
+				const z = posAttr.getZ(i) / 400;
+				const h = THREE.MathUtils.clamp((y + 0.15) / 0.9, 0, 1);
+				tmp.copy(horizonColor).lerp(topColor, h);
+				const dirGlow =
+					THREE.MathUtils.clamp(1 - h * 2.2, 0, 1) *
+					THREE.MathUtils.clamp((x * 0.3 + z + 1) / 2, 0, 1);
+				tmp.lerp(glowColor, dirGlow * 0.35);
+				colors.push(tmp.r, tmp.g, tmp.b);
+			}
+			skyGeo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+			const skyMat = new THREE.MeshBasicMaterial({
+				vertexColors: true,
+				side: THREE.BackSide,
+				fog: false,
+			});
+			scene.add(new THREE.Mesh(skyGeo, skyMat));
+
+			// ground
+
+			const ground = new THREE.Mesh(
+				new THREE.PlaneGeometry(400, 400),
+				new THREE.MeshLambertMaterial({ map: groundTexture() })
+			);
+			ground.rotation.x = -Math.PI / 2;
+			scene.add(ground);
+
+			// lighting
+
+			scene.add(new THREE.AmbientLight(0x554540, 0.75));
+			const sun = new THREE.DirectionalLight(0xff8f55, 0.55);
+			sun.position.set(-30, 22, -15);
+			scene.add(sun);
+			const fillLight = new THREE.DirectionalLight(0x445566, 0.25);
+			fillLight.position.set(20, 15, 25);
+			scene.add(fillLight);
+
+			// city gen
+
+			const rubbleMat = new THREE.MeshLambertMaterial({ color: 0x3a332c });
+			const cityGroup = new THREE.Group();
+			scene.add(cityGroup);
+
+			const fireSites = []; // {x, z, y}
+
+			const GRID = 8;
+			const SPACING = 9;
+			const startOff = -((GRID - 1) * SPACING) / 2;
+
+			for (let gx = 0; gx < GRID; gx++) {
+				for (let gz = 0; gz < GRID; gz++) {
+					if (Math.random() < 0.16) continue; // gaps / plazas / roads
+
+					const x = startOff + gx * SPACING + (Math.random() - 0.5) * 1.6;
+					const z = startOff + gz * SPACING + (Math.random() - 0.5) * 1.6;
+
+					const damaged = Math.random() < 0.4;
+					const burning = damaged && Math.random() < 0.55;
+
+					const w = 3 + Math.random() * 2.4;
+					const d = 3 + Math.random() * 2.4;
+					let height = 6 + Math.random() * 22;
+					if (damaged) height *= 0.35 + Math.random() * 0.5;
+
+					const baseHexes = ['#4b463f', '#3f4247', '#544a40', '#464038'];
+					const tex = buildingTexture(
+						baseHexes[Math.floor(Math.random() * baseHexes.length)],
+						damaged ? 0.05 : 0.18,
+						damaged
+					);
+
+					const mat = new THREE.MeshLambertMaterial({ map: tex });
+					const geo = new THREE.BoxGeometry(w, height, d);
+					const building = new THREE.Mesh(geo, mat);
+					building.position.set(x, height / 2, z);
+
+					if (damaged) {
+						building.rotation.z = (Math.random() - 0.5) * 0.35;
+						building.rotation.x = (Math.random() - 0.5) * 0.2;
+						building.position.y = (height / 2) * Math.cos(building.rotation.z * 0.6);
+					} else {
+						building.rotation.y = (Math.random() - 0.5) * 0.05;
+					}
+
+					cityGroup.add(building);
+
+					if (damaged) {
+						const rubbleCount = 3 + Math.floor(Math.random() * 5);
+						for (let i = 0; i < rubbleCount; i++) {
+							const rs = 0.4 + Math.random() * 1.1;
+							const rb = new THREE.Mesh(new THREE.BoxGeometry(rs, rs * 0.7, rs), rubbleMat);
+							const ang = Math.random() * Math.PI * 2;
+							const dist = Math.max(w, d) / 2 + Math.random() * 2.5;
+							rb.position.set(x + Math.cos(ang) * dist, rs * 0.35, z + Math.sin(ang) * dist);
+							rb.rotation.y = Math.random() * Math.PI;
+							cityGroup.add(rb);
+						}
+					}
+
+					if (burning) {
+						fireSites.push({ x, y: height * (0.55 + Math.random() * 0.4), z, w, d });
+					}
+				}
+			}
+
+			// fire smoke
+
+			const fireSprites = [];
+			const smokeSprites = [];
+			const fireLights = [];
+
+			fireSites.forEach((site) => {
+				const light = new THREE.PointLight(0xff7a30, 2.2, 22, 2);
+				light.position.set(site.x, site.y + 1.5, site.z);
+				scene.add(light);
+				fireLights.push({ light, phase: Math.random() * Math.PI * 2 });
+
+				const fCount = 4 + Math.floor(Math.random() * 3);
+				for (let i = 0; i < fCount; i++) {
+					const mat = new THREE.SpriteMaterial({
+						map: fireTex,
+						blending: THREE.AdditiveBlending,
+						depthWrite: false,
+						transparent: true,
+					});
+					const s = new THREE.Sprite(mat);
+					const scale = 1.6 + Math.random() * 1.8;
+					s.scale.set(scale, scale * 1.4, 1);
+					s.position.set(
+						site.x + (Math.random() - 0.5) * site.w * 0.8,
+						site.y + Math.random() * 1.5,
+						site.z + (Math.random() - 0.5) * site.d * 0.8
+					);
+					s.userData = {
+						base: s.position.clone(),
+						phase: Math.random() * Math.PI * 2,
+						speed: 3 + Math.random() * 2,
+					};
+					fireSprites.push(s);
+					scene.add(s);
+				}
+
+				const sCount = 3 + Math.floor(Math.random() * 2);
+				for (let i = 0; i < sCount; i++) {
+					const mat = new THREE.SpriteMaterial({
+						map: smokeTex,
+						transparent: true,
+						depthWrite: false,
+					});
+					const s = new THREE.Sprite(mat);
+					const startY = site.y + 1 + Math.random();
+					s.position.set(
+						site.x + (Math.random() - 0.5) * 2,
+						startY,
+						site.z + (Math.random() - 0.5) * 2
+					);
+					s.scale.set(3, 3, 1);
+					s.userData = {
+						startX: s.position.x,
+						startZ: s.position.z,
+						startY,
+						life: Math.random(),
+						speed: 0.006 + Math.random() * 0.004,
+						driftX: (Math.random() - 0.5) * 0.01,
+					};
+					smokeSprites.push(s);
+					scene.add(s);
+				}
+			});
+
+			// ---------- animation ----------
+
+			const clock = new THREE.Clock();
+
+			setTimeout(() => {
+				document.getElementById('caption').style.opacity = 1;
+			}, 800);
+
+			function animate() {
+				requestAnimationFrame(animate);
+				const t = clock.getElapsedTime();
+
+				fireSprites.forEach((s) => {
+					const u = s.userData;
+					const flick =
+						0.75 +
+						0.25 * Math.sin(t * u.speed + u.phase) +
+						0.1 * Math.sin(t * u.speed * 3.7 + u.phase);
+					s.material.opacity = THREE.MathUtils.clamp(flick, 0.3, 1);
+					s.position.y = u.base.y + Math.sin(t * u.speed + u.phase) * 0.15;
+					s.position.x = u.base.x + Math.sin(t * 0.6 + u.phase) * 0.08;
+				});
+
+				fireLights.forEach((fl) => {
+					fl.light.intensity =
+						1.8 + Math.sin(t * 5 + fl.phase) * 0.5 + Math.sin(t * 13 + fl.phase) * 0.3;
+				});
+
+				smokeSprites.forEach((s) => {
+					const u = s.userData;
+					u.life += u.speed;
+					if (u.life > 1) {
+						u.life = 0;
+					}
+					s.position.y = u.startY + u.life * 14;
+					s.position.x = u.startX + u.driftX * u.life * 40;
+					const scale = 3 + u.life * 6;
+					s.scale.set(scale, scale, 1);
+					s.material.opacity = (1 - u.life) * 0.5;
+				});
+
+				controls.update();
+				renderer.render(scene, camera);
+			}
+			animate();
+		</script>
+	</body>
+</html>

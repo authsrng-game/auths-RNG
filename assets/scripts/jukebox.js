@@ -261,7 +261,7 @@
 	    top: 52px;
 	  }
 	`;
-	document.head.appendChild(style);
+	document.head.appendChild(style); // FIXME: fix positioning of disc, too low
 
 	// ── DOM ────────────────────────────────────────────────────────────────
 	// Using a sibling div for eq bars so they don't rotate with the disc

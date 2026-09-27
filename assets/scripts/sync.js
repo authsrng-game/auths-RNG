@@ -4,7 +4,9 @@
 	var TOKEN_KEY = 'authToken';
 	var SNAPSHOT_KEY = '_syncSnapshot';
 	var API = 'https://backup.authsrng.xyz/api/sync';
+	var MONOTONIC_MAX_KEYS = { totalRolls: 1, totalPlaytime: 1 };
 
+	// Generated code starts here on 2026-10-24T00:00:00Z:
 	var SYNC_KEYS = [
 		'rarityInventory',
 		'totalRolls',
@@ -28,9 +30,17 @@
 		'starmapData',
 		'starmapUnlocked',
 		'runesData',
+		'runesUnlocked',
 		'runeBlocks',
 		'runeGift',
 		'runeUpgrades',
+		'expeditionData',
+		'expeditionsUnlocked',
+		'dealerData',
+		'dealerUnlocked',
+		'catShrineUnlocked',
+		'catShrineEquipped',
+		'catShrineToggle',
 		'mutationTrust',
 		'mutationTrustOwned',
 		'mutationTrustActive',
@@ -38,7 +48,13 @@
 		'mutationBestResult',
 		'rarityTimestamps',
 		'notifications',
+		'themeEditorPresets',
+		'themeEditorActive',
+		'startAnimConfig',
+		'_plush_v3',
+		'infoTipsRead',
 	];
+	// Generated code ends here on 2026-10-24T00:00:00Z:
 
 	var retryDelay = 2000;
 	var MAX_RETRY_DELAY = 60000;
@@ -106,6 +122,14 @@
 		return SYNC_KEYS.indexOf(key) !== -1;
 	}
 
+	var PUSH_CHUNK_SIZE = 30;
+
+	function chunkArray(arr, size) {
+		var out = [];
+		for (var i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+		return out;
+	}
+
 	function flushDirty() {
 		var keys = Object.keys(dirty);
 		if (!keys.length) return;
@@ -115,14 +139,26 @@
 			return;
 		}
 
-		var snapshotUpdate = {};
-		var entries = keys.map(function (key) {
-			snapshotUpdate[key] = dirty[key];
-			return { key: key, value: dirty[key] };
-		});
+		var pending = dirty;
 		dirty = Object.create(null);
 
-		fetch(API + '/push', {
+		var keyChunks = chunkArray(keys, PUSH_CHUNK_SIZE);
+
+		keyChunks.reduce(function (p, chunkKeys) {
+			return p.then(function () {
+				return pushChunk(token, chunkKeys, pending);
+			});
+		}, Promise.resolve());
+	}
+
+	function pushChunk(token, chunkKeys, pending) {
+		var snapshotUpdate = {};
+		var entries = chunkKeys.map(function (key) {
+			snapshotUpdate[key] = pending[key];
+			return { key: key, value: pending[key] };
+		});
+
+		return fetch(API + '/push', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -138,14 +174,19 @@
 					document.dispatchEvent(new CustomEvent('syncAuthExpired'));
 					return;
 				}
-				if (!r.ok) throw new Error('push failed');
+				if (!r.ok) throw new Error('push failed with status ' + r.status);
+				cancelSyncBanner();
 				var snap = loadSnapshot();
 				Object.keys(snapshotUpdate).forEach(function (key) {
 					snap[key] = snapshotUpdate[key];
 				});
 				saveSnapshot(snap);
 			})
-			.catch(function () {
+			.catch(function (err) {
+				console.warn('[sync] push failed:', err ? err.message || err : 'unknown error');
+				queueSyncBanner(
+					"couldn't reach the server! your progress will sync once you're back online"
+				);
 				Object.keys(snapshotUpdate).forEach(function (key) {
 					if (!(key in dirty)) dirty[key] = snapshotUpdate[key];
 				});
@@ -176,6 +217,68 @@
 	}
 
 	var overlayEl = null;
+
+	var syncBannerEl = null;
+	var syncBannerHideTimer = null;
+	var syncBannerShowTimer = null;
+	var SYNC_BANNER_DEBOUNCE = 1500;
+
+	function queueSyncBanner(msg) {
+		if (syncBannerShowTimer) return;
+		syncBannerShowTimer = setTimeout(function () {
+			syncBannerShowTimer = null;
+			showSyncBannerNow(msg);
+		}, SYNC_BANNER_DEBOUNCE);
+	}
+
+	function showSyncBannerNow(msg) {
+		if (syncBannerHideTimer) {
+			clearTimeout(syncBannerHideTimer);
+			syncBannerHideTimer = null;
+		}
+		if (!syncBannerEl) {
+			syncBannerEl = document.createElement('div');
+			syncBannerEl.id = 'syncOfflineBanner';
+			syncBannerEl.style.cssText =
+				'position:fixed;top:0;left:0;width:100%;background:#3a0a0a;color:#f88;' +
+				'font-family:monospace;font-size:11px;padding:6px 8px;z-index:2147483647;' +
+				'text-align:center;pointer-events:none;opacity:0;' +
+				'transition:opacity 0.25s ease;border-bottom:1px solid #5a1a1a;';
+			var attach = function () {
+				document.body.appendChild(syncBannerEl);
+				syncBannerEl.textContent = msg;
+				requestAnimationFrame(function () {
+					requestAnimationFrame(function () {
+						if (syncBannerEl) syncBannerEl.style.opacity = '1';
+					});
+				});
+			};
+			if (document.body) attach();
+			else document.addEventListener('DOMContentLoaded', attach, { once: true });
+			return;
+		}
+		syncBannerEl.textContent = msg;
+		syncBannerEl.style.opacity = '1';
+	}
+
+	function cancelSyncBanner() {
+		if (syncBannerShowTimer) {
+			clearTimeout(syncBannerShowTimer);
+			syncBannerShowTimer = null;
+		}
+		hideSyncBanner();
+	}
+
+	function hideSyncBanner() {
+		if (!syncBannerEl) return;
+		syncBannerEl.style.opacity = '0';
+		syncBannerHideTimer = setTimeout(function () {
+			if (syncBannerEl && syncBannerEl.parentNode) {
+				syncBannerEl.parentNode.removeChild(syncBannerEl);
+			}
+			syncBannerEl = null;
+		}, 300);
+	}
 
 	function createOverlay() {
 		if (overlayEl || !document.body) return;
@@ -263,11 +366,14 @@
 		if (!token) return;
 
 		var xhr = new XMLHttpRequest();
+		// Generated code starts here on 2026-03-31T20:00:00Z:
 		try {
 			xhr.open('GET', API + '/pull', false);
 			xhr.setRequestHeader('Authorization', 'Bearer ' + token);
 			xhr.send(null);
-		} catch (_) {
+		} catch (e) {
+			console.warn('[sync] pull network error:', e ? e.message || e : 'unknown error');
+			queueSyncBanner("couldn't connect to the server! playing offline");
 			return;
 		}
 
@@ -278,14 +384,20 @@
 			return;
 		}
 
-		if (xhr.status !== 200) return;
+		if (xhr.status !== 200) {
+			console.warn('[sync] pull request failed with status:', xhr.status);
+			queueSyncBanner('sync unavailable right now! using local data...');
+			return;
+		}
 
 		var data;
 		try {
 			data = JSON.parse(xhr.responseText);
-		} catch (_) {
+		} catch (e) {
+			console.warn('[sync] pull JSON parse error:', e ? e.message || e : 'unknown error');
 			return;
 		}
+		// Generated code ends here on 2026-03-31T20:00:00Z:
 		if (!data || !data.fields) return;
 
 		var fields = data.fields;
@@ -311,11 +423,23 @@
 			} else if (localMatchesSnapshot && !hasServerVal) {
 				if (localVal !== null) newSnapshot[key] = localVal;
 			} else {
-				newSnapshot[key] = localVal;
-				markDirty(key, localVal);
+				if (MONOTONIC_MAX_KEYS[key] && hasServerVal) {
+					var localNum = parseInt(localVal, 10) || 0;
+					var serverNum = parseInt(serverVal, 10) || 0;
+					var winner = Math.max(localNum, serverNum);
+					if (String(winner) !== localVal) {
+						origSetItem.call(localStorage, key, String(winner));
+					}
+					newSnapshot[key] = String(winner);
+					if (String(winner) !== serverVal) markDirty(key, String(winner)); // only push if local actually had more
+				} else {
+					newSnapshot[key] = localVal;
+					markDirty(key, localVal);
+				}
 			}
 		});
 
+		cancelSyncBanner();
 		saveSnapshot(newSnapshot);
 	}
 
@@ -362,6 +486,14 @@
 			snap[e.key] = e.newValue;
 		}
 		saveSnapshot(snap);
+	});
+
+	window.addEventListener('offline', function () {
+		if (getToken()) queueSyncBanner('no internet connection! playing offline');
+	});
+	window.addEventListener('online', function () {
+		cancelSyncBanner();
+		flushDirty();
 	});
 
 	init();

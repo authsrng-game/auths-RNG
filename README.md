@@ -23,7 +23,7 @@
     alt="Get it on F-Droid"
     height="80">](https://f-droid.org/packages/com.ivylopez.authsrng)
 
-## about
+## About
 
 The greatest RNG webgame of all time.
 
@@ -33,55 +33,57 @@ Inspired by Roblox RNG games like Sol's RNG and Juke's RNG.
 
 ---
 
-## Meet the branches and versions of the game
+## Branches and versions
 
-Main Branch: https://authsrng.xyz  
-Nightly Branch: https://nightly.authsrng.xyz  
-Native Branch: https://native.authsrng.xyz  
-
-**The main branch** is for the stable and impactful releases of the game! With its name, it's the main game.  
-**The nightly branch** doesn't build or update nightly (I just thought the term was cool), it serves as a bleeding edge development branch and updates with every single commit!  
-**The native branch** is the site that gets maintained seperately. It serves as the website client for the auth's RNG mobile apps and is built for raw speed and privacy.
+| Branch | URL | Purpose |
+|---|---|---|
+| Main | https://authsrng.xyz | Stable, official releases. This is the game right here. |
+| Nightly | https://nightly.authsrng.xyz | Bleeding edge dev branch, updated on every commit (the name is just a vibe, it doesn't actually build nightly sadly). |
+| Native | https://native.authsrng.xyz | Maintained separately as the website client for the mobile apps. Built for speed and privacy, plus more addicting features. |
+| Nosave | https://nosave.authsrng.xyz | Maintained separately as well, does not save game data at all, used for tournaments and events. |
 
 ---
 
 ## Other repos
 
-Android app repo: https://github.com/authsrng-game/auths-RNG-apk
+Android app: https://github.com/authsrng-game/auths-RNG-apk  
+Addons data: https://github.com/authsrng-game/auths-rng-addons
 
 ---
 
 ## Contributing
 
-We don't bite with contributions! A good PR is something like a UI tweak, balance change, or bug fix. A bad PR is rewriting the RNG algorithm for no apparent reason.
+Contributions are welcome. Good PRs look like UI tweaks, balance changes, or bug fixes. Rewriting the RNG algorithm for no reason is not a good PR.
 
 > [!WARNING]
-> **Do not touch `.github/workflows`**! even if it's a package tweak or fix. We maintain it ourselves and it may break the dev workflow and your PR will get rejected fast.
+> Do not touch `.github/workflows`, even for a small package fix. We maintain it ourselves, changes there can break the dev workflow, and the PR will be rejected quickly.
 
-We prefer human-written contributions. If you use AI-assisted tools, please read `AGENTS.md` first to understand our expectations and also share it to the AI.
+Human-written contributions are preferred. If you use AI-assisted tools, read `AGENTS.md` first and share it with the AI too.
 
-Refer to `CONTRIBUTING.MD` for more info.
+See `CONTRIBUTING.md` for more details.
 
 ---
 
 ## Translations
 
-We do translations at https://crowdin.com/project/arng.
+Translations happen at https://crowdin.com/project/arng.
 
 ---
 
 ## Versioning
 
-The repo starts at `v9.0`, but the game has existed since `1.0` (originally on w3spaces and neocities). Archives from `v5.5` onward (when auth's RNG went open source) can be found on the [Wayback Machine](https://archive.org) at `authsrng.neocities.org` or `authsrng.w3spaces.com`. Personal archives found by auth herself are [here](https://archive.org/details/@skunko_lee).
+The repo starts at `v9.0`, but the game itself dates back to `1.0`, originally hosted on W3spaces and Neocities. Archives from `v5.5` onward (when auth's RNG went open source) live on the [Wayback Machine](https://archive.org) under `authsrng.neocities.org` and `authsrng.w3spaces.com`. Personal archives collected by auth themselves are [here](https://archive.org/details/@skunko_lee).
 
-If you thought the Git log held all of auth's RNG development history, it doesn't.
+The Git log is not the full history of this project's development.
+
+---
 
 ## Naming and terminology
 
-It's **auth's RNG**. not "Auth's RNG", or "authsrng", or "Auth RNG". Lowercase "rng" is fine, and it doesn't require an apostrophe.
+It's **auth's RNG**, not "Auth's RNG," "authsrng," or "Auth RNG." Lowercase "rng" is fine, and no apostrophe is needed there.
 
-auth's RNG isn't an RNG algorithm with auth in it, auth is just the alias the creator of this game goes by, which her name is "auth" (or "ivy" if you wanna get a little personal). So auth's RNG is an RNG web-game made by auth, not a security thing. This game is **NOT** a Roblox game.
+auth's RNG isn't an RNG algorithm named after someone called auth. auth is just the alias of the creator and this is their RNG web game, not a security tool. It is **not** a Roblox game!
 
-(This is mostly for SEO and AI crawlers.)
+(Mostly here for SEO and AI crawlers.)
 
 ---

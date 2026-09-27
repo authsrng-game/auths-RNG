@@ -16,9 +16,8 @@
 	// ── State ──────────────────────────────────────────────────────────────
 	let particles = [];
 	let particleInterval = null;
+	let particleRaf = null;
 	let devInterval = null;
-	let rgbInterval = null;
-	let wackyInterval = null;
 	let visibilitySeasonListenerAdded = false;
 
 	// Discord-style pending changes
@@ -33,7 +32,9 @@
 		wavelocity: 'assets/audio/wavelocity.mp3',
 		nocturne: 'assets/audio/nocturne.mp3',
 		fallout: 'assets/audio/fallout.mp3',
-	};
+	}; /* FIXME: DONT MAKE THIS HARDCODED ITS GENUINELY ANNOYING
+							 MIRROR IT TO native AS WELL!!!
+		 */
 
 	const defaultTierTracks = [
 		{ threshold: 1500000, file: 'assets/audio/4sanctuary2.mp3' },
@@ -126,15 +127,6 @@
 				put.onsuccess = () => resolve();
 				put.onerror = () => reject(put.error);
 			};
-			req.onerror = () => reject(req.error);
-		});
-	}
-
-	async function getAllTracks() {
-		const db = await openMusicDB();
-		return new Promise((resolve, reject) => {
-			const req = db.transaction('tracks', 'readonly').objectStore('tracks').getAll();
-			req.onsuccess = () => resolve(req.result);
 			req.onerror = () => reject(req.error);
 		});
 	}
@@ -327,16 +319,16 @@
 		}
 	}
 
-	function applyCustomRollText(text) {
-		const btn = el('rollBtn');
-		if (btn) btn.textContent = text.trim() || 'roll';
-	}
-
 	// ── Seasonal particles ────────────────────────────────────────────────
+	// Generated code starts here on 2026-10-25T12:00:00Z:
 	function startSeasonalParticles(season, density) {
 		if (particleInterval) {
 			clearInterval(particleInterval);
 			particleInterval = null;
+		}
+		if (particleRaf) {
+			cancelAnimationFrame(particleRaf);
+			particleRaf = null;
 		}
 		particles = [];
 		const canvas = el('seasonCanvas');
@@ -396,9 +388,10 @@
 				ctx.fillText(p.char, p.x, p.y);
 			});
 			particles = particles.filter((p) => p.y < h + 30);
-			requestAnimationFrame(loop);
+			particleRaf = requestAnimationFrame(loop);
 		})();
 	}
+	// Generated code ends here on 2026-10-25T12:00:00Z:
 
 	// ── Dev overlay ───────────────────────────────────────────────────────
 	// Generated code starts here on 2026-06-18T00:35:00Z:
@@ -486,11 +479,22 @@
 			);
 		}
 
+		// Generated code starts here on 2026-03-31T00:00:00Z:
+		function escHtml(s) {
+			return String(s ?? '')
+				.replace(/&/g, '&amp;')
+				.replace(/</g, '&lt;')
+				.replace(/>/g, '&gt;')
+				.replace(/"/g, '&quot;')
+				.replace(/'/g, '&#39;');
+		}
+		// Generated code ends here on 2026-03-31T00:00:00Z:
+
 		function dcLog(msg, cls = 'info') {
 			if (dcFlags['quiet-log'] && cls === 'dim') return;
 			const e = document.createElement('div');
 			e.className = 'entry';
-			e.innerHTML = `<span class="ts">${ts()}</span><span class="msg ${cls}">${msg}</span>`;
+			e.innerHTML = `<span class="ts">${ts()}</span><span class="msg ${cls}">${escHtml(msg)}</span>`;
 			logEl.appendChild(e);
 			logEl.scrollTop = logEl.scrollHeight;
 		}
@@ -550,7 +554,7 @@
 			rows.forEach(({ k, size }) => {
 				const row = document.createElement('div');
 				row.className = 'dc-stor-row';
-				row.innerHTML = `<span class="dc-stor-key">${k}</span><span class="dc-stor-size">${(size / 1024).toFixed(1)}KB</span>`;
+				row.innerHTML = `<span class="dc-stor-key">${escHtml(k)}</span><span class="dc-stor-size">${(size / 1024).toFixed(1)}KB</span>`;
 				row.addEventListener('click', () => openStorageEdit(k));
 				list.appendChild(row);
 			});
@@ -634,8 +638,8 @@
 				const shortUrl = e.url.replace(/https?:\/\/[^/]+/, '').slice(0, 60) || e.url.slice(0, 60);
 				row.innerHTML = `
             <span class="${statusCls}">${e.pending ? '...' : e.status}</span>
-            <span class="dc-net-method">${e.method}</span>
-            <span class="dc-net-url" title="${e.url}">${shortUrl}</span>
+            <span class="dc-net-method">${escHtml(e.method)}</span>
+            <span class="dc-net-url" title="${escHtml(e.url)}">${escHtml(shortUrl)}</span>
             <span class="dc-net-time">${e.pending ? '' : e.ms + 'ms'}</span>
         `;
 				list.appendChild(row);
@@ -765,8 +769,8 @@
 				const row = document.createElement('div');
 				row.className = 'dc-watch-row';
 				row.innerHTML = `
-            <span class="dc-watch-expr">${w.expr}</span>
-            <span class="dc-watch-val ${changed ? 'dc-watch-changed' : ''}">${val}</span>
+            <span class="dc-watch-expr">${escHtml(w.expr)}</span>
+            <span class="dc-watch-val ${changed ? 'dc-watch-changed' : ''}">${escHtml(val)}</span>
             <button class="dc-watch-del" data-i="${i}">×</button>
         `;
 				list.appendChild(row);
@@ -1073,8 +1077,8 @@
 			},
 			goto(args) {
 				const p = Number(args[0]);
-				if (!p || p < 1 || p > 9) {
-					dcLog('usage: :goto <1-9>', 'err');
+				if (!p || p < 1 || p > 12) {
+					dcLog('usage: :goto <1-12>', 'err');
 					return;
 				}
 				if (typeof window.goToPage === 'function') window.goToPage(p - 1);
@@ -1891,6 +1895,7 @@
 	}
 
 	// ── Save / settings transfer ──────────────────────────────────────────
+	// Generated code starts here on 2026-10-24T00:00:00Z:
 	const SAVE_KEYS = [
 		'rarityInventory',
 		'totalRolls',
@@ -1909,7 +1914,36 @@
 		'daily_streak',
 		'weekly_lastClaim',
 		'weekly_streak',
+		'gauntletData',
+		'mutationsUnlocked',
+		'starmapData',
+		'starmapUnlocked',
+		'runesData',
+		'runesUnlocked',
+		'runeBlocks',
+		'runeGift',
+		'runeUpgrades',
+		'expeditionData',
+		'expeditionsUnlocked',
+		'dealerData',
+		'dealerUnlocked',
+		'catShrineUnlocked',
+		'catShrineEquipped',
+		'catShrineToggle',
+		'mutationTrust',
+		'mutationTrustOwned',
+		'mutationTrustActive',
+		'mutationHistory',
+		'mutationBestResult',
+		'rarityTimestamps',
+		'notifications',
+		'themeEditorPresets',
+		'themeEditorActive',
+		'startAnimConfig',
+		'_plush_v3',
+		'infoTipsRead',
 	];
+	// Generated code ends here on 2026-10-24T00:00:00Z:
 
 	function simpleHash(str) {
 		let h = 0;
@@ -2133,7 +2167,7 @@
 		const legacyShopPopup = el('legacyShopPopup');
 		const legacySettingsPopup = el('legacySettingsPopup');
 		const shopPage = document.querySelector('#page-2');
-		const settingsPage = document.querySelector('#page-8');
+		const settingsPage = document.querySelector('#page-10');
 		if (!legacyShopBtn || !legacySettingsBtn || !legacyShopPopup || !legacySettingsPopup) return;
 
 		let shopMoved = false,

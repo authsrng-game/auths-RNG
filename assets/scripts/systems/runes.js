@@ -15,11 +15,6 @@
 		earth: '🌍',
 		wizardry: '🔮',
 	};
-	const RUNE_DROP_CHANCES = [
-		{ weight: 1, label: 'rare' },
-		{ weight: (1 / 70) * 30, label: 'mid-rare' },
-		{ weight: (1 / 140) * 30, label: 'common' },
-	];
 
 	let runesData = { counts: {}, elementals: {}, totalDropped: 0 };
 	let blocks = 0;
@@ -37,11 +32,20 @@
 	let giftWealthInterval = null;
 	let linkAnimationActive = false;
 
-	function isUnlocked() {
-		return localStorage.getItem(RUNES_KEY) === '1';
+	// Generated code starts here on 2026-09-22T00:00:00Z:
+	// In-memory cache for runes unlock state to avoid synchronous localStorage reads on every RNG roll in tryDropRune.
+	let _unlockedCache = null;
+
+	function isUnlocked(force = false) {
+		if (force || _unlockedCache === null) {
+			_unlockedCache = localStorage.getItem(RUNES_KEY) === '1';
+		}
+		return _unlockedCache;
 	}
+	// Generated code ends here on 2026-09-22T00:00:00Z:
 
 	function loadData() {
+		_unlockedCache = localStorage.getItem(RUNES_KEY) === '1';
 		try {
 			const d = JSON.parse(localStorage.getItem(RUNES_DATA_KEY) || '{}');
 			runesData = {
@@ -300,20 +304,12 @@
 		);
 	}
 
-	function totalElementalRunes() {
-		return ELEMENTS.reduce((s, el) => s + (runesData.elementals[el] || 0), 0);
-	}
-
 	function getExchangeRate() {
 		return upgrades.moreBlocks ? 10 : 1.25;
 	}
 
 	function exchangeRunesToBlocks(count) {
 		if (totalRunes() < count) return;
-		const total =
-			(runesData.counts.rare || 0) +
-			(runesData.counts['mid-rare'] || 0) +
-			(runesData.counts.common || 0);
 		let remaining = count;
 		for (const tier of ['common', 'mid-rare', 'rare']) {
 			const use = Math.min(runesData.counts[tier] || 0, remaining);
@@ -423,7 +419,7 @@
 		const container = document.getElementById('runesContainer');
 		if (!container) return;
 
-		if (!isUnlocked()) {
+		if (!isUnlocked(true)) {
 			container.innerHTML = `
         <div style="text-align:center;opacity:0.4;margin-top:48px;">
           <div style="font-size:2.2em;margin-bottom:14px;">🔷</div>

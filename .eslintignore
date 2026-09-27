@@ -1,1 +1,5 @@
 assets/scripts/altcha.js
+analysis/broken-links-check.js
+analysis/tab-out-guard-check.js
+analysis/stale-global-check.js
+analysis/method-consistency-check.js

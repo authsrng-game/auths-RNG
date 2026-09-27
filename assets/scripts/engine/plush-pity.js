@@ -26,33 +26,70 @@
 		const hard = Math.ceil(expected * 1.5);
 		const soft = Math.ceil(hard * SOFT_RATIO);
 		const early = Math.ceil(hard * EARLY_RATIO);
-		return { hardPity: hard, softPityStart: soft, earlyPityStart: early };
+		const minEarly = Math.max(1, Math.floor(early * (1 - MASTERY_CAP)));
+		return {
+			hardPity: hard,
+			softPityStart: soft,
+			earlyPityStart: early,
+			minEarlyPity: minEarly,
+		};
 	}
 
+	// Generated code starts here on 2026-09-11T03:25:15Z:
+	// Memoize static pity configuration to avoid ~300 object allocations per roll.
+	const _pityConfigCache = new WeakMap();
+	const _pityLimitCache = new WeakMap();
 	function resolveConfig(rarity) {
+		if (!rarity) return null;
 		if (rarity.pityLimit != null) {
-			const hard = rarity.pityLimit;
-			return {
+			const reduction =
+				typeof root.getPityCompressionReduction === 'function'
+					? root.getPityCompressionReduction(rarity.name)
+					: 1;
+			const cached = _pityLimitCache.get(rarity);
+			if (cached && cached.reduction === reduction) {
+				return cached.config;
+			}
+			const hard = Math.max(1000, Math.round(rarity.pityLimit * reduction));
+			const early = Math.ceil(hard * EARLY_RATIO);
+			const config = {
 				hardPity: hard,
 				softPityStart: Math.ceil(hard * SOFT_RATIO),
-				earlyPityStart: Math.ceil(hard * EARLY_RATIO),
+				earlyPityStart: early,
+				minEarlyPity: Math.max(1, Math.floor(early * (1 - MASTERY_CAP))),
 			};
+			_pityLimitCache.set(rarity, { reduction, config });
+			return config;
 		}
-		return derivePityConfig(chanceOf(rarity));
+		let cached = _pityConfigCache.get(rarity);
+		if (cached === undefined) {
+			cached = derivePityConfig(chanceOf(rarity));
+			_pityConfigCache.set(rarity, cached);
+		}
+		return cached;
 	}
+	// Generated code ends here on 2026-09-11T03:25:15Z:
 
 	class PityTracker {
+		// Generated code starts here on 2026-09-12T12:00:00Z:
+		// Refactored PityTracker to use O(1) step offsets instead of mutating ~550 Map items per roll.
 		constructor() {
-			this._counters = new Map();
+			this._step = 0;
+			this._lastResetStep = new Map();
 			this._mastery = new Map();
 		}
 
+		advance() {
+			this._step++;
+		}
+
 		increment(name) {
-			this._counters.set(name, (this._counters.get(name) || 0) + 1);
+			const current = this.get(name);
+			this._lastResetStep.set(name, this._step - (current + 1));
 		}
 
 		reset(name, wasHardPity) {
-			this._counters.set(name, 0);
+			this._lastResetStep.set(name, this._step);
 			if (!wasHardPity) {
 				const m = this._mastery.get(name) || 0;
 				this._mastery.set(name, Math.min(m + MASTERY_GAIN, MASTERY_CAP));
@@ -65,8 +102,11 @@
 		}
 
 		get(name) {
-			return this._counters.get(name) || 0;
+			const lastReset = this._lastResetStep.get(name);
+			if (lastReset === undefined) return 0;
+			return this._step - lastReset;
 		}
+		// Generated code ends here on 2026-09-12T12:00:00Z:
 
 		getMastery(name) {
 			return this._mastery.get(name) || 0;
@@ -76,6 +116,11 @@
 			const config = resolveConfig(rarity);
 			if (!config) return 1.0;
 			const count = this.get(rarity.name);
+			// Generated code starts here on 2026-09-11T04:10:00Z:
+			// Fast path: skip mastery lookup and floating point threshold math when pity count is below minimum early threshold.
+			if (count < config.minEarlyPity) return 1.0;
+			// Generated code ends here on 2026-09-11T04:10:00Z:
+
 			const mastery = this.getMastery(rarity.name);
 			const effectiveSoft = Math.max(1, Math.round(config.softPityStart * (1 - mastery)));
 			const effectiveEarly = Math.max(1, Math.round(config.earlyPityStart * (1 - mastery)));
@@ -121,10 +166,13 @@
 			};
 		}
 
+		// Generated code starts here on 2026-09-12T12:00:00Z:
+		// Maintain full 100% backward compatibility with serialized save data formats.
 		serialize() {
 			const counters = {};
-			this._counters.forEach(function (v, k) {
-				counters[k] = v;
+			const step = this._step;
+			this._lastResetStep.forEach(function (lastReset, k) {
+				counters[k] = step - lastReset;
 			});
 			const mastery = {};
 			this._mastery.forEach(function (v, k) {
@@ -134,28 +182,15 @@
 		}
 
 		deserialize(data) {
-			// Generated code starts here on 2026-06-18T01:30:00Z:
-			if (data.counters) {
-				this._counters = new Map(
-					Object.entries(data.counters).map(function (entry) {
-						return [entry[0], Number(entry[1]) || 0];
-					})
-				);
-				this._mastery = new Map(
-					Object.entries(data.mastery || {}).map(function (entry) {
-						return [entry[0], Number(entry[1]) || 0];
-					})
-				);
-			} else {
-				this._counters = new Map(
-					Object.entries(data || {}).map(function (entry) {
-						return [entry[0], Number(entry[1]) || 0];
-					})
-				);
-				this._mastery = new Map();
+			this._step = 0;
+			this._lastResetStep = new Map();
+			const counters = data.counters || data;
+			for (const [k, v] of Object.entries(counters || {})) {
+				this._lastResetStep.set(k, -v);
 			}
-			// Generated code ends here on 2026-06-18T01:30:00Z:
+			this._mastery = new Map(Object.entries(data.mastery || {}));
 		}
+		// Generated code ends here on 2026-09-12T12:00:00Z:
 	}
 
 	root.PityTracker = PityTracker;

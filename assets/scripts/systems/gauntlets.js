@@ -121,7 +121,7 @@ console.log(performance.now());
 		'Astral',
 		'Fearful',
 
-		// --- harder end (~1/2101–~1/3000) ---
+		// --- er end (~1/2101–~1/3000) ---
 		'horsehead hahahaha',
 		'Pillars',
 		'Verbose',
@@ -208,19 +208,20 @@ console.log(performance.now());
 			rewards: [
 				{ type: 'points', amount: 25000, label: '25,000 pts' },
 				{ type: 'anomaly', amount: 20, label: '20 anomalies' },
-				{ type: 'luck', mult: 2.5, dur: 60, label: '1m 2.5x luck' },
+				{ type: 'unlock_expeditions', label: 'unlock expeditions ⏳!!!' },
 			],
 		},
+		// Generated code starts here on 2026-03-31T12:00:00Z:
 		{
 			id: 'insane',
 			name: 'insane',
 			emoji: '💀',
 			minRolls: 3000,
-			rarities: ['Breakdown', 'Depression', 'Supergalaxy', 'Pulsar'],
+			rarities: ['Breakdown', 'panic!', 'kill me', 'Pulsar'],
 			rewards: [
 				{ type: 'points', amount: 100000, label: '100,000 pts' },
 				{ type: 'anomaly', amount: 100, label: '100 anomalies' },
-				{ type: 'luck', mult: 3, dur: 120, label: '2m 3x luck' },
+				{ type: 'unlock_dealer', label: 'unlock the dealer 🎭' },
 			],
 		},
 		{
@@ -228,7 +229,7 @@ console.log(performance.now());
 			name: 'godlike',
 			emoji: '✨',
 			minRolls: 6000,
-			rarities: ['Psychosis', 'CHARGED', 'SCHIZOPHRENIC'],
+			rarities: ['Event Horizon', 'Neurosis', 'Cosmic'],
 			rewards: [
 				{ type: 'points', amount: 500000, label: '500,000 pts' },
 				{ type: 'anomaly', amount: 1000, label: '1,000 anomalies' },
@@ -252,13 +253,14 @@ console.log(performance.now());
 			name: 'snowy',
 			emoji: '❄️',
 			minRolls: 20000,
-			rarities: ['Cosmic', 'Neurosis', 'Trauma', 'Mania'],
+			rarities: ['Cosmic', 'Neurosis', 'anxiety...', 'Mania'],
 			rewards: [
 				{ type: 'points', amount: 1200000, label: '1,200,000 pts' },
 				{ type: 'anomaly', amount: 3000, label: '3,000 anomalies' },
 				{ type: 'luck', mult: 7, dur: 360, label: '6m 7x luck' },
 			],
 		},
+		// Generated code ends here on 2026-03-31T12:00:00Z:
 		{
 			id: 'eon',
 			name: 'eon',
@@ -339,7 +341,7 @@ console.log(performance.now());
 		'global',
 		'easy',
 		'medium',
-		'hard',
+		'',
 		'insane',
 		'godlike',
 		'inferno',
@@ -410,16 +412,36 @@ console.log(performance.now());
 		return Math.floor(Date.now() / (2 * 24 * 60 * 60 * 1000));
 	}
 
+	// Generated code starts here on 2026-09-17T18:00:00Z:
+	// Cache rarity objects in a Map and memoize global rotation rarities to avoid ~20,000 linear array searches and redundant Fisher-Yates shuffles per render cycle.
+	let _rarityMap = null;
+	function getRarityByName(name) {
+		if (typeof rarities === 'undefined' || !Array.isArray(rarities)) return null;
+		if (!_rarityMap || _rarityMap.size !== rarities.length) {
+			_rarityMap = new Map(rarities.map((r) => [r.name, r]));
+		}
+		return _rarityMap.get(name) || null;
+	}
+
+	let _lastGlobalRot = -1;
+	let _cachedGlobalRarities = null;
+
 	function getGlobalRarities() {
 		const rot = rotIdx();
+		if (_lastGlobalRot === rot && _cachedGlobalRarities) {
+			return _cachedGlobalRarities;
+		}
 		// shuffle a copy of the pool with the seeded RNG, then take first 3
 		const indices = Array.from({ length: GLOBAL_POOL.length }, (_, i) => i);
 		for (let i = indices.length - 1; i > 0; i--) {
 			const j = Math.floor(seededRand(rot * 97 + i * 31) * (i + 1));
 			[indices[i], indices[j]] = [indices[j], indices[i]];
 		}
-		return indices.slice(0, 3).map((i) => GLOBAL_POOL[i]);
+		_cachedGlobalRarities = indices.slice(0, 3).map((i) => GLOBAL_POOL[i]);
+		_lastGlobalRot = rot;
+		return _cachedGlobalRarities;
 	}
+	// Generated code ends here on 2026-09-17T18:00:00Z.
 
 	function getTierRarities(t) {
 		return t.isGlobal ? getGlobalRarities() : t.rarities;
@@ -502,17 +524,27 @@ console.log(performance.now());
 			localStorage.setItem('mutationsUnlocked', '1');
 			showAnomalyPopup('mutations unlocked! 🧬');
 			if (typeof renderMutations === 'function') renderMutations();
-			window.unlockPageDot?.(3);
+			window.unlockPageDot?.(5);
 		} else if (rew.type === 'unlock_starmap') {
 			localStorage.setItem('starmapUnlocked', '1');
 			showAnomalyPopup('✦ starmap unlocked!');
 			if (typeof renderStarmap === 'function') renderStarmap();
-			window.unlockPageDot?.(4);
+			window.unlockPageDot?.(6);
 		} else if (rew.type === 'unlock_runes') {
 			localStorage.setItem('runesUnlocked', '1');
 			showAnomalyPopup('🔷 runes unlocked!');
 			if (typeof renderRunes === 'function') renderRunes();
-			window.unlockPageDot?.(5);
+			window.unlockPageDot?.(7);
+		} else if (rew.type === 'unlock_expeditions') {
+			localStorage.setItem('expeditionsUnlocked', '1');
+			showAnomalyPopup('expeditions unlocked!');
+			if (typeof renderExpeditions === 'function') renderExpeditions();
+			window.unlockPageDot?.(3);
+		} else if (rew.type === 'unlock_dealer') {
+			localStorage.setItem('dealerUnlocked', '1');
+			showAnomalyPopup('someone new is at the table...');
+			if (typeof renderDealer === 'function') renderDealer();
+			window.unlockPageDot?.(4);
 		}
 	}
 
@@ -629,8 +661,7 @@ console.log(performance.now());
 					const has = typeof inventoryData !== 'undefined' && inventoryData.has(name);
 					const chip = document.createElement('div');
 					chip.className = 'gauntlet-chip ' + (has ? 'chip-has' : 'chip-missing');
-					const rar =
-						typeof rarities !== 'undefined' ? rarities.find((r) => r.name === name) : null;
+					const rar = getRarityByName(name);
 					const den = rar ? '1/' + Math.round(1 / rar.chance).toLocaleString() : '?';
 					chip.textContent = (has ? '✓ ' : '') + name + ' · ' + den;
 					chipGrid.appendChild(chip);

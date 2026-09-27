@@ -13,6 +13,7 @@ const rarities = [
 	{
 		name: 'SUMMER',
 		chance: 1 / 1000000000000000,
+		pityLimit: 200000000,
 		style: `
     loop {
       color: #FFA500
@@ -24,6 +25,7 @@ const rarities = [
 	{
 		name: 'finished.',
 		chance: 1 / 100000000000000,
+		pityLimit: 100000000,
 		style: `
     color: #FFD700
     loop {
@@ -33,6 +35,7 @@ const rarities = [
 	},
 	{
 		name: 'pseudopseudohypoparathyroidism',
+		pityLimit: 50000000,
 		chance: 1 / 10000000000000,
 		style: `
     loop {
@@ -50,6 +53,7 @@ const rarities = [
 	{
 		name: '...',
 		chance: 1 / 10000000000,
+		pityLimit: 20000000,
 		style: `
     color: #666666
     loop {
@@ -60,6 +64,7 @@ const rarities = [
 	{
 		name: 'the world',
 		chance: 1 / 8200000000,
+		pityLimit: 16000000,
 		style: `
     color: #FFD700
     loop {
@@ -70,6 +75,7 @@ const rarities = [
 	{
 		name: 'Antimatter',
 		chance: 1 / 5000000000,
+		pityLimit: 12000000,
 		style: `
     color: #9900FF
     loop {
@@ -91,6 +97,7 @@ const rarities = [
 	{
 		name: 'Void',
 		chance: 1 / 1000000000,
+		pityLimit: 6000000,
 		style: `
     color: #111111
     loop {

@@ -327,7 +327,7 @@ console.log(performance.now());
 	}
 
 	// ------------------------------------------------------------------
-	// dashboard: single overlay, sidebar tabs instead of drilldown screens
+	// dashyboard
 	// ------------------------------------------------------------------
 
 	const DASH_TABS = [
@@ -336,6 +336,7 @@ console.log(performance.now());
 		{ id: 'appearance', label: 'appearance' },
 		{ id: 'layout', label: 'layout' },
 		{ id: 'social', label: 'social links' },
+		{ id: 'connections', label: 'connections' },
 		{ id: 'security', label: 'security' },
 	];
 
@@ -434,6 +435,7 @@ console.log(performance.now());
 			appearance: renderTabAppearance,
 			layout: renderTabLayout,
 			social: renderTabSocial,
+			connections: renderTabConnections,
 			security: renderTabSecurity,
 		};
 		renderers[dashActiveTab]();
@@ -985,9 +987,64 @@ console.log(performance.now());
 		});
 	}
 
+	function renderTabConnections() {
+		const pane = el('dashPane');
+		const data = dashState.data;
+
+		if (data.discordId) {
+			pane.innerHTML = `
+      <div class="dash-security-item">
+        <div>
+          <div class="dash-security-title">discord</div>
+          <div class="dash-security-desc">connected as ${escHtml(data.discordUsername || data.discordId)}</div>
+        </div>
+        <button id="discordUnlinkBtn" class="small" style="opacity:0.6;color:#f66;">disconnect</button>
+      </div>
+      <p style="font-size:0.8em;opacity:0.6;margin-top:12px;">
+        your discord account is linked! our discord bot uses this to assign roll milestone roles automatically.
+      </p>
+    `;
+			el('discordUnlinkBtn').addEventListener('click', async () => {
+				if (
+					!confirm(
+						'disconnect your discord account? you will stop receiving automatic roll roles...!!'
+					)
+				)
+					return;
+				try {
+					await apiCall('/discord/unlink', { method: 'POST' });
+					dashState.data.discordId = null;
+					dashState.data.discordUsername = null;
+					renderTabConnections();
+				} catch (e) {
+					dashStatus(e.message, '#f66');
+				}
+			});
+		} else {
+			pane.innerHTML = `
+      <p style="font-size:0.85em;opacity:0.75;">
+        link your discord account to automatically receive roll milestone roles in the discord server for ego points!
+      </p>
+      <button id="discordConnectBtn" class="small" style="width:100%;">connect discord</button>
+    `;
+			el('discordConnectBtn').addEventListener('click', async () => {
+				try {
+					const res = await apiCall('/discord/authorize');
+					// Generated code starts here on 2026-09-18T10:00:00Z:
+					if (res && typeof res.url === 'string' && /^https?:\/\//i.test(res.url)) {
+						window.location.href = res.url;
+					}
+					// Generated code ends here on 2026-09-18T10:00:00Z:
+				} catch (e) {
+					dashStatus(e.message, '#f66');
+				}
+			});
+		}
+	}
+
 	async function openSessionsInline() {
 		const pane = el('dashPane');
-		pane.innerHTML = '<p>loading sessions...</p>';
+		pane.innerHTML = '<p>loading your yummy sessions...</p>';
 		try {
 			const data = await apiCall('/sessions');
 			renderSessionsInline(data.sessions);
@@ -1385,6 +1442,7 @@ console.log(performance.now());
 		getUid,
 		isLoggedIn,
 		clearSession,
+		openDashboard: openAccountInfo,
 	};
 
 	document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();

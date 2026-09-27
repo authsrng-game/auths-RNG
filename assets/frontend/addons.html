@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<title>auth's RNG addons</title>
+		<style>
+			:root {
+				--bg-color: #0e0e0e;
+				--text-color: #dcdcdc;
+				--border-color: #303030;
+				--button-bg: #1a1a1a;
+				--button-hover: #242424;
+				--panel-bg: #131313;
+				--overlay-bg: #0c0c0c;
+				--accent-color: #dcdcdc;
+				--points-color: #ffb86b;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			html {
+				scroll-padding-top: env(safe-area-inset-top, 0px);
+			}
+			body {
+				background: var(--bg-color);
+				color: var(--text-color);
+				font-family: monospace;
+				margin: 0;
+				padding: 36px 20px 60px;
+				min-height: 100%;
+				padding-top: calc(36px + env(safe-area-inset-top, 0px));
+				padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+			}
+			h1 {
+				font-weight: normal;
+				letter-spacing: 0.06em;
+				font-size: 1.6rem;
+				margin: 0 0 0.3em;
+				text-align: center;
+			}
+			p.sub {
+				opacity: 0.55;
+				font-size: 0.9em;
+				text-align: center;
+				max-width: 480px;
+				margin: 0 auto 24px;
+				line-height: 1.6;
+			}
+			.wrap {
+				max-width: 960px;
+				margin: 0 auto;
+			}
+
+			.toolbar {
+				display: flex;
+				gap: 8px;
+				flex-wrap: wrap;
+				margin-bottom: 16px;
+				align-items: center;
+			}
+			.search-input {
+				flex: 1;
+				min-width: 160px;
+				background: var(--overlay-bg);
+				border: 1px solid var(--border-color);
+				color: var(--text-color);
+				padding: 8px 10px;
+				font-family: monospace;
+				font-size: 0.85em;
+				border-radius: 2px;
+			}
+			.search-input:focus {
+				outline: none;
+				border-color: var(--text-color);
+			}
+			.sort-select {
+				background: var(--button-bg);
+				color: var(--text-color);
+				border: 1px solid var(--border-color);
+				padding: 7px 8px;
+				font-family: monospace;
+				font-size: 0.8em;
+				border-radius: 2px;
+			}
+
+			.filter-row {
+				display: flex;
+				gap: 8px;
+				justify-content: center;
+				flex-wrap: wrap;
+				margin-bottom: 22px;
+			}
+			.filter-chip {
+				font-size: 0.78em;
+				padding: 5px 12px;
+				border: 1px solid var(--border-color);
+				border-radius: 20px;
+				background: var(--button-bg);
+				color: var(--text-color);
+				cursor: pointer;
+				opacity: 0.6;
+				transition: all 0.15s;
+				font-family: monospace;
+			}
+			.filter-chip.active {
+				opacity: 1;
+				border-color: var(--text-color);
+			}
+			.filter-chip:hover {
+				opacity: 1;
+				background: var(--button-hover);
+			}
+
+			.result-count {
+				font-size: 0.72em;
+				opacity: 0.35;
+				margin-bottom: 10px;
+			}
+
+			.grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+				gap: 14px;
+			}
+			.card {
+				background: var(--panel-bg);
+				border: 1px solid var(--border-color);
+				border-radius: 4px;
+				padding: 16px;
+				display: flex;
+				flex-direction: column;
+				transition: border-color 0.2s;
+			}
+			.card:hover {
+				border-color: #555;
+			}
+			.card-top {
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				margin-bottom: 8px;
+				cursor: pointer;
+			}
+			.card-name {
+				font-size: 0.95em;
+				display: flex;
+				align-items: center;
+				gap: 6px;
+				flex-wrap: wrap;
+			}
+			.card-author {
+				font-size: 0.7em;
+				opacity: 0.4;
+				margin-top: 1px;
+			}
+			.card-tags {
+				display: flex;
+				gap: 5px;
+				flex-wrap: wrap;
+				margin-bottom: 12px;
+			}
+			.tag {
+				font-size: 0.68em;
+				padding: 2px 7px;
+				border: 1px solid var(--border-color);
+				border-radius: 20px;
+				opacity: 0.5;
+			}
+			.official-badge {
+				font-size: 0.62em;
+				padding: 1px 6px;
+				border-radius: 20px;
+				border: 1px solid #3a5a3a;
+				color: #8c8;
+				background: rgba(50, 110, 50, 0.1);
+			}
+			.card-footer {
+				display: flex;
+				justify-content: flex-end;
+				align-items: center;
+			}
+
+			button.install {
+				background: var(--button-bg);
+				color: var(--text-color);
+				border: 1px solid var(--border-color);
+				padding: 7px 14px;
+				font-family: monospace;
+				font-size: 0.8em;
+				border-radius: 2px;
+				cursor: pointer;
+				transition: all 0.15s;
+				text-transform: lowercase;
+			}
+			button.install:hover {
+				background: var(--button-hover);
+				border-color: var(--text-color);
+			}
+			button.install.installed {
+				border-color: #3a5a3a;
+				color: #8c8;
+				background: rgba(50, 110, 50, 0.1);
+			}
+
+			.empty-state {
+				text-align: center;
+				opacity: 0.35;
+				font-size: 0.85em;
+				padding: 40px 0;
+			}
+
+			.warn-banner {
+				font-size: 0.75em;
+				opacity: 0.5;
+				text-align: center;
+				max-width: 520px;
+				margin: 34px auto 0;
+				border-top: 1px solid var(--border-color);
+				padding-top: 16px;
+				line-height: 1.6;
+			}
+
+			.modal-overlay {
+				display: none;
+				position: fixed;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.85);
+				z-index: 1000;
+				align-items: center;
+				justify-content: center;
+				padding: 20px;
+			}
+			.modal-overlay.show {
+				display: flex;
+			}
+			.modal-box {
+				background: var(--panel-bg);
+				border: 1px solid var(--border-color);
+				border-radius: 4px;
+				max-width: 480px;
+				width: 100%;
+				max-height: 80vh;
+				overflow-y: auto;
+				padding: 24px;
+				position: relative;
+			}
+			.modal-close {
+				position: absolute;
+				top: 10px;
+				right: 12px;
+				background: none;
+				border: none;
+				color: var(--text-color);
+				font-size: 20px;
+				opacity: 0.5;
+				cursor: pointer;
+				padding: 0;
+				width: 26px;
+				height: 26px;
+			}
+			.modal-close:hover {
+				opacity: 1;
+			}
+			.modal-name {
+				font-size: 1.1em;
+				text-align: center;
+				margin-bottom: 2px;
+			}
+			.modal-author {
+				font-size: 0.75em;
+				opacity: 0.45;
+				text-align: center;
+				margin-bottom: 16px;
+			}
+			.modal-install {
+				width: 100%;
+				padding: 10px;
+				font-size: 0.9em;
+			}
+
+			.perm-list {
+				list-style: none;
+				margin: 0 0 18px;
+				padding: 0;
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+			}
+			.perm-item {
+				display: flex;
+				gap: 10px;
+				align-items: flex-start;
+				background: var(--overlay-bg);
+				border: 1px solid var(--border-color);
+				border-radius: 3px;
+				padding: 9px 11px;
+			}
+			.perm-icon {
+				font-size: 1.05em;
+				flex-shrink: 0;
+				opacity: 0.85;
+			}
+			.perm-text {
+				font-size: 0.78em;
+				line-height: 1.5;
+			}
+			.perm-text .perm-title {
+				opacity: 0.9;
+			}
+			.perm-text .perm-desc {
+				opacity: 0.45;
+				display: block;
+				margin-top: 1px;
+			}
+			.perm-none {
+				font-size: 0.78em;
+				opacity: 0.45;
+				text-align: center;
+				padding: 14px 0;
+				border: 1px solid var(--border-color);
+				border-radius: 3px;
+				background: var(--overlay-bg);
+				margin-bottom: 18px;
+			}
+			.perm-source {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				font-size: 0.72em;
+				opacity: 0.4;
+				border-top: 1px solid var(--border-color);
+				padding-top: 12px;
+				margin-top: 2px;
+				margin-bottom: 16px;
+			}
+			.perm-btn-row {
+				display: flex;
+				gap: 8px;
+			}
+			.perm-btn-row button {
+				flex: 1;
+				padding: 10px;
+				font-size: 0.85em;
+			}
+			.perm-cancel {
+				opacity: 0.6;
+			}
+			.perm-allow {
+				border-color: #3a5a3a;
+				color: #8c8;
+				background: rgba(50, 110, 50, 0.1);
+			}
+			.perm-allow:hover {
+				border-color: #5a8a5a;
+				background: rgba(50, 110, 50, 0.18);
+			}
+
+			.load-state {
+				text-align: center;
+				opacity: 0.4;
+				font-size: 0.85em;
+				padding: 40px 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<h1>auth's RNG addons</h1>
+			<p class="sub">community and official mods for auth's RNG!</p>
+
+			<div class="toolbar">
+				<input
+					type="text"
+					id="searchInput"
+					class="search-input"
+					placeholder="search addons..."
+					aria-label="Search addons"
+				/>
+				<select id="sortSelect" class="sort-select" aria-label="Sort addons">
+					<option value="az">a to z</option>
+				</select>
+			</div>
+
+			<div class="filter-row">
+				<button class="filter-chip active" data-f="all">all</button>
+				<button class="filter-chip" data-f="theme">themes</button>
+				<button class="filter-chip" data-f="audio">audio</button>
+				<button class="filter-chip" data-f="readSave">qol</button>
+				<button class="filter-chip" data-f="official">official</button>
+			</div>
+
+			<div class="result-count" id="resultCount"></div>
+			<div class="grid" id="grid"></div>
+
+			<div class="warn-banner">
+				every install shows the permissions the author claims this addon needs before anything
+				happens. addons run with the same access as the game itself, so only install from authors
+				you trust! however, the addons store is heavily moderated and checked for safety risks, so
+				it is unlikely for a malicious addon to come through. but just keep in mind with that, just
+				in case!
+				<br /><br />
+				changes take effect the next time you load the game.
+			</div>
+
+			<div
+				id="pendingBar"
+				style="
+					display: none;
+					position: fixed;
+					bottom: 20px;
+					left: 50%;
+					transform: translateX(-50%);
+					background: var(--panel-bg);
+					border: 1px solid var(--border-color);
+					border-radius: 8px;
+					padding: 12px 16px;
+					display: none;
+					align-items: center;
+					gap: 12px;
+					z-index: 2000;
+					box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+					font-size: 0.85em;
+				"
+			>
+				<span>addon changes pending, reload to apply</span>
+				<button class="install" id="applyChangesBtn">reload now</button>
+			</div>
+		</div>
+
+		<div class="modal-overlay" id="modalOverlay">
+			<div class="modal-box">
+				<button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+				<div id="modalBody"></div>
+			</div>
+		</div>
+
+		<div class="modal-overlay" id="permOverlay">
+			<div class="modal-box">
+				<button class="modal-close" id="permClose" aria-label="Close">&times;</button>
+				<div id="permBody"></div>
+			</div>
+		</div>
+
+		<script src="/assets/scripts/addon-host.js" defer></script>
+		<script defer>
+			document.addEventListener('DOMContentLoaded', () => {
+				const grid = document.getElementById('grid');
+				const resultCount = document.getElementById('resultCount');
+				const chips = document.querySelectorAll('.filter-chip');
+				const searchInput = document.getElementById('searchInput');
+				const sortSelect = document.getElementById('sortSelect');
+				const modalOverlay = document.getElementById('modalOverlay');
+				const modalBody = document.getElementById('modalBody');
+				const permOverlay = document.getElementById('permOverlay');
+				const permBody = document.getElementById('permBody');
+
+				let activeFilter = 'all';
+
+				grid.innerHTML = '<div class="load-state">loading addons...</div>';
+
+				function getPermissionDetails(entry) {
+					const perms = [];
+					if (entry.permissions.includes('theme')) {
+						perms.push({
+							icon: '🎨',
+							title: 'modify interface appearance',
+							desc: 'changes colors, fonts, and layout styling',
+						});
+					}
+					if (entry.permissions.includes('audio')) {
+						perms.push({
+							icon: '🔊',
+							title: 'play custom audio',
+							desc: 'loads and plays sound files during rolls or in the background',
+						});
+					}
+					if (entry.permissions.includes('readSave')) {
+						perms.push({
+							icon: '📖',
+							title: 'read save data',
+							desc: 'reads your roll history, inventory, and stats to display them',
+						});
+					}
+					if (entry.permissions.includes('modifySave')) {
+						perms.push({
+							icon: '✏️',
+							title: 'modify save data',
+							desc: 'can change settings or save values on your behalf',
+						});
+					}
+					if (entry.permissions.includes('points')) {
+						perms.push({
+							icon: '💰',
+							title: 'spend points',
+							desc: 'can deduct points from your balance',
+						});
+					}
+					return perms;
+				}
+
+				function openPermModal(entry) {
+					const isInstalled = AddonManager.isInstalled(entry.id);
+					const perms = getPermissionDetails(entry);
+
+					const permsHtml = perms.length
+						? `<ul class="perm-list">${perms
+								.map(
+									(p) => `
+          <li class="perm-item">
+            <span class="perm-icon">${p.icon}</span>
+            <span class="perm-text"><span class="perm-title">${p.title}</span><span class="perm-desc">${p.desc}</span></span>
+          </li>`
+								)
+								.join('')}</ul>`
+						: `<div class="perm-none">this addon does not request any special permissions</div>`;
+
+					permBody.innerHTML = `
+      <div class="modal-name">${entry.name}</div>
+      <div class="modal-author">by ${entry.author} &middot; v${entry.version}</div>
+      ${permsHtml}
+      <div class="perm-source">
+        <span>author: ${entry.author}</span>
+        <span>reviewed via github PR</span>
+      </div>
+      <div class="perm-btn-row">
+        <button class="install perm-cancel" id="permCancelBtn">cancel</button>
+        <button class="install perm-allow" id="permAllowBtn">${isInstalled ? 'uninstall' : 'allow & install'}</button>
+      </div>
+    `;
+
+					document.getElementById('permCancelBtn').addEventListener('click', closePermModal);
+					document.getElementById('permAllowBtn').addEventListener('click', () => {
+						toggleInstall(entry);
+						closePermModal();
+					});
+
+					permOverlay.classList.add('show');
+				}
+
+				function closePermModal() {
+					permOverlay.classList.remove('show');
+				}
+
+				document.getElementById('permClose').addEventListener('click', closePermModal);
+				permOverlay.addEventListener('click', (e) => {
+					if (e.target.id === 'permOverlay') closePermModal();
+				});
+
+				function toggleInstall(entry) {
+					const ok = AddonManager.isInstalled(entry.id)
+						? AddonManager.uninstall(entry.id)
+						: AddonManager.install(entry);
+					if (!ok) return; // action was blocked or a no-op, don't repaint as if it succeeded
+					render();
+				}
+
+				function openModal(entry) {
+					const isInstalled = AddonManager.isInstalled(entry.id);
+					modalBody.innerHTML = `
+      <div class="modal-name">${entry.name}</div>
+      <div class="modal-author">by ${entry.author} &middot; v${entry.version}</div>
+      <button class="install modal-install ${isInstalled ? 'installed' : ''}" id="modalInstallBtn">${isInstalled ? 'installed' : 'install'}</button>
+    `;
+					document.getElementById('modalInstallBtn').addEventListener('click', () => {
+						modalOverlay.classList.remove('show');
+						openPermModal(entry);
+					});
+					modalOverlay.classList.add('show');
+				}
+
+				document
+					.getElementById('modalClose')
+					.addEventListener('click', () => modalOverlay.classList.remove('show'));
+				modalOverlay.addEventListener('click', (e) => {
+					if (e.target === modalOverlay) modalOverlay.classList.remove('show');
+				});
+
+				function render() {
+					const q = searchInput.value.trim().toLowerCase();
+					const sort = sortSelect.value;
+					const index = AddonManager.index || [];
+
+					let list = index.filter((entry) => {
+						const matchesFilter =
+							activeFilter === 'all' ||
+							(activeFilter === 'official'
+								? entry.author === 'auth'
+								: entry.permissions.includes(activeFilter));
+						const matchesSearch =
+							!q || entry.name.toLowerCase().includes(q) || entry.author.toLowerCase().includes(q);
+						return matchesFilter && matchesSearch;
+					});
+
+					list = list.slice().sort((x, y) => {
+						if (sort === 'az') return x.name.localeCompare(y.name);
+						return 0;
+					});
+
+					resultCount.textContent = `${list.length} addon${list.length === 1 ? '' : 's'}`;
+					grid.innerHTML = '';
+
+					if (list.length === 0) {
+						grid.innerHTML =
+							'<div class="empty-state" style="grid-column:1/-1">no addons match your search</div>';
+						return;
+					}
+
+					list.forEach((entry) => {
+						const isInstalled = AddonManager.isInstalled(entry.id);
+						const card = document.createElement('div');
+						card.className = 'card';
+						card.innerHTML = `
+        <div class="card-top">
+          <div>
+            <div class="card-name">${entry.name} ${entry.author === 'auth' ? '<span class="official-badge">official</span>' : ''}</div>
+            <div class="card-author">by ${entry.author}</div>
+          </div>
+        </div>
+        <div class="card-tags">${entry.permissions.map((t) => `<span class="tag">${t}</span>`).join('')}</div>
+        <div class="card-footer">
+          <button class="install ${isInstalled ? 'installed' : ''}">${isInstalled ? 'installed' : 'install'}</button>
+        </div>
+      `;
+						card.querySelector('.card-top').addEventListener('click', () => openModal(entry));
+						const btn = card.querySelector('button.install');
+						btn.addEventListener('click', (e) => {
+							e.stopPropagation();
+							if (AddonManager.isInstalled(entry.id)) {
+								toggleInstall(entry);
+							} else {
+								openPermModal(entry);
+							}
+						});
+						grid.appendChild(card);
+					});
+				}
+
+				chips.forEach((chip) => {
+					chip.addEventListener('click', () => {
+						chips.forEach((c) => c.classList.remove('active'));
+						chip.classList.add('active');
+						activeFilter = chip.dataset.f;
+						render();
+					});
+				});
+
+				searchInput.addEventListener('input', render);
+				sortSelect.addEventListener('change', render);
+
+				function tryRender() {
+					if (AddonManager.index && AddonManager.index.length) {
+						render();
+					} else {
+						AddonManager.fetchIndex()
+							.then(render)
+							.catch(() => {
+								grid.innerHTML =
+									'<div class="load-state">failed to load addons, try refreshing</div>';
+							});
+					}
+				}
+
+				function updatePendingBar() {
+					const bar = document.getElementById('pendingBar');
+					if (!bar) return;
+					const pending = AddonManager.hasPendingChanges();
+					bar.style.display = pending ? 'flex' : 'none';
+				}
+
+				const applyBtn = document.getElementById('applyChangesBtn');
+				if (applyBtn) {
+					applyBtn.addEventListener('click', (e) => {
+						e.target.textContent = 'reloading...';
+						e.target.disabled = true;
+						AddonManager.applyChanges();
+					});
+				}
+
+				document.addEventListener('addonPendingChange', updatePendingBar);
+				document.addEventListener('addonsReady', updatePendingBar);
+				updatePendingBar();
+
+				if (window.AddonManager) {
+					tryRender();
+				} else {
+					grid.innerHTML = '<div class="load-state">addon system unavailable</div>';
+				}
+			});
+		</script>
+	</body>
+</html>

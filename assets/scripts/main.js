@@ -1,5 +1,24 @@
 console.log(performance.now());
 
+// Generated code starts here on 2026-03-31T20:00:00Z:
+window.addEventListener('unhandledrejection', (event) => {
+	console.error('[main] Unhandled promise rejection:', {
+		reason: event.reason,
+		promise: event.promise,
+	});
+});
+
+window.addEventListener('error', (event) => {
+	console.error('[main] Uncaught runtime error:', {
+		message: event.message,
+		filename: event.filename,
+		lineno: event.lineno,
+		colno: event.colno,
+		error: event.error,
+	});
+});
+// Generated code ends here on 2026-03-31T20:00:00Z:
+
 const rollBtn = document.getElementById('rollBtn'),
 	spinner = document.getElementById('spinner'),
 	inventoryList = document.getElementById('inventoryList'),
@@ -590,14 +609,18 @@ function updateLuckDisplay() {
 	if (duplicateRollsLeft > 0) parts.push(`duplicate: ${duplicateRollsLeft} rolls left`);
 
 	// starmap bonus
+	// Generated code starts here on 2026-09-22T00:00:00Z:
+	// Use cached getStarmapConstellationsCount to avoid reading localStorage and parsing JSON in updateLuckDisplay.
 	const starmapMult =
 		typeof window.getStarmapLuckBonus === 'function' ? window.getStarmapLuckBonus() : 1;
-	if (starmapMult > 1)
-		parts.push(
-			`starmap: +${formatMult(starmapMult - 1)}x (${
-				JSON.parse(localStorage.getItem('starmapData') || '{}').constellations?.length || 0
-			} constellations)`
-		);
+	if (starmapMult > 1) {
+		const constCount =
+			typeof window.getStarmapConstellationsCount === 'function'
+				? window.getStarmapConstellationsCount()
+				: JSON.parse(localStorage.getItem('starmapData') || '{}').constellations?.length || 0;
+		parts.push(`starmap: +${formatMult(starmapMult - 1)}x (${constCount} constellations)`);
+	}
+	// Generated code ends here on 2026-09-22T00:00:00Z:
 
 	breakdownEl.textContent = parts.length ? parts.join(' • ') : 'base luck (no modifiers active)';
 }
@@ -961,6 +984,7 @@ const achievementsList = [
 ];
 
 function updateAchievementsUI() {
+	updateLockedAchievements();
 	achievementsContainer.innerHTML = '';
 	achievementsList.forEach((ach) => {
 		const unlocked = achievementsUnlocked.has(ach.id);
@@ -1217,26 +1241,48 @@ document.getElementById('buyPointBtn').addEventListener('click', () => {
 
 // Point printer passive generation
 let _lastShopUIPoints = -1;
+// Generated code starts here on 2026-03-31T20:00:00Z:
+window._lastPrinterTick = Date.now();
 
-setInterval(() => {
+function updatePrinterPoints() {
 	if (shopUpgrades.printer > 0) {
-		points += shopUpgrades.printer;
-		updatePointsDisplay();
+		const now = Date.now();
+		const elapsedMs = now - (window._lastPrinterTick || now);
+		const elapsedSeconds = Math.min(3600, Math.floor(elapsedMs / 1000));
 
-		const luckCost = Math.floor(25 + shopUpgrades.luck * shopUpgrades.luck * 15);
-		const speedCost = Math.floor(50 + shopUpgrades.speed * shopUpgrades.speed * 55);
-		const pointCost = Math.floor(100 + shopUpgrades.pointMult * shopUpgrades.pointMult * 35);
-		const magnetCost = 500 + (shopUpgrades.magnet || 0) * 1000;
-		const printerCost = 1000 + (shopUpgrades.printer || 0) * (shopUpgrades.printer || 0) * 500;
-		const dupeCost = 800 + (shopUpgrades.duplicate || 0) * (shopUpgrades.duplicate || 0) * 400;
+		if (elapsedSeconds > 0) {
+			window._lastPrinterTick = (window._lastPrinterTick || now) + elapsedSeconds * 1000;
+			points += shopUpgrades.printer * elapsedSeconds;
+			updatePointsDisplay();
 
-		const thresholds = [luckCost, speedCost, pointCost, magnetCost, printerCost, dupeCost];
-		const crossed = thresholds.some((t) => points >= t !== _lastShopUIPoints >= t);
-		if (crossed || _lastShopUIPoints < 0) updateShopUI();
-		_lastShopUIPoints = points;
+			const luckCost = Math.floor(25 + shopUpgrades.luck * shopUpgrades.luck * 15);
+			const speedCost = Math.floor(50 + shopUpgrades.speed * shopUpgrades.speed * 55);
+			const pointCost = Math.floor(100 + shopUpgrades.pointMult * shopUpgrades.pointMult * 35);
+			const magnetCost = 500 + (shopUpgrades.magnet || 0) * 1000;
+			const printerCost = 1000 + (shopUpgrades.printer || 0) * (shopUpgrades.printer || 0) * 500;
+			const dupeCost = 800 + (shopUpgrades.duplicate || 0) * (shopUpgrades.duplicate || 0) * 400;
+
+			const thresholds = [luckCost, speedCost, pointCost, magnetCost, printerCost, dupeCost];
+			const crossed = thresholds.some((t) => points >= t !== _lastShopUIPoints >= t);
+			if (crossed || _lastShopUIPoints < 0) updateShopUI();
+			_lastShopUIPoints = points;
+		}
+	} else {
+		window._lastPrinterTick = Date.now();
 	}
-}, 1000);
+}
 
+setInterval(updatePrinterPoints, 1000);
+
+document.addEventListener('visibilitychange', () => {
+	if (document.visibilityState === 'visible') {
+		updatePrinterPoints();
+	}
+});
+// Generated code ends here on 2026-03-31T20:00:00Z.
+
+// Generated code starts here on 2026-09-17T00:00:00Z:
+// Fast-path inventory item updates: preserve running RarityStyle animation loops, attach dblclick sell handler once, and manage new-roll highlight timers to eliminate per-roll allocation and DOM thrashing overhead.
 function updateItem(d) {
 	const { rarityObj, count, liElement } = d;
 	const denom = Plush.denomOf(rarityObj);
@@ -1244,18 +1290,18 @@ function updateItem(d) {
 	liElement.textContent =
 		count > 1 ? `${rarityObj.name} (1/${denom}) x${count}` : `${rarityObj.name} (1/${denom})`;
 
-	if (liElement._rarityStyleAC) {
-		liElement._rarityStyleAC.abort();
-		liElement._rarityStyleAC = null;
-	}
-	liElement.style.color = '';
-	liElement.style.transition = '';
-	if (rarityObj.style && window.RarityStyle) {
-		liElement._rarityStyleAC = window.RarityStyle.apply(liElement, rarityObj.style);
+	if (!liElement._rarityStyleAC || liElement._rarityStyleAC.signal.aborted) {
+		if (rarityObj.style && window.RarityStyle) {
+			liElement._rarityStyleAC = window.RarityStyle.apply(liElement, rarityObj.style);
+		}
 	}
 
 	liElement.classList.add('new-roll');
-	setTimeout(() => liElement.classList.remove('new-roll'), 2000);
+	if (liElement._newRollTimer) clearTimeout(liElement._newRollTimer);
+	liElement._newRollTimer = setTimeout(() => {
+		liElement.classList.remove('new-roll');
+		liElement._newRollTimer = null;
+	}, 2000);
 
 	const key = rarityObj.name;
 	const soldData = soldOutRarities.get(key);
@@ -1265,76 +1311,85 @@ function updateItem(d) {
 		liElement.classList.remove('sold-out');
 	}
 
-	// Remove previous sell handler before adding a new one (prevents listener accumulation)
-	if (liElement._sellHandler) {
-		liElement.removeEventListener('dblclick', liElement._sellHandler);
-	}
+	if (!liElement._sellHandler) {
+		liElement._sellHandler = function sellHandler() {
+			const currentData = inventoryData.get(rarityObj.name);
+			if (!currentData) return;
 
-	liElement._sellHandler = function sellHandler() {
-		const currentData = inventoryData.get(rarityObj.name);
-		if (!currentData) return;
+			const soldData = soldOutRarities.get(key);
+			const alreadySold = soldData ? soldData.count : 0;
+			const availableToSell = currentData.count - alreadySold;
 
-		const soldData = soldOutRarities.get(key);
-		const alreadySold = soldData ? soldData.count : 0;
-		const availableToSell = currentData.count - alreadySold;
-
-		if (availableToSell <= 0) {
-			window.showAlert('all copies already sold out!');
-			return;
-		}
-
-		const snapCount = currentData.count;
-		const snapAvailable = availableToSell;
-		const pointsEarned = calculateRarityPoints(rarityObj) * snapAvailable;
-
-		showConfirmModal(
-			'sell rarity?',
-			`sell ${snapAvailable}x ${rarityObj.name} for ${formatNum(pointsEarned)} points? (you keep the rarity)`,
-			() => {
-				const freshData = inventoryData.get(rarityObj.name);
-				if (!freshData) return;
-				const freshSold = soldOutRarities.get(key);
-				const freshAlready = freshSold ? freshSold.count : 0;
-				const actualAvailable = freshData.count - freshAlready;
-				if (actualAvailable <= 0) {
-					window.showAlert('nothing left to sell!');
-					return;
-				}
-				const actualEarned = calculateRarityPoints(rarityObj) * actualAvailable;
-				points += actualEarned;
-				soldOutRarities.set(key, { count: freshData.count });
-				updatePointsDisplay();
-				updateShopUI();
-				saveAllData();
-				updateItem(freshData);
-				recalcLuckMultiplier();
-				updateLuckDisplay();
+			if (availableToSell <= 0) {
+				window.showAlert('all copies already sold out!');
+				return;
 			}
-		);
-	};
-	liElement.addEventListener('dblclick', liElement._sellHandler);
+
+			const snapCount = currentData.count;
+			const snapAvailable = availableToSell;
+			const pointsEarned = calculateRarityPoints(rarityObj) * snapAvailable;
+
+			showConfirmModal(
+				'sell rarity?',
+				`sell ${snapAvailable}x ${rarityObj.name} for ${formatNum(pointsEarned)} points? (you keep the rarity)`,
+				() => {
+					const freshData = inventoryData.get(rarityObj.name);
+					if (!freshData) return;
+					const freshSold = soldOutRarities.get(key);
+					const freshAlready = freshSold ? freshSold.count : 0;
+					const actualAvailable = freshData.count - freshAlready;
+					if (actualAvailable <= 0) {
+						window.showAlert('nothing left to sell!');
+						return;
+					}
+					const actualEarned = calculateRarityPoints(rarityObj) * actualAvailable;
+					points += actualEarned;
+					soldOutRarities.set(key, { count: freshData.count });
+					updatePointsDisplay();
+					updateShopUI();
+					saveAllData();
+					updateItem(freshData);
+					recalcLuckMultiplier();
+					updateLuckDisplay();
+				}
+			);
+		};
+		liElement.addEventListener('dblclick', liElement._sellHandler);
+	}
 }
+// Generated code ends here on 2026-09-17T00:00:00Z:
 
 function getRandomRarity() {
 	return Plush.roll(rarities, globalLuckMultiplier, inventoryData, shopUpgrades, luckBoostActive);
 }
 
+// Generated code starts here on 2026-10-25T00:00:00Z:
+// Maintain active list of locked achievements to avoid iterating over all 37 achievement items and evaluating Set lookups on every RNG roll.
+let _lockedAchievements = null;
+function updateLockedAchievements() {
+	_lockedAchievements = achievementsList.filter((ach) => !achievementsUnlocked.has(ach.id));
+}
+
 function checkAchievements(currentRarity) {
+	if (!_lockedAchievements) updateLockedAchievements();
+	if (_lockedAchievements.length === 0) return;
+
 	let newlyUnlocked = false;
-	achievementsList.forEach((ach) => {
-		if (!achievementsUnlocked.has(ach.id)) {
-			if (ach.check(currentRarity)) {
-				achievementsUnlocked.add(ach.id);
-				newlyUnlocked = true;
-			}
+	for (let i = _lockedAchievements.length - 1; i >= 0; i--) {
+		const ach = _lockedAchievements[i];
+		if (ach.check(currentRarity)) {
+			achievementsUnlocked.add(ach.id);
+			_lockedAchievements.splice(i, 1);
+			newlyUnlocked = true;
 		}
-	});
+	}
 	if (newlyUnlocked) {
 		if (window.playThemeSound) window.playThemeSound('achievement');
 		updateAchievementsUI();
 		saveAllData();
 	}
 }
+// Generated code ends here on 2026-10-25T00:00:00Z:
 
 function updateAnomalyUI() {
 	const el = document.getElementById('anomalyCount');
@@ -1553,18 +1608,29 @@ function initNotifCenter() {
 	const clearBtn = document.getElementById('notifClearAll');
 	if (!bell || !panel) return;
 
+	// Generated code starts here on 2026-09-16T00:45:00Z:
+	const setPanelOpenState = (isOpen) => {
+		notifPanelOpen = isOpen;
+		panel.classList.toggle('open', isOpen);
+		bell.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+		if (isOpen) renderNotifList();
+	};
+
 	bell.addEventListener('click', (e) => {
 		e.stopPropagation();
-		notifPanelOpen = !notifPanelOpen;
-		panel.classList.toggle('open', notifPanelOpen);
-		if (notifPanelOpen) renderNotifList();
+		setPanelOpenState(!notifPanelOpen);
 	});
 
 	document.addEventListener('pointerdown', (e) => {
 		if (!notifPanelOpen) return;
 		if (!panel.contains(e.target) && !bell.contains(e.target)) {
-			notifPanelOpen = false;
-			panel.classList.remove('open');
+			setPanelOpenState(false);
+		}
+	});
+
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape' && notifPanelOpen) {
+			setPanelOpenState(false);
 		}
 	});
 
@@ -1572,6 +1638,7 @@ function initNotifCenter() {
 	if (clearBtn) clearBtn.addEventListener('click', notifClearAll);
 
 	updateNotifBadge();
+	// Generated code ends here on 2026-09-16T00:45:00Z:
 }
 
 function consumeAnomaly() {
@@ -1731,9 +1798,22 @@ async function resetInventory() {
 	localStorage.removeItem('mutationHistory');
 	localStorage.removeItem('mutationBestResult');
 	localStorage.removeItem('runesData');
+	// Generated code starts here on 2026-03-29T12:00:00Z:
+	localStorage.removeItem('runesUnlocked');
+	// Generated code ends here on 2026-03-29T12:00:00Z:
 	localStorage.removeItem('runeBlocks');
 	localStorage.removeItem('runeGift');
 	localStorage.removeItem('runeUpgrades');
+	localStorage.removeItem('expeditionData');
+	localStorage.removeItem('expeditionsUnlocked');
+	localStorage.removeItem('dealerData');
+	localStorage.removeItem('dealerUnlocked');
+	// Generated code starts here on 2026-03-29T12:00:00Z:
+	localStorage.removeItem('catShrineUnlocked');
+	localStorage.removeItem('catShrineEquipped');
+	localStorage.removeItem('catShrineToggle');
+	localStorage.removeItem('infoTipsRead');
+	// Generated code ends here on 2026-03-29T12:00:00Z:
 	rarityTimestamps = new Map();
 	window.rarityTimestamps = rarityTimestamps;
 	notifications = [];
@@ -1876,6 +1956,7 @@ function spinAndReveal(res) {
 	if (totalRolls > 0 && totalRolls % 100 === 0) startLuckBoost();
 
 	const finalize = () => {
+		document.getElementById('spinnerContainer')?.classList.remove('roll-pending');
 		totalRolls++;
 		updateTotalRolls();
 		if (window.recheckDefaultMusicTier) window.recheckDefaultMusicTier();
@@ -2046,8 +2127,14 @@ function startWellCooldownTimer() {
 
 const sortSelect = document.getElementById('sortSelect');
 
+let nextRollAllowedAt = 0;
+
 rollBtn.addEventListener('click', () => {
 	if (isCutscenePlaying) return;
+	const now = Date.now();
+	if (now < nextRollAllowedAt) return;
+	nextRollAllowedAt = now + Math.max(250, rollSpeed * 1000);
+
 	rollBtn.disabled = true;
 	if (window.setCursorRolling) window.setCursorRolling(true);
 
@@ -2099,29 +2186,10 @@ document.addEventListener('visibilitychange', () => {
 		updateActivePotionsDisplay();
 	}
 
-	if (_rollClickTimer) {
-		clearTimeout(_rollClickTimer);
-		_rollClickTimer = null;
+	if (_rollClickTimer || _rollFinalizeTimer) {
 		spinner.style.transition = 'none';
 		spinner.style.transform = 'translateY(0)';
-		spinner.innerHTML = '';
-		rollBtn.disabled = false;
-	}
-
-	if (_rollFinalizeTimer) {
-		clearTimeout(_rollFinalizeTimer);
-		_rollFinalizeTimer = null;
-		spinner.style.transition = 'none';
-		spinner.style.transform = 'translateY(0)';
-		spinner.innerHTML = '';
-		rollBtn.disabled = false;
-	}
-
-	if (!isCutscenePlaying && rollBtn.disabled) {
-		spinner.style.transition = 'none';
-		spinner.style.transform = 'translateY(0)';
-		spinner.innerHTML = '';
-		rollBtn.disabled = false;
+		document.getElementById('spinnerContainer')?.classList.add('roll-pending');
 	}
 
 	if (luckBoostActive) {
@@ -2482,6 +2550,19 @@ document.addEventListener('DOMContentLoaded', function () {
 		indexModal.classList.remove('show');
 	}
 
+	// Generated code starts here on 2026-09-12T10:00:00Z:
+	// Cache sorted rarities list lazy-evaluated to avoid ~300 item sorts on every search keystroke in the Index modal.
+	let _cachedSortedRarities = null;
+	function getSortedRarities() {
+		if (!_cachedSortedRarities) {
+			_cachedSortedRarities = [...rarities].sort((a, b) => Plush.denomOf(b) - Plush.denomOf(a));
+		}
+		return _cachedSortedRarities;
+	}
+	// Generated code ends here on 2026-09-12T10:00:00Z.
+
+	// Generated code starts here on 2026-09-21T00:00:00Z:
+	// Batch DOM element insertions with DocumentFragment and hoist lowercasing outside filter loop to eliminate layout thrashing during Index search.
 	function updateIndexDisplay(searchTerm = '') {
 		// Update stats
 		const collected = inventoryData.size;
@@ -2492,14 +2573,15 @@ document.addEventListener('DOMContentLoaded', function () {
 		indexList.innerHTML = '';
 
 		// balls
-		const sortedRarities = [...rarities].sort((a, b) => Plush.denomOf(b) - Plush.denomOf(a));
+		const sortedRarities = getSortedRarities();
 
-		// Filter by search term
-		const filteredRarities = searchTerm
+		// Filter by search term with lowercasing hoisted
+		const lowerTerm = searchTerm ? searchTerm.toLowerCase() : '';
+		const filteredRarities = lowerTerm
 			? sortedRarities.filter((rarity) => {
 					const isUnlocked = inventoryData.has(rarity.name);
 					// Only search unlocked rarities by name
-					return isUnlocked && rarity.name.toLowerCase().includes(searchTerm.toLowerCase());
+					return isUnlocked && rarity.name.toLowerCase().includes(lowerTerm);
 				})
 			: sortedRarities;
 
@@ -2513,6 +2595,8 @@ document.addEventListener('DOMContentLoaded', function () {
 			indexList.appendChild(noResults);
 			return;
 		}
+
+		const fragment = document.createDocumentFragment();
 
 		filteredRarities.forEach((rarity) => {
 			const isUnlocked = inventoryData.has(rarity.name);
@@ -2548,9 +2632,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
 			item.appendChild(leftSide);
 			item.appendChild(rightSide);
-			indexList.appendChild(item);
+			fragment.appendChild(item);
 		});
+
+		indexList.appendChild(fragment);
 	}
+	// Generated code ends here on 2026-09-21T00:00:00Z:
 
 	// Event listeners
 	indexBtn.addEventListener('click', openIndex);

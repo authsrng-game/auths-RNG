@@ -48,7 +48,16 @@ console.log(performance.now());
 	const TITLE_CSS = 'font-size:1em;font-weight:bold;margin-bottom:10px;';
 	const BTN_ROW_CSS = 'display:flex;gap:10px;justify-content:center;';
 
+	let _activeOverlayCleanup = null;
+
 	function removeExisting() {
+		// Generated code starts here on 2026-03-31T00:00:00Z:
+		if (typeof _activeOverlayCleanup === 'function') {
+			const cleanup = _activeOverlayCleanup;
+			_activeOverlayCleanup = null;
+			cleanup();
+		}
+		// Generated code ends here on 2026-03-31T00:00:00Z:
 		const el = document.getElementById('customPopupOverlay');
 		if (el) el.remove();
 	}

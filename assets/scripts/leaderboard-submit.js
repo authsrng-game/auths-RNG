@@ -6,47 +6,42 @@ console.log(performance.now());
 	const API = 'https://leaderboard.authsrng.xyz/api/leaderboard';
 	const SUBMIT_INTERVAL = 15 * 60 * 1000;
 
-	// Generated code starts here on 2026-06-18T15:15:00Z:
-	function getRarest() {
+	// Generated code starts here on 2026-06-18T01:30:00Z:
+	function escHtml(s) {
+		return String(s)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#39;');
+	}
+	// Generated code ends here on 2026-06-18T01:30:00Z:
+
+	function getInventoryArray() {
 		try {
-			const inv = JSON.parse(localStorage.getItem('rarityInventory') || '[]');
-			if (Array.isArray(inv)) {
-				let best = { name: null, denom: 0 };
-				for (const item of inv) {
-					if (!item || !item.name || !item.count) continue;
-					const denom =
-						item.denom || item.denominator || (item.chance ? Math.round(1 / item.chance) : 0);
-					if (denom > best.denom) best = { name: item.name, denom };
-				}
-				if (best.name) return best;
-			} else if (typeof inv === 'object' && inv !== null) {
-				const rarities = window.RARITIES || window.rarities || [];
-				let best = { name: null, denom: 0 };
-				for (const r of rarities) {
-					if (!inv[r.name]) continue;
-					const denom = r.denom || r.denominator || (r.chance ? Math.round(1 / r.chance) : 0);
-					if (denom > best.denom) best = { name: r.name, denom };
-				}
-				if (best.name) return best;
-			}
-		} catch (_) {}
-		return {
-			name: localStorage.getItem('lbRarestName') || 'none',
-			denom: parseInt(localStorage.getItem('lbRarestDenom') || '0'),
-		};
+			return JSON.parse(localStorage.getItem('rarityInventory') || '[]');
+		} catch (_) {
+			return [];
+		}
+	}
+
+	function denomOf(item) {
+		return item.denom || (item.chance ? Math.round(1 / item.chance) : 0);
+	}
+
+	function getRarest(inv) {
+		let best = { name: null, denom: 0 };
+		for (const item of inv) {
+			const denom = denomOf(item);
+			if (denom > best.denom) best = { name: item.name, denom };
+		}
+		return best;
 	}
 
 	function buildPayload() {
-		let totalRarities = 0;
-		try {
-			const inv = JSON.parse(localStorage.getItem('rarityInventory') || '[]');
-			if (Array.isArray(inv)) {
-				totalRarities = inv.reduce((s, v) => s + (parseInt(v.count) || 0), 0);
-			} else if (typeof inv === 'object' && inv !== null) {
-				totalRarities = Object.values(inv).reduce((s, v) => s + (parseInt(v) || 0), 0);
-			}
-		} catch (_) {}
-		const rarest = getRarest();
+		const inv = getInventoryArray();
+		const totalRarities = inv.reduce((s, item) => s + (parseInt(item.count) || 0), 0);
+		const rarest = getRarest(inv);
 		let achievements = [];
 		try {
 			achievements = JSON.parse(localStorage.getItem('achievementsUnlocked') || '[]');
@@ -103,11 +98,19 @@ console.log(performance.now());
 		}
 	}
 
+	// Generated code starts here on 2026-03-31T15:00:00Z:
 	async function deleteEntry() {
 		try {
-			await fetch(API, { method: 'DELETE', headers: authHeaders() });
-		} catch (_) {}
+			const r = await fetch(API, { method: 'DELETE', headers: authHeaders() });
+			if (!r.ok) {
+				const data = await r.json().catch(() => ({}));
+				console.warn('[leaderboard] delete entry rejected:', data.error || r.status);
+			}
+		} catch (e) {
+			console.warn('[leaderboard] delete entry request failed:', e.message || e);
+		}
 	}
+	// Generated code ends here on 2026-03-31T15:00:00Z:
 
 	let autoTimer = null;
 
@@ -147,7 +150,7 @@ console.log(performance.now());
       <button id="enableLbBtn" class="small" style="width:100%;margin-top:4px;">join leaderboard</button>
       <small class="helper" style="margin-top:6px;display:block;">
         your stats shown publicly under your account username.
-        <a href="/assets/frontend/leaderboard.html" style="opacity:0.6;">view leaderboard</a>
+        <a href="/assets/frontend/leaderboard.html" style="opacity:0.6;" target="_blank" rel="noopener noreferrer">view leaderboard</a>
       </small>`;
 
 			document.getElementById('enableLbBtn').addEventListener('click', async () => {
@@ -166,7 +169,7 @@ console.log(performance.now());
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
       <span style="font-size:0.85em;opacity:0.8;">
         leaderboard: <span style="color:#88dd88;">on</span>
-        <span style="opacity:0.4;"> — ${username}</span>
+        <span style="opacity:0.4;"> — ${escHtml(username)}</span>
       </span>
       <button id="disableLbBtn" class="small" style="opacity:0.5;">opt out</button>
     </div>

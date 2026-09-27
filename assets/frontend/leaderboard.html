@@ -229,11 +229,32 @@
 				margin-left: 6px;
 				vertical-align: middle;
 			}
+
+			.lb-mode-btn {
+				padding: 4px 12px;
+				font-size: 0.85em;
+				background: #1a1a1a;
+				border: 1px solid #2a2a2a;
+				color: var(--text);
+				cursor: pointer;
+				font-family: monospace;
+				border-radius: 2px;
+				margin-right: 6px;
+			}
+			.lb-mode-btn.active {
+				border-color: var(--accent);
+				color: var(--accent);
+			}
 		</style>
 	</head>
 	<body>
 		<div class="container">
 			<h1>leaderboard</h1>
+
+			<div class="lb-mode-toggle" style="margin-bottom: 14px">
+				<button id="lbModeGlobal" class="lb-mode-btn active">global</button>
+				<button id="lbModeFriends" class="lb-mode-btn">friends</button>
+			</div>
 
 			<div class="meta">
 				<span
@@ -267,13 +288,14 @@
 			<p class="small">
 				leaderboard updates every 15 minutes &nbsp;·&nbsp; opt-in from the settings page
 			</p>
-			<a href="/" class="back-link">← back to game</a>
+			<a href="/" class="back-link" target="_blank" rel="noopener noreferrer">← back to game</a>
 		</div>
 
 		<script>
 			'use strict';
 
 			const API = 'https://leaderboard.authsrng.xyz/api/leaderboard';
+			const FRIENDS_API = 'https://leaderboard.authsrng.xyz/api/leaderboard/friends';
 			const REFRESH_INTERVAL = 15 * 60 * 1000;
 
 			let allEntries = [];
@@ -282,6 +304,20 @@
 			let refreshTimer = null;
 			let countdownTimer = null;
 			let nextRefreshAt = 0;
+			let leaderboardMode = 'global';
+
+			function getToken() {
+				return localStorage.getItem('authToken');
+			}
+
+			function syncModeButtons() {
+				document
+					.getElementById('lbModeGlobal')
+					.classList.toggle('active', leaderboardMode === 'global');
+				document
+					.getElementById('lbModeFriends')
+					.classList.toggle('active', leaderboardMode === 'friends');
+			}
 
 			function abbr(n) {
 				n = Number(n) || 0;
@@ -384,13 +420,26 @@
 				errorBox.style.display = 'none';
 
 				try {
-					const r = await fetch(API + '?t=' + Date.now());
+					const token = getToken();
+					if (leaderboardMode === 'friends' && !token) {
+						leaderboardMode = 'global';
+						syncModeButtons();
+					}
+
+					const url = leaderboardMode === 'friends' ? FRIENDS_API : API;
+					const headers =
+						leaderboardMode === 'friends' && token ? { Authorization: 'Bearer ' + token } : {};
+
+					const r = await fetch(url + '?t=' + Date.now(), { headers });
 					if (!r.ok) throw new Error('HTTP ' + r.status);
 					const data = await r.json();
 
 					allEntries = data.entries || [];
 					document.getElementById('playerCount').textContent =
-						allEntries.length + ' player' + (allEntries.length !== 1 ? 's' : '') + ' on the board';
+						allEntries.length +
+						' player' +
+						(allEntries.length !== 1 ? 's' : '') +
+						(leaderboardMode === 'friends' ? ' in your friends list' : ' on the board');
 
 					stateBox.style.display = 'none';
 					table.style.display = '';
@@ -453,6 +502,24 @@
 					th.appendChild(arrow);
 					renderTable();
 				});
+			});
+
+			document.getElementById('lbModeGlobal').addEventListener('click', () => {
+				if (leaderboardMode === 'global') return;
+				leaderboardMode = 'global';
+				syncModeButtons();
+				fetchLeaderboard();
+			});
+
+			document.getElementById('lbModeFriends').addEventListener('click', () => {
+				if (!getToken()) {
+					window.alert('log in on the main site to view your friends leaderboard.');
+					return;
+				}
+				if (leaderboardMode === 'friends') return;
+				leaderboardMode = 'friends';
+				syncModeButtons();
+				fetchLeaderboard();
 			});
 
 			fetchLeaderboard();
