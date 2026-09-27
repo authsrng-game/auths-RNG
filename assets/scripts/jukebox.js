@@ -320,28 +320,7 @@
 	const btnPrev = document.getElementById('jb-prev');
 	const btnNext = document.getElementById('jb-next');
 
-	// Generated code starts here on 2026-10-26T00:00:00Z:
-	// Cache DOM element handles and scalar states to bypass redundant document queries, string formatting, and panel style reflows on background render ticks.
-	let _muteMusicEl = null;
-	let _musicSelectEl = null;
-	let _fillEl = null;
-	let _timeEl = null;
-	let _volEl = null;
-
-	let _lastMutedState = null;
-	let _lastPlayingState = null;
-	let _lastTrackName = null;
-	let _lastTimeStr = null;
-	let _lastFillWidth = null;
-	let _lastVolValue = null;
-
-	function getPanelElements() {
-		if (!_fillEl) _fillEl = document.getElementById('jb-progress-fill');
-		if (!_timeEl) _timeEl = document.getElementById('jb-time');
-		if (!_volEl) _volEl = document.getElementById('jb-vol');
-		return { fill: _fillEl, timeEl: _timeEl, volEl: _volEl };
-	}
-
+	// ── State helpers ──────────────────────────────────────────────────────
 	function isPlaying() {
 		const a = window.backgroundMusic;
 		if (a && !a.paused && a.readyState > 0) return true;
@@ -350,14 +329,14 @@
 	}
 
 	function isMuted() {
-		if (!_muteMusicEl) _muteMusicEl = document.getElementById('muteMusic');
-		return _muteMusicEl ? _muteMusicEl.checked : false;
+		const n = document.getElementById('muteMusic');
+		return n ? n.checked : false;
 	}
 
 	function trackName() {
-		if (!_musicSelectEl) _musicSelectEl = document.getElementById('musicSelect');
-		if (!_musicSelectEl || _musicSelectEl.selectedIndex < 0) return '—';
-		let t = _musicSelectEl.options[_musicSelectEl.selectedIndex].textContent;
+		const sel = document.getElementById('musicSelect');
+		if (!sel || sel.selectedIndex < 0) return '—';
+		let t = sel.options[sel.selectedIndex].textContent;
 		// strip the fucking noise from built-in labels
 		t = t.replace(/\s*\(custom\)/gi, '').replace(/\s*\(default\)/gi, '');
 		// "Artist - Title" → just Title when long.
@@ -365,7 +344,6 @@
 		if (d > -1 && t.length > 28) t = t.slice(d + 3);
 		return t.trim() || '—';
 	}
-	// Generated code ends here on 2026-10-26T00:00:00Z:
 
 	// ── da controls ───────────────────────────────────────────────────────────
 
@@ -481,60 +459,28 @@
 	let seekDragging = false;
 	let volUserActive = false;
 
-	// Generated code starts here on 2026-10-26T00:00:00Z:
 	function render() {
-		const muted = isMuted();
-		const active = !muted;
+		const active = !isMuted();
 		const playing = isPlaying() && active;
 
-		if (active !== _lastMutedState) {
-			_lastMutedState = active;
-			disc.classList.toggle('jb-active', active);
-			btnPlay.textContent = muted ? '▶' : '❚❚';
-			btnPlay.title = muted ? 'play' : 'pause';
-		}
+		disc.classList.toggle('jb-active', active);
+		disc.classList.toggle('jb-spinning', playing);
+		btnPlay.innerHTML = isMuted() ? '&#9654;' : '&#9646;&#9646;';
+		btnPlay.title = isMuted() ? 'play' : 'pause';
+		nameEl.textContent = trackName();
 
-		if (playing !== _lastPlayingState) {
-			_lastPlayingState = playing;
-			disc.classList.toggle('jb-spinning', playing);
-		}
-
-		if (!panel.classList.contains('jb-open')) return;
-
-		const tName = trackName();
-		if (tName !== _lastTrackName) {
-			_lastTrackName = tName;
-			nameEl.textContent = tName;
-		}
-
-		const { fill, timeEl, volEl } = getPanelElements();
 		const dur = getDuration();
 		const cur = getCurrentTime();
+		const fill = document.getElementById('jb-progress-fill');
+		const timeEl = document.getElementById('jb-time');
+		const volEl = document.getElementById('jb-vol');
 
 		if (fill && !seekDragging) {
-			const widthStr = dur ? (cur / dur) * 100 + '%' : '0%';
-			if (widthStr !== _lastFillWidth) {
-				_lastFillWidth = widthStr;
-				fill.classList.add('jb-smooth');
-				fill.style.width = widthStr;
-			}
+			fill.classList.add('jb-smooth');
+			fill.style.width = (dur ? (cur / dur) * 100 : 0) + '%';
 		}
-
-		if (timeEl) {
-			const timeStr = dur ? formatTime(cur) + ' / ' + formatTime(dur) : '';
-			if (timeStr !== _lastTimeStr) {
-				_lastTimeStr = timeStr;
-				timeEl.textContent = timeStr;
-			}
-		}
-
-		if (volEl && !volUserActive) {
-			const volVal = getVolume();
-			if (volVal !== _lastVolValue) {
-				_lastVolValue = volVal;
-				volEl.value = volVal;
-			}
-		}
+		if (timeEl) timeEl.textContent = dur ? formatTime(cur) + ' / ' + formatTime(dur) : '';
+		if (volEl && !volUserActive) volEl.value = getVolume();
 	}
 
 	// ── Panel open / close ─────────────────────────────────────────────────
@@ -542,9 +488,7 @@
 	const openPanel = () => {
 		clearTimeout(closeTimer);
 		panel.classList.add('jb-open');
-		render();
 	};
-	// Generated code ends here on 2026-10-26T00:00:00Z:
 	const closePanel = () => {
 		closeTimer = setTimeout(() => panel.classList.remove('jb-open'), 900);
 	};

@@ -369,23 +369,6 @@
 			<h1>auth's RNG addons</h1>
 			<p class="sub">community and official mods for auth's RNG!</p>
 
-			<div id="backToGameBar" style="display: flex; justify-content: center; margin-bottom: 20px">
-				<a
-					href="https://authsrng.xyz"
-					style="
-						font-size: 0.82em;
-						padding: 6px 14px;
-						border: 1px solid var(--border-color);
-						border-radius: 20px;
-						background: var(--button-bg);
-						color: var(--text-color);
-						opacity: 0.75;
-						text-decoration: none;
-					"
-					>&lt;&lt; back to auth's RNG</a
-				>
-			</div>
-
 			<div class="toolbar">
 				<input
 					type="text"
@@ -459,9 +442,6 @@
 			</div>
 		</div>
 
-		<script>
-			window.ADDON_HOST_NO_AUTOLOAD = true;
-		</script>
 		<script src="/assets/scripts/addon-host.js" defer></script>
 		<script defer>
 			document.addEventListener('DOMContentLoaded', () => {
@@ -474,27 +454,6 @@
 				const modalBody = document.getElementById('modalBody');
 				const permOverlay = document.getElementById('permOverlay');
 				const permBody = document.getElementById('permBody');
-
-				(function () {
-					let justApplied = false;
-					try {
-						justApplied = sessionStorage.getItem('addonChangesJustApplied') === '1';
-						sessionStorage.removeItem('addonChangesJustApplied');
-					} catch (_) {}
-					if (justApplied) {
-						const toast = document.createElement('div');
-						toast.textContent =
-							"addon changes applied! they'll be active next time you load auth's RNG!!";
-						toast.style.cssText = `
-			position:fixed; top:20px; left:50%; transform:translateX(-50%);
-			background:var(--panel-bg); border:1px solid #3a5a3a; color:#8c8;
-			padding:10px 18px; border-radius:6px; font-size:0.85em; z-index:3000;
-			box-shadow:0 4px 16px rgba(0,0,0,0.4);
-		`;
-						document.body.appendChild(toast);
-						setTimeout(() => toast.remove(), 4500);
-					}
-				})();
 
 				let activeFilter = 'all';
 
@@ -720,6 +679,7 @@
 				}
 
 				document.addEventListener('addonPendingChange', updatePendingBar);
+				updatePendingBar();
 
 				if (window.AddonManager) {
 					tryRender();
