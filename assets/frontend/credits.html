@@ -165,27 +165,31 @@
 
 			<script>
 				(async () => {
-					const res = await fetch(
-						'https://api.github.com/repos/authsrng-game/auths-RNG/contributors?per_page=100'
-					);
-					const users = await res.json();
+					try {
+						const res = await fetch(
+							'https://api.github.com/repos/authsrng-game/auths-RNG/contributors?per_page=100'
+						);
+						if (!res.ok) return;
+						const users = await res.json();
+						if (!Array.isArray(users)) return;
 
-					const root = document.getElementById('contributors');
+						const root = document.getElementById('contributors');
 
-					users.forEach((u) => {
-						const a = document.createElement('a');
-						a.className = 'contributor';
-						a.href = u.html_url;
-						a.target = '_blank';
+						users.forEach((u) => {
+							const a = document.createElement('a');
+							a.className = 'contributor';
+							a.href = u.html_url;
+							a.target = '_blank';
 
-						a.innerHTML = `
+							a.innerHTML = `
       <img src="${u.avatar_url}">
       <span class="name">${u.login}</span>
       <span class="count">${u.contributions}</span>
     `;
 
-						root.appendChild(a);
-					});
+							root.appendChild(a);
+						});
+					} catch (_) {}
 				})();
 			</script>
 			<br />
