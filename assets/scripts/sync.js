@@ -57,6 +57,7 @@
 	// Generated code ends here on 2026-10-24T00:00:00Z:
 
 	var retryDelay = 2000;
+	var flushInFlight = false;
 	var MAX_RETRY_DELAY = 60000;
 
 	function scheduleFlush(delay) {
@@ -69,7 +70,6 @@
 
 	function markDirty(key, value) {
 		dirty[key] = value;
-		retryDelay = 2000;
 		scheduleFlush(retryDelay);
 	}
 
@@ -131,6 +131,7 @@
 	}
 
 	function flushDirty() {
+		if (flushInFlight) return;
 		var keys = Object.keys(dirty);
 		if (!keys.length) return;
 		var token = getToken();
@@ -139,16 +140,22 @@
 			return;
 		}
 
+		flushInFlight = true;
 		var pending = dirty;
 		dirty = Object.create(null);
 
-		var keyChunks = chunkArray(keys, PUSH_CHUNK_SIZE);
+		var keyChunks = chunkArray(Object.keys(pending), PUSH_CHUNK_SIZE);
 
-		keyChunks.reduce(function (p, chunkKeys) {
-			return p.then(function () {
-				return pushChunk(token, chunkKeys, pending);
+		keyChunks
+			.reduce(function (p, chunkKeys) {
+				return p.then(function () {
+					return pushChunk(token, chunkKeys, pending);
+				});
+			}, Promise.resolve())
+			.then(function () {
+				flushInFlight = false;
+				if (Object.keys(dirty).length) scheduleFlush(retryDelay);
 			});
-		}, Promise.resolve());
 	}
 
 	function pushChunk(token, chunkKeys, pending) {
@@ -175,6 +182,7 @@
 					return;
 				}
 				if (!r.ok) throw new Error('push failed with status ' + r.status);
+				retryDelay = 2000;
 				cancelSyncBanner();
 				var snap = loadSnapshot();
 				Object.keys(snapshotUpdate).forEach(function (key) {
