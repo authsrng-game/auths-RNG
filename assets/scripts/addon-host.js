@@ -1,126 +1,131 @@
+'use strict';
+
 const ADDON_ORIGIN = 'https://addons.authsrng.xyz';
+const INDEX_URL = `${ADDON_ORIGIN}/index.json`;
+const INSTALLED_KEY = 'installedAddonIds';
 
-const PERMISSION_METHODS = {
-	readSave: ['getInventory', 'getPoints', 'getRarities', 'getAchievements', 'getLuckMultiplier'],
-	modifySave: ['setAutoSellThreshold'],
-	audio: ['playSound'],
-	theme: ['setCSSVar'],
-	points: ['spendPoints'],
-};
-
-class AddonInstance {
-	constructor(manifest) {
-		this.manifest = manifest;
-		this.allowed = new Set(manifest.permissions.flatMap((p) => PERMISSION_METHODS[p] || []));
-		this.iframe = document.createElement('iframe');
-		this.iframe.src = `${ADDON_ORIGIN}/run/${manifest.id}/${manifest.version}/`;
-		this.iframe.sandbox = 'allow-scripts';
-		this.iframe.style.cssText =
-			'position:fixed;pointer-events:none;width:0;height:0;border:0;opacity:0;';
-		this.iframe.dataset.addonId = manifest.id;
-		document.body.appendChild(this.iframe);
-		this._onMessage = this.onMessage.bind(this);
-		window.addEventListener('message', this._onMessage);
+function getInstalledIds() {
+	try {
+		return JSON.parse(localStorage.getItem(INSTALLED_KEY) || '[]');
+	} catch (_) {
+		return [];
 	}
+}
 
-	onMessage(e) {
-		if (e.origin !== ADDON_ORIGIN) return;
-		if (e.source !== this.iframe.contentWindow) return;
-		const { id, method, args } = e.data || {};
-		if (typeof method !== 'string') return;
-		if (!this.allowed.has(method)) {
-			this.reply(id, { error: 'permission denied: ' + method });
-			return;
-		}
-		const fn = this.api[method];
-		if (!fn) {
-			this.reply(id, { error: 'unknown method' });
-			return;
-		}
-		try {
-			const result = fn.apply(null, Array.isArray(args) ? args : []);
-			this.reply(id, { result });
-		} catch (err) {
-			this.reply(id, { error: String((err && err.message) || err) });
-		}
-	}
+function setInstalledIds(ids) {
+	try {
+		localStorage.setItem(INSTALLED_KEY, JSON.stringify(ids));
+	} catch (_) {}
+}
 
-	reply(id, payload) {
-		this.iframe.contentWindow.postMessage(Object.assign({ id }, payload), ADDON_ORIGIN);
-	}
-
-	destroy() {
-		window.removeEventListener('message', this._onMessage);
-		this.iframe.remove();
-	}
-
-	get api() {
-		return {
-			getInventory: () =>
-				Array.from(inventoryData.values()).map((d) => ({
-					name: d.rarityObj.name,
-					count: d.count,
-					denom: Plush.denomOf(d.rarityObj),
-				})),
-			getPoints: () => points,
-			getRarities: () => rarities.map((r) => ({ name: r.name, denom: Plush.denomOf(r) })),
-			getAchievements: () => Array.from(achievementsUnlocked),
-			getLuckMultiplier: () => globalLuckMultiplier,
-			setAutoSellThreshold: (v) => {
-				if (typeof v !== 'number' || v < 0 || v > 1e9) throw new Error('invalid threshold');
-				window.autoSellThreshold = v;
-			},
-			playSound: (url) => {
-				if (typeof url !== 'string' || !url.startsWith(ADDON_ORIGIN + '/')) {
-					throw new Error('audio must be addon-hosted');
-				}
-				const audio = new Audio(url);
-				audio.volume = 0.5;
-				audio.play().catch(() => {});
-			},
-			setCSSVar: (name, value) => {
-				if (typeof name !== 'string' || !/^--addon-[a-z0-9-]+$/.test(name)) {
-					throw new Error('addon css vars must be prefixed --addon-');
-				}
-				if (typeof value !== 'string' || value.length > 200) throw new Error('invalid value');
-				document.documentElement.style.setProperty(name, value);
-			},
-			spendPoints: (amount) => {
-				if (typeof amount !== 'number' || amount <= 0 || amount > points)
-					throw new Error('invalid amount');
-				points -= amount;
-				updatePointsDisplay();
-				saveAllData();
-				return points;
-			},
-		};
+function notify(text) {
+	if (typeof window.addNotification === 'function') {
+		window.addNotification(text);
+	} else {
+		console.log('[addon]', text);
 	}
 }
 
 const AddonManager = {
 	active: new Map(),
+	index: [],
 
-	load(manifest) {
-		if (this.active.has(manifest.id)) return;
-		const known = Object.keys(PERMISSION_METHODS);
-		const bad = manifest.permissions.filter((p) => !known.includes(p));
-		if (bad.length) {
-			console.error('addon has unknown permissions:', manifest.id, bad);
-			return;
+	load(entry) {
+		if (this.active.has(entry.id)) {
+			const existing = this.active.get(entry.id);
+			if (existing.version === entry.version) return;
+			this.unload(entry.id);
 		}
-		this.active.set(manifest.id, new AddonInstance(manifest));
+
+		const script = document.createElement('script');
+		script.src = `${ADDON_ORIGIN}/bundles/${entry.id}/${entry.version}/${entry.entry}`;
+		script.dataset.addonId = entry.id;
+		script.dataset.addonVersion = entry.version;
+		script.async = false;
+		script.onerror = () => {
+			console.error('failed to load addon script:', entry.id);
+		};
+		document.body.appendChild(script);
+
+		this.active.set(entry.id, { version: entry.version, scriptEl: script });
 	},
 
 	unload(id) {
 		const inst = this.active.get(id);
 		if (!inst) return;
-		inst.destroy();
+		inst.scriptEl.remove();
 		this.active.delete(id);
 	},
 
 	unloadAll() {
 		for (const id of Array.from(this.active.keys())) this.unload(id);
 	},
+
+	install(entry) {
+		const ids = getInstalledIds();
+		if (!ids.includes(entry.id)) {
+			ids.push(entry.id);
+			setInstalledIds(ids);
+		}
+		this.load(entry);
+	},
+
+	uninstall(id) {
+		const ids = getInstalledIds().filter((x) => x !== id);
+		setInstalledIds(ids);
+		this.unload(id);
+	},
+
+	isInstalled(id) {
+		return getInstalledIds().includes(id);
+	},
+
+	async fetchIndex() {
+		const res = await fetch(INDEX_URL, { cache: 'no-store' });
+		if (!res.ok) throw new Error('failed to fetch addon index');
+		const data = await res.json();
+		this.index = data;
+		return data;
+	},
+
+	async syncFromIndex() {
+		let index;
+		try {
+			index = await this.fetchIndex();
+		} catch (err) {
+			console.error('addon index fetch failed:', err);
+			return this.index;
+		}
+
+		const byId = new Map(index.map((entry) => [entry.id, entry]));
+		const installedIds = getInstalledIds();
+		const stillValid = [];
+
+		for (const id of installedIds) {
+			const entry = byId.get(id);
+			if (entry) {
+				stillValid.push(id);
+				this.load(entry);
+			} else {
+				notify(`the "${id}" addon has been removed and is no longer available`);
+			}
+		}
+
+		setInstalledIds(stillValid);
+		return index;
+	},
 };
 
 window.AddonManager = AddonManager;
+
+function initAddons() {
+	AddonManager.syncFromIndex().then(() => {
+		document.dispatchEvent(new CustomEvent('addonsReady'));
+	});
+}
+
+if (document.readyState === 'loading') {
+	document.addEventListener('DOMContentLoaded', initAddons);
+} else {
+	initAddons();
+}
