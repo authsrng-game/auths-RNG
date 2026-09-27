@@ -678,6 +678,7 @@
 				}
 
 				document.addEventListener('addonPendingChange', updatePendingBar);
+				document.addEventListener('addonsReady', updatePendingBar);
 				updatePendingBar();
 
 				if (window.AddonManager) {
