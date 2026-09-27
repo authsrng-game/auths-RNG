@@ -18,7 +18,7 @@ function walk(dir, exts, out = []) {
 function isLocalPath(p) {
 	if (!p) return false;
 	if (/^(https?:)?\/\//.test(p)) return false;
-	if (p.startsWith('mailto:') || p.startsWith('tel:') || p.startsWith('data:')) return false;
+	if (p.startsWith('mailto:') || p.startsWith('tel:') || p.startsWith('data:') || p.startsWith('vbscript:')) return false;
 	if (p.startsWith('#')) return false;
 	if (p.startsWith('javascript:')) return false;
 	if (p.includes('${')) return false;
