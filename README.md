@@ -46,7 +46,7 @@ Inspired by Roblox RNG games like Sol's RNG and Juke's RNG.
 
 ## Other repos
 
-Android app: https://github.com/authsrng-game/auths-RNG-apk
+Android app: https://github.com/authsrng-game/auths-RNG-apk  
 Addons data: https://github.com/authsrng-game/auths-rng-addons
 
 ---
