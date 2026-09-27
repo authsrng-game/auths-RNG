@@ -435,4 +435,35 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(result.countSecondRender).toBe(1);
 	});
 	// Generated code ends here on 2026-06-18T16:00:00Z:
+
+	// Generated code starts here on 2026-06-18T18:00:00Z:
+	test('starmap crystallize reads window.totalSeconds / getCurrentTotalSeconds correctly', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('totalPlaytime', '3600');
+			localStorage.setItem('starmapUnlocked', '1');
+			localStorage.setItem('totalRolls', '200');
+			localStorage.setItem(
+				'rarityInventory',
+				JSON.stringify([{ name: 'Common', chance: 0.5, count: 5 }])
+			);
+		});
+
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(() => {
+			const seconds = typeof window.getCurrentTotalSeconds === 'function' ? window.getCurrentTotalSeconds() : null;
+			const totalSec = window.totalSeconds;
+			let constellationPlaytime = null;
+			if (typeof window.crystallize === 'function') {
+				const c = window.crystallize();
+				if (c) constellationPlaytime = c.playtime;
+			}
+			return { seconds, totalSec, constellationPlaytime };
+		});
+
+		expect(result.seconds).toBeGreaterThanOrEqual(3600);
+		expect(result.totalSec).toBeGreaterThanOrEqual(3600);
+		expect(result.constellationPlaytime).toBeGreaterThanOrEqual(3600);
+	});
+	// Generated code ends here on 2026-06-18T18:00:00Z:
 });
