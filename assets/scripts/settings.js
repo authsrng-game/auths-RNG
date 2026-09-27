@@ -18,8 +18,6 @@
 	let particleInterval = null;
 	let particleRaf = null;
 	let devInterval = null;
-	let rgbInterval = null;
-	let wackyInterval = null;
 	let visibilitySeasonListenerAdded = false;
 
 	// Discord-style pending changes
