@@ -28,7 +28,17 @@
 	});
 
 	function getTrust() {
-		const val = parseInt(localStorage.getItem(TRUST_KEY) || '0', 10);
+		const raw = localStorage.getItem(TRUST_KEY);
+		if (raw !== null && (raw.trim().startsWith('[') || raw.trim().startsWith('{'))) {
+			try {
+				const parsed = JSON.parse(raw);
+				if (Array.isArray(parsed)) {
+					loadHistory();
+					return 0;
+				}
+			} catch {}
+		}
+		const val = parseInt(raw || '0', 10);
 		return Number.isNaN(val) ? 0 : val;
 	}
 	function setTrust(v) {

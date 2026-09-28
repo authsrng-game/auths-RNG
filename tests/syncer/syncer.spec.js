@@ -65,4 +65,39 @@ test.describe('Syncer state consistency tests', () => {
 		expect(containsKeyInSource).toBe(true);
 	});
 	// Generated code ends here on 2026-03-31T21:00:00Z:
+
+	// Generated code starts here on 2026-10-25T00:00:00Z:
+	test('getTrust handles legacy array data in mutationTrust and migrates to mutationHistory', async ({
+		page,
+	}) => {
+		const legacyArray = [
+			{ a: 'Common', b: 'Uncommon', result: 'Rare', good: true, ts: Date.now() },
+		];
+		await page.addInitScript((items) => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('mutationsUnlocked', '1');
+			localStorage.setItem('mutationTrust', JSON.stringify(items));
+		}, legacyArray);
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(() => {
+			const history = globalThis.localStorage.getItem('mutationHistory');
+			const trustKey = globalThis.localStorage.getItem('mutationTrust');
+			const trustAmtEl = globalThis.document.getElementById('mutationTrustAmt');
+			return {
+				history,
+				trustKey,
+				trustAmtText: trustAmtEl ? trustAmtEl.textContent : null,
+			};
+		});
+
+		expect(result.history).not.toBeNull();
+		expect(JSON.parse(result.history)).toEqual(legacyArray);
+		expect(result.trustKey).toBeNull();
+		if (result.trustAmtText !== null) {
+			expect(result.trustAmtText).toBe('0');
+		}
+	});
+	// Generated code ends here on 2026-10-25T00:00:00Z:
 });
