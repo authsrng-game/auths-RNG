@@ -692,6 +692,16 @@ setInterval(() => {
 	updatePlaytimeDisplay();
 }, 1000);
 
+// Generated code starts here on 2026-03-31T20:00:00Z:
+// Reconcile total playtime and refresh display immediately when backgrounded tab regains focus
+document.addEventListener('visibilitychange', () => {
+	if (document.visibilityState === 'visible') {
+		flushPlaytime();
+		updatePlaytimeDisplay();
+	}
+});
+// Generated code ends here on 2026-03-31T20:00:00Z.
+
 let isCutscenePlaying = false;
 
 function playCutscene(rarityName, callback) {
