@@ -1,7 +1,7 @@
 // Generated code starts here on 2026-03-31T00:00:00Z:
 const { test, expect } = require('@playwright/test');
 
-/* global inventoryData, rarityTimestamps, renderGauntlets */
+/* global inventoryData, rarityTimestamps, renderGauntlets, potionData */
 
 const BASE_URL = 'http://localhost:8080/';
 
@@ -49,6 +49,23 @@ test.describe('gauntlets system completion logic', () => {
 		});
 
 		await expect(easyMeta).not.toHaveText('✓ ready');
+	});
+
+	test('pre-registers potionData keys for all gauntlet tier IDs including hard tier', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(() => {
+			if (typeof potionData === 'undefined') return { error: 'potionData undefined' };
+			return {
+				hasHard: '_g_hard' in potionData,
+				hasEmpty: '_g_' in potionData,
+			};
+		});
+
+		expect(result.hasHard).toBe(true);
+		expect(result.hasEmpty).toBe(false);
 	});
 });
 // Generated code ends here on 2026-03-31T00:00:00Z:
