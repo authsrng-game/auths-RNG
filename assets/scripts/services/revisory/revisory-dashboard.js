@@ -264,7 +264,7 @@
 				print('language: if/else, while, for x in list { }, func name(a,b) { return a }');
 				print('variables persist across lines in this session: $x = 5');
 				print("pipe sugar: expr | fn(...) inserts expr as fn's first argument");
-				print("every command ends with (), for example, ls()");
+				print('every command ends with (), for example, ls()');
 				return undefined;
 			},
 			print: (...args) => {
