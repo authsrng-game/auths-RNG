@@ -65,4 +65,29 @@ test.describe('Syncer state consistency tests', () => {
 		expect(containsKeyInSource).toBe(true);
 	});
 	// Generated code ends here on 2026-03-31T21:00:00Z:
+
+	// Generated code starts here on 2026-10-27T00:00:00Z:
+	test('server sync endpoint rejects sync payload with implausible roll count for playtime', async () => {
+		const { onRequest } = await import('../../functions/api/sync.js');
+
+		const makeReq = (body) => ({
+			method: 'POST',
+			url: 'https://example.com/api/sync',
+			json: async () => body,
+		});
+
+		const validRes = await onRequest({ request: makeReq({ totalRolls: 500, totalPlaytime: 600, userId: 'u1' }) });
+		expect(validRes.status).toBe(200);
+
+		const implausibleRes = await onRequest({ request: makeReq({ totalRolls: 50000, totalPlaytime: 10, userId: 'u2' }) });
+		expect(implausibleRes.status).toBe(400);
+		const implausibleBody = await implausibleRes.json();
+		expect(implausibleBody.error).toBe('implausible progress');
+
+		const negativeRes = await onRequest({ request: makeReq({ totalRolls: -10, totalPlaytime: 600, userId: 'u3' }) });
+		expect(negativeRes.status).toBe(400);
+		const negativeBody = await negativeRes.json();
+		expect(negativeBody.error).toBe('implausible progress');
+	});
+	// Generated code ends here on 2026-10-27T00:00:00Z:
 });

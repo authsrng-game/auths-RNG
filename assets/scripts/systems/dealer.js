@@ -123,12 +123,6 @@
 		localStorage.setItem(DEALER_KEY, JSON.stringify(d));
 	}
 
-	/**
-	 * Invalidates in-memory dealer cache and forces re-reading from localStorage.
-	 * Must be invoked by external systems (e.g. sync reconciliation or dev tools)
-	 * after mutating 'dealerData' in localStorage to prevent stale state overwrites.
-	 * @returns {Object} Fresh dealer state object loaded from localStorage.
-	 */
 	window.reloadDealerCache = function () {
 		_cachedDealerData = null;
 		return loadData(true);
