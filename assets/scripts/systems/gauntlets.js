@@ -253,7 +253,7 @@ console.log(performance.now());
 			name: 'snowy',
 			emoji: '❄️',
 			minRolls: 20000,
-			rarities: ['anxiety...', 'Cosmic', 'Mania', 'Neurosis'],
+			rarities: ['Cosmic', 'Neurosis', 'anxiety...', 'Mania'],
 			rewards: [
 				{ type: 'points', amount: 1200000, label: '1,200,000 pts' },
 				{ type: 'anomaly', amount: 3000, label: '3,000 anomalies' },
