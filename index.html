@@ -1062,9 +1062,10 @@ Last release date on nightly: ${nightlyRDate}`;
 								</label>
 							</div>
 
+							<!-- Generated code starts here on 2026-03-31T15:00:00Z: -->
 							<div class="setting-row setting-row--stacked">
-								<span class="setting-name">background music</span>
-								<select id="musicSelect" class="setting-select">
+								<label for="musicSelect" class="setting-name">background music</label>
+								<select id="musicSelect" class="setting-select" aria-label="Background music">
 									<option value="default">auth's RNG ost (progresses with rolls)</option>
 									<option value="wavelocity">leon chang - wavelocity</option>
 									<option value="nocturne">Chopin - Nocturne op.9 No.2</option>
@@ -1073,14 +1074,15 @@ Last release date on nightly: ${nightlyRDate}`;
 							</div>
 
 							<div class="setting-row setting-row--stacked">
-								<span class="setting-name">roll sound</span>
-								<select id="rollSound" class="setting-select">
+								<label for="rollSound" class="setting-name">roll sound</label>
+								<select id="rollSound" class="setting-select" aria-label="Roll sound">
 									<option value="none">none</option>
 									<option value="click">click</option>
 									<option value="whoosh">whoosh</option>
 									<option value="coin">coin</option>
 								</select>
 							</div>
+							<!-- Generated code ends here on 2026-03-31T15:00:00Z: -->
 
 							<div class="setting-row setting-row--stacked">
 								<div class="setting-info">
@@ -1155,9 +1157,10 @@ Last release date on nightly: ${nightlyRDate}`;
 						<div class="settings-group">
 							<div class="settings-group-label">gameplay</div>
 
+							<!-- Generated code starts here on 2026-03-31T15:00:00Z: -->
 							<div class="setting-row setting-row--stacked">
 								<div class="setting-info">
-									<span class="setting-name">"rare" threshold</span>
+									<label for="rareThreshold" class="setting-name">"rare" threshold</label>
 									<span class="setting-desc"
 										>1/X and rarer · used for highlights and the rolls-since-rare counter</span
 									>
@@ -1168,12 +1171,13 @@ Last release date on nightly: ${nightlyRDate}`;
 									min="0"
 									value="1000"
 									class="setting-input"
+									aria-label="Rare threshold"
 								/>
 							</div>
 
 							<div class="setting-row setting-row--stacked">
 								<div class="setting-info">
-									<span class="setting-name">auto-sell threshold</span>
+									<label for="autoSellThreshold" class="setting-name">auto-sell threshold</label>
 									<span class="setting-desc"
 										>sell rarities below 1/X for points automatically · 0 = off</span
 									>
@@ -1184,8 +1188,10 @@ Last release date on nightly: ${nightlyRDate}`;
 									min="0"
 									value="0"
 									class="setting-input"
+									aria-label="Auto sell threshold"
 								/>
 							</div>
+							<!-- Generated code ends here on 2026-03-31T15:00:00Z: -->
 						</div>
 
 						<div class="settings-group">
@@ -1589,6 +1595,8 @@ Last release date on nightly: ${nightlyRDate}`;
 		<script src="assets/scripts/engine/plush-resistance.js"></script>
 		<script src="assets/scripts/engine/plush-roller.js"></script>
 		<script src="assets/scripts/engine/plush-core.js"></script>
+		<script src="assets/scripts/services/revisory/revisory.js"></script>
+		<script src="assets/scripts/services/revisory/revisory-lang.js"></script>
 		<script src="assets/scripts/popup.js"></script>
 		<script src="assets/scripts/sync.js"></script>
 		<script src="assets/scripts/social.js" defer></script>
@@ -1639,6 +1647,8 @@ Last release date on nightly: ${nightlyRDate}`;
 
 		<script src="assets/scripts/icons.js" defer></script>
 		<script src="assets/scripts/settings.js" defer></script>
+		<script src="assets/scripts/services/revisory/revisory-settings.js" defer></script>
+		<script src="assets/scripts/services/revisory/revisory-dashboard.js" defer></script>
 		<script src="assets/scripts/jukebox.js" defer></script>
 
 		<div id="cutsceneOverlay">

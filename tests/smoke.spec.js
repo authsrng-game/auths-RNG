@@ -414,4 +414,28 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(dot1).toHaveAttribute('aria-current', 'page');
 	});
 	// Generated code ends here on 2026-10-25T00:00:00Z:
+
+	// Generated code starts here on 2026-03-31T15:00:00Z:
+	test('settings select and threshold controls have associated labels and accessible aria-labels', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+
+		const musicSelect = page.locator('#musicSelect');
+		await expect(musicSelect).toHaveAttribute('aria-label', 'Background music');
+		await expect(page.locator('label[for="musicSelect"]')).toBeVisible();
+
+		const rollSound = page.locator('#rollSound');
+		await expect(rollSound).toHaveAttribute('aria-label', 'Roll sound');
+		await expect(page.locator('label[for="rollSound"]')).toBeVisible();
+
+		const rareThreshold = page.locator('#rareThreshold');
+		await expect(rareThreshold).toHaveAttribute('aria-label', 'Rare threshold');
+		await expect(page.locator('label[for="rareThreshold"]')).toBeVisible();
+
+		const autoSellThreshold = page.locator('#autoSellThreshold');
+		await expect(autoSellThreshold).toHaveAttribute('aria-label', 'Auto sell threshold');
+		await expect(page.locator('label[for="autoSellThreshold"]')).toBeVisible();
+	});
+	// Generated code ends here on 2026-03-31T15:00:00Z:
 });
