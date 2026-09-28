@@ -38,10 +38,11 @@ export async function onRequest(context) {
 	// Max manual speed = 4 rolls/s (250ms cooldown cap); Max expedition burst = 4000 (MAX_SIM_ROLLS)
 	const maxPossibleRolls = playtime * 4 + 4000;
 	if (rolls > maxPossibleRolls) {
-		console.warn(
-			'[sync] rejected sync payload: totalRolls exceeds max physically possible gain',
-			{ userId, rolls, playtime }
-		);
+		console.warn('[sync] rejected sync payload: totalRolls exceeds max physically possible gain', {
+			userId,
+			rolls,
+			playtime,
+		});
 		return new Response(JSON.stringify({ error: 'implausible progress' }), {
 			status: 400,
 			headers,
