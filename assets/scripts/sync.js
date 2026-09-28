@@ -96,10 +96,12 @@
 		return localStorage.getItem(TOKEN_KEY);
 	}
 
+	// Generated code starts here on 2026-03-31T23:00:00Z:
 	function loadSnapshot() {
 		try {
 			return JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || '{}');
-		} catch (_) {
+		} catch (err) {
+			console.warn('[sync] loadSnapshot failed:', err ? err.message || err : 'unknown error');
 			return {};
 		}
 	}
@@ -107,8 +109,11 @@
 	function saveSnapshot(snap) {
 		try {
 			origSetItem.call(localStorage, SNAPSHOT_KEY, JSON.stringify(snap));
-		} catch (_) {}
+		} catch (err) {
+			console.warn('[sync] saveSnapshot failed:', err ? err.message || err : 'unknown error');
+		}
 	}
+	// Generated code ends here on 2026-03-31T23:00:00Z:
 
 	var origSetItem = Storage.prototype.setItem;
 	var origRemoveItem = Storage.prototype.removeItem;
