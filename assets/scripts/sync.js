@@ -2,11 +2,8 @@
 
 (function () {
 	var TOKEN_KEY = 'authToken';
-	var SNAPSHOT_KEY = '_syncSnapshot';
 	var API = 'https://backup.authsrng.xyz/api/sync';
-	var MONOTONIC_MAX_KEYS = { totalRolls: 1, totalPlaytime: 1 };
 
-	// Generated code starts here on 2026-10-24T00:00:00Z:
 	var SYNC_KEYS = [
 		'rarityInventory',
 		'totalRolls',
@@ -54,7 +51,6 @@
 		'_plush_v3',
 		'infoTipsRead',
 	];
-	// Generated code ends here on 2026-10-24T00:00:00Z:
 
 	var retryDelay = 2000;
 	var flushInFlight = false;
@@ -94,20 +90,6 @@
 
 	function getToken() {
 		return localStorage.getItem(TOKEN_KEY);
-	}
-
-	function loadSnapshot() {
-		try {
-			return JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || '{}');
-		} catch (_) {
-			return {};
-		}
-	}
-
-	function saveSnapshot(snap) {
-		try {
-			origSetItem.call(localStorage, SNAPSHOT_KEY, JSON.stringify(snap));
-		} catch (_) {}
 	}
 
 	var origSetItem = Storage.prototype.setItem;
@@ -158,12 +140,19 @@
 			});
 	}
 
+	function currentRevisoryMeta() {
+		if (!window.Revisory) return null;
+		return {
+			device: window.Revisory.getDeviceId(),
+		};
+	}
+
 	function pushChunk(token, chunkKeys, pending) {
-		var snapshotUpdate = {};
 		var entries = chunkKeys.map(function (key) {
-			snapshotUpdate[key] = pending[key];
 			return { key: key, value: pending[key] };
 		});
+
+		var meta = currentRevisoryMeta();
 
 		return fetch(API + '/push', {
 			method: 'POST',
@@ -171,7 +160,7 @@
 				'Content-Type': 'application/json',
 				Authorization: 'Bearer ' + token,
 			},
-			body: JSON.stringify({ entries: entries }),
+			body: JSON.stringify({ entries: entries, meta: meta }),
 			keepalive: true,
 		})
 			.then(function (r) {
@@ -184,19 +173,21 @@
 				if (!r.ok) throw new Error('push failed with status ' + r.status);
 				retryDelay = 2000;
 				cancelSyncBanner();
-				var snap = loadSnapshot();
-				Object.keys(snapshotUpdate).forEach(function (key) {
-					snap[key] = snapshotUpdate[key];
-				});
-				saveSnapshot(snap);
+				if (window.Revisory) {
+					window.Revisory.createRevisionFromCurrentState('sync_push', {
+						pushedKeys: chunkKeys,
+					}).catch(function (e) {
+						console.warn('[sync] revisory snapshot after push failed:', e);
+					});
+				}
 			})
 			.catch(function (err) {
 				console.warn('[sync] push failed:', err ? err.message || err : 'unknown error');
 				queueSyncBanner(
 					"couldn't reach the server! your progress will sync once you're back online"
 				);
-				Object.keys(snapshotUpdate).forEach(function (key) {
-					if (!(key in dirty)) dirty[key] = snapshotUpdate[key];
+				Object.keys(pending).forEach(function (key) {
+					if (chunkKeys.indexOf(key) !== -1 && !(key in dirty)) dirty[key] = pending[key];
 				});
 				retryDelay = Math.min(retryDelay * 2, MAX_RETRY_DELAY);
 				scheduleFlush(retryDelay);
@@ -332,44 +323,16 @@
 			'downloading data...',
 			'pulling your progress...',
 			'syncing save...',
-			'fetching your rarities...',
-			'grabbing your data...',
+			'checking your save is safe...',
 			'connecting to the server...',
-			'asking nicely for data...',
 			'crunching up your data for you...',
 			'restoring your session...',
-			'petting the server cat...',
-			'looking under the couch for your save...',
 			'warming up the servers...',
 			'loading loading loading...',
 			'verifying your progress...',
-			'looking through the database...',
-			'giving your save a high five...',
-			'kindly asking the server to cooperate',
-			'finding where you left off...',
-			'opening the vault...',
-			'loading the fun part...',
-			'waking up sleepy servers...',
-			'consulting the data goblins...',
-			'assembling the bits...',
-			'watering the database...',
-			'checking for updates...',
-			'loading your profile...',
-			'finding the good stuff...',
-			'making sure everything is where you left it...',
-			'flipping the on switch...',
-			'checking the corners for your save...',
 			'reading your save file...',
 			'connecting the dots...',
-			'stirring the data soup...',
-			'getting comfy...',
-			'loading awesomeness...',
-			'just one more moment...',
-			'looking for extra luck...',
-			'finding the values...',
-			'doing important computer things...',
 			'almost ready...',
-			'packing everything up for you...',
 		];
 		var msg = messages[Math.floor(Math.random() * messages.length)];
 
@@ -406,12 +369,37 @@
 		document.dispatchEvent(new CustomEvent('syncBootComplete'));
 	}
 
+	function waitForRevisory() {
+		if (window.Revisory) return Promise.resolve(window.Revisory);
+		return new Promise(function (resolve) {
+			var tries = 0;
+			var iv = setInterval(function () {
+				tries++;
+				if (window.Revisory || tries > 100) {
+					clearInterval(iv);
+					resolve(window.Revisory || null);
+				}
+			}, 50);
+		});
+	}
+
+	function applyFieldsDirectly(fields) {
+		SYNC_KEYS.forEach(function (key) {
+			if (!Object.prototype.hasOwnProperty.call(fields, key)) return;
+			var serverVal = fields[key];
+			if (serverVal === null) {
+				origRemoveItem.call(localStorage, key);
+			} else {
+				origSetItem.call(localStorage, key, serverVal);
+			}
+		});
+	}
+
 	function pullSync() {
 		var token = getToken();
 		if (!token) return;
 
 		var xhr = new XMLHttpRequest();
-		// Generated code starts here on 2026-03-31T20:00:00Z:
 		try {
 			xhr.open('GET', API + '/pull', false);
 			xhr.setRequestHeader('Authorization', 'Bearer ' + token);
@@ -442,50 +430,60 @@
 			console.warn('[sync] pull JSON parse error:', e ? e.message || e : 'unknown error');
 			return;
 		}
-		// Generated code ends here on 2026-03-31T20:00:00Z:
 		if (!data || !data.fields) return;
 
-		var fields = data.fields;
-		var snapshot = loadSnapshot();
-		var newSnapshot = {};
-
-		SYNC_KEYS.forEach(function (key) {
-			var localVal = origGetItem.call(localStorage, key);
-			var snapVal = Object.prototype.hasOwnProperty.call(snapshot, key) ? snapshot[key] : undefined;
-			var hasServerVal = Object.prototype.hasOwnProperty.call(fields, key);
-			var serverVal = hasServerVal ? fields[key] : undefined;
-
-			var localMatchesSnapshot =
-				(localVal === null && snapVal === undefined) || localVal === snapVal;
-
-			if (localMatchesSnapshot && hasServerVal) {
-				if (serverVal === null) {
-					origRemoveItem.call(localStorage, key);
-				} else {
-					origSetItem.call(localStorage, key, serverVal);
-				}
-				newSnapshot[key] = serverVal;
-			} else if (localMatchesSnapshot && !hasServerVal) {
-				if (localVal !== null) newSnapshot[key] = localVal;
-			} else {
-				if (MONOTONIC_MAX_KEYS[key] && hasServerVal) {
-					var localNum = parseInt(localVal, 10) || 0;
-					var serverNum = parseInt(serverVal, 10) || 0;
-					var winner = Math.max(localNum, serverNum);
-					if (String(winner) !== localVal) {
-						origSetItem.call(localStorage, key, String(winner));
-					}
-					newSnapshot[key] = String(winner);
-					if (String(winner) !== serverVal) markDirty(key, String(winner)); // only push if local actually had more
-				} else {
-					newSnapshot[key] = localVal;
-					markDirty(key, localVal);
-				}
+		waitForRevisory().then(function (Revisory) {
+			if (!Revisory) {
+				console.warn('[sync] Revisory unavailable, applying pull directly as a fallback');
+				applyFieldsDirectly(data.fields);
+				cancelSyncBanner();
+				return;
 			}
-		});
 
-		cancelSyncBanner();
-		saveSnapshot(newSnapshot);
+			var incomingSnapshot = {};
+			SYNC_KEYS.forEach(function (key) {
+				if (Object.prototype.hasOwnProperty.call(data.fields, key)) {
+					var v = data.fields[key];
+					if (v !== null) incomingSnapshot[key] = v;
+				} else {
+					var local = origGetItem.call(localStorage, key);
+					if (local !== null) incomingSnapshot[key] = local;
+				}
+			});
+
+			var incomingMeta = Object.assign({ ts: Date.now() }, data.meta || {});
+
+			Revisory.ingestSync(incomingSnapshot, incomingMeta)
+				.then(function (result) {
+					if (result.applied) {
+						cancelSyncBanner();
+					} else {
+						console.warn(
+							'[sync] incoming pull was quarantined instead of applied:',
+							result.classification,
+							result.reasons
+						);
+						queueSyncBanner(
+							'a sync looked unsafe (' +
+								result.classification +
+								') and was held for review in revisory'
+						);
+						document.dispatchEvent(
+							new CustomEvent('revisorySyncQuarantined', {
+								detail: {
+									quarantineId: result.quarantineId,
+									classification: result.classification,
+								},
+							})
+						);
+					}
+				})
+				.catch(function (e) {
+					console.error('[sync] revisory ingestSync failed, falling back to direct apply:', e);
+					applyFieldsDirectly(data.fields);
+					cancelSyncBanner();
+				});
+		});
 	}
 
 	function init() {
@@ -520,18 +518,6 @@
 			flushDirty();
 		});
 	}
-
-	window.addEventListener('storage', function (e) {
-		if (e.storageArea !== localStorage) return;
-		if (!e.key || !isSyncKey(e.key)) return;
-		var snap = loadSnapshot();
-		if (e.newValue === null) {
-			delete snap[e.key];
-		} else {
-			snap[e.key] = e.newValue;
-		}
-		saveSnapshot(snap);
-	});
 
 	window.addEventListener('offline', function () {
 		if (getToken()) queueSyncBanner('no internet connection! playing offline');
