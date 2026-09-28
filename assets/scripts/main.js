@@ -512,10 +512,14 @@ function updateActivePotionsDisplay() {
 }
 
 // Update potion timers
+// Generated code starts here on 2026-10-27T00:00:00Z:
+// Fast-path potion timer tick: short-circuit immediately when no active potions or duplicate rolls are pending to avoid redundant multiplier recalculations and DOM updates every second.
 setInterval(() => {
+	if (activePotions.length === 0 && duplicateRollsLeft === 0) return;
 	recalcPotionLuck(); // handles filter + multiplier reset internally
 	updateActivePotionsDisplay();
 }, 1000);
+// Generated code ends here on 2026-10-27T00:00:00Z:
 
 // Make functions global
 window.buyPotion = buyPotion;
