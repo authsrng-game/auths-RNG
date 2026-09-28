@@ -368,17 +368,31 @@
 		if (!visibilitySeasonListenerAdded) {
 			document.addEventListener('visibilitychange', () => {
 				const sel = el('seasonSelect');
+				const currentSeason = sel?.value || savedSettings?.season || 'none';
 				if (document.hidden) {
 					if (particleInterval) {
 						clearInterval(particleInterval);
 						particleInterval = null;
 					}
-				} else if (sel && sel.value !== 'none') startInterval();
+					if (particleRaf) {
+						cancelAnimationFrame(particleRaf);
+						particleRaf = null;
+					}
+				} else if (currentSeason !== 'none') {
+					startInterval();
+					if (!particleRaf) {
+						particleRaf = requestAnimationFrame(loop);
+					}
+				}
 			});
 			visibilitySeasonListenerAdded = true;
 		}
 
-		(function loop() {
+		function loop() {
+			if (document.hidden) {
+				particleRaf = null;
+				return;
+			}
 			ctx.clearRect(0, 0, w, h);
 			particles.forEach((p) => {
 				p.y += p.speed;
@@ -389,7 +403,8 @@
 			});
 			particles = particles.filter((p) => p.y < h + 30);
 			particleRaf = requestAnimationFrame(loop);
-		})();
+		}
+		particleRaf = requestAnimationFrame(loop);
 	}
 	// Generated code ends here on 2026-10-25T12:00:00Z:
 
