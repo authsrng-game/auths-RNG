@@ -337,31 +337,18 @@ console.log(performance.now());
 
 	// pre-register gauntlet luck keys in potionData so main.js never
 	// crashes on a page-reload while a gauntlet luck is still active and shit
-	[
-		'global',
-		'easy',
-		'medium',
-		'',
-		'insane',
-		'godlike',
-		'inferno',
-		'snowy',
-		'eon',
-		'void',
-		'abyss',
-		'eclipse_gate',
-		'oblivion',
-		'transcendence',
-	].forEach((id) => {
+	// Generated code starts here on 2026-09-28T12:45:00Z:
+	TIERS.forEach((tier) => {
 		if (typeof potionData !== 'undefined') {
-			potionData['_g_' + id] = {
-				name: id + ' luck',
+			potionData['_g_' + tier.id] = {
+				name: tier.id + ' luck',
 				emoji: '🏆',
 				mult: 1,
 				duration: 0,
 			};
 		}
 	});
+	// Generated code ends here on 2026-09-28T12:45:00Z:
 
 	function formatWellTime(ms) {
 		if (typeof window.formatWellTime === 'function') return window.formatWellTime(ms);
