@@ -18,6 +18,7 @@
 	let particleInterval = null;
 	let particleRaf = null;
 	let devInterval = null;
+	let fpsRaf = null;
 	let visibilitySeasonListenerAdded = false;
 
 	// Discord-style pending changes
@@ -394,7 +395,24 @@
 	// Generated code ends here on 2026-10-25T12:00:00Z:
 
 	// ── Dev overlay ───────────────────────────────────────────────────────
-	// Generated code starts here on 2026-06-18T00:35:00Z:
+	// Generated code starts here on 2026-10-26T00:00:00Z:
+	function startFpsLoop() {
+		if (fpsRaf) return;
+		let frameCount = 0;
+		let lastFPSTime = performance.now();
+		function fpsLoop() {
+			frameCount++;
+			const now = performance.now();
+			if (now - lastFPSTime >= 1000) {
+				window._devFPS = Math.round((frameCount * 1000) / (now - lastFPSTime));
+				frameCount = 0;
+				lastFPSTime = now;
+			}
+			fpsRaf = requestAnimationFrame(fpsLoop);
+		}
+		fpsRaf = requestAnimationFrame(fpsLoop);
+	}
+
 	function startDevOverlay(settings) {
 		const panel = document.getElementById('devOverlayPanel');
 		if (!panel) return;
@@ -404,6 +422,10 @@
 			if (devInterval) {
 				clearInterval(devInterval);
 				devInterval = null;
+			}
+			if (fpsRaf) {
+				cancelAnimationFrame(fpsRaf);
+				fpsRaf = null;
 			}
 			return;
 		}
@@ -418,8 +440,12 @@
 		if (!devInterval) {
 			devInterval = setInterval(() => updateDevStats(panel, settings), 500);
 		}
+
+		if (!fpsRaf) {
+			startFpsLoop();
+		}
 	}
-	// Generated code ends here on 2026-06-18T00:35:00Z:
+	// Generated code ends here on 2026-10-26T00:00:00Z:
 
 	function updateDevStats(panel, settings) {
 		const fps = window._devFPS || '--';
@@ -1263,19 +1289,6 @@
 		dcLog(`build: ${location.hostname} · ${new Date().toLocaleTimeString()}`, 'dim');
 
 		rebuildFlags();
-
-		let frameCount = 0,
-			lastFPSTime = performance.now();
-		(function fpsLoop() {
-			frameCount++;
-			const now = performance.now();
-			if (now - lastFPSTime >= 1000) {
-				window._devFPS = Math.round((frameCount * 1000) / (now - lastFPSTime));
-				frameCount = 0;
-				lastFPSTime = now;
-			}
-			requestAnimationFrame(fpsLoop);
-		})();
 
 		document.addEventListener('keydown', (e) => {
 			if (e.target.id === 'dc-input') return;

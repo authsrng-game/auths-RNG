@@ -38,3 +38,8 @@
 **Bug:** `render()` in `system-notify.js` called `list.insertAdjacentHTML('beforeend', html)` to insert system messages into `#notifList` without removing existing `.sysmsg-item` elements first. Every re-render (such as marking an item read or receiving an `authchange` event) appended duplicate copies of all system messages to the notification list.
 **Learning:** Functions that append elements to shared parent containers using `insertAdjacentHTML('beforeend', ...)` must clean up previously appended elements (`list.querySelectorAll('.sysmsg-item').forEach(el => el.remove())`) before inserting fresh HTML.
 **Prevention:** Always remove existing elements matching the component class before invoking `insertAdjacentHTML` during re-renders.
+
+## 2026-10-26 - Un-cancelled RequestAnimationFrame Loops in Settings Overlay Lifecycle
+**Bug:** `startDevOverlay` in `settings.js` initialized an FPS counter loop that scheduled `requestAnimationFrame` recursively without tracking or cancelling its handle. Disabling dev mode hid the UI panel but left `fpsLoop` running on every frame in the background.
+**Learning:** Toggle/teardown functions for animated overlays must store RAF handles in state variables (e.g. `fpsRaf`) and explicitly call `cancelAnimationFrame(fpsRaf)` when disabled.
+**Prevention:** Always pair `requestAnimationFrame` recursion with a tracked handle variable and `cancelAnimationFrame` in toggle and teardown handlers.
