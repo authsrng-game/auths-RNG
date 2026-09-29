@@ -204,7 +204,7 @@
 	}
 
 	function init() {
-		checkUnlock();
+		const unlocked = checkUnlock();
 		syncSettingRow();
 		bindShrineToggle();
 
@@ -216,7 +216,14 @@
 		const equipped = localStorage.getItem(EQUIP_KEY);
 		if (equipped && localStorage.getItem('catShrineToggle') === '1') equipCat(equipped);
 
-		setInterval(checkUnlock, 5000);
+		// Generated code starts here on 2026-09-29T16:15:00Z:
+		// Stop periodic checking as soon as checkUnlock returns true to avoid perpetual localStorage queries.
+		if (!unlocked) {
+			const checkInterval = setInterval(() => {
+				if (checkUnlock()) clearInterval(checkInterval);
+			}, 5000);
+		}
+		// Generated code ends here on 2026-09-29T16:15:00Z:
 	}
 
 	if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
