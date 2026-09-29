@@ -279,17 +279,33 @@
 		}
 	}
 
+	// Generated code starts here on 2026-09-22T00:00:00Z:
+	window._lastRuneWealthTick = Date.now();
+	function updateWealthGift() {
+		if (gift !== 'wealth') {
+			window._lastRuneWealthTick = Date.now();
+			return;
+		}
+		const now = Date.now();
+		const elapsedMs = now - (window._lastRuneWealthTick || now);
+		const elapsedSec = Math.min(3600, Math.floor(elapsedMs / 1000));
+		if (elapsedSec > 0) {
+			window._lastRuneWealthTick = (window._lastRuneWealthTick || now) + elapsedSec * 1000;
+			if (typeof points !== 'undefined') {
+				points += 200000 * elapsedSec;
+				if (typeof updatePointsDisplay === 'function') updatePointsDisplay();
+				if (typeof saveAllData === 'function') saveAllData();
+			}
+		}
+	}
+
 	function startWealthGift() {
 		if (giftWealthInterval) clearInterval(giftWealthInterval);
 		if (gift !== 'wealth') return;
-		giftWealthInterval = setInterval(() => {
-			if (typeof points !== 'undefined' && typeof updatePointsDisplay === 'function') {
-				points += 200000;
-				updatePointsDisplay();
-				if (typeof saveAllData === 'function') saveAllData();
-			}
-		}, 1000);
+		window._lastRuneWealthTick = Date.now();
+		giftWealthInterval = setInterval(updateWealthGift, 1000);
 	}
+	// Generated code ends here on 2026-09-22T00:00:00Z:
 
 	function getGiftLuckMultiplier() {
 		return gift === 'luck' ? 2 : 1;
@@ -378,16 +394,41 @@
 		}
 	}
 
-	function startAnomalyMachine() {
-		if (anomalyMachineInterval) clearInterval(anomalyMachineInterval);
-		anomalyMachineInterval = setInterval(() => {
+	// Generated code starts here on 2026-09-22T00:00:00Z:
+	window._lastRuneAnomalyMachineTick = Date.now();
+	function updateAnomalyMachine() {
+		if (!upgrades.anomalyMachine) {
+			window._lastRuneAnomalyMachineTick = Date.now();
+			return;
+		}
+		const now = Date.now();
+		const elapsedMs = now - (window._lastRuneAnomalyMachineTick || now);
+		const elapsedTicks = Math.min(1800, Math.floor(elapsedMs / 2000));
+		if (elapsedTicks > 0) {
+			window._lastRuneAnomalyMachineTick =
+				(window._lastRuneAnomalyMachineTick || now) + elapsedTicks * 2000;
 			if (typeof anomalies !== 'undefined') {
-				anomalies += 50;
+				anomalies += 50 * elapsedTicks;
 				if (typeof updateAnomalyUI === 'function') updateAnomalyUI();
 				if (typeof saveAllData === 'function') saveAllData();
 			}
-		}, 2000);
+		}
 	}
+
+	function startAnomalyMachine() {
+		if (anomalyMachineInterval) clearInterval(anomalyMachineInterval);
+		if (!upgrades.anomalyMachine) return;
+		window._lastRuneAnomalyMachineTick = Date.now();
+		anomalyMachineInterval = setInterval(updateAnomalyMachine, 2000);
+	}
+
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'visible') {
+			updateWealthGift();
+			updateAnomalyMachine();
+		}
+	});
+	// Generated code ends here on 2026-09-22T00:00:00Z:
 
 	function startDopamineAttack() {
 		if (dopamineAttackInterval) clearInterval(dopamineAttackInterval);
