@@ -1,6 +1,8 @@
 // Generated code starts here on 2026-11-01T12:00:00Z:
 const { test, expect } = require('@playwright/test');
 
+/* global window */
+
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
 
 test.describe('Dev overlay FPS loop lifecycle', () => {
