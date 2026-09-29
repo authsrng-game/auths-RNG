@@ -212,48 +212,52 @@ console.log(performance.now());
 			],
 		},
 		// Generated code starts here on 2026-03-31T12:00:00Z:
+		// Rarity denominator range: 3,000 - 3,300 (monotonically scales with 3,000 minRolls)
 		{
 			id: 'insane',
 			name: 'insane',
 			emoji: '💀',
 			minRolls: 3000,
-			rarities: ['Breakdown', 'panic!', 'kill me', 'Pulsar'],
+			rarities: ['The End?', 'Zenith', 'Spectrum', 'Abandoned'],
 			rewards: [
 				{ type: 'points', amount: 100000, label: '100,000 pts' },
 				{ type: 'anomaly', amount: 100, label: '100 anomalies' },
 				{ type: 'unlock_dealer', label: 'unlock the dealer 🎭' },
 			],
 		},
+		// Rarity denominator range: 4,200 - 5,100 (monotonically scales with 6,000 minRolls)
 		{
 			id: 'godlike',
 			name: 'godlike',
 			emoji: '✨',
 			minRolls: 6000,
-			rarities: ['Event Horizon', 'Neurosis', 'Cosmic'],
+			rarities: ['Asteroid', 'Comet', 'Nebula', 'Spectral'],
 			rewards: [
 				{ type: 'points', amount: 500000, label: '500,000 pts' },
 				{ type: 'anomaly', amount: 1000, label: '1,000 anomalies' },
 				{ type: 'luck', mult: 4, dur: 180, label: '3m 4x luck' },
 			],
 		},
+		// Rarity denominator range: 10,000 - 12,000 (monotonically scales with 10,000 minRolls)
 		{
 			id: 'inferno',
 			name: 'inferno',
 			emoji: '🔥',
 			minRolls: 10000,
-			rarities: ['Galactic', 'rare rarity :3', 'Disorder'],
+			rarities: ['cat', 'Stellar', 'Supergiant', 'Hypernova'],
 			rewards: [
 				{ type: 'points', amount: 1000000, label: '1,000,000 pts' },
 				{ type: 'anomaly', amount: 1800, label: '1,800 anomalies' },
 				{ type: 'luck', mult: 5, dur: 300, label: '5m 5x luck' },
 			],
 		},
+		// Rarity denominator range: 28,000 - 33,000 (monotonically scales with 20,000 minRolls)
 		{
 			id: 'snowy',
 			name: 'snowy',
 			emoji: '❄️',
 			minRolls: 20000,
-			rarities: ['Cosmic', 'Neurosis', 'anxiety...', 'Mania'],
+			rarities: ['Galactic', 'rare rarity :3', 'Disorder'],
 			rewards: [
 				{ type: 'points', amount: 1200000, label: '1,200,000 pts' },
 				{ type: 'anomaly', amount: 3000, label: '3,000 anomalies' },
@@ -261,72 +265,78 @@ console.log(performance.now());
 			],
 		},
 		// Generated code ends here on 2026-03-31T12:00:00Z:
+		// Rarity denominator range: 45,000 - 95,000 (monotonically scales with 40,000 minRolls)
 		{
 			id: 'eon',
 			name: 'eon',
 			emoji: '🌌',
 			minRolls: 40000,
-			rarities: ['Interstellar', 'Delusion', 'Psychosis', 'STOP PLAYING'],
+			rarities: ['Nebulous', 'panic!', 'Pulsar', 'Breakdown'],
 			rewards: [
 				{ type: 'anomaly', amount: 10000, label: '10,000 anomalies' },
 				{ type: 'luck', mult: 8, dur: 480, label: '8m 8x luck' },
 				{ type: 'unlock_mutations', label: 'unlock mutations! 🧬' },
 			],
 		},
+		// Rarity denominator range: 100,000 - 250,000 (monotonically scales with 80,000 minRolls)
 		{
 			id: 'void',
 			name: 'void',
 			emoji: '🌑',
 			minRolls: 80000,
-			rarities: ['Nebulous', 'panic!', 'just let go already', 'kill me'],
+			rarities: ['kill me', 'Event Horizon', 'Neurosis', 'Cosmic'],
 			rewards: [
 				{ type: 'points', amount: 5000000, label: '5,000,000 pts' },
 				{ type: 'anomaly', amount: 8000, label: '8,000 anomalies' },
 				{ type: 'luck', mult: 10, dur: 600, label: '10m 10x luck' },
 			],
 		},
+		// Rarity denominator range: 300,000 - 700,000 (monotonically scales with 175,000 minRolls)
 		{
 			id: 'abyss',
 			name: 'abyss',
 			emoji: '🕳️',
 			minRolls: 175000,
-			rarities: ['Event Horizon', 'anxiety...', 'Gravitational', 'Dissociative'],
+			rarities: ['anxiety...', 'Gravitational', 'Mania', 'Dissociative'],
 			rewards: [
 				{ type: 'points', amount: 20000000, label: '20,000,000 pts' },
 				{ type: 'anomaly', amount: 25000, label: '25,000 anomalies' },
 				{ type: 'unlock_runes', label: 'unlock runes 🔷' },
 			],
 		},
+		// Rarity denominator range: 800,000 - 1,500,000 (monotonically scales with 400,000 minRolls)
 		{
 			id: 'eclipse_gate',
 			name: 'eclipse',
 			emoji: '🌒',
 			minRolls: 400000,
-			rarities: ['Impossible...', 'Obsession', 'Kyawthuite', 'Supermassive'],
+			rarities: ['Interstellar', 'Impossible...', 'Obsession', 'Kyawthuite'],
 			rewards: [
 				{ type: 'points', amount: 100000000, label: '100,000,000 pts' },
 				{ type: 'anomaly', amount: 75000, label: '75,000 anomalies' },
 				{ type: 'luck', mult: 20, dur: 900, label: '15m 20x luck' },
 			],
 		},
+		// Rarity denominator range: 3,000,000 - 30,000,000 (monotonically scales with 900,000 minRolls)
 		{
 			id: 'oblivion',
 			name: 'oblivion',
 			emoji: '💫',
 			minRolls: 900000,
-			rarities: ['some sort of paranoia', 'smoking gun', 'Extinction', 'Multiverse'],
+			rarities: ['Delusion', 'Supermassive', 'some sort of paranoia', 'Extinction'],
 			rewards: [
 				{ type: 'points', amount: 500000000, label: '500,000,000 pts' },
 				{ type: 'anomaly', amount: 250000, label: '250,000 anomalies' },
 				{ type: 'unlock_starmap', label: 'unlock starmap ✦' },
 			],
 		},
+		// Rarity denominator range: 50,000,000 - 5,000,000,000 (monotonically scales with 2,500,000 minRolls)
 		{
 			id: 'transcendence',
 			name: 'transcendence',
 			emoji: '☀️',
 			minRolls: 2500000,
-			rarities: ['Void', 'Dissociation', 'Antimatter', 'the world'],
+			rarities: ['Psychosis', 'Void', 'Dissociation', 'Antimatter'],
 			rewards: [
 				{ type: 'points', amount: 1000000000, label: '1,000,000,000 pts' },
 				{ type: 'anomaly', amount: 1000000, label: '1,000,000 anomalies' },
