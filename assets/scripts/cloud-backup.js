@@ -164,9 +164,9 @@ console.log(performance.now());
 			const data = await r.json();
 			if (!r.ok) {
 				if (!silent) setStatus('error: ' + (data.error || r.status), '#ff8888');
-				// Generated code starts here on 2026-10-31T00:00:00Z:
-				console.warn('[cloud-backup] backup rejected:', data.error || r.status);
-				// Generated code ends here on 2026-10-31T00:00:00Z:
+				// Generated code starts here on 2026-03-31T12:00:00Z:
+				else console.warn('[cloud-backup] silent auto-backup rejected:', data.error || r.status);
+				// Generated code ends here on 2026-03-31T12:00:00Z:
 				return false;
 			}
 			localStorage.setItem('lastCloudBackup', data.ts);
@@ -175,9 +175,9 @@ console.log(performance.now());
 			return true;
 		} catch (e) {
 			if (!silent) setStatus('backup failed: ' + e.message, '#ff8888');
-			// Generated code starts here on 2026-10-31T00:00:00Z:
-			console.warn('[cloud-backup] backup failed:', e.message || e);
-			// Generated code ends here on 2026-10-31T00:00:00Z:
+			// Generated code starts here on 2026-03-31T12:00:00Z:
+			else console.warn('[cloud-backup] silent auto-backup failed:', e.message);
+			// Generated code ends here on 2026-03-31T12:00:00Z:
 			return false;
 		}
 	}
@@ -193,20 +193,11 @@ console.log(performance.now());
 			const data = await r.json();
 			if (!r.ok || !data.payload) {
 				setStatus('error: ' + (data.error || 'no backup found'), '#ff8888');
-				// Generated code starts here on 2026-10-31T00:00:00Z:
-				console.warn(
-					'[cloud-backup] restore rejected:',
-					data.error || (!r.ok ? r.status : 'no backup found')
-				);
-				// Generated code ends here on 2026-10-31T00:00:00Z:
 				return;
 			}
 			const result = decode(data.payload);
 			if (result.error) {
 				setStatus('restore error: ' + result.error, '#ff8888');
-				// Generated code starts here on 2026-10-31T00:00:00Z:
-				console.warn('[cloud-backup] restore decode failed:', result.error);
-				// Generated code ends here on 2026-10-31T00:00:00Z:
 				return;
 			}
 			Object.keys(result.bundle).forEach((k) => localStorage.setItem(k, result.bundle[k]));
@@ -214,9 +205,6 @@ console.log(performance.now());
 			setTimeout(() => location.reload(), 600);
 		} catch (e) {
 			setStatus('restore failed: ' + e.message, '#ff8888');
-			// Generated code starts here on 2026-10-31T00:00:00Z:
-			console.warn('[cloud-backup] restore failed:', e.message || e);
-			// Generated code ends here on 2026-10-31T00:00:00Z:
 		}
 	}
 
@@ -230,9 +218,6 @@ console.log(performance.now());
 			const data = await r.json();
 			if (!r.ok) {
 				setStatus('error: ' + (data.error || r.status), '#ff8888');
-				// Generated code starts here on 2026-10-31T00:00:00Z:
-				console.warn('[cloud-backup] delete rejected:', data.error || r.status);
-				// Generated code ends here on 2026-10-31T00:00:00Z:
 				return;
 			}
 			localStorage.removeItem('lastCloudBackup');
@@ -240,9 +225,6 @@ console.log(performance.now());
 			setStatus('cloud backup deleted.', '#aaa');
 		} catch (e) {
 			setStatus('delete failed: ' + e.message, '#ff8888');
-			// Generated code starts here on 2026-10-31T00:00:00Z:
-			console.warn('[cloud-backup] delete failed:', e.message || e);
-			// Generated code ends here on 2026-10-31T00:00:00Z:
 		}
 	}
 

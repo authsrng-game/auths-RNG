@@ -534,25 +534,23 @@
 
 		menu.appendChild(makeItem('↺', 'reload game', '', () => location.reload()));
 
-		// Generated code starts here on 2026-03-31T00:00:00Z:
 		menu.appendChild(
 			makeItem('📰', 'open github', '', () => {
-				window.open('https://github.com/authsrng-game/auths-RNG', '_blank', 'noopener,noreferrer');
+				window.open('https://github.com/authsrng-game/auths-RNG', '_blank');
 			})
 		);
 
 		menu.appendChild(
 			makeItem('💬', 'open discord', '', () => {
-				window.open('https://discord.gg/mTDw8jJYqX', '_blank', 'noopener,noreferrer');
+				window.open('https://discord.gg/mTDw8jJYqX', '_blank');
 			})
 		);
 
 		menu.appendChild(
 			makeItem('❓', 'open faq', '', () => {
-				window.open('/FAQ.html', '_blank', 'noopener,noreferrer');
+				window.open('/FAQ.html', '_blank');
 			})
 		);
-		// Generated code ends here on 2026-03-31T00:00:00Z:
 
 		menu.appendChild(makeSep());
 
