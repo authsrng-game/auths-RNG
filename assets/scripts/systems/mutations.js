@@ -8,8 +8,6 @@
 	const MUTATION_HISTORY_MAX = 50;
 
 	const TRUST_KEY = 'mutationTrust';
-	const TRUST_OWNED_KEY = 'mutationTrustOwned';
-	const TRUST_ACTIVE_KEY = 'mutationTrustActive';
 
 	document.addEventListener('click', (e) => {
 		const dot = e.target.closest('.page-dot[data-page="3"]');
