@@ -105,9 +105,7 @@ test.describe('Syncer state consistency tests', () => {
 	test('trustCosmetics getTrust migrates legacy mutationTrust array data to mutationHistory', async ({
 		page,
 	}) => {
-		const legacyArray = [
-			{ a: 'Uncommon', b: 'Rare', result: 'Epic', good: true, ts: Date.now() },
-		];
+		const legacyArray = [{ a: 'Uncommon', b: 'Rare', result: 'Epic', good: true, ts: Date.now() }];
 		await page.addInitScript((items) => {
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('seenReleaseTag', 'v9.7');
