@@ -154,12 +154,22 @@
 			pin = document.createElement('div');
 			pin.id = 'catShrinePin';
 			pin.title = 'click to unequip your emotional support cat';
+			pin.setAttribute('role', 'button');
+			pin.setAttribute('tabindex', '0');
+			pin.setAttribute('aria-label', 'Unequip emotional support cat');
 			pin.addEventListener('click', unequipCat);
+			pin.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					unequipCat();
+				}
+			});
 			document.body.appendChild(pin);
 		}
 		pin.innerHTML = '';
 		const img = document.createElement('img');
 		img.src = url;
+		img.alt = 'Equipped emotional support cat';
 		pin.appendChild(img);
 		pin.style.display = 'block';
 	}
@@ -186,6 +196,12 @@
 	}
 
 	// Generated code starts here on 2026-10-28T00:00:00Z:
+	/**
+	 * Evaluates whether the Cat Shrine overlay/pin features are enabled.
+	 * Compares against '0' so uninitialized or null localStorage entries default to enabled.
+	 *
+	 * @returns {boolean} True if shrine is enabled.
+	 */
 	function isShrineEnabled() {
 		return localStorage.getItem('catShrineToggle') !== '0';
 	}
