@@ -1,9 +1,9 @@
-// Generated code starts here on 2026-09-29T16:20:00Z:
+// Generated code starts here on 2026-10-26T12:00:00Z:
 const { test, expect } = require('@playwright/test');
 
 /* global window, document */
 
-const BASE_URL = 'http://localhost:8080/';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:8080/';
 
 test.describe('Jukebox Performance & State Caching', () => {
 	test('renderJukebox updates state and avoids redundant DOM mutations when idle', async ({
@@ -50,4 +50,4 @@ test.describe('Jukebox Performance & State Caching', () => {
 		expect(metrics.playBtnText).toBe('▶');
 	});
 });
-// Generated code ends here on 2026-09-29T16:20:00Z:
+// Generated code ends here on 2026-10-26T12:00:00Z:

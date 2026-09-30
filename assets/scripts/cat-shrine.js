@@ -233,7 +233,7 @@
 		refreshGrid();
 
 		const equipped = localStorage.getItem(EQUIP_KEY);
-		if (equipped && localStorage.getItem('catShrineToggle') === '1') equipCat(equipped);
+		if (equipped && isShrineEnabled()) equipCat(equipped);
 
 		// Generated code starts here on 2026-03-31T20:30:00Z:
 		if (!isUnlocked) {
