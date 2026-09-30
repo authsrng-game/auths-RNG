@@ -101,6 +101,40 @@ test.describe('Syncer state consistency tests', () => {
 	});
 	// Generated code ends here on 2026-10-25T00:00:00Z:
 
+	// Generated code starts here on 2026-03-31T22:00:00Z:
+	test('trustCosmetics getTrust migrates legacy mutationTrust array data to mutationHistory', async ({
+		page,
+	}) => {
+		const legacyArray = [
+			{ a: 'Uncommon', b: 'Rare', result: 'Epic', good: true, ts: Date.now() },
+		];
+		await page.addInitScript((items) => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('mutationsUnlocked', '1');
+			localStorage.setItem('mutationTrust', JSON.stringify(items));
+		}, legacyArray);
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(() => {
+			const mount = globalThis.document.createElement('div');
+			globalThis.document.body.appendChild(mount);
+			globalThis.trustCosmetics?.renderShop?.(mount);
+			const history = globalThis.localStorage.getItem('mutationHistory');
+			const trustKey = globalThis.localStorage.getItem('mutationTrust');
+			mount.remove();
+			return {
+				history,
+				trustKey,
+			};
+		});
+
+		expect(result.history).not.toBeNull();
+		expect(JSON.parse(result.history)).toEqual(legacyArray);
+		expect(result.trustKey).toBeNull();
+	});
+	// Generated code ends here on 2026-03-31T22:00:00Z:
+
 	// Generated code starts here on 2026-10-27T00:00:00Z:
 	test('server sync endpoint rejects sync payload with implausible roll count for playtime', async () => {
 		const { onRequest } = await import('../../functions/api/sync.js');
