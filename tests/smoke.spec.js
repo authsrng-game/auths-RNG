@@ -438,4 +438,31 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(page.locator('label[for="autoSellThreshold"]')).toBeVisible();
 	});
 	// Generated code ends here on 2026-03-31T15:00:00Z:
+
+	// Generated code starts here on 2026-03-31T20:00:00Z:
+	test('pinned cat button has accessible role, aria-label, and keyboard interaction', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+		await page.evaluate(() => {
+			localStorage.setItem('catShrineUnlocked', '1');
+			localStorage.setItem('catShrineToggle', '1');
+			localStorage.setItem('catShrineEquipped', 'https://cataas.com/cat/test');
+		});
+		await page.goto(BASE_URL);
+
+		const pin = page.locator('#catShrinePin');
+		await expect(pin).toBeVisible();
+		await expect(pin).toHaveAttribute('role', 'button');
+		await expect(pin).toHaveAttribute('tabindex', '0');
+		await expect(pin).toHaveAttribute('aria-label', 'Unequip emotional support cat');
+
+		const img = pin.locator('img');
+		await expect(img).toHaveAttribute('alt', 'Equipped emotional support cat');
+
+		await pin.focus();
+		await page.keyboard.press('Enter');
+		await expect(pin).toBeHidden();
+	});
+	// Generated code ends here on 2026-03-31T20:00:00Z:
 });
