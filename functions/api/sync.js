@@ -17,7 +17,10 @@ export async function onRequest(context) {
 	let body;
 	try {
 		body = await request.json();
-	} catch {
+	} catch (err) {
+		console.warn('[sync] rejected sync payload: invalid JSON body', {
+			error: err ? err.message || err : 'unknown error',
+		});
 		return new Response(JSON.stringify({ error: 'invalid json' }), { status: 400, headers });
 	}
 
