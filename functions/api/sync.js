@@ -55,12 +55,15 @@ export async function onRequest(context) {
 		// Max rarity sell = 2e15 (SUMMER x2 dupe); Max printer rate = 1e9 pts/s; Starter buffer = 1e15
 		const maxPossiblePoints = rolls * 2e15 + playtime * 1000000000 + 1e15;
 		if (isNaN(pts) || pts < 0 || pts > maxPossiblePoints) {
-			console.warn('[sync] rejected sync payload: shopPoints exceeds max physically possible gain', {
-				userId,
-				pts,
-				rolls,
-				playtime,
-			});
+			console.warn(
+				'[sync] rejected sync payload: shopPoints exceeds max physically possible gain',
+				{
+					userId,
+					pts,
+					rolls,
+					playtime,
+				}
+			);
 			return new Response(JSON.stringify({ error: 'implausible progress' }), {
 				status: 400,
 				headers,
