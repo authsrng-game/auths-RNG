@@ -321,6 +321,50 @@
 	const btnNext = document.getElementById('jb-next');
 
 	// ── State helpers ──────────────────────────────────────────────────────
+	// Generated code starts here on 2026-10-26T12:00:00Z:
+	// Lazy element reference caching to avoid redundant DOM queries in periodic render loop
+	let _cachedMuteEl = null;
+	let _cachedSelectEl = null;
+	let _cachedFillEl = null;
+	let _cachedTimeEl = null;
+	let _cachedVolEl = null;
+
+	function getMuteMusicEl() {
+		if (!_cachedMuteEl || !_cachedMuteEl.isConnected) {
+			_cachedMuteEl = document.getElementById('muteMusic');
+		}
+		return _cachedMuteEl;
+	}
+
+	function getMusicSelectEl() {
+		if (!_cachedSelectEl || !_cachedSelectEl.isConnected) {
+			_cachedSelectEl = document.getElementById('musicSelect');
+		}
+		return _cachedSelectEl;
+	}
+
+	function getProgressFillEl() {
+		if (!_cachedFillEl || !_cachedFillEl.isConnected) {
+			_cachedFillEl = document.getElementById('jb-progress-fill');
+		}
+		return _cachedFillEl;
+	}
+
+	function getTimeEl() {
+		if (!_cachedTimeEl || !_cachedTimeEl.isConnected) {
+			_cachedTimeEl = document.getElementById('jb-time');
+		}
+		return _cachedTimeEl;
+	}
+
+	function getVolEl() {
+		if (!_cachedVolEl || !_cachedVolEl.isConnected) {
+			_cachedVolEl = document.getElementById('jb-vol');
+		}
+		return _cachedVolEl;
+	}
+	// Generated code ends here on 2026-10-26T12:00:00Z:
+
 	function isPlaying() {
 		const a = window.backgroundMusic;
 		if (a && !a.paused && a.readyState > 0) return true;
@@ -329,12 +373,12 @@
 	}
 
 	function isMuted() {
-		const n = document.getElementById('muteMusic');
+		const n = getMuteMusicEl();
 		return n ? n.checked : false;
 	}
 
 	function trackName() {
-		const sel = document.getElementById('musicSelect');
+		const sel = getMusicSelectEl();
 		if (!sel || sel.selectedIndex < 0) return '—';
 		let t = sel.options[sel.selectedIndex].textContent;
 		// strip the fucking noise from built-in labels
@@ -459,29 +503,69 @@
 	let seekDragging = false;
 	let volUserActive = false;
 
+	// Generated code starts here on 2026-10-26T12:00:00Z:
+	// Avoid redundant DOM mutations and style recalcs in 700ms polling interval
+	let _lastPlayHtml = '';
+	let _lastPlayTitle = '';
+	let _lastNameText = '';
+
 	function render() {
-		const active = !isMuted();
+		const muted = isMuted();
+		const active = !muted;
 		const playing = isPlaying() && active;
 
 		disc.classList.toggle('jb-active', active);
 		disc.classList.toggle('jb-spinning', playing);
-		btnPlay.innerHTML = isMuted() ? '&#9654;' : '&#9646;&#9646;';
-		btnPlay.title = isMuted() ? 'play' : 'pause';
-		nameEl.textContent = trackName();
+
+		const playHtml = muted ? '&#9654;' : '&#9646;&#9646;';
+		if (_lastPlayHtml !== playHtml) {
+			btnPlay.innerHTML = playHtml;
+			_lastPlayHtml = playHtml;
+		}
+
+		const playTitle = muted ? 'play' : 'pause';
+		if (_lastPlayTitle !== playTitle) {
+			btnPlay.title = playTitle;
+			_lastPlayTitle = playTitle;
+		}
+
+		const nameText = trackName();
+		if (_lastNameText !== nameText) {
+			nameEl.textContent = nameText;
+			_lastNameText = nameText;
+		}
 
 		const dur = getDuration();
 		const cur = getCurrentTime();
-		const fill = document.getElementById('jb-progress-fill');
-		const timeEl = document.getElementById('jb-time');
-		const volEl = document.getElementById('jb-vol');
+		const fill = getProgressFillEl();
+		const timeEl = getTimeEl();
+		const volEl = getVolEl();
 
 		if (fill && !seekDragging) {
 			fill.classList.add('jb-smooth');
-			fill.style.width = (dur ? (cur / dur) * 100 : 0) + '%';
+			const newWidth = (dur ? (cur / dur) * 100 : 0) + '%';
+			if (fill.style.width !== newWidth) {
+				fill.style.width = newWidth;
+			}
 		}
-		if (timeEl) timeEl.textContent = dur ? formatTime(cur) + ' / ' + formatTime(dur) : '';
-		if (volEl && !volUserActive) volEl.value = getVolume();
+
+		if (timeEl) {
+			const newTimeStr = dur ? formatTime(cur) + ' / ' + formatTime(dur) : '';
+			if (timeEl.textContent !== newTimeStr) {
+				timeEl.textContent = newTimeStr;
+			}
+		}
+
+		if (volEl && !volUserActive) {
+			const currentVol = String(getVolume());
+			if (volEl.value !== currentVol) {
+				volEl.value = currentVol;
+			}
+		}
 	}
+
+	window._renderJukebox = render;
+	// Generated code ends here on 2026-10-26T12:00:00Z:
 
 	// ── Panel open / close ─────────────────────────────────────────────────
 	let closeTimer;
