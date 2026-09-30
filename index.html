@@ -1274,6 +1274,79 @@ Last release date on nightly: ${nightlyRDate}`;
 				<div class="page" id="page-11">
 					<h2 style="margin-top: 0">links and widgets</h2>
 
+					<div id="irc-widget" class="irc-widget">
+						<div class="irc-title">chat with us on irc!</div>
+						<div class="irc-sub">##authsrng on libera.chat</div>
+						<div class="irc-actions">
+							<a
+								class="irc-btn"
+								target="_blank"
+								rel="noopener"
+								href="https://web.libera.chat/?channel=%23%23authsrng"
+								>join in browser</a
+							>
+							<a class="irc-btn" href="ircs://irc.libera.chat:6697/%23%23authsrng"
+								>open in irc client</a
+							>
+							<button class="irc-btn" id="irc-copy" type="button">copy /join</button>
+						</div>
+					</div>
+
+					<style>
+						.irc-widget {
+							display: inline-block;
+							padding: 12px 14px;
+							border: 1px solid currentColor;
+							border-radius: 6px;
+							font-family: inherit;
+						}
+						.irc-title {
+							font-weight: bold;
+						}
+						.irc-sub {
+							opacity: 0.7;
+							font-size: 0.85em;
+							margin-bottom: 8px;
+						}
+						.irc-actions {
+							display: flex;
+							gap: 6px;
+							flex-wrap: wrap;
+						}
+						.irc-btn {
+							padding: 4px 10px;
+							border: 1px solid currentColor;
+							border-radius: 4px;
+							background: none;
+							color: inherit;
+							font: inherit;
+							font-size: 0.85em;
+							text-decoration: none;
+							cursor: pointer;
+						}
+						.irc-btn:hover {
+							opacity: 0.7;
+						}
+					</style>
+
+					<script>
+						(function () {
+							var btn = document.getElementById('irc-copy');
+							btn.addEventListener('click', function () {
+								var text = '/server add libera irc.libera.chat/6697 -tls\n/join ##authsrng';
+								var done = function () {
+									btn.textContent = 'copied';
+									setTimeout(function () {
+										btn.textContent = 'copy /join';
+									}, 1500);
+								};
+								if (navigator.clipboard) navigator.clipboard.writeText(text).then(done);
+							});
+						})();
+					</script>
+
+					<br />
+
 					<a
 						class="lazy"
 						href="/assets/frontend/leaderboard.html"
