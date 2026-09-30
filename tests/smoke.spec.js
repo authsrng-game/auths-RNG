@@ -438,4 +438,58 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(page.locator('label[for="autoSellThreshold"]')).toBeVisible();
 	});
 	// Generated code ends here on 2026-03-31T15:00:00Z:
+
+	// Generated code starts here on 2026-03-31T18:00:00Z:
+	test('jukebox controls have accessible aria attributes and keyboard controls', async ({
+		page,
+	}) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
+		await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
+
+		const disc = page.locator('#jb-disc');
+		await expect(disc).toHaveAttribute('role', 'button');
+		await expect(disc).toHaveAttribute('aria-label', 'Toggle jukebox controls');
+		await expect(disc).toHaveAttribute('aria-expanded', 'false');
+
+		await expect(page.locator('#jb-prev')).toHaveAttribute('aria-label', 'Previous track');
+		await expect(page.locator('#jb-play')).toHaveAttribute('aria-label', 'Pause background music');
+		await expect(page.locator('#jb-next')).toHaveAttribute('aria-label', 'Next track');
+
+		const progress = page.locator('#jb-progress-wrap');
+		await expect(progress).toHaveAttribute('role', 'slider');
+		await expect(progress).toHaveAttribute('aria-label', 'Music progress');
+
+		const vol = page.locator('#jb-vol');
+		await expect(vol).toHaveAttribute('aria-label', 'Music volume');
+	});
+	// Generated code ends here on 2026-03-31T18:00:00Z:
+	// Generated code starts here on 2026-03-31T20:00:00Z:
+	test('pinned cat button has accessible role, aria-label, and keyboard interaction', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+		await page.evaluate(() => {
+			localStorage.setItem('catShrineUnlocked', '1');
+			localStorage.setItem('catShrineToggle', '1');
+			localStorage.setItem('catShrineEquipped', 'https://cataas.com/cat/test');
+		});
+		await page.goto(BASE_URL);
+
+		const pin = page.locator('#catShrinePin');
+		await expect(pin).toBeVisible();
+		await expect(pin).toHaveAttribute('role', 'button');
+		await expect(pin).toHaveAttribute('tabindex', '0');
+		await expect(pin).toHaveAttribute('aria-label', 'Unequip emotional support cat');
+
+		const img = pin.locator('img');
+		await expect(img).toHaveAttribute('alt', 'Equipped emotional support cat');
+
+		await pin.focus();
+		await page.keyboard.press('Enter');
+		await expect(pin).toBeHidden();
+	});
+	// Generated code ends here on 2026-03-31T20:00:00Z:
 });

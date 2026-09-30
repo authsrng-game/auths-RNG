@@ -185,10 +185,15 @@
 		}
 	}
 
+	// Generated code starts here on 2026-10-28T00:00:00Z:
+	function isShrineEnabled() {
+		return localStorage.getItem('catShrineToggle') !== '0';
+	}
+
 	function bindShrineToggle() {
 		const toggle = document.getElementById('catShrineEnabled');
 		if (!toggle) return;
-		const on = localStorage.getItem('catShrineToggle') === '1';
+		const on = isShrineEnabled();
 		toggle.checked = on;
 		document.body.classList.toggle('cat-shrine-off', !on);
 		toggle.addEventListener('change', () => {
@@ -204,7 +209,7 @@
 	}
 
 	function init() {
-		checkUnlock();
+		const isUnlocked = checkUnlock();
 		syncSettingRow();
 		bindShrineToggle();
 
@@ -214,10 +219,19 @@
 		refreshGrid();
 
 		const equipped = localStorage.getItem(EQUIP_KEY);
-		if (equipped && localStorage.getItem('catShrineToggle') === '1') equipCat(equipped);
+		if (equipped && isShrineEnabled()) equipCat(equipped);
 
-		setInterval(checkUnlock, 5000);
+		// Generated code starts here on 2026-03-31T20:30:00Z:
+		if (!isUnlocked) {
+			const unlockInterval = setInterval(() => {
+				if (checkUnlock()) {
+					clearInterval(unlockInterval);
+				}
+			}, 5000);
+		}
+		// Generated code ends here on 2026-03-31T20:30:00Z:
 	}
+	// Generated code ends here on 2026-10-28T00:00:00Z:
 
 	if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
 	else init();
