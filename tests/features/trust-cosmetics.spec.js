@@ -43,6 +43,9 @@ test.describe('trust cosmetics system', () => {
 		}));
 		expect(unequipped.cat).toBeUndefined();
 		expect(unequipped.cls).toBe('');
+	});
+});
+
 test.describe('Trust Cosmetics System', () => {
 	test('purchasing and equipping trust cosmetics validates trust balance and updates active cosmetics', async ({
 		page,
