@@ -100,6 +100,7 @@ test.describe('Syncer state consistency tests', () => {
 		}
 	});
 	// Generated code ends here on 2026-10-25T00:00:00Z:
+
 	// Generated code starts here on 2026-10-27T00:00:00Z:
 	test('server sync endpoint rejects sync payload with implausible roll count for playtime', async () => {
 		const { onRequest } = await import('../../functions/api/sync.js');
@@ -128,6 +129,44 @@ test.describe('Syncer state consistency tests', () => {
 		expect(negativeRes.status).toBe(400);
 		const negativeBody = await negativeRes.json();
 		expect(negativeBody.error).toBe('implausible progress');
+	});
+
+	test('server sync endpoint validates shopPoints plausibility', async () => {
+		const { onRequest } = await import('../../functions/api/sync.js');
+
+		const makeReq = (body) => ({
+			method: 'POST',
+			url: 'https://example.com/api/sync',
+			json: async () => body,
+		});
+
+		const validRes = await onRequest({
+			request: makeReq({ totalRolls: 10, totalPlaytime: 100, shopPoints: 5000, userId: 'u4' }),
+		});
+		expect(validRes.status).toBe(200);
+
+		const negativePointsRes = await onRequest({
+			request: makeReq({ totalRolls: 10, totalPlaytime: 100, shopPoints: -50, userId: 'u5' }),
+		});
+		expect(negativePointsRes.status).toBe(400);
+		expect((await negativePointsRes.json()).error).toBe('implausible progress');
+
+		const nonNumericPointsRes = await onRequest({
+			request: makeReq({ totalRolls: 10, totalPlaytime: 100, shopPoints: 'invalid', userId: 'u6' }),
+		});
+		expect(nonNumericPointsRes.status).toBe(400);
+		expect((await nonNumericPointsRes.json()).error).toBe('implausible progress');
+
+		const implausiblePointsRes = await onRequest({
+			request: makeReq({
+				totalRolls: 10,
+				totalPlaytime: 100,
+				shopPoints: '1000000000000000000000000',
+				userId: 'u7',
+			}),
+		});
+		expect(implausiblePointsRes.status).toBe(400);
+		expect((await implausiblePointsRes.json()).error).toBe('implausible progress');
 	});
 	// Generated code ends here on 2026-10-27T00:00:00Z:
 
