@@ -154,12 +154,26 @@
 			pin = document.createElement('div');
 			pin.id = 'catShrinePin';
 			pin.title = 'click to unequip your emotional support cat';
+			// Generated code starts here on 2026-03-31T20:00:00Z:
+			pin.setAttribute('role', 'button');
+			pin.tabIndex = 0;
+			pin.setAttribute('aria-label', 'Unequip emotional support cat');
 			pin.addEventListener('click', unequipCat);
+			pin.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					unequipCat();
+				}
+			});
+			// Generated code ends here on 2026-03-31T20:00:00Z:
 			document.body.appendChild(pin);
 		}
 		pin.innerHTML = '';
 		const img = document.createElement('img');
 		img.src = url;
+		// Generated code starts here on 2026-03-31T20:00:00Z:
+		img.alt = 'Equipped emotional support cat';
+		// Generated code ends here on 2026-03-31T20:00:00Z:
 		pin.appendChild(img);
 		pin.style.display = 'block';
 	}
@@ -185,10 +199,15 @@
 		}
 	}
 
+	// Generated code starts here on 2026-10-28T00:00:00Z:
+	function isShrineEnabled() {
+		return localStorage.getItem('catShrineToggle') !== '0';
+	}
+
 	function bindShrineToggle() {
 		const toggle = document.getElementById('catShrineEnabled');
 		if (!toggle) return;
-		const on = localStorage.getItem('catShrineToggle') === '1';
+		const on = isShrineEnabled();
 		toggle.checked = on;
 		document.body.classList.toggle('cat-shrine-off', !on);
 		toggle.addEventListener('change', () => {
@@ -226,6 +245,7 @@
 		}
 		// Generated code ends here on 2026-03-31T20:30:00Z:
 	}
+	// Generated code ends here on 2026-10-28T00:00:00Z:
 
 	if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
 	else init();

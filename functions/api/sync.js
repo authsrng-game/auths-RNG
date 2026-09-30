@@ -21,7 +21,7 @@ export async function onRequest(context) {
 		return new Response(JSON.stringify({ error: 'invalid json' }), { status: 400, headers });
 	}
 
-	const { totalRolls, totalPlaytime, userId } = body || {};
+	const { totalRolls, totalPlaytime, userId, shopPoints, points } = body || {};
 	const rolls = parseInt(totalRolls, 10);
 	const playtime = parseInt(totalPlaytime || '0', 10);
 
@@ -47,6 +47,28 @@ export async function onRequest(context) {
 			status: 400,
 			headers,
 		});
+	}
+
+	const pointsVal = shopPoints !== undefined ? shopPoints : points;
+	if (pointsVal !== undefined) {
+		const pts = parseInt(pointsVal, 10);
+		// Max rarity sell = 2e15 (SUMMER x2 dupe); Max printer rate = 1e9 pts/s; Starter buffer = 1e15
+		const maxPossiblePoints = rolls * 2e15 + playtime * 1000000000 + 1e15;
+		if (isNaN(pts) || pts < 0 || pts > maxPossiblePoints) {
+			console.warn(
+				'[sync] rejected sync payload: shopPoints exceeds max physically possible gain',
+				{
+					userId,
+					pts,
+					rolls,
+					playtime,
+				}
+			);
+			return new Response(JSON.stringify({ error: 'implausible progress' }), {
+				status: 400,
+				headers,
+			});
+		}
 	}
 
 	return new Response(JSON.stringify({ ok: true }), { headers });
