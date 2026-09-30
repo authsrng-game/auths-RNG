@@ -79,16 +79,31 @@
 		if (window._currentPage === 9 && window.goToPage) window.goToPage(9);
 	}
 
+	// Generated code starts here on 2026-09-30T12:00:00Z:
+	let unlockInterval = null;
+
 	function checkUnlock() {
-		if (localStorage.getItem(UNLOCK_KEY) === '1') return true;
+		if (localStorage.getItem(UNLOCK_KEY) === '1') {
+			if (unlockInterval) {
+				clearInterval(unlockInterval);
+				unlockInterval = null;
+			}
+			return true;
+		}
 		if (typeof totalRolls !== 'undefined' && totalRolls >= UNLOCK_ROLLS) {
 			localStorage.setItem(UNLOCK_KEY, '1');
 			if (window.unlockPageDot) window.unlockPageDot(11);
 			syncSettingRow();
+			if (unlockInterval) {
+				clearInterval(unlockInterval);
+				unlockInterval = null;
+			}
 			return true;
 		}
 		return false;
 	}
+	window.checkUnlock = checkUnlock;
+	// Generated code ends here on 2026-09-30T12:00:00Z:
 
 	function syncSettingRow() {
 		const toggle = document.getElementById('catShrineEnabled');
@@ -216,7 +231,11 @@
 		const equipped = localStorage.getItem(EQUIP_KEY);
 		if (equipped && localStorage.getItem('catShrineToggle') === '1') equipCat(equipped);
 
-		setInterval(checkUnlock, 5000);
+		// Generated code starts here on 2026-09-30T12:00:00Z:
+		if (!checkUnlock()) {
+			unlockInterval = setInterval(checkUnlock, 5000);
+		}
+		// Generated code ends here on 2026-09-30T12:00:00Z:
 	}
 
 	if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
