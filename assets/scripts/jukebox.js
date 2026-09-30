@@ -268,7 +268,7 @@
 	document.body.insertAdjacentHTML(
 		'beforeend',
 		`<div id="jukebox">
-	    <div id="jb-disc"></div>
+	    <div id="jb-disc" role="button" tabindex="0" aria-label="Toggle jukebox controls" aria-expanded="false"></div>
 	    <div id="jb-eq">
 	      <div class="jb-bar"></div>
 	      <div class="jb-bar"></div>
@@ -276,18 +276,18 @@
 	    </div>
 	    <div id="jb-panel">
 	      <div id="jb-row-controls">
-	        <button class="jb-btn" id="jb-prev" title="previous">&#9664;&#9664;</button>
-	        <button class="jb-btn" id="jb-play" title="pause/play">&#9646;&#9646;</button>
-	        <button class="jb-btn" id="jb-next" title="next">&#9654;&#9654;</button>
+	        <button class="jb-btn" id="jb-prev" title="previous" aria-label="Previous track">&#9664;&#9664;</button>
+	        <button class="jb-btn" id="jb-play" title="pause/play" aria-label="Pause background music">&#9646;&#9646;</button>
+	        <button class="jb-btn" id="jb-next" title="next" aria-label="Next track">&#9654;&#9654;</button>
 	        <span id="jb-name">—</span>
 	        <span id="jb-time"></span>
 	      </div>
-	      <div id="jb-progress-wrap">
+	      <div id="jb-progress-wrap" role="slider" tabindex="0" aria-label="Music progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
 	        <div id="jb-progress-fill"></div>
 	      </div>
 	      <div id="jb-row-vol">
-	        <span id="jb-vol-label">vol</span>
-	        <input type="range" id="jb-vol" min="0" max="1" step="0.01" value="0.3">
+	        <label for="jb-vol" id="jb-vol-label">vol</label>
+	        <input type="range" id="jb-vol" min="0" max="1" step="0.01" value="0.3" aria-label="Music volume">
 	      </div>
 	    </div>
 	  </div>`
@@ -321,6 +321,58 @@
 	const btnNext = document.getElementById('jb-next');
 
 	// ── State helpers ──────────────────────────────────────────────────────
+	// Generated code starts here on 2026-10-26T12:00:00Z:
+	// Lazy element reference caching to avoid redundant DOM queries in periodic render loop
+	let _cachedMuteEl = null;
+	let _cachedSelectEl = null;
+	let _cachedFillEl = null;
+	let _cachedTimeEl = null;
+	let _cachedVolEl = null;
+	let _cachedProgressWrapEl = null;
+
+	function getMuteMusicEl() {
+		if (!_cachedMuteEl || !_cachedMuteEl.isConnected) {
+			_cachedMuteEl = document.getElementById('muteMusic');
+		}
+		return _cachedMuteEl;
+	}
+
+	function getMusicSelectEl() {
+		if (!_cachedSelectEl || !_cachedSelectEl.isConnected) {
+			_cachedSelectEl = document.getElementById('musicSelect');
+		}
+		return _cachedSelectEl;
+	}
+
+	function getFillEl() {
+		if (!_cachedFillEl || !_cachedFillEl.isConnected) {
+			_cachedFillEl = document.getElementById('jb-progress-fill');
+		}
+		return _cachedFillEl;
+	}
+
+	function getTimeEl() {
+		if (!_cachedTimeEl || !_cachedTimeEl.isConnected) {
+			_cachedTimeEl = document.getElementById('jb-time');
+		}
+		return _cachedTimeEl;
+	}
+
+	function getVolEl() {
+		if (!_cachedVolEl || !_cachedVolEl.isConnected) {
+			_cachedVolEl = document.getElementById('jb-vol');
+		}
+		return _cachedVolEl;
+	}
+
+	function getProgressWrapEl() {
+		if (!_cachedProgressWrapEl || !_cachedProgressWrapEl.isConnected) {
+			_cachedProgressWrapEl = document.getElementById('jb-progress-wrap');
+		}
+		return _cachedProgressWrapEl;
+	}
+	// Generated code ends here on 2026-10-26T12:00:00Z:
+
 	function isPlaying() {
 		const a = window.backgroundMusic;
 		if (a && !a.paused && a.readyState > 0) return true;
@@ -329,15 +381,15 @@
 	}
 
 	function isMuted() {
-		const n = document.getElementById('muteMusic');
+		const n = getMuteMusicEl();
 		return n ? n.checked : false;
 	}
 
 	function trackName() {
-		const sel = document.getElementById('musicSelect');
+		const sel = getMusicSelectEl();
 		if (!sel || sel.selectedIndex < 0) return '—';
 		let t = sel.options[sel.selectedIndex].textContent;
-		// strip the fucking noise from built-in labels
+		// strip noise from built-in labels
 		t = t.replace(/\s*\(custom\)/gi, '').replace(/\s*\(default\)/gi, '');
 		// "Artist - Title" → just Title when long.
 		const d = t.indexOf(' - ');
@@ -456,41 +508,97 @@
 	}
 
 	// ── Render ─────────────────────────────────────────────────────────────
+	// Generated code starts here on 2026-10-26T12:00:00Z:
+	// Maintain state cache to avoid unnecessary DOM mutations, class toggles, innerHTML parsing, and style updates when values are unchanged.
 	let seekDragging = false;
 	let volUserActive = false;
 
+	let _lastMuted = null;
+	let _lastPlaying = null;
+	let _lastTrackName = null;
+	let _lastTimeStr = null;
+	let _lastFillWidth = null;
+	let _lastVol = null;
+	let _lastValuenow = null;
+	let _fillHasSmooth = false;
+
 	function render() {
-		const active = !isMuted();
+		const muted = isMuted();
+		const active = !muted;
 		const playing = isPlaying() && active;
 
-		disc.classList.toggle('jb-active', active);
-		disc.classList.toggle('jb-spinning', playing);
-		btnPlay.innerHTML = isMuted() ? '&#9654;' : '&#9646;&#9646;';
-		btnPlay.title = isMuted() ? 'play' : 'pause';
-		nameEl.textContent = trackName();
+		if (muted !== _lastMuted || playing !== _lastPlaying) {
+			_lastMuted = muted;
+			_lastPlaying = playing;
+			disc.classList.toggle('jb-active', active);
+			disc.classList.toggle('jb-spinning', playing);
+			btnPlay.textContent = muted ? '▶' : '❚❚';
+			btnPlay.title = muted ? 'play' : 'pause';
+			btnPlay.setAttribute(
+				'aria-label',
+				muted ? 'Play background music' : 'Pause background music'
+			);
+		}
+
+		const name = trackName();
+		if (name !== _lastTrackName) {
+			_lastTrackName = name;
+			nameEl.textContent = name;
+		}
 
 		const dur = getDuration();
 		const cur = getCurrentTime();
-		const fill = document.getElementById('jb-progress-fill');
-		const timeEl = document.getElementById('jb-time');
-		const volEl = document.getElementById('jb-vol');
+		const fillWidth = dur ? ((cur / dur) * 100).toFixed(1) : '0';
+		const timeStr = dur ? formatTime(cur) + ' / ' + formatTime(dur) : '';
 
-		if (fill && !seekDragging) {
-			fill.classList.add('jb-smooth');
-			fill.style.width = (dur ? (cur / dur) * 100 : 0) + '%';
+		const fill = getFillEl();
+		if (fill && !seekDragging && fillWidth !== _lastFillWidth) {
+			_lastFillWidth = fillWidth;
+			if (!_fillHasSmooth) {
+				fill.classList.add('jb-smooth');
+				_fillHasSmooth = true;
+			}
+			fill.style.width = fillWidth + '%';
 		}
-		if (timeEl) timeEl.textContent = dur ? formatTime(cur) + ' / ' + formatTime(dur) : '';
-		if (volEl && !volUserActive) volEl.value = getVolume();
+
+		const timeEl = getTimeEl();
+		if (timeEl && timeStr !== _lastTimeStr) {
+			_lastTimeStr = timeStr;
+			timeEl.textContent = timeStr;
+		}
+
+		const volEl = getVolEl();
+		if (volEl && !volUserActive) {
+			const vol = getVolume();
+			if (vol !== _lastVol) {
+				_lastVol = vol;
+				volEl.value = vol;
+			}
+		}
+
+		const pctStr = dur ? Math.round((cur / dur) * 100).toString() : '0';
+		const progWrap = getProgressWrapEl();
+		if (progWrap && pctStr !== _lastValuenow) {
+			_lastValuenow = pctStr;
+			progWrap.setAttribute('aria-valuenow', pctStr);
+		}
 	}
+
+	window._renderJukebox = render;
+	// Generated code ends here on 2026-10-26T12:00:00Z:
 
 	// ── Panel open / close ─────────────────────────────────────────────────
 	let closeTimer;
 	const openPanel = () => {
 		clearTimeout(closeTimer);
 		panel.classList.add('jb-open');
+		disc.setAttribute('aria-expanded', 'true');
 	};
 	const closePanel = () => {
-		closeTimer = setTimeout(() => panel.classList.remove('jb-open'), 900);
+		closeTimer = setTimeout(() => {
+			panel.classList.remove('jb-open');
+			disc.setAttribute('aria-expanded', 'false');
+		}, 900);
 	};
 
 	discWrap.addEventListener('mouseenter', openPanel);
@@ -502,6 +610,13 @@
 	disc.addEventListener('click', () =>
 		panel.classList.contains('jb-open') ? closePanel() : openPanel()
 	);
+
+	disc.addEventListener('keydown', (e) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			panel.classList.contains('jb-open') ? closePanel() : openPanel();
+		}
+	});
 
 	const progressWrap = document.getElementById('jb-progress-wrap');
 	const progressFill = document.getElementById('jb-progress-fill');
@@ -549,6 +664,17 @@
 		document.addEventListener('touchend', () => {
 			seekDragging = false;
 			progressFill.classList.add('jb-smooth');
+		});
+
+		progressWrap.addEventListener('keydown', (e) => {
+			const dur = getDuration();
+			if (!dur) return;
+			if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+				e.preventDefault();
+				const delta = e.key === 'ArrowLeft' ? -5 : 5;
+				const cur = getCurrentTime();
+				seekTo(Math.max(0, Math.min(dur, cur + delta)));
+			}
 		});
 	}
 
