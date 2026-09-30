@@ -163,6 +163,18 @@ test.describe('Syncer state consistency tests', () => {
 		expect(negativeRes.status).toBe(400);
 		const negativeBody = await negativeRes.json();
 		expect(negativeBody.error).toBe('implausible progress');
+
+		const invalidJsonReq = {
+			method: 'POST',
+			url: 'https://example.com/api/sync',
+			json: async () => {
+				throw new SyntaxError('Unexpected token');
+			},
+		};
+		const invalidJsonRes = await onRequest({ request: invalidJsonReq });
+		expect(invalidJsonRes.status).toBe(400);
+		const invalidJsonBody = await invalidJsonRes.json();
+		expect(invalidJsonBody.error).toBe('invalid json');
 	});
 
 	test('server sync endpoint validates shopPoints plausibility', async () => {
