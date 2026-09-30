@@ -243,4 +243,44 @@ test.describe('Syncer state consistency tests', () => {
 		expect(result.pinVisible).toBe(true);
 	});
 	// Generated code ends here on 2026-10-28T00:00:00Z:
+
+	// Generated code starts here on 2026-10-29T00:00:00Z:
+	test('server sync endpoint validates mutationTrust plausibility', async () => {
+		const { onRequest } = await import('../../functions/api/sync.js');
+
+		const makeReq = (body) => ({
+			method: 'POST',
+			url: 'https://example.com/api/sync',
+			json: async () => body,
+		});
+
+		const validRes = await onRequest({
+			request: makeReq({ totalRolls: 10, totalPlaytime: 100, mutationTrust: 200, userId: 'u8' }),
+		});
+		expect(validRes.status).toBe(200);
+
+		const negativeTrustRes = await onRequest({
+			request: makeReq({ totalRolls: 10, totalPlaytime: 100, mutationTrust: -10, userId: 'u9' }),
+		});
+		expect(negativeTrustRes.status).toBe(400);
+		expect((await negativeTrustRes.json()).error).toBe('implausible progress');
+
+		const nonNumericTrustRes = await onRequest({
+			request: makeReq({ totalRolls: 10, totalPlaytime: 100, trust: 'invalid', userId: 'u10' }),
+		});
+		expect(nonNumericTrustRes.status).toBe(400);
+		expect((await nonNumericTrustRes.json()).error).toBe('implausible progress');
+
+		const implausibleTrustRes = await onRequest({
+			request: makeReq({
+				totalRolls: 10,
+				totalPlaytime: 100,
+				mutationTrust: 100000,
+				userId: 'u11',
+			}),
+		});
+		expect(implausibleTrustRes.status).toBe(400);
+		expect((await implausibleTrustRes.json()).error).toBe('implausible progress');
+	});
+	// Generated code ends here on 2026-10-29T00:00:00Z:
 });

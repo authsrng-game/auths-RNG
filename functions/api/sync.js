@@ -24,7 +24,8 @@ export async function onRequest(context) {
 		return new Response(JSON.stringify({ error: 'invalid json' }), { status: 400, headers });
 	}
 
-	const { totalRolls, totalPlaytime, userId, shopPoints, points } = body || {};
+	const { totalRolls, totalPlaytime, userId, shopPoints, points, mutationTrust, trust } =
+		body || {};
 	const rolls = parseInt(totalRolls, 10);
 	const playtime = parseInt(totalPlaytime || '0', 10);
 
@@ -73,6 +74,30 @@ export async function onRequest(context) {
 			});
 		}
 	}
+
+	// Generated code starts here on 2026-10-29T00:00:00Z:
+	const trustVal = mutationTrust !== undefined ? mutationTrust : trust;
+	if (trustVal !== undefined) {
+		const trst = parseInt(trustVal, 10);
+		// Max trust gain rate = 16 trust / 15s cooldown (~1.07 trust/s); Starter buffer = 1000
+		const maxPossibleTrust = playtime * 2 + 1000;
+		if (isNaN(trst) || trst < 0 || trst > maxPossibleTrust) {
+			console.warn(
+				'[sync] rejected sync payload: mutationTrust exceeds max physically possible gain',
+				{
+					userId,
+					trst,
+					rolls,
+					playtime,
+				}
+			);
+			return new Response(JSON.stringify({ error: 'implausible progress' }), {
+				status: 400,
+				headers,
+			});
+		}
+	}
+	// Generated code ends here on 2026-10-29T00:00:00Z:
 
 	return new Response(JSON.stringify({ ok: true }), { headers });
 }
