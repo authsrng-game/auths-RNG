@@ -455,10 +455,7 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(disc).toHaveAttribute('aria-expanded', 'false');
 
 		await expect(page.locator('#jb-prev')).toHaveAttribute('aria-label', 'Previous track');
-		await expect(page.locator('#jb-play')).toHaveAttribute(
-			'aria-label',
-			'Pause background music'
-		);
+		await expect(page.locator('#jb-play')).toHaveAttribute('aria-label', 'Pause background music');
 		await expect(page.locator('#jb-next')).toHaveAttribute('aria-label', 'Next track');
 
 		const progress = page.locator('#jb-progress-wrap');

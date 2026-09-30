@@ -561,7 +561,10 @@
 		if (timeEl) timeEl.textContent = dur ? formatTime(cur) + ' / ' + formatTime(dur) : '';
 		if (volEl && !volUserActive) volEl.value = getVolume();
 		// Generated code starts here on 2026-03-31T18:00:00Z:
-		btnPlay.setAttribute('aria-label', isMuted() ? 'Play background music' : 'Pause background music');
+		btnPlay.setAttribute(
+			'aria-label',
+			isMuted() ? 'Play background music' : 'Pause background music'
+		);
 		const pct = dur ? Math.round((cur / dur) * 100) : 0;
 		if (progressWrap) progressWrap.setAttribute('aria-valuenow', pct.toString());
 		// Generated code ends here on 2026-03-31T18:00:00Z:
