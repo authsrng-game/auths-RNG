@@ -31,7 +31,9 @@ test.describe('addons page security', () => {
 		expect(xssExecuted).toBeUndefined();
 
 		const textContent = await cardName.textContent();
-		expect(textContent).toContain('Malicious <img src="x" onerror="window.xssExecuted=true"> Addon');
+		expect(textContent).toContain(
+			'Malicious <img src="x" onerror="window.xssExecuted=true"> Addon'
+		);
 	});
 });
 // Generated code ends here on 2026-03-31T00:00:00Z:
