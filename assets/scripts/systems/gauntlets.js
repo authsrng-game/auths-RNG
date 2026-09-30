@@ -241,7 +241,9 @@ console.log(performance.now());
 			name: 'inferno',
 			emoji: '🔥',
 			minRolls: 10000,
-			rarities: ['Galactic', 'rare rarity :3', 'Disorder'],
+			// Monotonic progression: anxiety... (1/300,000) and Gravitational (1/400,000).
+			// Fits between godlike (max 1/250,000) and snowy (max 1/500,000) for minRolls: 10000.
+			rarities: ['anxiety...', 'Gravitational'],
 			rewards: [
 				{ type: 'points', amount: 1000000, label: '1,000,000 pts' },
 				{ type: 'anomaly', amount: 1800, label: '1,800 anomalies' },
