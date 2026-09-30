@@ -97,10 +97,25 @@
 		click: '💥 click effects',
 	};
 
+	// Generated code starts here on 2026-03-31T22:00:00Z:
 	function getTrust() {
-		const val = parseInt(localStorage.getItem(TRUST_KEY) || '0', 10);
+		const raw = localStorage.getItem(TRUST_KEY);
+		if (raw !== null && (raw.trim().startsWith('[') || raw.trim().startsWith('{'))) {
+			try {
+				const parsed = JSON.parse(raw);
+				if (Array.isArray(parsed)) {
+					if (!localStorage.getItem('mutationHistory')) {
+						localStorage.setItem('mutationHistory', JSON.stringify(parsed));
+					}
+					localStorage.removeItem(TRUST_KEY);
+					return 0;
+				}
+			} catch (_) {}
+		}
+		const val = parseInt(raw || '0', 10);
 		return Number.isNaN(val) ? 0 : val;
 	}
+	// Generated code ends here on 2026-03-31T22:00:00Z:
 	function setTrust(v) {
 		localStorage.setItem(TRUST_KEY, String(Math.max(0, v)));
 	}
