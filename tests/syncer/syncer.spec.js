@@ -132,7 +132,9 @@ test.describe('Syncer state consistency tests', () => {
 	// Generated code ends here on 2026-10-27T00:00:00Z:
 
 	// Generated code starts here on 2026-10-28T00:00:00Z:
-	test('catShrineToggle defaults to enabled when key is missing in localStorage', async ({ page }) => {
+	test('catShrineToggle defaults to enabled when key is missing in localStorage', async ({
+		page,
+	}) => {
 		await page.addInitScript(() => {
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('seenReleaseTag', 'v9.7');
