@@ -268,7 +268,9 @@
 	document.body.insertAdjacentHTML(
 		'beforeend',
 		`<div id="jukebox">
-	    <div id="jb-disc"></div>
+	    <!-- Generated code starts here on 2026-03-31T18:00:00Z: -->
+	    <div id="jb-disc" role="button" tabindex="0" aria-label="Toggle jukebox controls" aria-expanded="false"></div>
+	    <!-- Generated code ends here on 2026-03-31T18:00:00Z: -->
 	    <div id="jb-eq">
 	      <div class="jb-bar"></div>
 	      <div class="jb-bar"></div>
@@ -276,19 +278,23 @@
 	    </div>
 	    <div id="jb-panel">
 	      <div id="jb-row-controls">
-	        <button class="jb-btn" id="jb-prev" title="previous">&#9664;&#9664;</button>
-	        <button class="jb-btn" id="jb-play" title="pause/play">&#9646;&#9646;</button>
-	        <button class="jb-btn" id="jb-next" title="next">&#9654;&#9654;</button>
+	        <!-- Generated code starts here on 2026-03-31T18:00:00Z: -->
+	        <button class="jb-btn" id="jb-prev" title="previous" aria-label="Previous track">&#9664;&#9664;</button>
+	        <button class="jb-btn" id="jb-play" title="pause/play" aria-label="Pause or play background music">&#9646;&#9646;</button>
+	        <button class="jb-btn" id="jb-next" title="next" aria-label="Next track">&#9654;&#9654;</button>
+	        <!-- Generated code ends here on 2026-03-31T18:00:00Z: -->
 	        <span id="jb-name">—</span>
 	        <span id="jb-time"></span>
 	      </div>
-	      <div id="jb-progress-wrap">
+	      <!-- Generated code starts here on 2026-03-31T18:00:00Z: -->
+	      <div id="jb-progress-wrap" role="slider" tabindex="0" aria-label="Music progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
 	        <div id="jb-progress-fill"></div>
 	      </div>
 	      <div id="jb-row-vol">
-	        <span id="jb-vol-label">vol</span>
-	        <input type="range" id="jb-vol" min="0" max="1" step="0.01" value="0.3">
+	        <label for="jb-vol" id="jb-vol-label">vol</label>
+	        <input type="range" id="jb-vol" min="0" max="1" step="0.01" value="0.3" aria-label="Music volume">
 	      </div>
+	      <!-- Generated code ends here on 2026-03-31T18:00:00Z: -->
 	    </div>
 	  </div>`
 	);
@@ -321,6 +327,39 @@
 	const btnNext = document.getElementById('jb-next');
 
 	// ── State helpers ──────────────────────────────────────────────────────
+	// Generated code starts here on 2026-09-29T16:15:00Z:
+	// Cache static DOM element references to avoid repeated document tree lookups on periodic render ticks.
+	let _muteMusicEl = null;
+	let _musicSelectEl = null;
+	let _fillEl = null;
+	let _timeEl = null;
+	let _volEl = null;
+
+	function getMuteMusicEl() {
+		if (!_muteMusicEl) _muteMusicEl = document.getElementById('muteMusic');
+		return _muteMusicEl;
+	}
+
+	function getMusicSelectEl() {
+		if (!_musicSelectEl) _musicSelectEl = document.getElementById('musicSelect');
+		return _musicSelectEl;
+	}
+
+	function getFillEl() {
+		if (!_fillEl) _fillEl = document.getElementById('jb-progress-fill');
+		return _fillEl;
+	}
+
+	function getTimeEl() {
+		if (!_timeEl) _timeEl = document.getElementById('jb-time');
+		return _timeEl;
+	}
+
+	function getVolEl() {
+		if (!_volEl) _volEl = document.getElementById('jb-vol');
+		return _volEl;
+	}
+
 	function isPlaying() {
 		const a = window.backgroundMusic;
 		if (a && !a.paused && a.readyState > 0) return true;
@@ -329,21 +368,22 @@
 	}
 
 	function isMuted() {
-		const n = document.getElementById('muteMusic');
+		const n = getMuteMusicEl();
 		return n ? n.checked : false;
 	}
 
 	function trackName() {
-		const sel = document.getElementById('musicSelect');
+		const sel = getMusicSelectEl();
 		if (!sel || sel.selectedIndex < 0) return '—';
 		let t = sel.options[sel.selectedIndex].textContent;
-		// strip the fucking noise from built-in labels
+		// strip noise from built-in labels
 		t = t.replace(/\s*\(custom\)/gi, '').replace(/\s*\(default\)/gi, '');
 		// "Artist - Title" → just Title when long.
 		const d = t.indexOf(' - ');
 		if (d > -1 && t.length > 28) t = t.slice(d + 3);
 		return t.trim() || '—';
 	}
+	// Generated code ends here on 2026-09-29T16:15:00Z:
 
 	// ── da controls ───────────────────────────────────────────────────────────
 
@@ -456,42 +496,98 @@
 	}
 
 	// ── Render ─────────────────────────────────────────────────────────────
+	// Generated code starts here on 2026-09-29T16:15:00Z:
+	// Maintain state cache to avoid unnecessary DOM mutations, class toggles, innerHTML parsing, and style updates when values are unchanged.
 	let seekDragging = false;
 	let volUserActive = false;
 
+	let _lastMuted = null;
+	let _lastPlaying = null;
+	let _lastTrackName = null;
+	let _lastTimeStr = null;
+	let _lastFillWidth = null;
+	let _lastVol = null;
+	let _fillHasSmooth = false;
+
 	function render() {
-		const active = !isMuted();
+		const muted = isMuted();
+		const active = !muted;
 		const playing = isPlaying() && active;
 
-		disc.classList.toggle('jb-active', active);
-		disc.classList.toggle('jb-spinning', playing);
-		btnPlay.innerHTML = isMuted() ? '&#9654;' : '&#9646;&#9646;';
-		btnPlay.title = isMuted() ? 'play' : 'pause';
-		nameEl.textContent = trackName();
+		if (muted !== _lastMuted || playing !== _lastPlaying) {
+			_lastMuted = muted;
+			_lastPlaying = playing;
+			disc.classList.toggle('jb-active', active);
+			disc.classList.toggle('jb-spinning', playing);
+			btnPlay.textContent = muted ? '▶' : '❚❚';
+			btnPlay.title = muted ? 'play' : 'pause';
+		}
+
+		const name = trackName();
+		if (name !== _lastTrackName) {
+			_lastTrackName = name;
+			nameEl.textContent = name;
+		}
 
 		const dur = getDuration();
 		const cur = getCurrentTime();
-		const fill = document.getElementById('jb-progress-fill');
-		const timeEl = document.getElementById('jb-time');
-		const volEl = document.getElementById('jb-vol');
+		const fillWidth = dur ? ((cur / dur) * 100).toFixed(1) : '0';
+		const timeStr = dur ? formatTime(cur) + ' / ' + formatTime(dur) : '';
 
-		if (fill && !seekDragging) {
-			fill.classList.add('jb-smooth');
-			fill.style.width = (dur ? (cur / dur) * 100 : 0) + '%';
+		const fill = getFillEl();
+		if (fill && !seekDragging && fillWidth !== _lastFillWidth) {
+			_lastFillWidth = fillWidth;
+			if (!_fillHasSmooth) {
+				fill.classList.add('jb-smooth');
+				_fillHasSmooth = true;
+			}
+			fill.style.width = fillWidth + '%';
+		}
+
+		const timeEl = getTimeEl();
+		if (timeEl && timeStr !== _lastTimeStr) {
+			_lastTimeStr = timeStr;
+			timeEl.textContent = timeStr;
+		}
+
+		const volEl = getVolEl();
+		if (volEl && !volUserActive) {
+			const vol = getVolume();
+			if (vol !== _lastVol) {
+				_lastVol = vol;
+				volEl.value = vol;
+			}
 		}
 		if (timeEl) timeEl.textContent = dur ? formatTime(cur) + ' / ' + formatTime(dur) : '';
 		if (volEl && !volUserActive) volEl.value = getVolume();
+		// Generated code starts here on 2026-03-31T18:00:00Z:
+		btnPlay.setAttribute(
+			'aria-label',
+			isMuted() ? 'Play background music' : 'Pause background music'
+		);
+		const pct = dur ? Math.round((cur / dur) * 100) : 0;
+		if (progressWrap) progressWrap.setAttribute('aria-valuenow', pct.toString());
+		// Generated code ends here on 2026-03-31T18:00:00Z:
 	}
+
+	window._renderJukebox = render;
+	// Generated code ends here on 2026-09-29T16:15:00Z:
 
 	// ── Panel open / close ─────────────────────────────────────────────────
 	let closeTimer;
+	// Generated code starts here on 2026-03-31T18:00:00Z:
 	const openPanel = () => {
 		clearTimeout(closeTimer);
 		panel.classList.add('jb-open');
+		disc.setAttribute('aria-expanded', 'true');
 	};
 	const closePanel = () => {
-		closeTimer = setTimeout(() => panel.classList.remove('jb-open'), 900);
+		closeTimer = setTimeout(() => {
+			panel.classList.remove('jb-open');
+			disc.setAttribute('aria-expanded', 'false');
+		}, 900);
 	};
+	// Generated code ends here on 2026-03-31T18:00:00Z:
 
 	discWrap.addEventListener('mouseenter', openPanel);
 	discWrap.addEventListener('mouseleave', closePanel);
@@ -502,6 +598,15 @@
 	disc.addEventListener('click', () =>
 		panel.classList.contains('jb-open') ? closePanel() : openPanel()
 	);
+
+	// Generated code starts here on 2026-03-31T18:00:00Z:
+	disc.addEventListener('keydown', (e) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			panel.classList.contains('jb-open') ? closePanel() : openPanel();
+		}
+	});
+	// Generated code ends here on 2026-03-31T18:00:00Z:
 
 	const progressWrap = document.getElementById('jb-progress-wrap');
 	const progressFill = document.getElementById('jb-progress-fill');
@@ -550,6 +655,19 @@
 			seekDragging = false;
 			progressFill.classList.add('jb-smooth');
 		});
+
+		// Generated code starts here on 2026-03-31T18:00:00Z:
+		progressWrap.addEventListener('keydown', (e) => {
+			const dur = getDuration();
+			if (!dur) return;
+			if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+				e.preventDefault();
+				const delta = e.key === 'ArrowLeft' ? -5 : 5;
+				const cur = getCurrentTime();
+				seekTo(Math.max(0, Math.min(dur, cur + delta)));
+			}
+		});
+		// Generated code ends here on 2026-03-31T18:00:00Z:
 	}
 
 	const volSlider = document.getElementById('jb-vol');
