@@ -268,7 +268,9 @@
 	document.body.insertAdjacentHTML(
 		'beforeend',
 		`<div id="jukebox">
-	    <div id="jb-disc"></div>
+	    <!-- Generated code starts here on 2026-03-31T18:00:00Z: -->
+	    <div id="jb-disc" role="button" tabindex="0" aria-label="Toggle jukebox controls" aria-expanded="false"></div>
+	    <!-- Generated code ends here on 2026-03-31T18:00:00Z: -->
 	    <div id="jb-eq">
 	      <div class="jb-bar"></div>
 	      <div class="jb-bar"></div>
@@ -276,19 +278,23 @@
 	    </div>
 	    <div id="jb-panel">
 	      <div id="jb-row-controls">
-	        <button class="jb-btn" id="jb-prev" title="previous">&#9664;&#9664;</button>
-	        <button class="jb-btn" id="jb-play" title="pause/play">&#9646;&#9646;</button>
-	        <button class="jb-btn" id="jb-next" title="next">&#9654;&#9654;</button>
+	        <!-- Generated code starts here on 2026-03-31T18:00:00Z: -->
+	        <button class="jb-btn" id="jb-prev" title="previous" aria-label="Previous track">&#9664;&#9664;</button>
+	        <button class="jb-btn" id="jb-play" title="pause/play" aria-label="Pause or play background music">&#9646;&#9646;</button>
+	        <button class="jb-btn" id="jb-next" title="next" aria-label="Next track">&#9654;&#9654;</button>
+	        <!-- Generated code ends here on 2026-03-31T18:00:00Z: -->
 	        <span id="jb-name">—</span>
 	        <span id="jb-time"></span>
 	      </div>
-	      <div id="jb-progress-wrap">
+	      <!-- Generated code starts here on 2026-03-31T18:00:00Z: -->
+	      <div id="jb-progress-wrap" role="slider" tabindex="0" aria-label="Music progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
 	        <div id="jb-progress-fill"></div>
 	      </div>
 	      <div id="jb-row-vol">
-	        <span id="jb-vol-label">vol</span>
-	        <input type="range" id="jb-vol" min="0" max="1" step="0.01" value="0.3">
+	        <label for="jb-vol" id="jb-vol-label">vol</label>
+	        <input type="range" id="jb-vol" min="0" max="1" step="0.01" value="0.3" aria-label="Music volume">
 	      </div>
+	      <!-- Generated code ends here on 2026-03-31T18:00:00Z: -->
 	    </div>
 	  </div>`
 	);
@@ -552,6 +558,13 @@
 				volEl.value = vol;
 			}
 		}
+		if (timeEl) timeEl.textContent = dur ? formatTime(cur) + ' / ' + formatTime(dur) : '';
+		if (volEl && !volUserActive) volEl.value = getVolume();
+		// Generated code starts here on 2026-03-31T18:00:00Z:
+		btnPlay.setAttribute('aria-label', isMuted() ? 'Play background music' : 'Pause background music');
+		const pct = dur ? Math.round((cur / dur) * 100) : 0;
+		if (progressWrap) progressWrap.setAttribute('aria-valuenow', pct.toString());
+		// Generated code ends here on 2026-03-31T18:00:00Z:
 	}
 
 	window._renderJukebox = render;
@@ -559,13 +572,19 @@
 
 	// ── Panel open / close ─────────────────────────────────────────────────
 	let closeTimer;
+	// Generated code starts here on 2026-03-31T18:00:00Z:
 	const openPanel = () => {
 		clearTimeout(closeTimer);
 		panel.classList.add('jb-open');
+		disc.setAttribute('aria-expanded', 'true');
 	};
 	const closePanel = () => {
-		closeTimer = setTimeout(() => panel.classList.remove('jb-open'), 900);
+		closeTimer = setTimeout(() => {
+			panel.classList.remove('jb-open');
+			disc.setAttribute('aria-expanded', 'false');
+		}, 900);
 	};
+	// Generated code ends here on 2026-03-31T18:00:00Z:
 
 	discWrap.addEventListener('mouseenter', openPanel);
 	discWrap.addEventListener('mouseleave', closePanel);
@@ -576,6 +595,15 @@
 	disc.addEventListener('click', () =>
 		panel.classList.contains('jb-open') ? closePanel() : openPanel()
 	);
+
+	// Generated code starts here on 2026-03-31T18:00:00Z:
+	disc.addEventListener('keydown', (e) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			panel.classList.contains('jb-open') ? closePanel() : openPanel();
+		}
+	});
+	// Generated code ends here on 2026-03-31T18:00:00Z:
 
 	const progressWrap = document.getElementById('jb-progress-wrap');
 	const progressFill = document.getElementById('jb-progress-fill');
@@ -624,6 +652,19 @@
 			seekDragging = false;
 			progressFill.classList.add('jb-smooth');
 		});
+
+		// Generated code starts here on 2026-03-31T18:00:00Z:
+		progressWrap.addEventListener('keydown', (e) => {
+			const dur = getDuration();
+			if (!dur) return;
+			if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+				e.preventDefault();
+				const delta = e.key === 'ArrowLeft' ? -5 : 5;
+				const cur = getCurrentTime();
+				seekTo(Math.max(0, Math.min(dur, cur + delta)));
+			}
+		});
+		// Generated code ends here on 2026-03-31T18:00:00Z:
 	}
 
 	const volSlider = document.getElementById('jb-vol');

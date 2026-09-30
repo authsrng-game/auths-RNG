@@ -439,6 +439,36 @@ test.describe('auths-RNG smoke tests', () => {
 	});
 	// Generated code ends here on 2026-03-31T15:00:00Z:
 
+	// Generated code starts here on 2026-03-31T18:00:00Z:
+	test('jukebox controls have accessible aria attributes and keyboard controls', async ({
+		page,
+	}) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
+		await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
+
+		const disc = page.locator('#jb-disc');
+		await expect(disc).toHaveAttribute('role', 'button');
+		await expect(disc).toHaveAttribute('aria-label', 'Toggle jukebox controls');
+		await expect(disc).toHaveAttribute('aria-expanded', 'false');
+
+		await expect(page.locator('#jb-prev')).toHaveAttribute('aria-label', 'Previous track');
+		await expect(page.locator('#jb-play')).toHaveAttribute(
+			'aria-label',
+			'Pause background music'
+		);
+		await expect(page.locator('#jb-next')).toHaveAttribute('aria-label', 'Next track');
+
+		const progress = page.locator('#jb-progress-wrap');
+		await expect(progress).toHaveAttribute('role', 'slider');
+		await expect(progress).toHaveAttribute('aria-label', 'Music progress');
+
+		const vol = page.locator('#jb-vol');
+		await expect(vol).toHaveAttribute('aria-label', 'Music volume');
+	});
+	// Generated code ends here on 2026-03-31T18:00:00Z:
 	// Generated code starts here on 2026-03-31T20:00:00Z:
 	test('pinned cat button has accessible role, aria-label, and keyboard interaction', async ({
 		page,
