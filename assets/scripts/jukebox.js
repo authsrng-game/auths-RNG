@@ -268,9 +268,7 @@
 	document.body.insertAdjacentHTML(
 		'beforeend',
 		`<div id="jukebox">
-	    <!-- Generated code starts here on 2026-03-31T18:00:00Z: -->
 	    <div id="jb-disc" role="button" tabindex="0" aria-label="Toggle jukebox controls" aria-expanded="false"></div>
-	    <!-- Generated code ends here on 2026-03-31T18:00:00Z: -->
 	    <div id="jb-eq">
 	      <div class="jb-bar"></div>
 	      <div class="jb-bar"></div>
@@ -278,15 +276,12 @@
 	    </div>
 	    <div id="jb-panel">
 	      <div id="jb-row-controls">
-	        <!-- Generated code starts here on 2026-03-31T18:00:00Z: -->
 	        <button class="jb-btn" id="jb-prev" title="previous" aria-label="Previous track">&#9664;&#9664;</button>
-	        <button class="jb-btn" id="jb-play" title="pause/play" aria-label="Pause or play background music">&#9646;&#9646;</button>
+	        <button class="jb-btn" id="jb-play" title="pause/play" aria-label="Pause background music">&#9646;&#9646;</button>
 	        <button class="jb-btn" id="jb-next" title="next" aria-label="Next track">&#9654;&#9654;</button>
-	        <!-- Generated code ends here on 2026-03-31T18:00:00Z: -->
 	        <span id="jb-name">—</span>
 	        <span id="jb-time"></span>
 	      </div>
-	      <!-- Generated code starts here on 2026-03-31T18:00:00Z: -->
 	      <div id="jb-progress-wrap" role="slider" tabindex="0" aria-label="Music progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
 	        <div id="jb-progress-fill"></div>
 	      </div>
@@ -294,7 +289,6 @@
 	        <label for="jb-vol" id="jb-vol-label">vol</label>
 	        <input type="range" id="jb-vol" min="0" max="1" step="0.01" value="0.3" aria-label="Music volume">
 	      </div>
-	      <!-- Generated code ends here on 2026-03-31T18:00:00Z: -->
 	    </div>
 	  </div>`
 	);
@@ -334,6 +328,7 @@
 	let _cachedFillEl = null;
 	let _cachedTimeEl = null;
 	let _cachedVolEl = null;
+	let _cachedProgressWrapEl = null;
 
 	function getMuteMusicEl() {
 		if (!_cachedMuteEl || !_cachedMuteEl.isConnected) {
@@ -349,7 +344,7 @@
 		return _cachedSelectEl;
 	}
 
-	function getProgressFillEl() {
+	function getFillEl() {
 		if (!_cachedFillEl || !_cachedFillEl.isConnected) {
 			_cachedFillEl = document.getElementById('jb-progress-fill');
 		}
@@ -368,6 +363,13 @@
 			_cachedVolEl = document.getElementById('jb-vol');
 		}
 		return _cachedVolEl;
+	}
+
+	function getProgressWrapEl() {
+		if (!_cachedProgressWrapEl || !_cachedProgressWrapEl.isConnected) {
+			_cachedProgressWrapEl = document.getElementById('jb-progress-wrap');
+		}
+		return _cachedProgressWrapEl;
 	}
 	// Generated code ends here on 2026-10-26T12:00:00Z:
 
@@ -394,7 +396,6 @@
 		if (d > -1 && t.length > 28) t = t.slice(d + 3);
 		return t.trim() || '—';
 	}
-	// Generated code ends here on 2026-09-29T16:15:00Z:
 
 	// ── da controls ───────────────────────────────────────────────────────────
 
@@ -507,69 +508,79 @@
 	}
 
 	// ── Render ─────────────────────────────────────────────────────────────
-	// Generated code starts here on 2026-09-29T16:15:00Z:
+	// Generated code starts here on 2026-10-26T12:00:00Z:
 	// Maintain state cache to avoid unnecessary DOM mutations, class toggles, innerHTML parsing, and style updates when values are unchanged.
 	let seekDragging = false;
 	let volUserActive = false;
 
-	// Generated code starts here on 2026-10-26T12:00:00Z:
-	// Avoid redundant DOM mutations and style recalcs in 700ms polling interval
-	let _lastPlayHtml = '';
-	let _lastPlayTitle = '';
-	let _lastNameText = '';
+	let _lastMuted = null;
+	let _lastPlaying = null;
+	let _lastTrackName = null;
+	let _lastTimeStr = null;
+	let _lastFillWidth = null;
+	let _lastVol = null;
+	let _lastValuenow = null;
+	let _fillHasSmooth = false;
 
 	function render() {
 		const muted = isMuted();
 		const active = !muted;
 		const playing = isPlaying() && active;
 
-		disc.classList.toggle('jb-active', active);
-		disc.classList.toggle('jb-spinning', playing);
-
-		const playHtml = muted ? '&#9654;' : '&#9646;&#9646;';
-		if (_lastPlayHtml !== playHtml) {
-			btnPlay.innerHTML = playHtml;
-			_lastPlayHtml = playHtml;
+		if (muted !== _lastMuted || playing !== _lastPlaying) {
+			_lastMuted = muted;
+			_lastPlaying = playing;
+			disc.classList.toggle('jb-active', active);
+			disc.classList.toggle('jb-spinning', playing);
+			btnPlay.textContent = muted ? '▶' : '❚❚';
+			btnPlay.title = muted ? 'play' : 'pause';
+			btnPlay.setAttribute(
+				'aria-label',
+				muted ? 'Play background music' : 'Pause background music'
+			);
 		}
 
-		const playTitle = muted ? 'play' : 'pause';
-		if (_lastPlayTitle !== playTitle) {
-			btnPlay.title = playTitle;
-			_lastPlayTitle = playTitle;
-		}
-
-		const nameText = trackName();
-		if (_lastNameText !== nameText) {
-			nameEl.textContent = nameText;
-			_lastNameText = nameText;
+		const name = trackName();
+		if (name !== _lastTrackName) {
+			_lastTrackName = name;
+			nameEl.textContent = name;
 		}
 
 		const dur = getDuration();
 		const cur = getCurrentTime();
-		const fill = getProgressFillEl();
+		const fillWidth = dur ? ((cur / dur) * 100).toFixed(1) : '0';
+		const timeStr = dur ? formatTime(cur) + ' / ' + formatTime(dur) : '';
+
+		const fill = getFillEl();
+		if (fill && !seekDragging && fillWidth !== _lastFillWidth) {
+			_lastFillWidth = fillWidth;
+			if (!_fillHasSmooth) {
+				fill.classList.add('jb-smooth');
+				_fillHasSmooth = true;
+			}
+			fill.style.width = fillWidth + '%';
+		}
+
 		const timeEl = getTimeEl();
+		if (timeEl && timeStr !== _lastTimeStr) {
+			_lastTimeStr = timeStr;
+			timeEl.textContent = timeStr;
+		}
+
 		const volEl = getVolEl();
-
-		if (fill && !seekDragging) {
-			fill.classList.add('jb-smooth');
-			const newWidth = (dur ? (cur / dur) * 100 : 0) + '%';
-			if (fill.style.width !== newWidth) {
-				fill.style.width = newWidth;
-			}
-		}
-
-		if (timeEl) {
-			const newTimeStr = dur ? formatTime(cur) + ' / ' + formatTime(dur) : '';
-			if (timeEl.textContent !== newTimeStr) {
-				timeEl.textContent = newTimeStr;
-			}
-		}
-
 		if (volEl && !volUserActive) {
-			const currentVol = String(getVolume());
-			if (volEl.value !== currentVol) {
-				volEl.value = currentVol;
+			const vol = getVolume();
+			if (vol !== _lastVol) {
+				_lastVol = vol;
+				volEl.value = vol;
 			}
+		}
+
+		const pctStr = dur ? Math.round((cur / dur) * 100).toString() : '0';
+		const progWrap = getProgressWrapEl();
+		if (progWrap && pctStr !== _lastValuenow) {
+			_lastValuenow = pctStr;
+			progWrap.setAttribute('aria-valuenow', pctStr);
 		}
 	}
 
@@ -578,7 +589,6 @@
 
 	// ── Panel open / close ─────────────────────────────────────────────────
 	let closeTimer;
-	// Generated code starts here on 2026-03-31T18:00:00Z:
 	const openPanel = () => {
 		clearTimeout(closeTimer);
 		panel.classList.add('jb-open');
@@ -590,7 +600,6 @@
 			disc.setAttribute('aria-expanded', 'false');
 		}, 900);
 	};
-	// Generated code ends here on 2026-03-31T18:00:00Z:
 
 	discWrap.addEventListener('mouseenter', openPanel);
 	discWrap.addEventListener('mouseleave', closePanel);
@@ -602,14 +611,12 @@
 		panel.classList.contains('jb-open') ? closePanel() : openPanel()
 	);
 
-	// Generated code starts here on 2026-03-31T18:00:00Z:
 	disc.addEventListener('keydown', (e) => {
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
 			panel.classList.contains('jb-open') ? closePanel() : openPanel();
 		}
 	});
-	// Generated code ends here on 2026-03-31T18:00:00Z:
 
 	const progressWrap = document.getElementById('jb-progress-wrap');
 	const progressFill = document.getElementById('jb-progress-fill');
@@ -659,7 +666,6 @@
 			progressFill.classList.add('jb-smooth');
 		});
 
-		// Generated code starts here on 2026-03-31T18:00:00Z:
 		progressWrap.addEventListener('keydown', (e) => {
 			const dur = getDuration();
 			if (!dur) return;
@@ -670,7 +676,6 @@
 				seekTo(Math.max(0, Math.min(dur, cur + delta)));
 			}
 		});
-		// Generated code ends here on 2026-03-31T18:00:00Z:
 	}
 
 	const volSlider = document.getElementById('jb-vol');
