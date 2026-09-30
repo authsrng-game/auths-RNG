@@ -169,4 +169,34 @@ test.describe('Syncer state consistency tests', () => {
 		expect((await implausiblePointsRes.json()).error).toBe('implausible progress');
 	});
 	// Generated code ends here on 2026-10-27T00:00:00Z:
+
+	// Generated code starts here on 2026-10-28T00:00:00Z:
+	test('catShrineToggle defaults to enabled when key is missing in localStorage', async ({
+		page,
+	}) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('catShrineUnlocked', '1');
+			localStorage.setItem('catShrineEquipped', 'https://cataas.com/cat/testcat');
+			localStorage.removeItem('catShrineToggle');
+		});
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(() => {
+			const bodyOff = globalThis.document.body.classList.contains('cat-shrine-off');
+			const toggle = globalThis.document.getElementById('catShrineEnabled');
+			const pin = globalThis.document.getElementById('catShrinePin');
+			return {
+				bodyOff,
+				checked: toggle ? toggle.checked : null,
+				pinVisible: pin ? pin.style.display !== 'none' : false,
+			};
+		});
+
+		expect(result.bodyOff).toBe(false);
+		expect(result.checked).toBe(true);
+		expect(result.pinVisible).toBe(true);
+	});
+	// Generated code ends here on 2026-10-28T00:00:00Z:
 });
