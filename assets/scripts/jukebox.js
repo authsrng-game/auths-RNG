@@ -268,9 +268,7 @@
 	document.body.insertAdjacentHTML(
 		'beforeend',
 		`<div id="jukebox">
-	    <!-- Generated code starts here on 2026-03-31T18:00:00Z: -->
 	    <div id="jb-disc" role="button" tabindex="0" aria-label="Toggle jukebox controls" aria-expanded="false"></div>
-	    <!-- Generated code ends here on 2026-03-31T18:00:00Z: -->
 	    <div id="jb-eq">
 	      <div class="jb-bar"></div>
 	      <div class="jb-bar"></div>
@@ -278,15 +276,12 @@
 	    </div>
 	    <div id="jb-panel">
 	      <div id="jb-row-controls">
-	        <!-- Generated code starts here on 2026-03-31T18:00:00Z: -->
 	        <button class="jb-btn" id="jb-prev" title="previous" aria-label="Previous track">&#9664;&#9664;</button>
-	        <button class="jb-btn" id="jb-play" title="pause/play" aria-label="Pause or play background music">&#9646;&#9646;</button>
+	        <button class="jb-btn" id="jb-play" title="pause/play" aria-label="Pause background music">&#9646;&#9646;</button>
 	        <button class="jb-btn" id="jb-next" title="next" aria-label="Next track">&#9654;&#9654;</button>
-	        <!-- Generated code ends here on 2026-03-31T18:00:00Z: -->
 	        <span id="jb-name">—</span>
 	        <span id="jb-time"></span>
 	      </div>
-	      <!-- Generated code starts here on 2026-03-31T18:00:00Z: -->
 	      <div id="jb-progress-wrap" role="slider" tabindex="0" aria-label="Music progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
 	        <div id="jb-progress-fill"></div>
 	      </div>
@@ -294,7 +289,6 @@
 	        <label for="jb-vol" id="jb-vol-label">vol</label>
 	        <input type="range" id="jb-vol" min="0" max="1" step="0.01" value="0.3" aria-label="Music volume">
 	      </div>
-	      <!-- Generated code ends here on 2026-03-31T18:00:00Z: -->
 	    </div>
 	  </div>`
 	);
@@ -327,38 +321,57 @@
 	const btnNext = document.getElementById('jb-next');
 
 	// ── State helpers ──────────────────────────────────────────────────────
-	// Generated code starts here on 2026-09-29T16:15:00Z:
-	// Cache static DOM element references to avoid repeated document tree lookups on periodic render ticks.
-	let _muteMusicEl = null;
-	let _musicSelectEl = null;
-	let _fillEl = null;
-	let _timeEl = null;
-	let _volEl = null;
+	// Generated code starts here on 2026-10-26T12:00:00Z:
+	// Lazy element reference caching to avoid redundant DOM queries in periodic render loop
+	let _cachedMuteEl = null;
+	let _cachedSelectEl = null;
+	let _cachedFillEl = null;
+	let _cachedTimeEl = null;
+	let _cachedVolEl = null;
+	let _cachedProgressWrapEl = null;
 
 	function getMuteMusicEl() {
-		if (!_muteMusicEl) _muteMusicEl = document.getElementById('muteMusic');
-		return _muteMusicEl;
+		if (!_cachedMuteEl || !_cachedMuteEl.isConnected) {
+			_cachedMuteEl = document.getElementById('muteMusic');
+		}
+		return _cachedMuteEl;
 	}
 
 	function getMusicSelectEl() {
-		if (!_musicSelectEl) _musicSelectEl = document.getElementById('musicSelect');
-		return _musicSelectEl;
+		if (!_cachedSelectEl || !_cachedSelectEl.isConnected) {
+			_cachedSelectEl = document.getElementById('musicSelect');
+		}
+		return _cachedSelectEl;
 	}
 
 	function getFillEl() {
-		if (!_fillEl) _fillEl = document.getElementById('jb-progress-fill');
-		return _fillEl;
+		if (!_cachedFillEl || !_cachedFillEl.isConnected) {
+			_cachedFillEl = document.getElementById('jb-progress-fill');
+		}
+		return _cachedFillEl;
 	}
 
 	function getTimeEl() {
-		if (!_timeEl) _timeEl = document.getElementById('jb-time');
-		return _timeEl;
+		if (!_cachedTimeEl || !_cachedTimeEl.isConnected) {
+			_cachedTimeEl = document.getElementById('jb-time');
+		}
+		return _cachedTimeEl;
 	}
 
 	function getVolEl() {
-		if (!_volEl) _volEl = document.getElementById('jb-vol');
-		return _volEl;
+		if (!_cachedVolEl || !_cachedVolEl.isConnected) {
+			_cachedVolEl = document.getElementById('jb-vol');
+		}
+		return _cachedVolEl;
 	}
+
+	function getProgressWrapEl() {
+		if (!_cachedProgressWrapEl || !_cachedProgressWrapEl.isConnected) {
+			_cachedProgressWrapEl = document.getElementById('jb-progress-wrap');
+		}
+		return _cachedProgressWrapEl;
+	}
+	// Generated code ends here on 2026-10-26T12:00:00Z:
 
 	function isPlaying() {
 		const a = window.backgroundMusic;
@@ -383,7 +396,6 @@
 		if (d > -1 && t.length > 28) t = t.slice(d + 3);
 		return t.trim() || '—';
 	}
-	// Generated code ends here on 2026-09-29T16:15:00Z:
 
 	// ── da controls ───────────────────────────────────────────────────────────
 
@@ -496,7 +508,7 @@
 	}
 
 	// ── Render ─────────────────────────────────────────────────────────────
-	// Generated code starts here on 2026-09-29T16:15:00Z:
+	// Generated code starts here on 2026-10-26T12:00:00Z:
 	// Maintain state cache to avoid unnecessary DOM mutations, class toggles, innerHTML parsing, and style updates when values are unchanged.
 	let seekDragging = false;
 	let volUserActive = false;
@@ -507,6 +519,7 @@
 	let _lastTimeStr = null;
 	let _lastFillWidth = null;
 	let _lastVol = null;
+	let _lastValuenow = null;
 	let _fillHasSmooth = false;
 
 	function render() {
@@ -521,6 +534,10 @@
 			disc.classList.toggle('jb-spinning', playing);
 			btnPlay.textContent = muted ? '▶' : '❚❚';
 			btnPlay.title = muted ? 'play' : 'pause';
+			btnPlay.setAttribute(
+				'aria-label',
+				muted ? 'Play background music' : 'Pause background music'
+			);
 		}
 
 		const name = trackName();
@@ -558,24 +575,20 @@
 				volEl.value = vol;
 			}
 		}
-		if (timeEl) timeEl.textContent = dur ? formatTime(cur) + ' / ' + formatTime(dur) : '';
-		if (volEl && !volUserActive) volEl.value = getVolume();
-		// Generated code starts here on 2026-03-31T18:00:00Z:
-		btnPlay.setAttribute(
-			'aria-label',
-			isMuted() ? 'Play background music' : 'Pause background music'
-		);
-		const pct = dur ? Math.round((cur / dur) * 100) : 0;
-		if (progressWrap) progressWrap.setAttribute('aria-valuenow', pct.toString());
-		// Generated code ends here on 2026-03-31T18:00:00Z:
+
+		const pctStr = dur ? Math.round((cur / dur) * 100).toString() : '0';
+		const progWrap = getProgressWrapEl();
+		if (progWrap && pctStr !== _lastValuenow) {
+			_lastValuenow = pctStr;
+			progWrap.setAttribute('aria-valuenow', pctStr);
+		}
 	}
 
 	window._renderJukebox = render;
-	// Generated code ends here on 2026-09-29T16:15:00Z:
+	// Generated code ends here on 2026-10-26T12:00:00Z:
 
 	// ── Panel open / close ─────────────────────────────────────────────────
 	let closeTimer;
-	// Generated code starts here on 2026-03-31T18:00:00Z:
 	const openPanel = () => {
 		clearTimeout(closeTimer);
 		panel.classList.add('jb-open');
@@ -587,7 +600,6 @@
 			disc.setAttribute('aria-expanded', 'false');
 		}, 900);
 	};
-	// Generated code ends here on 2026-03-31T18:00:00Z:
 
 	discWrap.addEventListener('mouseenter', openPanel);
 	discWrap.addEventListener('mouseleave', closePanel);
@@ -599,14 +611,12 @@
 		panel.classList.contains('jb-open') ? closePanel() : openPanel()
 	);
 
-	// Generated code starts here on 2026-03-31T18:00:00Z:
 	disc.addEventListener('keydown', (e) => {
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
 			panel.classList.contains('jb-open') ? closePanel() : openPanel();
 		}
 	});
-	// Generated code ends here on 2026-03-31T18:00:00Z:
 
 	const progressWrap = document.getElementById('jb-progress-wrap');
 	const progressFill = document.getElementById('jb-progress-fill');
@@ -656,7 +666,6 @@
 			progressFill.classList.add('jb-smooth');
 		});
 
-		// Generated code starts here on 2026-03-31T18:00:00Z:
 		progressWrap.addEventListener('keydown', (e) => {
 			const dur = getDuration();
 			if (!dur) return;
@@ -667,7 +676,6 @@
 				seekTo(Math.max(0, Math.min(dur, cur + delta)));
 			}
 		});
-		// Generated code ends here on 2026-03-31T18:00:00Z:
 	}
 
 	const volSlider = document.getElementById('jb-vol');
