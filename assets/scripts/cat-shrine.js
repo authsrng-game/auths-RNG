@@ -154,12 +154,22 @@
 			pin = document.createElement('div');
 			pin.id = 'catShrinePin';
 			pin.title = 'click to unequip your emotional support cat';
+			pin.setAttribute('role', 'button');
+			pin.setAttribute('tabindex', '0');
+			pin.setAttribute('aria-label', 'Unequip emotional support cat');
 			pin.addEventListener('click', unequipCat);
+			pin.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					unequipCat();
+				}
+			});
 			document.body.appendChild(pin);
 		}
 		pin.innerHTML = '';
 		const img = document.createElement('img');
 		img.src = url;
+		img.alt = 'Equipped emotional support cat';
 		pin.appendChild(img);
 		pin.style.display = 'block';
 	}
