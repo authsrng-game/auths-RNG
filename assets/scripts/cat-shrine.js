@@ -186,6 +186,12 @@
 	}
 
 	// Generated code starts here on 2026-10-28T00:00:00Z:
+	/**
+	 * Evaluates whether the Cat Shrine overlay/pin features are enabled.
+	 * Compares against '0' so uninitialized or null localStorage entries default to enabled.
+	 *
+	 * @returns {boolean} True if shrine is enabled.
+	 */
 	function isShrineEnabled() {
 		return localStorage.getItem('catShrineToggle') !== '0';
 	}
