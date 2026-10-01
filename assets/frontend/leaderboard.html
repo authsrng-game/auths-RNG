@@ -504,8 +504,14 @@
 				});
 			});
 
+			let lastModeToggleAt = 0;
+			const TOGGLE_COOLDOWN_MS = 1000;
+
 			document.getElementById('lbModeGlobal').addEventListener('click', () => {
 				if (leaderboardMode === 'global') return;
+				const now = Date.now();
+				if (now - lastModeToggleAt < TOGGLE_COOLDOWN_MS) return;
+				lastModeToggleAt = now;
 				leaderboardMode = 'global';
 				syncModeButtons();
 				fetchLeaderboard();
@@ -517,6 +523,9 @@
 					return;
 				}
 				if (leaderboardMode === 'friends') return;
+				const now = Date.now();
+				if (now - lastModeToggleAt < TOGGLE_COOLDOWN_MS) return;
+				lastModeToggleAt = now;
 				leaderboardMode = 'friends';
 				syncModeButtons();
 				fetchLeaderboard();
