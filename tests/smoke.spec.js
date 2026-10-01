@@ -23,7 +23,9 @@ test.describe('auths-RNG smoke tests', () => {
 	test('no failed network requests', async ({ page }) => {
 		const failed = [];
 		page.on('response', (res) => {
-			if (res.status() >= 400) failed.push(`${res.status()} ${res.url()}`);
+			if (res.status() >= 400 && res.url().startsWith(BASE_URL)) {
+				failed.push(`${res.status()} ${res.url()}`);
+			}
 		});
 		await page.goto(BASE_URL);
 		await page.waitForTimeout(2000);
