@@ -323,7 +323,7 @@
 	}
 
 	function exchangeBlocksToRunes(count) {
-		const cost = Math.ceil(count / 0.85);
+		const cost = Math.ceil((count * getExchangeRate()) / 0.85);
 		if (blocks < cost) return;
 		blocks -= cost;
 		runesData.counts.common = (runesData.counts.common || 0) + count;
