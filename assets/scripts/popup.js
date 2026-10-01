@@ -70,15 +70,19 @@ console.log(performance.now());
 		return overlay;
 	}
 
+	// Generated code starts here on 2026-10-26T12:00:00Z:
 	function makeBox() {
 		const box = document.createElement('div');
 		box.style.cssText = BOX_CSS;
+		box.setAttribute('role', 'dialog');
+		box.setAttribute('aria-modal', 'true');
 		return box;
 	}
 
 	function makeTitle(text) {
 		if (!text) return null;
 		const el = document.createElement('div');
+		el.id = 'customPopupTitle';
 		el.style.cssText = TITLE_CSS;
 		el.textContent = text;
 		return el;
@@ -86,6 +90,7 @@ console.log(performance.now());
 
 	function makeMessage(text) {
 		const el = document.createElement('div');
+		el.id = 'customPopupDesc';
 		el.style.cssText = MSG_CSS;
 		el.textContent = text;
 		return el;
@@ -117,8 +122,15 @@ console.log(performance.now());
 			const box = makeBox();
 
 			const titleEl = makeTitle(title);
-			if (titleEl) box.appendChild(titleEl);
-			box.appendChild(makeMessage(message));
+			if (titleEl) {
+				box.appendChild(titleEl);
+				box.setAttribute('aria-labelledby', titleEl.id);
+			} else {
+				box.setAttribute('aria-label', 'Alert');
+			}
+			const msgEl = makeMessage(message);
+			box.appendChild(msgEl);
+			box.setAttribute('aria-describedby', msgEl.id);
 
 			function handler(e) {
 				if (e.key === 'Enter' || e.key === 'Escape') close();
@@ -133,7 +145,8 @@ console.log(performance.now());
 
 			_activeOverlayCleanup = close;
 
-			box.appendChild(makeBtnRow(makeButton('ok', BTN_PRIMARY, close)));
+			const okBtn = makeButton('ok', BTN_PRIMARY, close);
+			box.appendChild(makeBtnRow(okBtn));
 
 			overlay.addEventListener('click', (e) => {
 				if (e.target === overlay) close();
@@ -141,6 +154,7 @@ console.log(performance.now());
 			document.addEventListener('keydown', handler);
 
 			mount(overlay, box);
+			setTimeout(() => okBtn.focus(), 50);
 		});
 	};
 
@@ -150,8 +164,15 @@ console.log(performance.now());
 			const box = makeBox();
 
 			const titleEl = makeTitle(title);
-			if (titleEl) box.appendChild(titleEl);
-			box.appendChild(makeMessage(message));
+			if (titleEl) {
+				box.appendChild(titleEl);
+				box.setAttribute('aria-labelledby', titleEl.id);
+			} else {
+				box.setAttribute('aria-label', 'Confirm');
+			}
+			const msgEl = makeMessage(message);
+			box.appendChild(msgEl);
+			box.setAttribute('aria-describedby', msgEl.id);
 
 			function handler(e) {
 				if (e.key === 'Enter') finish(true);
@@ -167,10 +188,11 @@ console.log(performance.now());
 
 			_activeOverlayCleanup = () => finish(false);
 
+			const okBtn = makeButton('ok', BTN_PRIMARY, () => finish(true));
 			box.appendChild(
 				makeBtnRow(
 					makeButton('cancel', BTN_CANCEL, () => finish(false)),
-					makeButton('ok', BTN_PRIMARY, () => finish(true))
+					okBtn
 				)
 			);
 
@@ -180,6 +202,7 @@ console.log(performance.now());
 			document.addEventListener('keydown', handler);
 
 			mount(overlay, box);
+			setTimeout(() => okBtn.focus(), 50);
 		});
 	};
 
@@ -188,7 +211,10 @@ console.log(performance.now());
 			const overlay = makeOverlay();
 			const box = makeBox();
 
-			box.appendChild(makeMessage(message));
+			const msgEl = makeMessage(message);
+			box.appendChild(msgEl);
+			box.setAttribute('aria-describedby', msgEl.id);
+			box.setAttribute('aria-label', 'Prompt');
 
 			const input = document.createElement('input');
 			input.type = 'text';
@@ -224,6 +250,7 @@ console.log(performance.now());
 			setTimeout(() => input.focus(), 50);
 		});
 	};
+	// Generated code ends here on 2026-10-26T12:00:00Z:
 
 	// ─custom fucking dropdown
 	// bitch
