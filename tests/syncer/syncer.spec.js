@@ -244,6 +244,37 @@ test.describe('Syncer state consistency tests', () => {
 	});
 	// Generated code ends here on 2026-10-28T00:00:00Z:
 
+	// Generated code starts here on 2026-10-30T00:00:00Z:
+	test('themeEditorPresets, themeEditorActive, and startAnimConfig are removed on resetInventory', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+		await page.evaluate(() => {
+			globalThis.localStorage.setItem('themeEditorPresets', JSON.stringify([{ name: 'test' }]));
+			globalThis.localStorage.setItem('themeEditorActive', JSON.stringify({ name: 'test' }));
+			globalThis.localStorage.setItem('startAnimConfig', JSON.stringify({ enabled: true }));
+		});
+		await page.evaluate(async () => {
+			globalThis.showConfirm = () => Promise.resolve(true);
+			globalThis.showAlert = () => Promise.resolve();
+			globalThis.location.reload = () => {};
+			const resetBtn = globalThis.document.getElementById('resetBtn');
+			if (resetBtn) resetBtn.click();
+		});
+		await page.waitForTimeout(500);
+		const vals = await page.evaluate(() => {
+			return {
+				presets: globalThis.localStorage.getItem('themeEditorPresets'),
+				active: globalThis.localStorage.getItem('themeEditorActive'),
+				anim: globalThis.localStorage.getItem('startAnimConfig'),
+			};
+		});
+		expect(vals.presets).toBeNull();
+		expect(vals.active).toBeNull();
+		expect(vals.anim).toBeNull();
+	});
+	// Generated code ends here on 2026-10-30T00:00:00Z:
+
 	// Generated code starts here on 2026-10-29T00:00:00Z:
 	test('server sync endpoint validates mutationTrust plausibility', async () => {
 		const { onRequest } = await import('../../functions/api/sync.js');
