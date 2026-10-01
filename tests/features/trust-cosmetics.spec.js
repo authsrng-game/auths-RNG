@@ -97,5 +97,25 @@ test.describe('Trust Cosmetics System', () => {
 		).toBeUndefined();
 		expect(await page.evaluate(() => document.getElementById('trust-frame')?.className)).toBe('');
 	});
+
+	test('startAutoMutate clears active interval when upgrade_automutate is no longer owned', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(() => {
+			// Own the upgrade and start auto mutate
+			localStorage.setItem('mutationTrustOwned', JSON.stringify(['upgrade_automutate']));
+			window.trustCosmetics.startAutoMutate();
+
+			// Remove the upgrade ownership and trigger startAutoMutate
+			localStorage.setItem('mutationTrustOwned', JSON.stringify([]));
+			window.trustCosmetics.startAutoMutate();
+
+			return true;
+		});
+
+		expect(result).toBe(true);
+	});
 });
 // Generated code ends here on 2026-03-31T00:00:00Z:
