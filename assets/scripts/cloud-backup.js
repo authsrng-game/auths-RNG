@@ -192,11 +192,14 @@ console.log(performance.now());
 			const r = await fetch(API, { headers: authHeaders() });
 			const data = await r.json();
 			if (!r.ok || !data.payload) {
-				setStatus('error: ' + (data.error || 'no backup found'), '#ff8888');
+				const errMsg = data.error || 'no backup found';
+				console.warn('[cloud-backup] restore failed:', errMsg, { status: r.status });
+				setStatus('error: ' + errMsg, '#ff8888');
 				return;
 			}
 			const result = decode(data.payload);
 			if (result.error) {
+				console.warn('[cloud-backup] restore decode failed:', result.error);
 				setStatus('restore error: ' + result.error, '#ff8888');
 				return;
 			}
@@ -204,6 +207,7 @@ console.log(performance.now());
 			setStatus('restored! reloading...', '#88dd88');
 			setTimeout(() => location.reload(), 600);
 		} catch (e) {
+			console.warn('[cloud-backup] restore request failed:', e);
 			setStatus('restore failed: ' + e.message, '#ff8888');
 		}
 	}
