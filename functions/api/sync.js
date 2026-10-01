@@ -99,6 +99,31 @@ export async function onRequest(context) {
 	}
 	// Generated code ends here on 2026-10-29T00:00:00Z:
 
+	// Generated code starts here on 2026-10-30T00:00:00Z:
+	for (const key of ['anomalies', 'anomaliesUsed']) {
+		if (body && body[key] !== undefined) {
+			const anom = Number(body[key]);
+			// Max static grants = 50M (double clover) + ~2M (gauntlets); Max gain rate = ~30/s; Starter buffer = 100M
+			const maxPossibleAnomalies = playtime * 100 + 100000000;
+			if (isNaN(anom) || anom < 0 || anom > maxPossibleAnomalies) {
+				console.warn(
+					`[sync] rejected sync payload: ${key} exceeds max physically possible gain`,
+					{
+						userId,
+						anom,
+						rolls,
+						playtime,
+					}
+				);
+				return new Response(JSON.stringify({ error: 'implausible progress' }), {
+					status: 400,
+					headers,
+				});
+			}
+		}
+	}
+	// Generated code ends here on 2026-10-30T00:00:00Z:
+
 	return new Response(JSON.stringify({ ok: true }), { headers });
 }
 // Generated code ends here on 2026-10-27T00:00:00Z:
