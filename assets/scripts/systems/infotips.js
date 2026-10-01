@@ -58,8 +58,12 @@
 		},
 	];
 
+	// Fast-path visibility check: avoid getClientRects layout flushes when dimensions exist
 	function isVisible(el) {
-		return !!(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length));
+		return !!(
+			el &&
+			(el.offsetWidth || el.offsetHeight || (el.getClientRects && el.getClientRects().length))
+		);
 	}
 
 	function createIcon(tip) {
@@ -90,11 +94,15 @@
 		return wrap;
 	}
 
-	// Generated code starts here on 2026-09-12T14:00:00Z:
-	// Cache tip icon elements and avoid redundant getComputedStyle layout flushes on periodic scans.
+	// Generated code starts here on 2026-10-27T00:00:00Z:
+	// Cache container references and guard icon style assignments to eliminate redundant DOM mutations during periodic scans.
 	function tryPlace(tip) {
-		const container = tip.container();
-		if (!container) return;
+		let container = tip._container;
+		if (!container || !document.body.contains(container)) {
+			container = tip.container();
+			if (!container) return;
+			tip._container = container;
+		}
 
 		let icon = tip._icon;
 		if (!icon || !container.contains(icon)) {
@@ -113,13 +121,18 @@
 			}
 		}
 
-		icon.style.display = isVisible(container) ? '' : 'none';
+		const targetDisplay = isVisible(container) ? '' : 'none';
+		if (icon.style.display !== targetDisplay) {
+			icon.style.display = targetDisplay;
+		}
 	}
-	// Generated code ends here on 2026-09-12T14:00:00Z:
 
 	function scanAll() {
 		TOOLTIPS.forEach(tryPlace);
 	}
+
+	window._scanInfoTips = scanAll;
+	// Generated code ends here on 2026-10-27T00:00:00Z:
 
 	let popoverEl = null;
 
