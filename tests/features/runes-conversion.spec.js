@@ -1,6 +1,8 @@
 // Generated code starts here on 2026-11-01T00:00:00Z:
 const { test, expect } = require('@playwright/test');
 
+/* global window, document */
+
 const BASE_URL = 'http://localhost:8080/';
 
 test.describe('Runes UTM conversion rate and arbitrage prevention', () => {
