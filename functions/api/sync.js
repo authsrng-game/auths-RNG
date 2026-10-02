@@ -130,7 +130,10 @@ export async function onRequest(context) {
 		return true;
 	};
 
-	if (!checkAnomalyVal(anomalies, 'anomalies') || !checkAnomalyVal(anomaliesUsed, 'anomaliesUsed')) {
+	if (
+		!checkAnomalyVal(anomalies, 'anomalies') ||
+		!checkAnomalyVal(anomaliesUsed, 'anomaliesUsed')
+	) {
 		return new Response(JSON.stringify({ error: 'implausible progress' }), {
 			status: 400,
 			headers,
