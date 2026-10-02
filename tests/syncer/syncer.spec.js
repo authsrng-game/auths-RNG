@@ -283,4 +283,90 @@ test.describe('Syncer state consistency tests', () => {
 		expect((await implausibleTrustRes.json()).error).toBe('implausible progress');
 	});
 	// Generated code ends here on 2026-10-29T00:00:00Z:
+
+	// Generated code starts here on 2026-10-30T00:00:00Z:
+	test('themeEditorPresets, themeEditorActive, and startAnimConfig are removed on resetInventory', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+		await page.evaluate(() => {
+			globalThis.localStorage.setItem('themeEditorPresets', JSON.stringify([{ name: 'custom' }]));
+			globalThis.localStorage.setItem('themeEditorActive', JSON.stringify({ name: 'custom' }));
+			globalThis.localStorage.setItem('startAnimConfig', JSON.stringify({ enabled: false }));
+		});
+		await page.evaluate(async () => {
+			globalThis.showConfirm = () => Promise.resolve(true);
+			globalThis.showAlert = () => Promise.resolve();
+			globalThis.location.reload = () => {};
+			const resetBtn = globalThis.document.getElementById('resetBtn');
+			if (resetBtn) resetBtn.click();
+		});
+		await page.waitForTimeout(500);
+		const result = await page.evaluate(() => {
+			return {
+				presets: globalThis.localStorage.getItem('themeEditorPresets'),
+				active: globalThis.localStorage.getItem('themeEditorActive'),
+				anim: globalThis.localStorage.getItem('startAnimConfig'),
+			};
+		});
+		expect(result.presets).toBeNull();
+		expect(result.active).toBeNull();
+		expect(result.anim).toBeNull();
+	});
+	// Generated code ends here on 2026-10-30T00:00:00Z:
+	// Generated code starts here on 2026-03-31T00:00:00Z:
+	test('server sync endpoint validates anomalies and anomaliesUsed plausibility', async () => {
+		const { onRequest } = await import('../../functions/api/sync.js');
+
+		const makeReq = (body) => ({
+			method: 'POST',
+			url: 'https://example.com/api/sync',
+			json: async () => body,
+		});
+
+		const validRes = await onRequest({
+			request: makeReq({
+				totalRolls: 10,
+				totalPlaytime: 100,
+				anomalies: 500,
+				anomaliesUsed: 10,
+				userId: 'u12',
+			}),
+		});
+		expect(validRes.status).toBe(200);
+
+		const negativeAnomaliesRes = await onRequest({
+			request: makeReq({
+				totalRolls: 10,
+				totalPlaytime: 100,
+				anomalies: -5,
+				userId: 'u13',
+			}),
+		});
+		expect(negativeAnomaliesRes.status).toBe(400);
+		expect((await negativeAnomaliesRes.json()).error).toBe('implausible progress');
+
+		const nonNumericAnomaliesRes = await onRequest({
+			request: makeReq({
+				totalRolls: 10,
+				totalPlaytime: 100,
+				anomaliesUsed: 'invalid',
+				userId: 'u14',
+			}),
+		});
+		expect(nonNumericAnomaliesRes.status).toBe(400);
+		expect((await nonNumericAnomaliesRes.json()).error).toBe('implausible progress');
+
+		const implausibleAnomaliesRes = await onRequest({
+			request: makeReq({
+				totalRolls: 10,
+				totalPlaytime: 100,
+				anomalies: 99999999999,
+				userId: 'u15',
+			}),
+		});
+		expect(implausibleAnomaliesRes.status).toBe(400);
+		expect((await implausibleAnomaliesRes.json()).error).toBe('implausible progress');
+	});
+	// Generated code ends here on 2026-03-31T00:00:00Z:
 });
