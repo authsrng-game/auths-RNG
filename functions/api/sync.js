@@ -24,8 +24,17 @@ export async function onRequest(context) {
 		return new Response(JSON.stringify({ error: 'invalid json' }), { status: 400, headers });
 	}
 
-	const { totalRolls, totalPlaytime, userId, shopPoints, points, mutationTrust, trust } =
-		body || {};
+	const {
+		totalRolls,
+		totalPlaytime,
+		userId,
+		shopPoints,
+		points,
+		mutationTrust,
+		trust,
+		anomalies,
+		anomaliesUsed,
+	} = body || {};
 	const rolls = parseInt(totalRolls, 10);
 	const playtime = parseInt(totalPlaytime || '0', 10);
 
@@ -98,6 +107,37 @@ export async function onRequest(context) {
 		}
 	}
 	// Generated code ends here on 2026-10-29T00:00:00Z:
+
+	// Generated code starts here on 2026-10-30T00:00:00Z:
+	const maxPossibleAnomalies = playtime * 100 + 100000000;
+	if (anomalies !== undefined) {
+		const anom = Number(anomalies);
+		if (isNaN(anom) || anom < 0 || !isFinite(anom) || anom > maxPossibleAnomalies) {
+			console.warn(
+				'[sync] rejected sync payload: anomalies exceeds max physically possible gain',
+				{ userId, anom, playtime }
+			);
+			return new Response(JSON.stringify({ error: 'implausible progress' }), {
+				status: 400,
+				headers,
+			});
+		}
+	}
+
+	if (anomaliesUsed !== undefined) {
+		const anomUsed = Number(anomaliesUsed);
+		if (isNaN(anomUsed) || anomUsed < 0 || !isFinite(anomUsed) || anomUsed > maxPossibleAnomalies) {
+			console.warn(
+				'[sync] rejected sync payload: anomaliesUsed exceeds max physically possible gain',
+				{ userId, anomUsed, playtime }
+			);
+			return new Response(JSON.stringify({ error: 'implausible progress' }), {
+				status: 400,
+				headers,
+			});
+		}
+	}
+	// Generated code ends here on 2026-10-30T00:00:00Z:
 
 	return new Response(JSON.stringify({ ok: true }), { headers });
 }
