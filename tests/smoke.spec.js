@@ -492,4 +492,20 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(pin).toBeHidden();
 	});
 	// Generated code ends here on 2026-03-31T20:00:00Z:
+
+	// Generated code starts here on 2026-03-31T22:00:00Z:
+	test('leaderboard mode toggle buttons have aria-pressed attributes', async ({ page }) => {
+		await page.goto(`${BASE_URL}/assets/frontend/leaderboard.html`);
+
+		const globalBtn = page.locator('#lbModeGlobal');
+		const friendsBtn = page.locator('#lbModeFriends');
+
+		await expect(globalBtn).toHaveAttribute('aria-pressed', 'true');
+		await expect(friendsBtn).toHaveAttribute('aria-pressed', 'false');
+
+		await globalBtn.click();
+		await expect(globalBtn).toHaveAttribute('aria-pressed', 'true');
+		await expect(friendsBtn).toHaveAttribute('aria-pressed', 'false');
+	});
+	// Generated code ends here on 2026-03-31T22:00:00Z:
 });

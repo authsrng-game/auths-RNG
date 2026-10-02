@@ -1325,7 +1325,6 @@ function updateItem(d) {
 				return;
 			}
 
-			const snapCount = currentData.count;
 			const snapAvailable = availableToSell;
 			const pointsEarned = calculateRarityPoints(rarityObj) * snapAvailable;
 
@@ -1814,6 +1813,11 @@ async function resetInventory() {
 	localStorage.removeItem('catShrineToggle');
 	localStorage.removeItem('infoTipsRead');
 	// Generated code ends here on 2026-03-29T12:00:00Z:
+	// Generated code starts here on 2026-10-30T00:00:00Z:
+	localStorage.removeItem('themeEditorPresets');
+	localStorage.removeItem('themeEditorActive');
+	localStorage.removeItem('startAnimConfig');
+	// Generated code ends here on 2026-10-30T00:00:00Z:
 	rarityTimestamps = new Map();
 	window.rarityTimestamps = rarityTimestamps;
 	notifications = [];

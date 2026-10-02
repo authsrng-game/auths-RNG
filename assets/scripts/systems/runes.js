@@ -279,17 +279,34 @@
 		}
 	}
 
-	function startWealthGift() {
-		if (giftWealthInterval) clearInterval(giftWealthInterval);
-		if (gift !== 'wealth') return;
-		giftWealthInterval = setInterval(() => {
+	// Generated code starts here on 2026-03-31T22:00:00Z:
+	window._lastRuneWealthTick = Date.now();
+	function updateRuneWealth() {
+		if (gift !== 'wealth') {
+			window._lastRuneWealthTick = Date.now();
+			return;
+		}
+		const now = Date.now();
+		const elapsedMs = now - (window._lastRuneWealthTick || now);
+		const elapsedSeconds = Math.floor(elapsedMs / 1000);
+		if (elapsedSeconds > 0) {
+			const cappedSeconds = Math.min(3600, elapsedSeconds);
+			window._lastRuneWealthTick = now - (elapsedMs % 1000);
 			if (typeof points !== 'undefined' && typeof updatePointsDisplay === 'function') {
-				points += 200000;
+				points += 200000 * cappedSeconds;
 				updatePointsDisplay();
 				if (typeof saveAllData === 'function') saveAllData();
 			}
-		}, 1000);
+		}
 	}
+
+	function startWealthGift() {
+		if (giftWealthInterval) clearInterval(giftWealthInterval);
+		if (gift !== 'wealth') return;
+		window._lastRuneWealthTick = Date.now();
+		giftWealthInterval = setInterval(updateRuneWealth, 1000);
+	}
+	// Generated code ends here on 2026-03-31T22:00:00Z:
 
 	function getGiftLuckMultiplier() {
 		return gift === 'luck' ? 2 : 1;
@@ -325,6 +342,7 @@
 	// Generated code starts here on 2026-11-01T00:00:00Z:
 	// Calculate block cost relative to getExchangeRate() to enforce a lossy ~0.85 conversion ratio and prevent positive arbitrage loops.
 	function exchangeBlocksToRunes(count) {
+		// Block cost scales with getExchangeRate() to maintain the lossy 0.85 conversion ratio relative to rune value and prevent infinite block generation loops.
 		const cost = Math.ceil((count * getExchangeRate()) / 0.85);
 		if (blocks < cost) return;
 		blocks -= cost;
@@ -381,16 +399,40 @@
 		}
 	}
 
-	function startAnomalyMachine() {
-		if (anomalyMachineInterval) clearInterval(anomalyMachineInterval);
-		anomalyMachineInterval = setInterval(() => {
+	// Generated code starts here on 2026-03-31T22:00:00Z:
+	window._lastRuneAnomalyMachineTick = Date.now();
+	function updateRuneAnomalyMachine() {
+		if (!upgrades.anomalyMachine) {
+			window._lastRuneAnomalyMachineTick = Date.now();
+			return;
+		}
+		const now = Date.now();
+		const elapsedMs = now - (window._lastRuneAnomalyMachineTick || now);
+		const elapsedTicks = Math.floor(elapsedMs / 2000);
+		if (elapsedTicks > 0) {
+			const cappedTicks = Math.min(1800, elapsedTicks);
+			window._lastRuneAnomalyMachineTick = now - (elapsedMs % 2000);
 			if (typeof anomalies !== 'undefined') {
-				anomalies += 50;
+				anomalies += 50 * cappedTicks;
 				if (typeof updateAnomalyUI === 'function') updateAnomalyUI();
 				if (typeof saveAllData === 'function') saveAllData();
 			}
-		}, 2000);
+		}
 	}
+
+	function startAnomalyMachine() {
+		if (anomalyMachineInterval) clearInterval(anomalyMachineInterval);
+		window._lastRuneAnomalyMachineTick = Date.now();
+		anomalyMachineInterval = setInterval(updateRuneAnomalyMachine, 2000);
+	}
+
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'visible') {
+			if (gift === 'wealth') updateRuneWealth();
+			if (upgrades.anomalyMachine) updateRuneAnomalyMachine();
+		}
+	});
+	// Generated code ends here on 2026-03-31T22:00:00Z:
 
 	function startDopamineAttack() {
 		if (dopamineAttackInterval) clearInterval(dopamineAttackInterval);
