@@ -6,7 +6,9 @@ const { test, expect } = require('@playwright/test');
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
 
 test.describe('cloud backup observability', () => {
-	test('cloud backup manual operations emit diagnostic warning logs on failure', async ({ page }) => {
+	test('cloud backup manual operations emit diagnostic warning logs on failure', async ({
+		page,
+	}) => {
 		const warnLogs = [];
 		page.on('console', (msg) => {
 			if (msg.type() === 'warning') {
