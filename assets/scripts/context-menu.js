@@ -546,11 +546,13 @@
 			})
 		);
 
+		// Generated code starts here on 2026-06-18T00:00:00Z:
 		menu.appendChild(
 			makeItem('❓', 'open faq', '', () => {
-				window.open('/FAQ.html', '_blank');
+				window.open('/assets/frontend/FAQ.html', '_blank');
 			})
 		);
+		// Generated code ends here on 2026-06-18T00:00:00Z:
 
 		menu.appendChild(makeSep());
 
