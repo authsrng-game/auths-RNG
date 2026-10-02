@@ -285,7 +285,9 @@ test.describe('Syncer state consistency tests', () => {
 	// Generated code ends here on 2026-10-29T00:00:00Z:
 
 	// Generated code starts here on 2026-10-30T00:00:00Z:
-	test('themeEditorPresets, themeEditorActive, and startAnimConfig are removed on resetInventory', async ({ page }) => {
+	test('themeEditorPresets, themeEditorActive, and startAnimConfig are removed on resetInventory', async ({
+		page,
+	}) => {
 		await page.goto(BASE_URL);
 		await page.evaluate(() => {
 			globalThis.localStorage.setItem('themeEditorPresets', JSON.stringify([{ name: 'custom' }]));
