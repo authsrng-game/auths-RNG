@@ -312,4 +312,59 @@ test.describe('Syncer state consistency tests', () => {
 		expect(result.anim).toBeNull();
 	});
 	// Generated code ends here on 2026-10-30T00:00:00Z:
+	// Generated code starts here on 2026-03-31T00:00:00Z:
+	test('server sync endpoint validates anomalies and anomaliesUsed plausibility', async () => {
+		const { onRequest } = await import('../../functions/api/sync.js');
+
+		const makeReq = (body) => ({
+			method: 'POST',
+			url: 'https://example.com/api/sync',
+			json: async () => body,
+		});
+
+		const validRes = await onRequest({
+			request: makeReq({
+				totalRolls: 10,
+				totalPlaytime: 100,
+				anomalies: 500,
+				anomaliesUsed: 10,
+				userId: 'u12',
+			}),
+		});
+		expect(validRes.status).toBe(200);
+
+		const negativeAnomaliesRes = await onRequest({
+			request: makeReq({
+				totalRolls: 10,
+				totalPlaytime: 100,
+				anomalies: -5,
+				userId: 'u13',
+			}),
+		});
+		expect(negativeAnomaliesRes.status).toBe(400);
+		expect((await negativeAnomaliesRes.json()).error).toBe('implausible progress');
+
+		const nonNumericAnomaliesRes = await onRequest({
+			request: makeReq({
+				totalRolls: 10,
+				totalPlaytime: 100,
+				anomaliesUsed: 'invalid',
+				userId: 'u14',
+			}),
+		});
+		expect(nonNumericAnomaliesRes.status).toBe(400);
+		expect((await nonNumericAnomaliesRes.json()).error).toBe('implausible progress');
+
+		const implausibleAnomaliesRes = await onRequest({
+			request: makeReq({
+				totalRolls: 10,
+				totalPlaytime: 100,
+				anomalies: 99999999999,
+				userId: 'u15',
+			}),
+		});
+		expect(implausibleAnomaliesRes.status).toBe(400);
+		expect((await implausibleAnomaliesRes.json()).error).toBe('implausible progress');
+	});
+	// Generated code ends here on 2026-03-31T00:00:00Z:
 });

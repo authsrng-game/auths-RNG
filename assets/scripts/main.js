@@ -1325,7 +1325,6 @@ function updateItem(d) {
 				return;
 			}
 
-			const snapCount = currentData.count;
 			const snapAvailable = availableToSell;
 			const pointsEarned = calculateRarityPoints(rarityObj) * snapAvailable;
 
