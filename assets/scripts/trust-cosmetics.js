@@ -189,8 +189,11 @@
 
 	// Generated code starts here on 2026-09-25T12:46:00Z:
 	function startAutoMutate() {
+		if (autoMutateInterval) {
+			clearInterval(autoMutateInterval);
+			autoMutateInterval = null;
+		}
 		if (!getOwned().includes('upgrade_automutate')) return;
-		if (autoMutateInterval) clearInterval(autoMutateInterval);
 		autoMutateInterval = setInterval(() => {
 			const ms = window.MutationSystem;
 			if (!ms || typeof ms.getInventoryRarities !== 'function') return;
@@ -626,5 +629,5 @@
 		init();
 	}
 
-	window.trustCosmetics = { renderShop, buy, equip, unequip };
+	window.trustCosmetics = { renderShop, buy, equip, unequip, startAutoMutate };
 })();

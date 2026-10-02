@@ -163,10 +163,14 @@ console.log(performance.now());
 			});
 			const data = await r.json();
 			if (!r.ok) {
-				if (!silent) setStatus('error: ' + (data.error || r.status), '#ff8888');
-				// Generated code starts here on 2026-03-31T12:00:00Z:
-				else console.warn('[cloud-backup] silent auto-backup rejected:', data.error || r.status);
-				// Generated code ends here on 2026-03-31T12:00:00Z:
+				const errMsg = data.error || r.status;
+				if (!silent) setStatus('error: ' + errMsg, '#ff8888');
+				// Generated code starts here on 2026-03-31T22:30:00Z:
+				console.warn(
+					'[cloud-backup] ' + (silent ? 'silent auto-backup' : 'backup') + ' rejected:',
+					errMsg
+				);
+				// Generated code ends here on 2026-03-31T22:30:00Z:
 				return false;
 			}
 			localStorage.setItem('lastCloudBackup', data.ts);
@@ -175,9 +179,12 @@ console.log(performance.now());
 			return true;
 		} catch (e) {
 			if (!silent) setStatus('backup failed: ' + e.message, '#ff8888');
-			// Generated code starts here on 2026-03-31T12:00:00Z:
-			else console.warn('[cloud-backup] silent auto-backup failed:', e.message);
-			// Generated code ends here on 2026-03-31T12:00:00Z:
+			// Generated code starts here on 2026-03-31T22:30:00Z:
+			console.warn(
+				'[cloud-backup] ' + (silent ? 'silent auto-backup' : 'backup') + ' failed:',
+				e.message || e
+			);
+			// Generated code ends here on 2026-03-31T22:30:00Z:
 			return false;
 		}
 	}
@@ -192,12 +199,19 @@ console.log(performance.now());
 			const r = await fetch(API, { headers: authHeaders() });
 			const data = await r.json();
 			if (!r.ok || !data.payload) {
-				setStatus('error: ' + (data.error || 'no backup found'), '#ff8888');
+				const errMsg = data.error || (r.ok ? 'no backup found' : r.status);
+				setStatus('error: ' + errMsg, '#ff8888');
+				// Generated code starts here on 2026-03-31T22:30:00Z:
+				console.warn('[cloud-backup] restore rejected:', errMsg);
+				// Generated code ends here on 2026-03-31T22:30:00Z:
 				return;
 			}
 			const result = decode(data.payload);
 			if (result.error) {
 				setStatus('restore error: ' + result.error, '#ff8888');
+				// Generated code starts here on 2026-03-31T22:30:00Z:
+				console.warn('[cloud-backup] restore decode error:', result.error);
+				// Generated code ends here on 2026-03-31T22:30:00Z:
 				return;
 			}
 			Object.keys(result.bundle).forEach((k) => localStorage.setItem(k, result.bundle[k]));
@@ -205,6 +219,9 @@ console.log(performance.now());
 			setTimeout(() => location.reload(), 600);
 		} catch (e) {
 			setStatus('restore failed: ' + e.message, '#ff8888');
+			// Generated code starts here on 2026-03-31T22:30:00Z:
+			console.warn('[cloud-backup] restore failed:', e.message || e);
+			// Generated code ends here on 2026-03-31T22:30:00Z:
 		}
 	}
 
@@ -217,7 +234,11 @@ console.log(performance.now());
 			const r = await fetch(API, { method: 'DELETE', headers: authHeaders() });
 			const data = await r.json();
 			if (!r.ok) {
-				setStatus('error: ' + (data.error || r.status), '#ff8888');
+				const errMsg = data.error || r.status;
+				setStatus('error: ' + errMsg, '#ff8888');
+				// Generated code starts here on 2026-03-31T22:30:00Z:
+				console.warn('[cloud-backup] delete rejected:', errMsg);
+				// Generated code ends here on 2026-03-31T22:30:00Z:
 				return;
 			}
 			localStorage.removeItem('lastCloudBackup');
@@ -225,6 +246,9 @@ console.log(performance.now());
 			setStatus('cloud backup deleted.', '#aaa');
 		} catch (e) {
 			setStatus('delete failed: ' + e.message, '#ff8888');
+			// Generated code starts here on 2026-03-31T22:30:00Z:
+			console.warn('[cloud-backup] delete failed:', e.message || e);
+			// Generated code ends here on 2026-03-31T22:30:00Z:
 		}
 	}
 
