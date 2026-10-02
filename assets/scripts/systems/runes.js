@@ -340,7 +340,8 @@
 	}
 
 	function exchangeBlocksToRunes(count) {
-		const cost = Math.ceil(count / 0.85);
+		// Block cost scales with getExchangeRate() to maintain the lossy 0.85 conversion ratio relative to rune value and prevent infinite block generation loops.
+		const cost = Math.ceil((count * getExchangeRate()) / 0.85);
 		if (blocks < cost) return;
 		blocks -= cost;
 		runesData.counts.common = (runesData.counts.common || 0) + count;
