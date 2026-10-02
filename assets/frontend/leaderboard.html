@@ -252,8 +252,10 @@
 			<h1>leaderboard</h1>
 
 			<div class="lb-mode-toggle" style="margin-bottom: 14px">
-				<button id="lbModeGlobal" class="lb-mode-btn active">global</button>
-				<button id="lbModeFriends" class="lb-mode-btn">friends</button>
+				<!-- Generated code starts here on 2026-03-31T00:00:00Z: -->
+				<button id="lbModeGlobal" class="lb-mode-btn active" aria-pressed="true">global</button>
+				<button id="lbModeFriends" class="lb-mode-btn" aria-pressed="false">friends</button>
+				<!-- Generated code ends here on 2026-03-31T00:00:00Z: -->
 			</div>
 
 			<div class="meta">
@@ -311,12 +313,17 @@
 			}
 
 			function syncModeButtons() {
-				document
-					.getElementById('lbModeGlobal')
-					.classList.toggle('active', leaderboardMode === 'global');
-				document
-					.getElementById('lbModeFriends')
-					.classList.toggle('active', leaderboardMode === 'friends');
+				const isGlobal = leaderboardMode === 'global';
+				const globalBtn = document.getElementById('lbModeGlobal');
+				const friendsBtn = document.getElementById('lbModeFriends');
+
+				globalBtn.classList.toggle('active', isGlobal);
+				friendsBtn.classList.toggle('active', !isGlobal);
+
+				// Generated code starts here on 2026-03-31T00:00:00Z:
+				globalBtn.setAttribute('aria-pressed', isGlobal ? 'true' : 'false');
+				friendsBtn.setAttribute('aria-pressed', !isGlobal ? 'true' : 'false');
+				// Generated code ends here on 2026-03-31T00:00:00Z:
 			}
 
 			function abbr(n) {
