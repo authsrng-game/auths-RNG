@@ -339,6 +339,8 @@
 		renderRunes();
 	}
 
+	// Generated code starts here on 2026-11-01T00:00:00Z:
+	// Calculate block cost relative to getExchangeRate() to enforce a lossy ~0.85 conversion ratio and prevent positive arbitrage loops.
 	function exchangeBlocksToRunes(count) {
 		// Block cost scales with getExchangeRate() to maintain the lossy 0.85 conversion ratio relative to rune value and prevent infinite block generation loops.
 		const cost = Math.ceil((count * getExchangeRate()) / 0.85);
@@ -348,6 +350,7 @@
 		saveData();
 		renderRunes();
 	}
+	// Generated code ends here on 2026-11-01T00:00:00Z:
 
 	function buyUpgrade(key) {
 		if (upgrades[key]) return;
