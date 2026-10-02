@@ -18,6 +18,7 @@
 	let particleInterval = null;
 	let particleRaf = null;
 	let devInterval = null;
+	let watchInterval = null;
 	let fpsRaf = null;
 	let visibilitySeasonListenerAdded = false;
 
@@ -421,6 +422,10 @@
 				clearInterval(devInterval);
 				devInterval = null;
 			}
+			if (watchInterval) {
+				clearInterval(watchInterval);
+				watchInterval = null;
+			}
 			if (fpsRaf) {
 				cancelAnimationFrame(fpsRaf);
 				fpsRaf = null;
@@ -818,7 +823,8 @@
 			if (e.key === 'Enter') document.getElementById('dc-watch-add')?.click();
 		});
 
-		setInterval(() => {
+		if (watchInterval) clearInterval(watchInterval);
+		watchInterval = setInterval(() => {
 			const watchTab = document.getElementById('dct-watch');
 			if (watchTab && watchTab.style.display !== 'none' && watchExprs.length) renderWatchList();
 		}, 500);
