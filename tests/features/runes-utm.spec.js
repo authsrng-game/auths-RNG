@@ -7,7 +7,10 @@ test.describe('Runes UTM Exchange', () => {
 		await page.goto('http://localhost:8080/');
 		await page.evaluate(() => {
 			localStorage.setItem('runesUnlocked', '1');
-			localStorage.setItem('runesData', JSON.stringify({ counts: { common: 100 }, totalDropped: 100 }));
+			localStorage.setItem(
+				'runesData',
+				JSON.stringify({ counts: { common: 100 }, totalDropped: 100 })
+			);
 			localStorage.setItem('runeBlocks', '0');
 			localStorage.setItem('runeUpgrades', JSON.stringify({ moreBlocks: true }));
 		});
@@ -25,6 +28,8 @@ test.describe('Runes UTM Exchange', () => {
 			document.querySelector('#blockToRuneInput').value = '100';
 			document.querySelector('#blockToRuneBtn')?.click();
 		});
-		expect(await page.evaluate(() => JSON.parse(localStorage.getItem('runesData')).counts.common)).toBe(0);
+		expect(
+			await page.evaluate(() => JSON.parse(localStorage.getItem('runesData')).counts.common)
+		).toBe(0);
 	});
 });
