@@ -24,8 +24,17 @@ export async function onRequest(context) {
 		return new Response(JSON.stringify({ error: 'invalid json' }), { status: 400, headers });
 	}
 
-	const { totalRolls, totalPlaytime, userId, shopPoints, points, mutationTrust, trust } =
-		body || {};
+	const {
+		totalRolls,
+		totalPlaytime,
+		userId,
+		shopPoints,
+		points,
+		mutationTrust,
+		trust,
+		anomalies,
+		anomaliesUsed,
+	} = body || {};
 	const rolls = parseInt(totalRolls, 10);
 	const playtime = parseInt(totalPlaytime || '0', 10);
 
@@ -98,6 +107,36 @@ export async function onRequest(context) {
 		}
 	}
 	// Generated code ends here on 2026-10-29T00:00:00Z:
+
+	// Generated code starts here on 2026-03-31T00:00:00Z:
+	const checkAnomalyVal = (val, fieldName) => {
+		if (val !== undefined) {
+			const num = Number(val);
+			// Max passive gain = ~100 anomalies/s; Double clover buffer = 50M; Starter buffer = 100M
+			const maxPossibleAnomalies = playtime * 100 + 100000000;
+			if (isNaN(num) || num < 0 || num > maxPossibleAnomalies) {
+				console.warn(
+					`[sync] rejected sync payload: ${fieldName} exceeds max physically possible gain`,
+					{
+						userId,
+						val: num,
+						rolls,
+						playtime,
+					}
+				);
+				return false;
+			}
+		}
+		return true;
+	};
+
+	if (!checkAnomalyVal(anomalies, 'anomalies') || !checkAnomalyVal(anomaliesUsed, 'anomaliesUsed')) {
+		return new Response(JSON.stringify({ error: 'implausible progress' }), {
+			status: 400,
+			headers,
+		});
+	}
+	// Generated code ends here on 2026-03-31T00:00:00Z:
 
 	return new Response(JSON.stringify({ ok: true }), { headers });
 }
