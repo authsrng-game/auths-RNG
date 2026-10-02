@@ -58,7 +58,9 @@ test.describe('Runes UTM conversion rate and arbitrage prevention', () => {
 			}
 		});
 
-		const newBlocks = await page.evaluate(() => parseFloat(localStorage.getItem('runeBlocks') || '0'));
+		const newBlocks = await page.evaluate(() =>
+			parseFloat(localStorage.getItem('runeBlocks') || '0')
+		);
 		const newRunes = await page.evaluate(() =>
 			JSON.parse(localStorage.getItem('runesData') || '{}')
 		);
