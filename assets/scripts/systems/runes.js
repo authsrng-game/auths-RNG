@@ -31,8 +31,9 @@
 	let dopamineAttackInterval = null;
 	let giftWealthInterval = null;
 	let linkAnimationActive = false;
+	let lastRuneWealthTick = 0;
+	let lastRuneAnomalyMachineTick = 0;
 
-	// Generated code starts here on 2026-09-22T00:00:00Z:
 	// In-memory cache for runes unlock state to avoid synchronous localStorage reads on every RNG roll in tryDropRune.
 	let _unlockedCache = null;
 
@@ -42,7 +43,6 @@
 		}
 		return _unlockedCache;
 	}
-	// Generated code ends here on 2026-09-22T00:00:00Z:
 
 	function loadData() {
 		_unlockedCache = localStorage.getItem(RUNES_KEY) === '1';
@@ -282,13 +282,23 @@
 	function startWealthGift() {
 		if (giftWealthInterval) clearInterval(giftWealthInterval);
 		if (gift !== 'wealth') return;
-		giftWealthInterval = setInterval(() => {
-			if (typeof points !== 'undefined' && typeof updatePointsDisplay === 'function') {
-				points += 200000;
+		lastRuneWealthTick = Date.now();
+		giftWealthInterval = setInterval(updateWealthGains, 1000);
+	}
+
+	function updateWealthGains() {
+		if (gift !== 'wealth') return;
+		if (typeof points !== 'undefined' && typeof updatePointsDisplay === 'function') {
+			const now = Date.now();
+			const elapsedMs = now - (lastRuneWealthTick || now);
+			const elapsedSeconds = Math.min(3600, Math.floor(elapsedMs / 1000));
+			if (elapsedSeconds > 0) {
+				lastRuneWealthTick = (lastRuneWealthTick || now) + elapsedSeconds * 1000;
+				points += 200000 * elapsedSeconds;
 				updatePointsDisplay();
 				if (typeof saveAllData === 'function') saveAllData();
 			}
-		}, 1000);
+		}
 	}
 
 	function getGiftLuckMultiplier() {
@@ -380,14 +390,33 @@
 
 	function startAnomalyMachine() {
 		if (anomalyMachineInterval) clearInterval(anomalyMachineInterval);
-		anomalyMachineInterval = setInterval(() => {
-			if (typeof anomalies !== 'undefined') {
-				anomalies += 50;
+		if (!upgrades.anomalyMachine) return;
+		lastRuneAnomalyMachineTick = Date.now();
+		anomalyMachineInterval = setInterval(updateAnomalyMachineGains, 2000);
+	}
+
+	function updateAnomalyMachineGains() {
+		if (!upgrades.anomalyMachine) return;
+		if (typeof anomalies !== 'undefined') {
+			const now = Date.now();
+			const elapsedMs = now - (lastRuneAnomalyMachineTick || now);
+			const elapsedIntervals = Math.min(1800, Math.floor(elapsedMs / 2000));
+			if (elapsedIntervals > 0) {
+				lastRuneAnomalyMachineTick =
+					(lastRuneAnomalyMachineTick || now) + elapsedIntervals * 2000;
+				anomalies += 50 * elapsedIntervals;
 				if (typeof updateAnomalyUI === 'function') updateAnomalyUI();
 				if (typeof saveAllData === 'function') saveAllData();
 			}
-		}, 2000);
+		}
 	}
+
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'visible') {
+			if (gift === 'wealth') updateWealthGains();
+			if (upgrades.anomalyMachine) updateAnomalyMachineGains();
+		}
+	});
 
 	function startDopamineAttack() {
 		if (dopamineAttackInterval) clearInterval(dopamineAttackInterval);
