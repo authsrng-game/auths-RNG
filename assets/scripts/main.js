@@ -476,11 +476,13 @@ function updateActivePotionsDisplay() {
 	if (!display || !list) return;
 
 	if (activePotions.length === 0 && duplicateRollsLeft === 0) {
-		display.style.display = 'none';
+		// Generated code starts here on 2026-10-28T00:00:00Z:
+		if (display.style.display !== 'none') display.style.display = 'none';
+		// Generated code ends here on 2026-10-28T00:00:00Z:
 		return;
 	}
 
-	display.style.display = 'block';
+	if (display.style.display !== 'block') display.style.display = 'block';
 	list.innerHTML = '';
 
 	activePotions.forEach((p) => {
@@ -683,10 +685,12 @@ function updatePlaytimeDisplay() {
 
 updatePlaytimeDisplay();
 
+// Generated code starts here on 2026-10-28T00:00:00Z:
+// Update playtime UI display every second without flushing to localStorage on every tick
 setInterval(() => {
-	flushPlaytime();
 	updatePlaytimeDisplay();
 }, 1000);
+// Generated code ends here on 2026-10-28T00:00:00Z:
 
 let isCutscenePlaying = false;
 
@@ -1003,6 +1007,9 @@ function updateAchievementsUI() {
 }
 
 function saveAllData() {
+	// Generated code starts here on 2026-10-28T00:00:00Z:
+	flushPlaytime();
+	// Generated code ends here on 2026-10-28T00:00:00Z:
 	const arr = Array.from(inventoryData.values()).map(({ rarityObj, count }) => ({
 		name: rarityObj.name,
 		chance: rarityObj.chance,
@@ -1689,7 +1696,12 @@ function renderSortedInventory(mode) {
 		items.sort((a, b) => a.rarityObj.name.localeCompare(b.rarityObj.name));
 	}
 
-	items.forEach((d) => inventoryList.appendChild(d.liElement));
+	// Generated code starts here on 2026-10-28T00:00:00Z:
+	// Batch DOM insertions with DocumentFragment to prevent N layout reflows
+	const fragment = document.createDocumentFragment();
+	items.forEach((d) => fragment.appendChild(d.liElement));
+	inventoryList.appendChild(fragment);
+	// Generated code ends here on 2026-10-28T00:00:00Z:
 	inventoryList.scrollTop = savedScroll;
 }
 
