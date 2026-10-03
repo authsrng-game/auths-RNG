@@ -508,4 +508,18 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(friendsBtn).toHaveAttribute('aria-pressed', 'false');
 	});
 	// Generated code ends here on 2026-03-31T22:00:00Z:
+
+	// Generated code starts here on 2026-03-31T23:00:00Z:
+	test('FAQ search input and result count container have accessible ARIA attributes', async ({
+		page,
+	}) => {
+		await page.goto(`${BASE_URL}/assets/frontend/FAQ.html`);
+
+		const searchInput = page.locator('#faq-search');
+		const searchCount = page.locator('#faq-search-count');
+
+		await expect(searchInput).toHaveAttribute('aria-label', 'Search FAQ');
+		await expect(searchCount).toHaveAttribute('aria-live', 'polite');
+	});
+	// Generated code ends here on 2026-03-31T23:00:00Z:
 });
