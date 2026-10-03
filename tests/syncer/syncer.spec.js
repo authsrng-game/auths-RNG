@@ -369,4 +369,33 @@ test.describe('Syncer state consistency tests', () => {
 		expect((await implausibleAnomaliesRes.json()).error).toBe('implausible progress');
 	});
 	// Generated code ends here on 2026-03-31T00:00:00Z:
+
+	// Generated code starts here on 2026-10-31T00:00:00Z:
+	test('starmap cosmetic and void unlock keys are removed on resetInventory', async ({ page }) => {
+		await page.goto(BASE_URL);
+		await page.evaluate(() => {
+			globalThis.localStorage.setItem('cosmeticUnlock_star_trail', '1');
+			globalThis.localStorage.setItem('voidUnlock_crystallized_unlock', '1');
+			globalThis.localStorage.setItem('voidUnlock_shattered_unlock', '1');
+		});
+		await page.evaluate(async () => {
+			globalThis.showConfirm = () => Promise.resolve(true);
+			globalThis.showAlert = () => Promise.resolve();
+			globalThis.location.reload = () => {};
+			const resetBtn = globalThis.document.getElementById('resetBtn');
+			if (resetBtn) resetBtn.click();
+		});
+		await page.waitForTimeout(500);
+		const result = await page.evaluate(() => {
+			return {
+				starTrail: globalThis.localStorage.getItem('cosmeticUnlock_star_trail'),
+				crystallized: globalThis.localStorage.getItem('voidUnlock_crystallized_unlock'),
+				shattered: globalThis.localStorage.getItem('voidUnlock_shattered_unlock'),
+			};
+		});
+		expect(result.starTrail).toBeNull();
+		expect(result.crystallized).toBeNull();
+		expect(result.shattered).toBeNull();
+	});
+	// Generated code ends here on 2026-10-31T00:00:00Z:
 });
