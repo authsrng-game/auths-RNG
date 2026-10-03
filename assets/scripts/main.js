@@ -1789,6 +1789,11 @@ async function resetInventory() {
 	localStorage.removeItem('mutationsUnlocked');
 	localStorage.removeItem('starmapData');
 	localStorage.removeItem('starmapUnlocked');
+	// Generated code starts here on 2026-10-31T00:00:00Z:
+	localStorage.removeItem('cosmeticUnlock_star_trail');
+	localStorage.removeItem('voidUnlock_crystallized_unlock');
+	localStorage.removeItem('voidUnlock_shattered_unlock');
+	// Generated code ends here on 2026-10-31T00:00:00Z:
 	localStorage.removeItem(NOTIF_KEY);
 	localStorage.removeItem(RARITY_TIMESTAMPS_KEY);
 	localStorage.removeItem('mutationTrust');
