@@ -6,6 +6,13 @@ This document is for contributors who want to test features without grinding for
 
 No! This isn't for finding bugs. this is mainly for testers who wanna get ahead and test their new features and other stuff out. Finding bugs and problems is handled with the automatic cleanups (smoke, lighthouse, ESLint, stylelint, HTMLHint) made by bots.
 
+## Running automated tests and linter
+
+To run automated checks locally before submitting a pull request:
+
+- **Lint code:** `pnpm exec eslint .` and `pnpm exec stylelint "**/*.css"`
+- **Run Playwright test suites:** Serve the repository locally (e.g., `python3 -m http.server 8080`) and run `pnpm exec playwright test --project=chromium`
+
 ## Quick start
 
 Open the game in your browser, open devtools (`F12`), go to the **console** tab, and paste whatever script you want!
