@@ -430,6 +430,11 @@
 				cancelAnimationFrame(fpsRaf);
 				fpsRaf = null;
 			}
+			// Generated code starts here on 2026-11-02T00:00:00Z:
+			if (typeof panel._stopPerfTab === 'function') {
+				panel._stopPerfTab();
+			}
+			// Generated code ends here on 2026-11-02T00:00:00Z:
 			return;
 		}
 
@@ -685,6 +690,16 @@
 		const perfSamples = { fps: [], rollMs: [] };
 		let perfTabActive = false;
 		let perfRAF = null;
+
+		// Generated code starts here on 2026-11-02T00:00:00Z:
+		panel._stopPerfTab = function () {
+			perfTabActive = false;
+			if (perfRAF) {
+				clearTimeout(perfRAF);
+				perfRAF = null;
+			}
+		};
+		// Generated code ends here on 2026-11-02T00:00:00Z:
 
 		window._perfMarkRollStart = function () {
 			window._rollPerfStart = performance.now();
