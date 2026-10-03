@@ -74,6 +74,7 @@ console.log(performance.now());
 		return token ? { Authorization: 'Bearer ' + token } : {};
 	}
 
+	// Generated code starts here on 2026-03-31T23:00:00Z:
 	async function submit(silent) {
 		if (!isEnabled() || !window.AuthAccount || !window.AuthAccount.isLoggedIn()) return false;
 		if (!silent) setStatus('submitting...', '');
@@ -85,18 +86,26 @@ console.log(performance.now());
 			});
 			const data = await r.json();
 			if (!r.ok) {
-				if (!silent) setStatus('error: ' + (data.error || r.status), '#ff8888');
-				else console.warn('[leaderboard] silent auto-submit rejected:', data.error || r.status);
+				const errMsg = data.error || r.status;
+				if (!silent) setStatus('error: ' + errMsg, '#ff8888');
+				console.warn(
+					'[leaderboard] ' + (silent ? 'silent auto-submit' : 'submit') + ' rejected:',
+					errMsg
+				);
 				return false;
 			}
 			if (!silent) setStatus('updated!', '#88dd88');
 			return true;
 		} catch (e) {
-			if (!silent) setStatus('failed: ' + e.message, '#ff8888');
-			else console.warn('[leaderboard] silent auto-submit failed:', e.message);
+			if (!silent) setStatus('failed: ' + (e?.message || e), '#ff8888');
+			console.warn(
+				'[leaderboard] ' + (silent ? 'silent auto-submit' : 'submit') + ' failed:',
+				e
+			);
 			return false;
 		}
 	}
+	// Generated code ends here on 2026-03-31T23:00:00Z:
 
 	// Generated code starts here on 2026-03-31T15:00:00Z:
 	async function deleteEntry() {
