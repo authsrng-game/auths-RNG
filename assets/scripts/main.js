@@ -1919,6 +1919,7 @@ function endLuckBoost() {
 	luckBoostActive = false;
 	luckBoostEndTime = 0;
 	recalcLuckMultiplier();
+	updateLuckDisplay();
 
 	const badge = document.getElementById('luckBoostBadge');
 	if (badge) badge.style.display = 'none';
@@ -2199,6 +2200,8 @@ document.addEventListener('visibilitychange', () => {
 	if (luckBoostActive) {
 		updateLuckTimer();
 	}
+
+	updateLuckDisplay();
 
 	if (isWellOnCooldown()) {
 		updateWellUI();
