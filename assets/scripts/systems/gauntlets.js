@@ -204,7 +204,7 @@ console.log(performance.now());
 			name: 'hard',
 			emoji: '🔴',
 			minRolls: 1500,
-			rarities: ['Eclipse', 'Wildfire', 'Despair', 'Paradox', 'Lunarity'],
+			rarities: ['Eclipse', 'Lunarity', 'Wildfire', 'Despair', 'Paradox'],
 			rewards: [
 				{ type: 'points', amount: 25000, label: '25,000 pts' },
 				{ type: 'anomaly', amount: 20, label: '20 anomalies' },
