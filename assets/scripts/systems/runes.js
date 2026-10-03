@@ -323,7 +323,9 @@
 	}
 
 	function exchangeBlocksToRunes(count) {
-		const cost = Math.ceil(count / 0.85);
+		// Generated code starts here on 2026-10-27T00:00:00Z:
+		const cost = Math.ceil((count * getExchangeRate()) / 0.85);
+		// Generated code ends here on 2026-10-27T00:00:00Z:
 		if (blocks < cost) return;
 		blocks -= cost;
 		runesData.counts.common = (runesData.counts.common || 0) + count;
