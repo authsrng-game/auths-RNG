@@ -165,6 +165,17 @@
 
 			<script>
 				(async () => {
+					// Generated code starts here on 2026-03-31T23:30:00Z:
+					function escHtml(s) {
+						return String(s || '')
+							.replace(/&/g, '&amp;')
+							.replace(/</g, '&lt;')
+							.replace(/>/g, '&gt;')
+							.replace(/"/g, '&quot;')
+							.replace(/'/g, '&#39;');
+					}
+					// Generated code ends here on 2026-03-31T23:30:00Z:
+
 					const res = await fetch(
 						'https://api.github.com/repos/authsrng-game/auths-RNG/contributors?per_page=100'
 					);
@@ -177,12 +188,15 @@
 						a.className = 'contributor';
 						a.href = u.html_url;
 						a.target = '_blank';
+						// Generated code starts here on 2026-03-31T23:30:00Z:
+						a.rel = 'noopener noreferrer';
 
 						a.innerHTML = `
-      <img src="${u.avatar_url}">
-      <span class="name">${u.login}</span>
-      <span class="count">${u.contributions}</span>
+      <img src="${escHtml(u.avatar_url)}" alt="${escHtml(u.login)}'s avatar">
+      <span class="name">${escHtml(u.login)}</span>
+      <span class="count">${escHtml(u.contributions)}</span>
     `;
+						// Generated code ends here on 2026-03-31T23:30:00Z:
 
 						root.appendChild(a);
 					});
