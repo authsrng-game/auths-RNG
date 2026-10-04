@@ -615,8 +615,17 @@
 	function initStarTrail() {
 		if (window._starTrailActive) return;
 		window._starTrailActive = true;
-		document.addEventListener('mousemove', (e) => {
-			if (!isStarTrailUnlocked()) return;
+		let lastTrailTime = 0;
+		// Generated code starts here on 2026-04-01T12:00:00Z:
+		function onStarTrailMouseMove(e) {
+			if (!isStarTrailUnlocked()) {
+				document.removeEventListener('mousemove', onStarTrailMouseMove);
+				window._starTrailActive = false;
+				return;
+			}
+			const now = Date.now();
+			if (now - lastTrailTime < 40) return;
+			lastTrailTime = now;
 			const dot = document.createElement('div');
 			dot.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;width:3px;height:3px;
         background:rgba(200,200,255,0.75);border-radius:50%;pointer-events:none;z-index:2147483640;
@@ -627,7 +636,9 @@
 				dot.style.transform = 'translate(-50%,-50%) scale(0)';
 			}, 30);
 			setTimeout(() => dot.remove(), 560);
-		});
+		}
+		document.addEventListener('mousemove', onStarTrailMouseMove);
+		// Generated code ends here on 2026-04-01T12:00:00Z:
 	}
 
 	function fmt(n) {
