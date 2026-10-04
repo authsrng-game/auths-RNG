@@ -1251,7 +1251,7 @@ function updatePrinterPoints() {
 		const elapsedSeconds = Math.min(3600, Math.floor(elapsedMs / 1000));
 
 		if (elapsedSeconds > 0) {
-			window._lastPrinterTick = (window._lastPrinterTick || now) + elapsedSeconds * 1000;
+			window._lastPrinterTick = now - (elapsedMs % 1000);
 			points += shopUpgrades.printer * elapsedSeconds;
 			updatePointsDisplay();
 
