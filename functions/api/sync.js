@@ -34,6 +34,7 @@ export async function onRequest(context) {
 		trust,
 		anomalies,
 		anomaliesUsed,
+		runeBlocks,
 	} = body || {};
 	const rolls = parseInt(totalRolls, 10);
 	const playtime = parseInt(totalPlaytime || '0', 10);
@@ -140,6 +141,29 @@ export async function onRequest(context) {
 		});
 	}
 	// Generated code ends here on 2026-03-31T00:00:00Z:
+
+	// Generated code starts here on 2026-03-31T23:30:00Z:
+	if (runeBlocks !== undefined) {
+		const blocks = parseInt(runeBlocks, 10);
+		// Max block rate = 10 blocks/roll; Starter buffer = 100,000
+		const maxPossibleRuneBlocks = maxPossibleRolls * 10 + 100000;
+		if (isNaN(blocks) || blocks < 0 || blocks > maxPossibleRuneBlocks) {
+			console.warn(
+				'[sync] rejected sync payload: runeBlocks exceeds max physically possible gain',
+				{
+					userId,
+					blocks,
+					rolls,
+					playtime,
+				}
+			);
+			return new Response(JSON.stringify({ error: 'implausible progress' }), {
+				status: 400,
+				headers,
+			});
+		}
+	}
+	// Generated code ends here on 2026-03-31T23:30:00Z:
 
 	return new Response(JSON.stringify({ ok: true }), { headers });
 }

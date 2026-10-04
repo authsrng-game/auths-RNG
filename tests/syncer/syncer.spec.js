@@ -369,4 +369,59 @@ test.describe('Syncer state consistency tests', () => {
 		expect((await implausibleAnomaliesRes.json()).error).toBe('implausible progress');
 	});
 	// Generated code ends here on 2026-03-31T00:00:00Z:
+
+	// Generated code starts here on 2026-03-31T23:30:00Z:
+	test('server sync endpoint validates runeBlocks plausibility', async () => {
+		const { onRequest } = await import('../../functions/api/sync.js');
+
+		const makeReq = (body) => ({
+			method: 'POST',
+			url: 'https://example.com/api/sync',
+			json: async () => body,
+		});
+
+		const validRes = await onRequest({
+			request: makeReq({
+				totalRolls: 10,
+				totalPlaytime: 100,
+				runeBlocks: 500,
+				userId: 'u16',
+			}),
+		});
+		expect(validRes.status).toBe(200);
+
+		const negativeRes = await onRequest({
+			request: makeReq({
+				totalRolls: 10,
+				totalPlaytime: 100,
+				runeBlocks: -10,
+				userId: 'u17',
+			}),
+		});
+		expect(negativeRes.status).toBe(400);
+		expect((await negativeRes.json()).error).toBe('implausible progress');
+
+		const nonNumericRes = await onRequest({
+			request: makeReq({
+				totalRolls: 10,
+				totalPlaytime: 100,
+				runeBlocks: 'invalid',
+				userId: 'u18',
+			}),
+		});
+		expect(nonNumericRes.status).toBe(400);
+		expect((await nonNumericRes.json()).error).toBe('implausible progress');
+
+		const implausibleRes = await onRequest({
+			request: makeReq({
+				totalRolls: 10,
+				totalPlaytime: 100,
+				runeBlocks: 999999999,
+				userId: 'u19',
+			}),
+		});
+		expect(implausibleRes.status).toBe(400);
+		expect((await implausibleRes.json()).error).toBe('implausible progress');
+	});
+	// Generated code ends here on 2026-03-31T23:30:00Z:
 });
