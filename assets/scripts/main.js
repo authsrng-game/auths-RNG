@@ -1814,6 +1814,14 @@ async function resetInventory() {
 	localStorage.removeItem('catShrineToggle');
 	localStorage.removeItem('infoTipsRead');
 	// Generated code ends here on 2026-03-29T12:00:00Z:
+	// Generated code starts here on 2026-10-27T00:00:00Z:
+	for (let i = localStorage.length - 1; i >= 0; i--) {
+		const key = localStorage.key(i);
+		if (key && (key.startsWith('voidUnlock_') || key.startsWith('cosmeticUnlock_'))) {
+			localStorage.removeItem(key);
+		}
+	}
+	// Generated code ends here on 2026-10-27T00:00:00Z:
 	rarityTimestamps = new Map();
 	window.rarityTimestamps = rarityTimestamps;
 	notifications = [];
