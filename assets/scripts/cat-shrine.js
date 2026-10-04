@@ -189,6 +189,9 @@
 			await addCat(url);
 			await refreshGrid();
 		} catch (e) {
+			// Generated code starts here on 2026-03-31T23:00:00Z:
+			console.warn('[cat-shrine] failed to summon cat:', e ? e.message || e : 'unknown error');
+			// Generated code ends here on 2026-03-31T23:00:00Z:
 			window.showAlert('the shrine failed to summon a cat.. try again?');
 		} finally {
 			if (btn) btn.disabled = false;
