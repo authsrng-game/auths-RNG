@@ -475,7 +475,8 @@ let _activePotionsDisplayEl = null;
 let _activePotionsListEl = null;
 
 function updateActivePotionsDisplay() {
-	if (!_activePotionsDisplayEl) _activePotionsDisplayEl = document.getElementById('activePotionsDisplay');
+	if (!_activePotionsDisplayEl)
+		_activePotionsDisplayEl = document.getElementById('activePotionsDisplay');
 	if (!_activePotionsListEl) _activePotionsListEl = document.getElementById('activePotionsList');
 
 	if (!_activePotionsDisplayEl || !_activePotionsListEl) return;
