@@ -384,17 +384,6 @@
 	};
 	// Generated code ends here on 2026-09-25T12:46:00Z:
 
-	function tryInit(n) {
-		if (!isUnlocked()) return;
-		if (
-			typeof inventoryData !== 'undefined' &&
-			inventoryData instanceof Map &&
-			inventoryData.size > 0
-		)
-			renderMutations();
-		else if (n > 0) setTimeout(() => tryInit(n - 1), 200);
-	}
-
 	// Generated code starts here on 2026-10-24T00:00:00Z:
 	loadHistory();
 	// Generated code ends here on 2026-10-24T00:00:00Z:
