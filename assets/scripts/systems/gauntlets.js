@@ -460,6 +460,19 @@ console.log(performance.now());
 	function isLocked(t) {
 		return (typeof totalRolls !== 'undefined' ? totalRolls : 0) < t.minRolls;
 	}
+
+	/**
+	 * Evaluates whether a gauntlet tier's completion requirements are currently met.
+	 *
+	 * For initial claims (no tier state), checks if all required rarities exist in inventory.
+	 * For subsequent re-claims, requires that every required rarity was freshly obtained
+	 * AFTER the tier's `lastClaimTime` using `window.rarityTimestamps` to prevent re-claiming
+	 * with pre-existing inventory items.
+	 *
+	 * @param {Object} t - Gauntlet tier configuration object.
+	 * @param {Object} d - Persisted gauntlet state data from localStorage.
+	 * @returns {boolean} True if all tier rarities are satisfied for the current claim cycle.
+	 */
 	function isComplete(t, d) {
 		if (typeof inventoryData === 'undefined') return false;
 
