@@ -378,7 +378,9 @@ Last release date on nightly: ${nightlyRDate}`;
 		<!-- BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~ -->
 
 		<div class="site-header lazy">
-			<div class="header-chip">update 9.71-hf</div>
+			<div class="header-chip" role="button" tabindex="0" aria-label="view changelog">
+				update 9.71-hf
+			</div>
 			<h1>welcome to auth's RNG!</h1>
 			<style>
 				.header-chip {
@@ -2584,30 +2586,57 @@ Last release date on nightly: ${nightlyRDate}`;
 		</div>
 
 		<script>
-			(async () => {
+			(() => {
 				const SEEN_KEY = 'seenReleaseTag';
-				try {
-					const res = await fetch(
-						'https://api.github.com/repos/authsrng-game/auths-RNG/releases/latest'
-					);
-					if (!res.ok) return;
-					const data = await res.json();
-					const tag = data.tag_name;
-					if (!tag || localStorage.getItem(SEEN_KEY) === tag) return;
+				const popup = document.getElementById('updatePopup');
+				let release = null;
 
-					document.getElementById('updatePopupTag').textContent = tag;
-					document.getElementById('updatePopupDate').textContent = new Date(
-						data.published_at
-					).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-					document.getElementById('updatePopupBody').textContent =
-						data.body || '(no release notes)';
-					document.getElementById('updatePopup').classList.remove('hidden');
+				async function loadRelease() {
+					if (release) return release;
+					try {
+						const res = await fetch(
+							'https://api.github.com/repos/authsrng-game/auths-RNG/releases/latest'
+						);
+						if (!res.ok) return null;
+						const data = await res.json();
+						if (!data.tag_name) return null;
 
-					document.getElementById('updatePopupClose').addEventListener('click', () => {
-						localStorage.setItem(SEEN_KEY, tag);
-						document.getElementById('updatePopup').classList.add('hidden');
+						document.getElementById('updatePopupTag').textContent = data.tag_name;
+						document.getElementById('updatePopupDate').textContent = new Date(
+							data.published_at
+						).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+						document.getElementById('updatePopupBody').textContent =
+							data.body || '(no release notes)';
+						release = data;
+					} catch (e) {}
+					return release;
+				}
+
+				async function showUpdatePopup() {
+					if (await loadRelease()) popup.classList.remove('hidden');
+				}
+
+				document.getElementById('updatePopupClose').addEventListener('click', () => {
+					if (release) localStorage.setItem(SEEN_KEY, release.tag_name);
+					popup.classList.add('hidden');
+				});
+
+				const chip = document.querySelector('.header-chip');
+				if (chip) {
+					chip.addEventListener('click', showUpdatePopup);
+					chip.addEventListener('keydown', (e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							showUpdatePopup();
+						}
 					});
-				} catch (e) {}
+				}
+
+				loadRelease().then((data) => {
+					if (data && localStorage.getItem(SEEN_KEY) !== data.tag_name) {
+						popup.classList.remove('hidden');
+					}
+				});
 			})();
 		</script>
 
