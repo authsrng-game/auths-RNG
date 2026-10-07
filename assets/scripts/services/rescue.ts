@@ -28,7 +28,6 @@
 	let lastTick = performance.now();
 	let level = 0;
 	let escalateTimer: ReturnType<typeof setTimeout> | null = null;
-	let rafHandle: number | null = null;
 
 	function resetClock(): void {
 		lastTick = performance.now();
@@ -148,10 +147,10 @@
 		if (!document.hidden && level < 3 && delta > STALL_MS) {
 			onStall(delta);
 		}
-		rafHandle = requestAnimationFrame(loop);
+		requestAnimationFrame(loop);
 	}
 
-	rafHandle = requestAnimationFrame(loop);
+	requestAnimationFrame(loop);
 
 	function showRescueWarning(): void {
 		const div = document.createElement('div');

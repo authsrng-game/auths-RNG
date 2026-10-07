@@ -12,7 +12,6 @@
 	let lastTick = performance.now();
 	let level = 0;
 	let escalateTimer = null;
-	let rafHandle = null;
 	function resetClock() {
 		lastTick = performance.now();
 	}
@@ -124,9 +123,9 @@
 		if (!document.hidden && level < 3 && delta > STALL_MS) {
 			onStall(delta);
 		}
-		rafHandle = requestAnimationFrame(loop);
+		requestAnimationFrame(loop);
 	}
-	rafHandle = requestAnimationFrame(loop);
+	requestAnimationFrame(loop);
 	function showRescueWarning() {
 		const div = document.createElement('div');
 		div.id = 'rescueWarningOverlay';
