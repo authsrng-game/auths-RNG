@@ -65,4 +65,35 @@ test.describe('Syncer state consistency tests', () => {
 		expect(containsKeyInSource).toBe(true);
 	});
 	// Generated code ends here on 2026-03-31T21:00:00Z:
+
+	// Generated code starts here on 2026-10-27T00:00:00Z:
+	test('resetInventory removes voidUnlock_ and cosmeticUnlock_ keys from localStorage', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+		await page.evaluate(() => {
+			globalThis.localStorage.setItem('voidUnlock_crystallized_unlock', '1');
+			globalThis.localStorage.setItem('voidUnlock_shattered_unlock', '1');
+			globalThis.localStorage.setItem('cosmeticUnlock_star_trail', '1');
+		});
+		await page.evaluate(async () => {
+			globalThis.showConfirm = () => Promise.resolve(true);
+			globalThis.showAlert = () => Promise.resolve();
+			globalThis.location.reload = () => {};
+			const resetBtn = globalThis.document.getElementById('resetBtn');
+			if (resetBtn) resetBtn.click();
+		});
+		await page.waitForTimeout(500);
+		const keys = await page.evaluate(() => {
+			return {
+				cryst: globalThis.localStorage.getItem('voidUnlock_crystallized_unlock'),
+				shatt: globalThis.localStorage.getItem('voidUnlock_shattered_unlock'),
+				trail: globalThis.localStorage.getItem('cosmeticUnlock_star_trail'),
+			};
+		});
+		expect(keys.cryst).toBeNull();
+		expect(keys.shatt).toBeNull();
+		expect(keys.trail).toBeNull();
+	});
+	// Generated code ends here on 2026-10-27T00:00:00Z:
 });
