@@ -196,6 +196,21 @@ test.describe('auths-RNG smoke tests', () => {
 	});
 	// Generated code starts here on 2026-09-20T15:30:00Z:
 	test('credits page license link resolves to valid licenseview page', async ({ page }) => {
+		await page.route('https://api.github.com/repos/authsrng-game/auths-RNG/contributors*', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify([
+					{
+						login: 'testuser',
+						avatar_url: 'https://avatars.githubusercontent.com/u/123?v=4',
+						html_url: 'https://github.com/testuser',
+						contributions: 42,
+					},
+				]),
+			})
+		);
+
 		await page.goto(`${BASE_URL}/assets/frontend/credits.html`);
 		const link = page.locator('a:has-text("MIT licensed")');
 		await expect(link).toBeAttached();
@@ -203,6 +218,10 @@ test.describe('auths-RNG smoke tests', () => {
 		const targetUrl = new URL(href, `${BASE_URL}/assets/frontend/credits.html`).href;
 		const res = await page.goto(targetUrl);
 		expect(res.status()).toBe(200);
+
+		const contributor = page.locator('.contributor').first();
+		await expect(contributor).toHaveAttribute('rel', 'noopener noreferrer');
+		await expect(contributor.locator('img')).toHaveAttribute('alt', "testuser's avatar");
 	});
 	// Generated code ends here on 2026-09-20T15:30:00Z:
 
@@ -523,31 +542,4 @@ test.describe('auths-RNG smoke tests', () => {
 	});
 	// Generated code ends here on 2026-03-31T23:00:00Z:
 
-	// Generated code starts here on 2026-03-31T23:30:00Z:
-	test('credits contributor links and avatars have rel="noopener noreferrer" and accessible alt text', async ({
-		page,
-	}) => {
-		await page.route('https://api.github.com/repos/authsrng-game/auths-RNG/contributors*', (route) =>
-			route.fulfill({
-				status: 200,
-				contentType: 'application/json',
-				body: JSON.stringify([
-					{
-						login: 'testuser',
-						avatar_url: 'https://avatars.githubusercontent.com/u/123?v=4',
-						html_url: 'https://github.com/testuser',
-						contributions: 42,
-					},
-				]),
-			})
-		);
-
-		await page.goto(`${BASE_URL}/assets/frontend/credits.html`);
-		const contributor = page.locator('.contributor').first();
-		await expect(contributor).toHaveAttribute('rel', 'noopener noreferrer');
-
-		const avatar = contributor.locator('img');
-		await expect(avatar).toHaveAttribute('alt', "testuser's avatar");
-	});
-	// Generated code ends here on 2026-03-31T23:30:00Z:
 });
