@@ -1,4 +1,17 @@
 // Generated code starts here on 2026-10-27T00:00:00Z:
+/**
+ * Cloudflare Pages Function endpoint handler for validating client save synchronization state (`POST /api/sync`).
+ *
+ * Enforces physical game economy upper bounds derived from playtime and roll mechanics to reject manipulated
+ * or implausible progress payloads upstream before sync ingestion:
+ * - `totalRolls`: Capped at max 4 rolls/sec (250ms minimum roll cooldown) plus a 4,000-roll expedition burst buffer.
+ * - `shopPoints`: Capped by maximum possible rarity sales (Summer dupe x2 @ 2e15), max printer rate (1e9 pts/s), and a 1e15 starter buffer.
+ * - `mutationTrust`: Capped by max trust gain rate (16 trust / 15s cooldown ~1.07/s) and a 1,000 starter buffer.
+ * - `anomalies` / `anomaliesUsed`: Capped by max passive gain (~100/s) plus double clover (50M) and starter (100M) buffers.
+ *
+ * @param {import('@cloudflare/workers-types').EventContext<unknown, string, unknown>} context - Cloudflare Pages event context.
+ * @returns {Promise<Response>} JSON response indicating `{ ok: true }` or a 400/405 error object.
+ */
 export async function onRequest(context) {
 	const { request } = context;
 	const headers = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
