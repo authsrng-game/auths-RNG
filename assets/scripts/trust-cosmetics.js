@@ -188,38 +188,64 @@
 	let autoMutateInterval = null;
 
 	// Generated code starts here on 2026-09-25T12:46:00Z:
+	window._lastAutoMutateTick = Date.now();
+
+	function performAutoMutate() {
+		const ms = window.MutationSystem;
+		if (!ms || typeof ms.getInventoryRarities !== 'function') return false;
+		const inv = ms.getInventoryRarities();
+		if (!inv || inv.length < 2) return false;
+		const shuffle = [...inv].sort(
+			() => (typeof Beacon !== 'undefined' ? Beacon.float() : Math.random()) - 0.5
+		);
+		const a = shuffle[0];
+		const b = shuffle[1];
+		if (a.name === b.name) return false;
+		const result = ms.mutate(a.name, b.name);
+		if (!result) return false;
+		const idxA = ms.getRarityIndex(a.name);
+		const idxB = ms.getRarityIndex(b.name);
+		const resultIdx = ms.getRarityIndex(result.name);
+		const wasGood = resultIdx < Math.min(idxA, idxB);
+		const trustDelta = ms.getTrustDelta(wasGood, resultIdx, idxA, idxB);
+		ms.addTrust(trustDelta);
+		ms.addToHistory(a.name, b.name, result, wasGood);
+		ms.renderHistory();
+		ms.renderTrustBalance();
+		if (typeof addToInventory === 'function') addToInventory(result);
+		if (typeof saveAllData === 'function') saveAllData();
+		return true;
+	}
+
+	function updateAutoMutate() {
+		if (!getOwned().includes('upgrade_automutate')) return;
+		const now = Date.now();
+		const elapsedMs = now - (window._lastAutoMutateTick || now);
+		const elapsedTicks = Math.floor(elapsedMs / 20000);
+		if (elapsedTicks > 0) {
+			const cappedTicks = Math.min(180, elapsedTicks);
+			window._lastAutoMutateTick = (window._lastAutoMutateTick || now) + cappedTicks * 20000;
+			for (let i = 0; i < cappedTicks; i++) {
+				if (!performAutoMutate()) break;
+			}
+		}
+	}
+
 	function startAutoMutate() {
 		if (autoMutateInterval) {
 			clearInterval(autoMutateInterval);
 			autoMutateInterval = null;
 		}
 		if (!getOwned().includes('upgrade_automutate')) return;
-		autoMutateInterval = setInterval(() => {
-			const ms = window.MutationSystem;
-			if (!ms || typeof ms.getInventoryRarities !== 'function') return;
-			const inv = ms.getInventoryRarities();
-			if (!inv || inv.length < 2) return;
-			const shuffle = [...inv].sort(
-				() => (typeof Beacon !== 'undefined' ? Beacon.float() : Math.random()) - 0.5
-			);
-			const a = shuffle[0];
-			const b = shuffle[1];
-			if (a.name === b.name) return;
-			const result = ms.mutate(a.name, b.name);
-			if (!result) return;
-			const idxA = ms.getRarityIndex(a.name);
-			const idxB = ms.getRarityIndex(b.name);
-			const resultIdx = ms.getRarityIndex(result.name);
-			const wasGood = resultIdx < Math.min(idxA, idxB);
-			const trustDelta = ms.getTrustDelta(wasGood, resultIdx, idxA, idxB);
-			ms.addTrust(trustDelta);
-			ms.addToHistory(a.name, b.name, result, wasGood);
-			ms.renderHistory();
-			ms.renderTrustBalance();
-			if (typeof addToInventory === 'function') addToInventory(result);
-			if (typeof saveAllData === 'function') saveAllData();
-		}, 20000);
+		window._lastAutoMutateTick = Date.now();
+		autoMutateInterval = setInterval(updateAutoMutate, 20000);
 	}
+
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'visible') {
+			updateAutoMutate();
+		}
+	});
 	// Generated code ends here on 2026-09-25T12:46:00Z:
 
 	function initTrail(id) {

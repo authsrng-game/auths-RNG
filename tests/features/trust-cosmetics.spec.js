@@ -117,5 +117,28 @@ test.describe('Trust Cosmetics System', () => {
 
 		expect(result).toBe(true);
 	});
+
+	test('reconciles auto-mutate timing on visibilitychange when tab was backgrounded', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(() => {
+			localStorage.setItem('mutationTrustOwned', JSON.stringify(['upgrade_automutate']));
+			window.trustCosmetics.startAutoMutate();
+
+			// Fast-forward _lastAutoMutateTick into past (e.g. 60 seconds ago for 3 ticks)
+			window._lastAutoMutateTick = Date.now() - 60000;
+
+			// Dispatch visibilitychange to visible
+			document.dispatchEvent(new globalThis.Event('visibilitychange'));
+
+			return {
+				lastTickDiff: Date.now() - window._lastAutoMutateTick,
+			};
+		});
+
+		expect(result.lastTickDiff).toBeLessThan(5000);
+	});
 });
 // Generated code ends here on 2026-03-31T00:00:00Z:
