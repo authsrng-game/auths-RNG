@@ -32,10 +32,19 @@ test.describe('Expeditions system lifecycle logic', () => {
 	test('renderExpeditions resolves expired expedition and sets cooldown', async ({ page }) => {
 		const res = await page.evaluate(() => {
 			const initialRolls = totalRolls;
-			localStorage.setItem('expeditionData', JSON.stringify({
-				active: { lengthId: 'short', startTime: Date.now() - 360000, duration: 300000, riskMode: false, lockedLuck: 1 },
-				cooldownUntil: 0
-			}));
+			localStorage.setItem(
+				'expeditionData',
+				JSON.stringify({
+					active: {
+						lengthId: 'short',
+						startTime: Date.now() - 360000,
+						duration: 300000,
+						riskMode: false,
+						lockedLuck: 1,
+					},
+					cooldownUntil: 0,
+				})
+			);
 			globalThis.reloadExpeditionsCache?.();
 			renderExpeditions();
 			const d = JSON.parse(localStorage.getItem('expeditionData') || '{}');
