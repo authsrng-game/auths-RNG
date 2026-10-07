@@ -469,47 +469,109 @@ function recalcPotionLuck() {
 	recalcLuckMultiplier();
 }
 
-function updateActivePotionsDisplay() {
-	const display = document.getElementById('activePotionsDisplay');
-	const list = document.getElementById('activePotionsList');
+// Generated code starts here on 2026-11-02T00:00:00Z:
+// Lazily cache DOM elements and update textContent on active potion list items in-place to prevent DOM churn and redundant style setter calls on periodic timer ticks.
+let _activePotionsDisplayEl = null;
+let _activePotionsListEl = null;
 
-	if (!display || !list) return;
+function updateActivePotionsDisplay() {
+	if (!_activePotionsDisplayEl) _activePotionsDisplayEl = document.getElementById('activePotionsDisplay');
+	if (!_activePotionsListEl) _activePotionsListEl = document.getElementById('activePotionsList');
+
+	if (!_activePotionsDisplayEl || !_activePotionsListEl) return;
 
 	if (activePotions.length === 0 && duplicateRollsLeft === 0) {
-		display.style.display = 'none';
+		if (_activePotionsDisplayEl.style.display !== 'none') {
+			_activePotionsDisplayEl.style.display = 'none';
+		}
 		return;
 	}
 
-	display.style.display = 'block';
-	list.innerHTML = '';
+	if (_activePotionsDisplayEl.style.display !== 'block') {
+		_activePotionsDisplayEl.style.display = 'block';
+	}
+
+	const totalItems = activePotions.length + (duplicateRollsLeft > 0 ? 1 : 0);
+	const children = _activePotionsListEl.children;
+
+	// In-place update if element count matches
+	if (children.length === totalItems) {
+		for (let i = 0; i < activePotions.length; i++) {
+			const p = activePotions[i];
+			const data = potionData[p.type];
+			const timeLeft = Math.ceil((p.endTime - Date.now()) / 1000);
+			const emoji = data?.emoji || '🏆';
+			const mult = p.multiplier ?? data?.mult ?? 1;
+			const nameStr = `${emoji} ${mult}x luck`;
+			const timerStr = `${timeLeft}s remaining`;
+
+			const div = children[i];
+			const nameEl = div.children[0];
+			const timerEl = div.children[1];
+
+			if (nameEl && nameEl.textContent !== nameStr) nameEl.textContent = nameStr;
+			if (timerEl && timerEl.textContent !== timerStr) timerEl.textContent = timerStr;
+		}
+
+		if (duplicateRollsLeft > 0) {
+			const div = children[activePotions.length];
+			const nameEl = div.children[0];
+			const timerEl = div.children[1];
+			const nameStr = '🎭 duplicate';
+			const timerStr = `${duplicateRollsLeft} rolls left`;
+
+			if (nameEl && nameEl.textContent !== nameStr) nameEl.textContent = nameStr;
+			if (timerEl && timerEl.textContent !== timerStr) timerEl.textContent = timerStr;
+		}
+		return;
+	}
+
+	// Structural change: rebuild list using DocumentFragment
+	_activePotionsListEl.innerHTML = '';
+	const fragment = document.createDocumentFragment();
 
 	activePotions.forEach((p) => {
 		const data = potionData[p.type];
 		const timeLeft = Math.ceil((p.endTime - Date.now()) / 1000);
-		// Generated code starts here on 2026-09-21T12:55:00Z:
 		const emoji = data?.emoji || '🏆';
 		const mult = p.multiplier ?? data?.mult ?? 1;
-		// Generated code ends here on 2026-09-21T12:55:00Z:
 
 		const div = document.createElement('div');
 		div.className = 'active-potion';
-		div.innerHTML = `
-      <div class="active-potion-name">${emoji} ${mult}x luck</div>
-      <div class="active-potion-timer">${timeLeft}s remaining</div>
-    `;
-		list.appendChild(div);
+
+		const nameDiv = document.createElement('div');
+		nameDiv.className = 'active-potion-name';
+		nameDiv.textContent = `${emoji} ${mult}x luck`;
+
+		const timerDiv = document.createElement('div');
+		timerDiv.className = 'active-potion-timer';
+		timerDiv.textContent = `${timeLeft}s remaining`;
+
+		div.appendChild(nameDiv);
+		div.appendChild(timerDiv);
+		fragment.appendChild(div);
 	});
 
 	if (duplicateRollsLeft > 0) {
 		const div = document.createElement('div');
 		div.className = 'active-potion';
-		div.innerHTML = `
-      <div class="active-potion-name">🎭 duplicate</div>
-      <div class="active-potion-timer">${duplicateRollsLeft} rolls left</div>
-    `;
-		list.appendChild(div);
+
+		const nameDiv = document.createElement('div');
+		nameDiv.className = 'active-potion-name';
+		nameDiv.textContent = '🎭 duplicate';
+
+		const timerDiv = document.createElement('div');
+		timerDiv.className = 'active-potion-timer';
+		timerDiv.textContent = `${duplicateRollsLeft} rolls left`;
+
+		div.appendChild(nameDiv);
+		div.appendChild(timerDiv);
+		fragment.appendChild(div);
 	}
+
+	_activePotionsListEl.appendChild(fragment);
 }
+// Generated code ends here on 2026-11-02T00:00:00Z:
 
 // Update potion timers
 setInterval(() => {
