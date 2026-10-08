@@ -201,11 +201,11 @@
       <div id="giftOptions" style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
         <button class="gift-opt" data-gift="luck" style="background:var(--button-bg);border:1px solid var(--border-color);color:var(--text-color);padding:16px;font-family:monospace;font-size:0.95em;border-radius:2px;cursor:pointer;">
           <div style="font-size:1.1em;margin-bottom:4px;">⚡ gift of luck</div>
-          <div style="font-size:0.75em;opacity:0.6;">2x your existing luck multiplier — permanently</div>
+          <div style="font-size:0.75em;opacity:0.6;">2x your existing luck multiplier - permanently</div>
         </button>
         <button class="gift-opt" data-gift="wealth" style="background:var(--button-bg);border:1px solid var(--border-color);color:var(--text-color);padding:16px;font-family:monospace;font-size:0.95em;border-radius:2px;cursor:pointer;">
           <div style="font-size:1.1em;margin-bottom:4px;">💰 gift of wealth</div>
-          <div style="font-size:0.75em;opacity:0.6;">200,000 points per second — permanently</div>
+          <div style="font-size:0.75em;opacity:0.6;">200,000 points per second - permanently</div>
         </button>
       </div>
       <div id="giftConfirmArea" style="display:none;">
@@ -559,11 +559,11 @@
             </div>`;
 					}).join('')}
         </div>
-        ${allElementsCollected && !gift ? '<div style="font-size:0.8em;opacity:0.6;text-align:center;margin-bottom:16px;">all elements collected — gift already granted</div>' : ''}
+        ${allElementsCollected && !gift ? '<div style="font-size:0.8em;opacity:0.6;text-align:center;margin-bottom:16px;">all elements collected - gift already granted</div>' : ''}
 
-        <div class="rune-section-label">blocks — ${formatBlocks(Math.floor(blocks))}</div>
+        <div class="rune-section-label">blocks - ${formatBlocks(Math.floor(blocks))}</div>
         <div class="rune-utm-panel">
-          <div style="font-size:0.8em;opacity:0.5;margin-bottom:12px;">UTM — universal transaction machine</div>
+          <div style="font-size:0.8em;opacity:0.5;margin-bottom:12px;">UTM - universal transaction machine</div>
           <div class="rune-utm-row">
             <div style="flex:1;">
               <div style="font-size:0.75em;opacity:0.6;margin-bottom:4px;">runes → blocks (rate: 1 = ${exchangeRate})</div>

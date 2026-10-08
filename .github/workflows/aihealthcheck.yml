@@ -73,12 +73,12 @@ jobs:
 
           Then, below the summary list, add a "--" separator, then go commit by commit. For each commit that has at least one issue, use this structure:
 
-          --- Commit: <short hash> — <commit subject line> ---
+          --- Commit: <short hash> - <commit subject line> ---
 
           Then for each issue found in that commit, show:
-          1. A short code excerpt (3-8 lines) from the diff giving context for the issue — copy it exactly as it appears in the diff, prefixed with "> " per line like a patch quote.
+          1. A short code excerpt (3-8 lines) from the diff giving context for the issue - copy it exactly as it appears in the diff, prefixed with "> " per line like a patch quote.
           2. Immediately below the excerpt, a line: [Severity: X]
-          3. Then 1-3 sentences phrased as a probing question, in the same tone as a thoughtful reviewer asking the author to double check their own logic — e.g. "Does this cause X because Y?" or "Is it safe to assume Z here?" rather than flatly stating the bug. Be specific: name the variable, function, or line behavior in question.
+          3. Then 1-3 sentences phrased as a probing question, in the same tone as a thoughtful reviewer asking the author to double check their own logic - e.g. "Does this cause X because Y?" or "Is it safe to assume Z here?" rather than flatly stating the bug. Be specific: name the variable, function, or line behavior in question.
 
           Use "[ ... ]" on its own line to skip over irrelevant parts of a commit's diff between excerpts.
 
@@ -88,7 +88,7 @@ jobs:
           - If a commit has no real issues, omit it from the per-commit section entirely (it just won't appear).
           - If there are zero issues across all commits, output only: "AI review found no significant issues this week." and stop there.
           - Do not invent line numbers or hashes that are not present in the diff. Use the commit hash exactly as given.
-          - Keep excerpts short — just enough to give context for the question, not the whole function.
+          - Keep excerpts short - just enough to give context for the question, not the whole function.
 
           Here is the diff to review:
           PROMPT_EOF

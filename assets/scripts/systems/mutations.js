@@ -155,12 +155,12 @@
 		return rarities.findIndex((r) => r.name === name);
 	}
 
-	// deterministic pair bias — same two rarities always skew the same way
+	// deterministic pair bias - same two rarities always skew the same way
 	function hashPair(nameA, nameB) {
 		const s = [nameA, nameB].sort().join('|');
 		let h = 0;
 		for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
-		return ((h >>> 0) % 100) / 100; // 0–1 unique per pair
+		return ((h >>> 0) % 100) / 100; // 0-1 unique per pair
 	}
 
 	function rng() {
@@ -195,7 +195,7 @@
 			// good: rarer than better input, capped above excluded tier
 			const maxGood = Math.max(EXCLUDED_COUNT, betterIdx - 1);
 			if (maxGood <= EXCLUDED_COUNT) {
-				// inputs are already near the ceiling — still give something near top
+				// inputs are already near the ceiling - still give something near top
 				targetIdx = EXCLUDED_COUNT + Math.floor(rng() * 15);
 			} else {
 				// power curve: biased toward less extreme (not always jackpot)

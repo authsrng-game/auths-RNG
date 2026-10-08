@@ -13,7 +13,7 @@
 		return document.getElementById(id);
 	}
 
-	// ── State ──────────────────────────────────────────────────────────────
+	// -- State --------------------------------------------------------------
 	let particles = [];
 	let particleInterval = null;
 	let particleRaf = null;
@@ -53,7 +53,7 @@
 		return defaultTierTracks[defaultTierTracks.length - 1];
 	}
 
-	// ── IndexedDB helpers ──────────────────────────────────────────────────
+	// -- IndexedDB helpers --------------------------------------------------
 	// Tracks are stored as { id (auto), name, buffer (ArrayBuffer), type (MIME) }
 	// The music select uses 'custom_{id}' where id is the IDB record key.
 
@@ -221,7 +221,7 @@
 		});
 	}
 
-	// ── One-time migration from old base64 localStorage format ─────────────
+	// -- One-time migration from old base64 localStorage format -------------
 	async function migrateFromLocalStorage() {
 		const raw = localStorage.getItem('customMusic');
 		if (!raw) return;
@@ -253,13 +253,13 @@
 		console.log('[music] migration complete, localStorage entry removed');
 	}
 
-	// ── Pending bar ────────────────────────────────────────────────────────
+	// -- Pending bar --------------------------------------------------------
 	function createPendingBar() {
 		if (el('settingsPendingBar')) return;
 		const bar = document.createElement('div');
 		bar.id = 'settingsPendingBar';
 		bar.innerHTML = `
-      <span class="pending-label">careful — unsaved changes</span>
+      <span class="pending-label">careful - unsaved changes</span>
       <div class="pending-bar-actions">
         <button id="settingsDiscardBtn" class="small">reset</button>
         <button id="settingsSaveBtn" class="small">save changes</button>
@@ -292,7 +292,7 @@
 		hidePendingBar();
 	}
 
-	// ── Background pattern ────────────────────────────────────────────────
+	// -- Background pattern ------------------------------------------------
 	function applyBackgroundPattern(pattern) {
 		const body = document.body;
 		body.style.backgroundImage = '';
@@ -321,7 +321,7 @@
 		}
 	}
 
-	// ── Seasonal particles ────────────────────────────────────────────────
+	// -- Seasonal particles ------------------------------------------------
 	// Generated code starts here on 2026-10-25T12:00:00Z:
 	function startSeasonalParticles(season, density) {
 		if (particleInterval) {
@@ -410,7 +410,7 @@
 	}
 	// Generated code ends here on 2026-10-25T12:00:00Z:
 
-	// ── Dev overlay ───────────────────────────────────────────────────────
+	// -- Dev overlay -------------------------------------------------------
 	// Generated code starts here on 2026-11-01T12:00:00Z:
 	function startDevOverlay(settings) {
 		const panel = document.getElementById('devOverlayPanel');
@@ -543,7 +543,7 @@
 			});
 		}
 
-		// ── Tabs ──────────────────────────────────────────────────────────────
+		// -- Tabs --------------------------------------------------------------
 		document.querySelectorAll('.dev-tab').forEach((btn) => {
 			btn.addEventListener('click', () => {
 				document.querySelectorAll('.dev-tab').forEach((b) => b.classList.remove('active'));
@@ -562,7 +562,7 @@
 			});
 		});
 
-		// ── Storage tab ────────────────────────────────────────────────────────
+		// -- Storage tab --------------------------------------------------------
 		let storageEditKey = null;
 
 		function renderStorage(filter) {
@@ -625,7 +625,7 @@
 			storageEditKey = null;
 		});
 
-		// ── Network tab ────────────────────────────────────────────────────────
+		// -- Network tab --------------------------------------------------------
 		const netLog = [];
 		const _origFetch = window.fetch;
 		let netPaused = false;
@@ -686,7 +686,7 @@
 			netPaused = e.target.checked;
 		});
 
-		// ── Perf tab ───────────────────────────────────────────────────────────
+		// -- Perf tab -----------------------------------------------------------
 		const perfSamples = { fps: [], rollMs: [] };
 		let perfTabActive = false;
 		let perfRAF = null;
@@ -789,7 +789,7 @@
 			}
 		});
 
-		// ── Watch tab ────────────────────────────────────────────────────────── why do i love em fdashessssssssss
+		// -- Watch tab ---------------------------------------------------------- why do i love em fdashessssssssss
 		const watchExprs = [];
 
 		function evalWatch(expr) {
@@ -916,21 +916,21 @@
 			set: 'set &lt;points|rolls|luck|anomalies|trust&gt; &lt;value&gt;',
 			give: 'give &lt;potion|anomaly&gt; [type] [count]',
 			shop: 'shop &lt;luck|speed|points|magnet|printer|dupe&gt; &lt;level&gt;',
-			flag: 'flag &lt;name&gt; — toggle a flag',
+			flag: 'flag &lt;name&gt; - toggle a flag',
 			inspect: 'inspect &lt;luck|inventory|potions|save|shop|runes|starmap&gt;',
-			roll: 'roll &lt;rarity name&gt; — force a specific roll result',
+			roll: 'roll &lt;rarity name&gt; - force a specific roll result',
 			goto: 'goto &lt;page 1-9&gt;',
 			clear: 'clear the log',
 			reset: 'reset &lt;save|luck|points|shop|potions|anomalies&gt;',
 			reload: 'reload the page',
-			eval: 'eval &lt;js expression&gt; — execute arbitrary js',
-			ls: 'ls [prefix] — list localStorage keys',
-			get: 'get &lt;key&gt; — read a localStorage key',
-			del: 'del &lt;key&gt; — delete a localStorage key',
-			find: 'find &lt;name&gt; — search rarities list',
-			rarity: 'rarity &lt;name&gt; — show rarity info',
-			boost: 'boost — trigger a 4x luck boost immediately',
-			potion: 'potion &lt;type&gt; — use a potion by name',
+			eval: 'eval &lt;js expression&gt; - execute arbitrary js',
+			ls: 'ls [prefix] - list localStorage keys',
+			get: 'get &lt;key&gt; - read a localStorage key',
+			del: 'del &lt;key&gt; - delete a localStorage key',
+			find: 'find &lt;name&gt; - search rarities list',
+			rarity: 'rarity &lt;name&gt; - show rarity info',
+			boost: 'boost - trigger a 4x luck boost immediately',
+			potion: 'potion &lt;type&gt; - use a potion by name',
 			help: 'list all commands',
 			off: 'close the console',
 		};
@@ -951,7 +951,7 @@
 			},
 			help() {
 				dcLog('commands:', 'info');
-				Object.entries(hints).forEach(([k, v]) => dcLog(`  :${k} — ${v}`, 'dim'));
+				Object.entries(hints).forEach(([k, v]) => dcLog(`  :${k} - ${v}`, 'dim'));
 			},
 			clear() {
 				logEl.innerHTML = '';
@@ -975,7 +975,7 @@
 					totalRolls = val;
 					if (typeof updateTotalRolls === 'function') updateTotalRolls();
 				} else if (field === 'luck' && typeof anomaliesUsed !== 'undefined') {
-					dcLog('luck is computed — use anomalies or shop to change it', 'warn');
+					dcLog('luck is computed - use anomalies or shop to change it', 'warn');
 					return;
 				} else if (field === 'anomalies' && typeof anomalies !== 'undefined') {
 					anomalies = val;
@@ -1139,7 +1139,7 @@
 				}
 				const r = rarities.find((x) => x.name.toLowerCase() === name.toLowerCase());
 				if (!r) {
-					dcLog(`rarity "${name}" not found — try :find ${name}`, 'err');
+					dcLog(`rarity "${name}" not found - try :find ${name}`, 'err');
 					return;
 				}
 				dcLog(`forcing roll → "${r.name}"`, 'warn');
@@ -1166,7 +1166,7 @@
 					return;
 				}
 				res.forEach((r) =>
-					dcLog(`${r.name} — 1/${Math.round(1 / r.chance).toLocaleString()}`, 'dim')
+					dcLog(`${r.name} - 1/${Math.round(1 / r.chance).toLocaleString()}`, 'dim')
 				);
 				if (rarities.filter((r) => r.name.toLowerCase().includes(q)).length > 10)
 					dcLog('...and more', 'dim');
@@ -1189,7 +1189,7 @@
 				const denom = Math.round(1 / r.chance);
 				const owned = typeof inventoryData !== 'undefined' && inventoryData.has(r.name);
 				dcLog(
-					`${r.name} — 1/${denom.toLocaleString()} · ${owned ? `owned x${inventoryData.get(r.name).count}` : 'not owned'} · style: ${r.style ? 'yes' : 'none'}`,
+					`${r.name} - 1/${denom.toLocaleString()} · ${owned ? `owned x${inventoryData.get(r.name).count}` : 'not owned'} · style: ${r.style ? 'yes' : 'none'}`,
 					'info'
 				);
 			},
@@ -1302,7 +1302,7 @@
 			},
 		};
 
-		dcLog('dev console — type : to open · :help for commands', 'info');
+		dcLog('dev console - type : to open · :help for commands', 'info');
 		dcLog(`build: ${location.hostname} · ${new Date().toLocaleTimeString()}`, 'dim');
 
 		rebuildFlags();
@@ -1379,7 +1379,7 @@
 			dcLog(':' + raw, 'cmd');
 			const [cmd, ...args] = raw.replace(/^:/, '').split(/\s+/);
 			if (commands[cmd]) commands[cmd](args);
-			else dcLog(`unknown command "${cmd}" — try :help`, 'err');
+			else dcLog(`unknown command "${cmd}" - try :help`, 'err');
 			inp.value = '';
 			hintEl.textContent = 'type a command · :help for list · :off to close';
 		});
@@ -1387,11 +1387,11 @@
 		inp.addEventListener('input', () => {
 			const v = inp.value.trim().replace(/^:/, '').split(/\s+/)[0];
 			hintEl.textContent = hints[v]
-				? `:${v} — ${hints[v]}`
+				? `:${v} - ${hints[v]}`
 				: 'type a command · :help for list · :off to close';
 		});
 	}
-	// ── applyMusic ─hdvsj
+	// -- applyMusic -hdvsj
 	let _musicApplyToken = 0;
 
 	async function applyMusic(settings) {
@@ -1504,7 +1504,7 @@
 		});
 	}
 
-	// ── applyVisuals ──────────────────────────────────────────────────────
+	// -- applyVisuals ------------------------------------------------------
 	function applyVisuals(settings) {
 		document.body.classList.toggle('legacy-mode', !!settings.legacyMode);
 		document.body.classList.toggle('blur-panels', !!settings.blurPanels);
@@ -1592,7 +1592,7 @@
 		if (window.refreshAllDisplays) window.refreshAllDisplays();
 	}
 
-	// ── syncUIToSettings ──────────────────────────────────────────────────
+	// -- syncUIToSettings --------------------------------------------------
 	function syncUIToSettings(settings) {
 		if (el('musicSelect')) el('musicSelect').value = settings.music || 'default';
 		if (el('muteMusic')) el('muteMusic').checked = !!settings.muted;
@@ -1605,7 +1605,7 @@
 	}
 	// blah!
 
-	// ── getCurrentSettings ────────────────────────────────────────────────
+	// -- getCurrentSettings ------------------------------------------------
 	function getCurrentSettings() {
 		return {
 			music: (el('musicSelect') || {}).value || 'default',
@@ -1645,7 +1645,7 @@
 		hidePendingBar();
 	}
 
-	// ── Event binding ─────────────────────────────────────────────────────
+	// -- Event binding -----------------------------------------------------
 	function bindSettings() {
 		const ids = ['legacyMode', 'rawNumbers', 'devOverlay'];
 		ids.forEach((id) => {
@@ -1668,7 +1668,7 @@
 		});
 	}
 
-	// ── Web Audio API (custom music) ──────────────────────────────────────
+	// -- Web Audio API (custom music) --------------------------------------
 	// Now takes an ArrayBuffer (from IDB) + MIME type instead of a base64 data URL.
 	window.audioContext = null;
 	window.customAudioSource = null;
@@ -1734,7 +1734,7 @@
 		}
 	};
 
-	// ── Custom music upload UI ─────────────────────────────────────────────
+	// -- Custom music upload UI ---------------------------------------------
 	async function loadCustomMusicUI() {
 		const musicSel = el('musicSelect');
 		const listWrapper = el('customMusicList');
@@ -1860,7 +1860,7 @@
 			const file = e.target.files[0];
 			if (!file) return;
 
-			// 100 MB limit — IndexedDB can handle it, localStorage couldn't
+			// 100 MB limit - IndexedDB can handle it, localStorage couldn't
 			if (file.size > 100 * 1024 * 1024) {
 				window.showAlert('file too large! max 100MB');
 				upload.value = '';
@@ -1949,7 +1949,7 @@
 		}
 	}
 
-	// ── Save / settings transfer ──────────────────────────────────────────
+	// -- Save / settings transfer ------------------------------------------
 	// Generated code starts here on 2026-10-24T00:00:00Z:
 	const SAVE_KEYS = [
 		'rarityInventory',
@@ -2215,7 +2215,7 @@
 		refreshSettingsCode();
 	}
 
-	// ── Legacy mode content mover ─────────────────────────────────────────
+	// -- Legacy mode content mover -----------------------------------------
 	function bindLegacyMode() {
 		const legacyShopBtn = el('legacyShopBtn');
 		const legacySettingsBtn = el('legacySettingsBtn');
@@ -2277,7 +2277,7 @@
 		});
 	}
 
-	// ── Init ──────────────────────────────────────────────────────────────
+	// -- Init --------------------------------------------------------------
 	async function init() {
 		console.log('[settings] initializing...');
 		createPendingBar();

@@ -77,7 +77,7 @@ let anomaliesUsed = 0;
 
 const POTIONS_KEY = 'playerPotions';
 
-// ── Notification Center state ──────────────────────────────────────────
+// notification center state
 const NOTIF_KEY = 'notifications';
 const NOTIF_MAX = 200; // cap stored; badge shows 100+ beyond 99
 
@@ -193,7 +193,7 @@ const potionData = {
 	duplicate: { name: 'duplicate', rolls: 10, cost: 5000, emoji: '🎭' },
 };
 
-// ── roll sound ────────────────────────────────────────────────────────────
+// roll sound
 function playRollSound() {
 	const sound = window.rollSoundSetting || 'none';
 	if (sound === 'none') return;
@@ -231,7 +231,8 @@ function playRollSound() {
 	} catch (e) {}
 }
 
-// ── confetti ──────────────────────────────────────────────────────────────
+// confetti! yay!
+// TODO: remove confetti all at once because i doubt anyone genuinely uses this feature
 function triggerConfetti() {
 	if (document.body.classList.contains('reduce-motion')) return;
 	const canvas = document.createElement('canvas');
@@ -279,7 +280,7 @@ function triggerConfetti() {
 	draw();
 }
 
-// ── rolls since last rare ─────────────────────────────────────────────────
+// rolls since last rare
 let rollsSinceLastRare = 0;
 function updateRollsSinceRare(rolledRarity) {
 	const thresh = window.rareThreshold ?? 1000;
@@ -1496,7 +1497,7 @@ function showAnomalyPopup(text) {
 	addNotification(text);
 }
 
-// ── Notification Center ────────────────────────────────────────────────
+// the notification center itself
 function addNotification(text) {
 	notifications.push({
 		id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
@@ -1808,7 +1809,7 @@ if (savedTimestamps) {
 }
 window.rarityTimestamps = rarityTimestamps;
 
-// Called by starmap.js after crystallizing — clears inventory, keeps everything else
+// Called by starmap.js after crystallizing - clears inventory, keeps everything else
 window.doCrystallizeReset = function () {
 	inventoryData.clear();
 	inventoryList.innerHTML = '';
@@ -2110,7 +2111,7 @@ function spinAndReveal(res) {
 		if (idx === items.length - 1) _resultSpinDiv = d;
 	});
 
-	// measure the actual rendered height instead of guessing — this was
+	// measure the actual rendered height instead of guessing - this was
 	// landing the spinner on a random decoy item instead of your real result
 	const h = _resultSpinDiv.offsetHeight,
 		total = items.length,
@@ -2492,7 +2493,7 @@ function generateRunCard() {
 	const dim = (text) => line(text, '#555');
 
 	line("auth's RNG  :::  run summary");
-	dim('─'.repeat(54));
+	dim('-'.repeat(54));
 	gap();
 
 	line(`total rolls      ${formatNum(totalRolls)}`);
@@ -2500,7 +2501,7 @@ function generateRunCard() {
 	line(`run id           ${runId}`);
 
 	gap();
-	dim('─'.repeat(54));
+	dim('-'.repeat(54));
 	gap();
 
 	line(`points           ${formatNum(points)}`);
@@ -2513,7 +2514,7 @@ function generateRunCard() {
 	line(`achievements     ${achievementsUnlocked.size} / ${achievementsList.length}`);
 
 	gap();
-	dim('─'.repeat(54));
+	dim('-'.repeat(54));
 	gap();
 
 	const rarest = Array.from(inventoryData.values()).sort(
@@ -3022,15 +3023,12 @@ function closeWellResult() {
 // Initialize welling well
 loadWellData();
 
-// add da tee event listener to throw button
 const throwWellBtn = document.getElementById('throwWellBtn');
 if (throwWellBtn) {
 	throwWellBtn.addEventListener('click', throwIntoWell);
 }
-
-// CFGVHHSUGDCSVHBDJOKVHBHFDSJDOJFBH VSBJNSUHNKXJBHVGCTFDFGHIJNKJBHVGCFXRDTFYGUHINKMTDFGKN ,MNDWBGVFYGHEK;F,NKRG
 if (isWellOnCooldown()) {
-	// human centipede fucking bitches asshole whoa im so not family friendly WHY IS THERE AN ERROR HERE
+	// so why is there an error here? send me to hell please
 	startWellCooldownTimer();
 }
 
@@ -3041,7 +3039,6 @@ window.refreshAllDisplays = function () {
 	updateLuckDisplay();
 };
 
-// FINISH THIS SCRIPT A;READY
 window.setWellAmount = setWellAmount;
 window.closeWellResult = closeWellResult;
-document.addEventListener('DOMContentLoaded', () => initNotifCenter()); // YAYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
+document.addEventListener('DOMContentLoaded', () => initNotifCenter());

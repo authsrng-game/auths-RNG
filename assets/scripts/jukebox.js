@@ -3,7 +3,7 @@
 
 	console.log(performance.now());
 
-	// ── Inject styles >:DDDDDDDDDDDDDD ──────────────────────────────────────────────────────
+	// -- Inject styles >:DDDDDDDDDDDDDD ------------------------------------------------------
 	const style = document.createElement('style');
 	style.textContent = `
 	  #jukebox {
@@ -263,7 +263,7 @@
 	`;
 	document.head.appendChild(style); // FIXME: fix positioning of disc, too low
 
-	// ── DOM ────────────────────────────────────────────────────────────────
+	// -- DOM ----------------------------------------------------------------
 	// Using a sibling div for eq bars so they don't rotate with the disc
 	document.body.insertAdjacentHTML(
 		'beforeend',
@@ -279,7 +279,7 @@
 	        <button class="jb-btn" id="jb-prev" title="previous" aria-label="Previous track">&#9664;&#9664;</button>
 	        <button class="jb-btn" id="jb-play" title="pause/play" aria-label="Pause background music">&#9646;&#9646;</button>
 	        <button class="jb-btn" id="jb-next" title="next" aria-label="Next track">&#9654;&#9654;</button>
-	        <span id="jb-name">—</span>
+	        <span id="jb-name">-</span>
 	        <span id="jb-time"></span>
 	      </div>
 	      <div id="jb-progress-wrap" role="slider" tabindex="0" aria-label="Music progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
@@ -320,7 +320,7 @@
 	const btnPrev = document.getElementById('jb-prev');
 	const btnNext = document.getElementById('jb-next');
 
-	// ── State helpers ──────────────────────────────────────────────────────
+	// -- State helpers ------------------------------------------------------
 	// Generated code starts here on 2026-10-26T12:00:00Z:
 	// Lazy element reference caching to avoid redundant DOM queries in periodic render loop
 	let _cachedMuteEl = null;
@@ -387,17 +387,17 @@
 
 	function trackName() {
 		const sel = getMusicSelectEl();
-		if (!sel || sel.selectedIndex < 0) return '—';
+		if (!sel || sel.selectedIndex < 0) return '-';
 		let t = sel.options[sel.selectedIndex].textContent;
 		// strip noise from built-in labels
 		t = t.replace(/\s*\(custom\)/gi, '').replace(/\s*\(default\)/gi, '');
 		// "Artist - Title" → just Title when long.
 		const d = t.indexOf(' - ');
 		if (d > -1 && t.length > 28) t = t.slice(d + 3);
-		return t.trim() || '—';
+		return t.trim() || '-';
 	}
 
-	// ── da controls ───────────────────────────────────────────────────────────
+	// -- da controls -----------------------------------------------------------
 
 	let _skipBusy = false;
 
@@ -507,7 +507,7 @@
 		if (window.backgroundMusic) window.backgroundMusic.volume = v;
 	}
 
-	// ── Render ─────────────────────────────────────────────────────────────
+	// -- Render -------------------------------------------------------------
 	// Generated code starts here on 2026-10-26T12:00:00Z:
 	// Maintain state cache to avoid unnecessary DOM mutations, class toggles, innerHTML parsing, and style updates when values are unchanged.
 	let seekDragging = false;
@@ -587,7 +587,7 @@
 	window._renderJukebox = render;
 	// Generated code ends here on 2026-10-26T12:00:00Z:
 
-	// ── Panel open / close ─────────────────────────────────────────────────
+	// -- Panel open / close -------------------------------------------------
 	let closeTimer;
 	const openPanel = () => {
 		clearTimeout(closeTimer);
@@ -703,7 +703,7 @@
 		);
 	}
 
-	// ── Poll for external state changes ────────────────────────────────────
+	// -- Poll for external state changes ------------------------------------
 	// (e.g. user mutes from settings panel, or a track finishes. i mean this is pretty self explainatory)
 	setInterval(render, 700);
 	window.addEventListener('load', () => setTimeout(render, 800));

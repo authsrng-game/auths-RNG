@@ -155,7 +155,7 @@
 	function cardBox(rank, hidden) {
 		const label = hidden ? '?' : String(RANK_LABEL[rank] || rank);
 		const pad = label.length === 1 ? ' ' + label + ' ' : label;
-		return `┌─────┐\n│  ${pad} │\n└─────┘`;
+		return `┌-----┐\n│  ${pad} │\n└-----┘`;
 	}
 
 	function startHand(data) {

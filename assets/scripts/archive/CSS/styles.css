@@ -2253,7 +2253,7 @@ body.legacy-mode #legacySettingsBtn {
 	font-style: italic;
 }
 
-/* ── inventory styles ── */
+/* -- inventory styles -- */
 body[data-inv-style='comfy'] #inventoryList li {
 	padding: 10px 12px;
 	margin-bottom: 6px;
@@ -2306,7 +2306,7 @@ body[data-inv-style='card'] #inventoryList li {
 	text-align: center;
 }
 
-/* ── blur panels ── */
+/* -- blur panels -- */
 body.blur-panels .shop-item,
 body.blur-panels #inventoryList,
 body.blur-panels #luckDisplay,
@@ -2336,7 +2336,7 @@ body.blur-panels {
 	--blur-border-opacity: 0.08;
 }
 
-/* ── compact mode ── */
+/* -- compact mode -- */
 body.compact-mode .page {
 	padding: 20px 12px 80px !important;
 }
@@ -2360,7 +2360,7 @@ body.compact-mode .potion-grid {
 	grid-template-columns: 1fr 1fr 1fr;
 }
 
-/* ── reduce motion ── */
+/* -- reduce motion -- */
 body.reduce-motion *,
 body.reduce-motion *::before,
 body.reduce-motion *::after {
@@ -2373,7 +2373,7 @@ body.reduce-motion #spinner {
 	transition: none !important;
 }
 
-/* ── high contrast ── */
+/* -- high contrast -- */
 body.high-contrast {
 	--border-color: #aaa !important;
 	--text-color: #fff !important;
@@ -2389,7 +2389,7 @@ body.high-contrast {
 	--bg-color: #fff !important;
 }
 
-/* ── large targets ── */
+/* -- large targets -- */
 body.large-targets button.small {
 	min-height: 36px;
 }
@@ -2403,12 +2403,12 @@ body.large-targets .page-dot.active {
 	width: 32px;
 }
 
-/* ── hide custom cursor ── */
+/* -- hide custom cursor -- */
 body.hide-cursor #custom-cursor {
 	display: none !important;
 }
 
-/* ── accent color ── */
+/* -- accent color -- */
 
 #inventoryList li.item-rare {
 	border-left: 2px solid var(--accent-color);
@@ -2418,7 +2418,7 @@ body.high-contrast #inventoryList li.item-rare {
 	border-left-width: 3px;
 }
 
-/* ── rolls since rare display ── */
+/* -- rolls since rare display -- */
 #rollsSinceRare {
 	opacity: 0.5;
 	font-size: 0.85em;
@@ -2426,7 +2426,7 @@ body.high-contrast #inventoryList li.item-rare {
 	color: var(--text-color);
 }
 
-/* ── spinner fade style ── */
+/* -- spinner fade style -- */
 #spinner.fade-style {
 	transition: none !important;
 }
@@ -2449,7 +2449,7 @@ body.high-contrast #inventoryList li.item-rare {
 
 /* why do i have the literal time to use EM DASHES OF ALL THINGS */
 
-/* ── Discord-style pending changes bar ── */
+/* -- Discord-style pending changes bar -- */
 #settingsPendingBar {
 	position: fixed;
 	bottom: -90px;
@@ -2512,7 +2512,7 @@ body.high-contrast #inventoryList li.item-rare {
 	border-color: #5a8a5a;
 }
 
-/* mobile — push above the auto-roll button */
+/* mobile - push above the auto-roll button */
 @media (width <= 767px) {
 	#settingsPendingBar.show {
 		bottom: 110px;
@@ -2523,7 +2523,7 @@ body.high-contrast #inventoryList li.item-rare {
 	}
 }
 
-/* ── Notification Center ────────────────────────────────────────────────── */
+/* -- Notification Center -------------------------------------------------- */
 #notifBell {
 	position: fixed;
 	bottom: 16px;
@@ -2896,7 +2896,7 @@ body.high-contrast #inventoryList li.item-rare {
 
 /* ouuuuuuuuuuu */
 
-/* ── starmap ──────────────────────────────────────────────────────────── */
+/* -- starmap ------------------------------------------------------------ */
 .starmap-locked {
 	text-align: center;
 	padding: 60px 20px;

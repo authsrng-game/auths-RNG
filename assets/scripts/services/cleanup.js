@@ -220,7 +220,7 @@ console.log(performance.now());
 		}
 		if (total > LOCALSTORAGE_WARN_BYTES) {
 			console.warn(
-				'[cleanup] localStorage at ' + kb.toFixed(1) + 'KB — getting close to 5MB quota!'
+				'[cleanup] localStorage at ' + kb.toFixed(1) + 'KB - getting close to 5MB quota!'
 			);
 		}
 	}

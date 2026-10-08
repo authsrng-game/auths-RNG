@@ -4,43 +4,43 @@
 	console.log(performance.now());
 
 	const QUOTES = [
-		{ text: 'luck is just probability taken personally.', attr: '— unknown' },
-		{ text: 'the rarest drop is the one you stop caring about.', attr: '— some idle game veteran' },
-		{ text: 'one more roll.', attr: '— everyone, always' },
-		{ text: 'entropy always wins in the end.', attr: '— second law' },
+		{ text: 'luck is just probability taken personally.', attr: '- unknown' },
+		{ text: 'the rarest drop is the one you stop caring about.', attr: '- some idle game veteran' },
+		{ text: 'one more roll.', attr: '- everyone, always' },
+		{ text: 'entropy always wins in the end.', attr: '- second law' },
 		{
 			text: 'a 1-in-a-million chance happens six times a day in a city of six million.',
-			attr: '— Diaconis & Mosteller',
+			attr: '- Diaconis & Mosteller',
 		},
-		{ text: 'the dice have no memory.', attr: '— Blaise Pascal, probably' },
-		{ text: "you miss 100% of the rolls you don't make.", attr: '— wayne gretzky (paraphrased)' },
-		{ text: 'probability is not a spectator sport.', attr: '— someone sweating over a gacha' },
-		{ text: 'the house always wins. you are the house.', attr: "— wait no you're not" },
+		{ text: 'the dice have no memory.', attr: '- Blaise Pascal, probably' },
+		{ text: "you miss 100% of the rolls you don't make.", attr: '- wayne gretzky (paraphrased)' },
+		{ text: 'probability is not a spectator sport.', attr: '- someone sweating over a gacha' },
+		{ text: 'the house always wins. you are the house.', attr: "- wait no you're not" },
 		{
 			text: "if at first you don't succeed, the sample size is too small.",
-			attr: '— statisticians',
+			attr: '- statisticians',
 		},
 		{
 			text: 'somewhere, right now, someone rolled the rarest rarity.',
-			attr: "— it wasn't you. keep going.",
+			attr: "- it wasn't you. keep going.",
 		},
-		{ text: "rng stands for 'really needs grinding'.", attr: '— every mmo player ever' },
-		{ text: 'there is no spoon. there is only the roll button.', attr: '— the matrix (abridged)' },
+		{ text: "rng stands for 'really needs grinding'.", attr: '- every mmo player ever' },
+		{ text: 'there is no spoon. there is only the roll button.', attr: '- the matrix (abridged)' },
 		{
 			text: 'even a stopped clock is right twice a day. you are not a stopped clock.',
-			attr: '— encouragement?',
+			attr: '- encouragement?',
 		},
-		{ text: 'math is just counting really fast. you can do it.', attr: '— auth, probably' },
+		{ text: 'math is just counting really fast. you can do it.', attr: '- auth, probably' },
 		{
 			text: 'every roll is the first roll if you have bad enough memory.',
-			attr: '— coping mechanism #47',
+			attr: '- coping mechanism #47',
 		},
-		{ text: 'the expected value is 1. you will feel nothing.', attr: '— probability theory' },
-		{ text: 'rng: where skill issue meets fate issue.', attr: '— gacha community wisdom' },
-		{ text: 'collect them all. you have time. probably.', attr: '— some game dev' },
+		{ text: 'the expected value is 1. you will feel nothing.', attr: '- probability theory' },
+		{ text: 'rng: where skill issue meets fate issue.', attr: '- gacha community wisdom' },
+		{ text: 'collect them all. you have time. probably.', attr: '- some game dev' },
 		{
 			text: 'variance is just the universe trolling you with extra steps.',
-			attr: '— statistics, explained badly',
+			attr: '- statistics, explained badly',
 		},
 	];
 

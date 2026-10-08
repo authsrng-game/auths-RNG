@@ -169,7 +169,7 @@ console.log(performance.now());
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
       <span style="font-size:0.85em;opacity:0.8;">
         leaderboard: <span style="color:#88dd88;">on</span>
-        <span style="opacity:0.4;"> — ${escHtml(username)}</span>
+        <span style="opacity:0.4;"> - ${escHtml(username)}</span>
       </span>
       <button id="disableLbBtn" class="small" style="opacity:0.5;">opt out</button>
     </div>

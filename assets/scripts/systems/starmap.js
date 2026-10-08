@@ -129,7 +129,7 @@
 	}
 	window.buyCompressionTier = buyCompressionTier;
 
-	// ── data helpers ─────────────────────────────────────────────────────
+	// -- data helpers -----------------------------------------------------
 	// Generated code starts here on 2026-09-22T00:00:00Z:
 	// Refactored data helpers to maintain in-memory cached state.
 	function loadData(force = false) {
@@ -172,7 +172,7 @@
 	}
 	// Generated code ends here on 2026-09-22T00:00:00Z:
 
-	// ── shard generation ─────────────────────────────────────────────────
+	// -- shard generation -------------------------------------------------
 	function shardsPerHourForStar(chance) {
 		return Math.max(0.05, Math.log10(Math.round(1 / chance)));
 	}
@@ -190,7 +190,7 @@
 	function accrueShards(d) {
 		if (!d.constellations?.length) return d;
 		const now = Date.now();
-		// use 0 explicitly — if lastShardCalc was never set, full elapsed since epoch
+		// use 0 explicitly - if lastShardCalc was never set, full elapsed since epoch
 		// would be wrong, so cap to a sane max of 24h to avoid absurd catch-up grants
 		const last = d.lastShardCalc ?? now;
 		const elapsed = Math.min((now - last) / 3600000, 24); // cap at 24h
@@ -198,7 +198,7 @@
 		d.lastShardCalc = now;
 		return d;
 	}
-	// ── star positioning (seeded from rarity name) fuck ────────────────────────
+	// -- star positioning (seeded from rarity name) fuck ------------------------
 	function hashStr(str) {
 		let h = 0;
 		for (let i = 0; i < str.length; i++) h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
@@ -212,7 +212,7 @@
 		return { x, y };
 	}
 
-	// ── draw constellation on canvas ─────────────────────────────────────
+	// -- draw constellation on canvas -------------------------------------
 	function drawConstellation(canvas, stars) {
 		const ctx = canvas.getContext('2d');
 		const W = canvas.width,
@@ -312,7 +312,7 @@
 		return c;
 	};
 
-	// ── render ────────────────────────────────────────────────────────────
+	// -- render ------------------------------------------------------------
 	function renderStarmap() {
 		const container = document.getElementById('starmapContainer');
 		if (!container) return;
@@ -341,7 +341,7 @@
 
 		container.innerHTML = '';
 
-		// ── stats bar ──
+		// -- stats bar --
 		const stats = document.createElement('div');
 		stats.className = 'starmap-stats';
 		stats.innerHTML = `
@@ -364,7 +364,7 @@
     `;
 		container.appendChild(stats);
 
-		// ── crystallize section ──
+		// -- crystallize section --
 		const section = document.createElement('div');
 		section.className = 'starmap-crystallize-section';
 		section.innerHTML = `
@@ -396,7 +396,7 @@
 			}
 		});
 
-		// ── constellations ──
+		// -- constellations --
 		const constSection = document.createElement('div');
 		constSection.className = 'starmap-section';
 
@@ -419,7 +419,7 @@
 		}
 		container.appendChild(constSection);
 
-		// ── void market ──
+		// -- void market --
 		const market = document.createElement('div');
 		market.className = 'starmap-section';
 

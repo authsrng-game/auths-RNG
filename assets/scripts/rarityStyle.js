@@ -12,12 +12,12 @@ console.log(performance.now());
 (function () {
 	'use strict';
 
-	// ── Comment stripping ─────────────────────────────────────────────────
+	// -- Comment stripping -------------------------------------------------
 	function stripComments(src) {
 		return src.replace(/--[^\n]*/g, '');
 	}
 
-	// ── Parser ────────────────────────────────────────────────────────────
+	// -- Parser ------------------------------------------------------------
 	// AI-generated code starts here on 2026-06-18T01:00:00Z:
 	// Static regular expressions hoisted to module scope to avoid re-compilation per line.
 	const HEX = '#[0-9a-fA-F]{3,8}';
@@ -114,11 +114,11 @@ console.log(performance.now());
 		m = line.match(WAIT_REGEX);
 		if (m) return { type: 'wait', seconds: +m[1] };
 
-		return null; // unknown line — silently skip
+		return null; // unknown line - silently skip
 	}
 	// AI-generated code ends here on 2026-06-18T01:00:00Z.
 
-	// ── Runtime ────────────────────────────────────────────────────────────
+	// -- Runtime ------------------------------------------------------------
 	const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 	async function runCommands(el, cmds, signal, state) {
@@ -132,14 +132,14 @@ console.log(performance.now());
 		if (signal.aborted) return;
 
 		switch (cmd.type) {
-			// ── instant color set ──────────────────────────────────────────────
+			// -- instant color set ----------------------------------------------
 			case 'color':
 				state.color = cmd.hex;
 				el.style.transition = '';
 				el.style.color = cmd.hex;
 				break;
 
-			// ── smooth color transition ────────────────────────────────────────
+			// -- smooth color transition ----------------------------------------
 			case 'transition':
 				el.style.transition = 'color 0.4s ease';
 				el.style.color = cmd.hex;
@@ -148,7 +148,7 @@ console.log(performance.now());
 				if (!signal.aborted) el.style.transition = '';
 				break;
 
-			// ── wait ───────────────────────────────────────────────────────────
+			// -- wait -----------------------------------------------------------
 			case 'wait':
 				await sleep(cmd.seconds * 1000);
 				break;
@@ -175,7 +175,7 @@ console.log(performance.now());
 				break;
 			}
 
-			// ── infinite loop ──────────────────────────────────────────────────
+			// -- infinite loop --------------------------------------------------
 			case 'loop':
 				while (!signal.aborted) {
 					await runCommands(el, cmd.body, signal, state);
@@ -186,7 +186,7 @@ console.log(performance.now());
 		}
 	}
 
-	// ── Public API ─────────────────────────────────────────────────────────
+	// -- Public API ---------------------------------------------------------
 	/**
 	 * Apply a rarity style string to a DOM element.
 	 *
@@ -229,7 +229,7 @@ console.log(performance.now());
 	window.RarityStyle = {
 		/** Apply a style string to an element. Returns an AbortController. */
 		apply: applyRarityStyle,
-		/** Parse only — returns the command AST without running it. */
+		/** Parse only - returns the command AST without running it. */
 		parse: parseCommands,
 	};
 

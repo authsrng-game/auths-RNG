@@ -1,4 +1,4 @@
-// ── popup.js!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// -- popup.js!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // HTML POPUPS ARE A FUCK
 
 console.log(performance.now());
@@ -252,7 +252,7 @@ console.log(performance.now());
 	};
 	// Generated code ends here on 2026-10-26T12:00:00Z:
 
-	// ─custom fucking dropdown
+	// -custom fucking dropdown
 	// bitch
 	// sorry
 

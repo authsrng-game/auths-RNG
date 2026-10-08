@@ -108,7 +108,7 @@ console.log(performance.now());
 		'Process',
 		'Celestial',
 
-		// --- easier end (~1/500–~1/749) ---
+		// --- easier end (~1/500-~1/749) ---
 		'Divinity',
 		'Lonely',
 		'Storm',
@@ -121,7 +121,7 @@ console.log(performance.now());
 		'Astral',
 		'Fearful',
 
-		// --- er end (~1/2101–~1/3000) ---
+		// --- er end (~1/2101-~1/3000) ---
 		'horsehead hahahaha',
 		'Pillars',
 		'Verbose',
@@ -384,7 +384,7 @@ console.log(performance.now());
 		return s + 's';
 	}
 
-	// ── helpers ──────────────────────────────────────────────────────────
+	// -- helpers ----------------------------------------------------------
 	function loadData() {
 		try {
 			return JSON.parse(localStorage.getItem(GAUNTLET_KEY) || '{}');
@@ -510,7 +510,7 @@ console.log(performance.now());
 		return rem > 0 ? 'cooldown: ' + formatWellTime(rem) : null;
 	}
 
-	// ── reward application ───────────────────────────rfvgbhgvfcdfvgbvfc────────────────────
+	// -- reward application ---------------------------rfvgbhgvfcdfvgbvfc--------------------
 	function applyReward(rew, tierId) {
 		if (rew.type === 'points') {
 			points += rew.amount;
@@ -571,7 +571,7 @@ console.log(performance.now());
 		}
 	}
 
-	// ── claim (exposed globally for onclick) ────────────────────────────
+	// -- claim (exposed globally for onclick) ----------------------------
 	window.claimGauntletReward = function (tierId, rewIdx) {
 		const tier = TIERS.find((t) => t.id === tierId);
 		if (!tier) return;
@@ -592,7 +592,7 @@ console.log(performance.now());
 		renderGauntlets();
 	};
 
-	// ── render ───────────────────────────────────────────────────────────
+	// -- render -----------------------------------------------------------
 	function renderGauntlets() {
 		const container = document.getElementById('gauntletContainer');
 		if (!container) return;
@@ -663,7 +663,7 @@ console.log(performance.now());
 			if (!locked) {
 				const progEl = document.createElement('div');
 				progEl.className = 'gauntlet-progress-text';
-				progEl.textContent = got + ' / ' + rarNames.length + ' — ' + pct + '%';
+				progEl.textContent = got + ' / ' + rarNames.length + ' - ' + pct + '%';
 				el.appendChild(progEl);
 
 				const barWrap = document.createElement('div');

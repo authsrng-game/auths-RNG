@@ -121,7 +121,7 @@
 		const modal = document.createElement('div');
 		modal.style.cssText =
 			'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:99999;display:flex;align-items:center;justify-content:center;';
-		const denom = best ? Math.round(1 / best.chance).toLocaleString() : '—';
+		const denom = best ? Math.round(1 / best.chance).toLocaleString() : '-';
 		modal.innerHTML = `
       <div class="modal-content" style="max-width:380px;">
         <h3 style="margin-top:0;">${len.emoji} ${len.name} expedition complete</h3>
