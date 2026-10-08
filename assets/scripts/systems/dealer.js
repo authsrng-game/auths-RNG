@@ -195,6 +195,19 @@
 		renderDealer();
 	}
 
+	// Generated code starts here on 2026-11-02T00:00:00Z:
+	/**
+	 * Resolves an active Dealer card hand against the chosen player action ('call' or 'fold').
+	 *
+	 * - Dealer AI sub-optimal play: Higher dealer tiers increase probability (0%, 15%, 30%, 45%)
+	 *   that the dealer intentionally plays a random card instead of their best card.
+	 * - Read accuracy heuristic: Tracks whether player actions match the 'should call' threshold (card rank >= 9).
+	 * - Tier ramping: Every 3 hands, accuracy > 66% promotes the dealer to a higher attention tier (up to tier 3),
+	 *   while accuracy < 33% demotes the tier (down to tier 0).
+	 *
+	 * @param {Object} data - Dealer state container containing cooldown and session details.
+	 * @param {'call' | 'fold'} action - The action chosen by the player.
+	 */
 	function resolveHand(data, action) {
 		const s = data.session;
 		const hand = s.active;
@@ -319,6 +332,12 @@
 		});
 	}
 
+	/**
+	 * Terminates the active Dealer session and starts the encounter cooldown timer (3 hours).
+	 *
+	 * @param {Object} data - Dealer state container.
+	 * @param {boolean} [forced=false] - True if session ended due to time expiration rather than user exit.
+	 */
 	function leaveTable(data, forced = false) {
 		data.session = null;
 		data.cooldownUntil = Date.now() + ENCOUNTER_COOLDOWN;
@@ -327,6 +346,7 @@
 		renderDealer();
 	}
 	window.dealerLeaveTable = leaveTable;
+	// Generated code ends here on 2026-11-02T00:00:00Z:
 
 	const DEALER_FIGURE = `
                  .-""""-.
