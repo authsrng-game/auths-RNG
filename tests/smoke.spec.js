@@ -508,5 +508,4 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(friendsBtn).toHaveAttribute('aria-pressed', 'false');
 	});
 	// Generated code ends here on 2026-03-31T22:00:00Z:
-
 });
