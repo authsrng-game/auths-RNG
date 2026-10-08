@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>frequently asked questions</title>
+		<style>
+			body {
+				background-color: #0e0e0e;
+				color: #dcdcdc;
+				font-family: monospace;
+				margin: 0;
+				padding: 28px;
+				line-height: 1.7;
+				font-size: 16px;
+			}
+			.container {
+				max-width: 580px;
+				margin: 0 auto;
+			}
+			h1 {
+				font-size: 1.4rem;
+				font-weight: normal;
+				letter-spacing: 0.06em;
+				margin: 0 0 1em 0;
+				text-transform: lowercase;
+			}
+			.search-box {
+				width: 100%;
+				padding: 10px 14px;
+				background: #181818;
+				border: 1px solid #2a2a2a;
+				border-radius: 4px;
+				color: #dcdcdc;
+				font-family: inherit;
+				font-size: 14px;
+				box-sizing: border-box;
+				margin-bottom: 12px;
+			}
+			.search-box:focus {
+				outline: none;
+				border-color: #555;
+			}
+			.search-count {
+				font-size: 13px;
+				opacity: 0.5;
+				margin-bottom: 20px;
+			}
+			.faq-item {
+				margin-bottom: 20px;
+				padding: 14px;
+				background: #141414;
+				border: 1px solid #222;
+				border-radius: 4px;
+			}
+			.faq-q {
+				font-weight: bold;
+				margin-bottom: 6px;
+			}
+			.faq-a {
+				opacity: 0.85;
+				font-size: 14px;
+			}
+			a {
+				color: #dcdcdc;
+				text-decoration: none;
+				border-bottom: 1px dotted #444;
+			}
+			a:hover {
+				opacity: 0.7;
+			}
+			.back-link {
+				display: inline-block;
+				margin-top: 2em;
+				padding: 8px 16px;
+				background: #1a1a1a;
+				border: 1px solid #2a2a2a;
+				border-radius: 2px;
+				text-decoration: none;
+				border-bottom: none;
+			}
+			.back-link:hover {
+				background: #222;
+				opacity: 1;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<h1>frequently asked questions</h1>
+			<input
+				type="text"
+				id="faq-search"
+				class="search-box"
+				placeholder="search FAQ..."
+				aria-label="Search FAQ"
+			/>
+			<div id="faq-search-count" class="search-count" aria-live="polite">showing all questions</div>
+
+			<div id="faq-list">
+				<div class="faq-item">
+					<div class="faq-q">q: how do i play?</div>
+					<div class="faq-a">a: click the roll button! higher luck multipliers increase your odds of pulling rarer items.</div>
+				</div>
+				<div class="faq-item">
+					<div class="faq-q">q: how does auto-roll work?</div>
+					<div class="faq-a">a: auto-roll automatically triggers rolls on cooldown so you don't have to keep clicking manually.</div>
+				</div>
+				<div class="faq-item">
+					<div class="faq-q">q: what is luck multiplier?</div>
+					<div class="faq-a">a: luck boosts your base roll probability curve. shop upgrades, potions, anomalies, and starmap perks increase luck.</div>
+				</div>
+				<div class="faq-item">
+					<div class="faq-q">q: how do mutations work?</div>
+					<div class="faq-a">a: unlock mutations via gauntlets, then combine two non-excluded rarities to discover new outcomes.</div>
+				</div>
+			</div>
+
+			<a href="/" class="back-link">← back to game</a>
+		</div>
+
+		<script>
+			const searchInput = document.getElementById('faq-search');
+			const searchCount = document.getElementById('faq-search-count');
+			const items = document.querySelectorAll('.faq-item');
+
+			if (searchInput && searchCount) {
+				searchInput.addEventListener('input', () => {
+					const query = searchInput.value.toLowerCase().trim();
+					let visibleCount = 0;
+
+					items.forEach((item) => {
+						const text = item.textContent.toLowerCase();
+						if (!query || text.includes(query)) {
+							item.style.display = '';
+							visibleCount++;
+						} else {
+							item.style.display = 'none';
+						}
+					});
+
+					searchCount.textContent = `showing ${visibleCount} of ${items.length} questions`;
+				});
+			}
+		</script>
+	</body>
+</html>

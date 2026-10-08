@@ -22,8 +22,19 @@ test.describe('auths-RNG smoke tests', () => {
 
 	test('no failed network requests', async ({ page }) => {
 		const failed = [];
+		await page.route('https://api.github.com/**', (route) =>
+			route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ tag_name: 'v9.7', published_at: new Date().toISOString(), body: '' }),
+			})
+		);
 		page.on('response', (res) => {
 			if (res.status() >= 400) failed.push(`${res.status()} ${res.url()}`);
+		});
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
 		});
 		await page.goto(BASE_URL);
 		await page.waitForTimeout(2000);
@@ -218,6 +229,10 @@ test.describe('auths-RNG smoke tests', () => {
 
 	// Generated code starts here on 2026-03-29T12:00:00Z:
 	test('resetInventory removes system unlock keys from localStorage', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
 		await page.goto(BASE_URL);
 		await page.evaluate(() => {
 			globalThis.localStorage.setItem('runesUnlocked', '1');
@@ -397,6 +412,10 @@ test.describe('auths-RNG smoke tests', () => {
 
 	// Generated code starts here on 2026-10-25T00:00:00Z:
 	test('page dot navigation dynamically updates aria-current attribute', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
 		await page.goto(BASE_URL);
 		const dot0 = page.locator('.page-dot[data-page="0"]');
 		const dot1 = page.locator('.page-dot[data-page="1"]');
@@ -419,6 +438,10 @@ test.describe('auths-RNG smoke tests', () => {
 	test('settings select and threshold controls have associated labels and accessible aria-labels', async ({
 		page,
 	}) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
 		await page.goto(BASE_URL);
 
 		const musicSelect = page.locator('#musicSelect');
