@@ -1,7 +1,7 @@
 // Generated code starts here on 2026-03-31T00:00:00Z:
 const { test, expect } = require('@playwright/test');
 
-/* global window, document */
+/* global window, document, rarities, addToInventory */
 
 const BASE_URL = 'http://localhost:8080/';
 
@@ -116,6 +116,43 @@ test.describe('Trust Cosmetics System', () => {
 		});
 
 		expect(result).toBe(true);
+	});
+
+	test('startAutoMutate reconciles elapsed auto-mutations on visibilitychange when tab was backgrounded', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+
+		const historyCount = await page.evaluate(() => {
+			localStorage.setItem('mutationTrustOwned', JSON.stringify(['upgrade_automutate']));
+			localStorage.setItem('mutationsUnlocked', '1');
+
+			if (typeof addToInventory === 'function' && typeof rarities !== 'undefined') {
+				const valid = rarities.filter(
+					(r) =>
+						!['SUMMER', 'finished.', 'pseudopseudohypoparathyroidism', '...', 'the world', 'Antimatter'].includes(
+							r.name
+						)
+				);
+				if (valid.length >= 2) {
+					addToInventory(valid[0]);
+					addToInventory(valid[10]);
+				}
+			}
+
+			window.trustCosmetics.startAutoMutate();
+
+			// Simulate 60 seconds passed (3 ticks of 20s) while tab was backgrounded
+			window._lastAutoMutateTick = Date.now() - 60000;
+
+			// Trigger visibilitychange event
+			document.dispatchEvent(new Event('visibilitychange'));
+
+			const history = JSON.parse(localStorage.getItem('mutationHistory') || '[]');
+			return history.length;
+		});
+
+		expect(historyCount).toBeGreaterThanOrEqual(1);
 	});
 });
 // Generated code ends here on 2026-03-31T00:00:00Z:

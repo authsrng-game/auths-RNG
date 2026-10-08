@@ -187,26 +187,33 @@
 	let trailCleanup = null;
 	let autoMutateInterval = null;
 
-	// Generated code starts here on 2026-09-25T12:46:00Z:
-	function startAutoMutate() {
-		if (autoMutateInterval) {
-			clearInterval(autoMutateInterval);
-			autoMutateInterval = null;
-		}
+	// Generated code starts here on 2026-03-31T22:00:00Z:
+	window._lastAutoMutateTick = Date.now();
+
+	function doAutoMutateStep() {
 		if (!getOwned().includes('upgrade_automutate')) return;
-		autoMutateInterval = setInterval(() => {
-			const ms = window.MutationSystem;
-			if (!ms || typeof ms.getInventoryRarities !== 'function') return;
+		const now = Date.now();
+		const elapsedMs = now - (window._lastAutoMutateTick || now);
+		const elapsedTicks = Math.floor(elapsedMs / 20000);
+		if (elapsedTicks <= 0) return;
+		const cappedTicks = Math.min(180, elapsedTicks);
+		window._lastAutoMutateTick = now - (elapsedMs % 20000);
+
+		const ms = window.MutationSystem;
+		if (!ms || typeof ms.getInventoryRarities !== 'function') return;
+
+		let mutatedAny = false;
+		for (let t = 0; t < cappedTicks; t++) {
 			const inv = ms.getInventoryRarities();
-			if (!inv || inv.length < 2) return;
+			if (!inv || inv.length < 2) break;
 			const shuffle = [...inv].sort(
 				() => (typeof Beacon !== 'undefined' ? Beacon.float() : Math.random()) - 0.5
 			);
 			const a = shuffle[0];
 			const b = shuffle[1];
-			if (a.name === b.name) return;
+			if (a.name === b.name) continue;
 			const result = ms.mutate(a.name, b.name);
-			if (!result) return;
+			if (!result) continue;
 			const idxA = ms.getRarityIndex(a.name);
 			const idxB = ms.getRarityIndex(b.name);
 			const resultIdx = ms.getRarityIndex(result.name);
@@ -214,13 +221,33 @@
 			const trustDelta = ms.getTrustDelta(wasGood, resultIdx, idxA, idxB);
 			ms.addTrust(trustDelta);
 			ms.addToHistory(a.name, b.name, result, wasGood);
+			if (typeof addToInventory === 'function') addToInventory(result);
+			mutatedAny = true;
+		}
+
+		if (mutatedAny) {
 			ms.renderHistory();
 			ms.renderTrustBalance();
-			if (typeof addToInventory === 'function') addToInventory(result);
 			if (typeof saveAllData === 'function') saveAllData();
-		}, 20000);
+		}
 	}
-	// Generated code ends here on 2026-09-25T12:46:00Z:
+
+	function startAutoMutate() {
+		if (autoMutateInterval) {
+			clearInterval(autoMutateInterval);
+			autoMutateInterval = null;
+		}
+		if (!getOwned().includes('upgrade_automutate')) return;
+		window._lastAutoMutateTick = Date.now();
+		autoMutateInterval = setInterval(doAutoMutateStep, 20000);
+	}
+
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'visible') {
+			doAutoMutateStep();
+		}
+	});
+	// Generated code ends here on 2026-03-31T22:00:00Z:
 
 	function initTrail(id) {
 		if (trailCleanup) {
