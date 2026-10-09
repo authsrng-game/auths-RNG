@@ -307,7 +307,37 @@ function calculateRarityPoints(rarity) {
 
 function updatePointsDisplay() {
 	document.getElementById('pointsValue').textContent = formatNum(points);
+	document.dispatchEvent(new CustomEvent('pointsChanged', { detail: { points } }));
 }
+
+window.getPoints = function () {
+	return points;
+};
+
+window.spendPoints = function (amount) {
+	if (!Number.isSafeInteger(amount) || amount <= 0) {
+		console.warn('[addon] spendPoints expects a positive integer, got:', amount);
+		return false;
+	}
+	if (amount > points) return false;
+	points -= amount;
+	updatePointsDisplay();
+	updateShopUI();
+	saveAllData();
+	return true;
+};
+
+window.awardPoints = function (amount) {
+	if (!Number.isSafeInteger(amount) || amount <= 0) {
+		console.warn('[addon] awardPoints expects a positive integer, got:', amount);
+		return false;
+	}
+	points += amount;
+	updatePointsDisplay();
+	updateShopUI();
+	saveAllData();
+	return true;
+};
 
 function updateShopUI() {
 	document.getElementById('luckLevel').textContent = shopUpgrades.luck;
