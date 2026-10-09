@@ -1,4 +1,5 @@
 // Generated code starts here on 2026-03-31T00:00:00Z:
+/* global window */
 const { test, expect } = require('@playwright/test');
 
 test.describe('Runes Universal Transaction Machine (UTM) exchange logic', () => {
