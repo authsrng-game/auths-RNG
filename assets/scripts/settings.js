@@ -1409,15 +1409,9 @@
 				window.backgroundMusic.pause();
 				window.backgroundMusic.volume = 0;
 			}
-			if (window.lunarMusic) {
-				window.lunarMusic.pause();
-				window.lunarMusic.volume = 0;
-			}
 			if (window.stopCustomAudio) window.stopCustomAudio();
 			return;
 		}
-
-		if (window.lunarMusic) window.lunarMusic.volume = 0.6;
 
 		if (window.stopCustomAudio) window.stopCustomAudio();
 		if (window.backgroundMusic) {
