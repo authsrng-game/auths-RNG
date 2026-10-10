@@ -734,10 +734,6 @@ backgroundMusic.preload = 'none';
 backgroundMusic.loop = true;
 backgroundMusic.volume = 0.3;
 
-const lunarMusic = new Audio();
-lunarMusic.preload = 'none';
-lunarMusic.volume = 0; // ITS INTENTIONALLY 0. DONT MAKE A FIX TO THIS. when we got time we remove the lunar music code because now we have cutscenes that we can instead use. too redundant
-
 const runId = Math.floor(Math.random() * 1e10);
 
 const playtimeKey = 'totalPlaytime';
@@ -796,9 +792,7 @@ function playCutscene(rarityName, callback) {
 
 	// STOP ALL MUSIC BEFORE CUTSCENE BECAUSE YES OF COURSE
 	const wasBackgroundMusicPlaying = !backgroundMusic.paused;
-	const wasLunarMusicPlaying = !lunarMusic.paused;
 	backgroundMusic.pause();
-	lunarMusic.pause();
 
 	const overlay = document.getElementById('cutsceneOverlay');
 	const video = document.getElementById('cutsceneVideo');
@@ -810,23 +804,23 @@ function playCutscene(rarityName, callback) {
 	setTimeout(() => {
 		video.play().catch((err) => {
 			console.error('Video playback failed:', err);
-			endCutscene(overlay, callback, wasBackgroundMusicPlaying, wasLunarMusicPlaying);
+			endCutscene(overlay, callback, wasBackgroundMusicPlaying);
 		});
 	}, 100);
 
 	// when video ends
 	video.onended = () => {
-		endCutscene(overlay, callback, wasBackgroundMusicPlaying, wasLunarMusicPlaying);
+		endCutscene(overlay, callback, wasBackgroundMusicPlaying);
 	};
 
 	// Error handling
 	video.onerror = () => {
 		console.error('video failed to load');
-		endCutscene(overlay, callback, wasBackgroundMusicPlaying, wasLunarMusicPlaying);
+		endCutscene(overlay, callback, wasBackgroundMusicPlaying);
 	};
 }
 
-function endCutscene(overlay, callback, wasBackgroundMusicPlaying, wasLunarMusicPlaying) {
+function endCutscene(overlay, callback, wasBackgroundMusicPlaying) {
 	// fade out
 	overlay.classList.add('fadeout');
 
@@ -843,9 +837,6 @@ function endCutscene(overlay, callback, wasBackgroundMusicPlaying, wasLunarMusic
 		if (!isMuted) {
 			if (wasBackgroundMusicPlaying) {
 				backgroundMusic.play().catch(() => {});
-			}
-			if (wasLunarMusicPlaying) {
-				lunarMusic.play().catch(() => {});
 			}
 		}
 
@@ -2030,8 +2021,6 @@ function checkMuteSettings() {
 			if (settings.muted) {
 				backgroundMusic.pause();
 				backgroundMusic.volume = 0;
-				lunarMusic.pause();
-				lunarMusic.volume = 0;
 				return true;
 			}
 		}
@@ -2174,16 +2163,7 @@ function maybeFireConfettiAndCutscene(res) {
 
 	const afterReveal = () => {
 		const isMuted = checkMuteSettings();
-		if (res.name === 'Lunar') {
-			if (!isMuted) {
-				lunarMusic.currentTime = 0;
-				lunarMusic.play().catch(() => {});
-			}
-			backgroundMusic.pause();
-		} else {
-			lunarMusic.pause();
-			if (!isMuted) backgroundMusic.play().catch(() => {});
-		}
+		if (!isMuted) backgroundMusic.play().catch(() => {});
 		rollBtn.disabled = false;
 		debouncedSave();
 	};
@@ -2576,7 +2556,6 @@ function generateRunCard() {
 }
 
 window.backgroundMusic = backgroundMusic;
-window.lunarMusic = lunarMusic;
 
 const buyMagnetBtn = document.getElementById('buyMagnetBtn');
 if (buyMagnetBtn) {
