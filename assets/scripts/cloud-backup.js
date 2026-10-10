@@ -73,12 +73,31 @@ console.log(performance.now());
 		return obj;
 	}
 
+	/**
+	 * Encodes a local save key-value bundle into a base64-encoded cloud save envelope.
+	 *
+	 * Pairs JSON-stringified save data with a non-cryptographic hash digest (`uid_hash`)
+	 * inside the envelope structure `{ p: payload, h: hash, t: 'save' }` to detect stream
+	 * corruption or tampering prior to remote backup ingestion.
+	 *
+	 * @param {Record<string, string>} b - Key-value map of localStorage save entries to bundle.
+	 * @returns {string} Base64-encoded envelope payload string.
+	 */
 	function encode(b) {
 		const payload = JSON.stringify(b);
 		const env = JSON.stringify({ p: payload, h: uid_hash(payload), t: 'save' });
 		return btoa(unescape(encodeURIComponent(env)));
 	}
 
+	/**
+	 * Decodes and validates a base64-encoded cloud save envelope payload string.
+	 *
+	 * Validates envelope structure, message type (`'save'`), and hash digest integrity (`uid_hash`).
+	 * Sanitizes decoded entries against `SAVE_KEYS` to strip unrecognised keys before save restoration.
+	 *
+	 * @param {string} input - Base64 envelope payload to decode.
+	 * @returns {{ bundle?: Record<string, string>, error?: string }} Result object containing the sanitized bundle or error message.
+	 */
 	function decode(input) {
 		let env;
 		try {
