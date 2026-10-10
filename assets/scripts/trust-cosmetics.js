@@ -187,40 +187,62 @@
 	let trailCleanup = null;
 	let autoMutateInterval = null;
 
-	// Generated code starts here on 2026-09-25T12:46:00Z:
+	// Generated code starts here on 2026-03-31T00:00:00Z:
+	function processAutoMutate() {
+		if (!getOwned().includes('upgrade_automutate')) return;
+		const now = Date.now();
+		const lastTick = window._lastAutoMutateTick || now;
+		const elapsedMs = now - lastTick;
+		const elapsedTicks = Math.floor(elapsedMs / 20000);
+
+		if (elapsedTicks > 0) {
+			const cappedTicks = Math.min(180, elapsedTicks);
+			window._lastAutoMutateTick = now - (elapsedMs % 20000);
+
+			for (let i = 0; i < cappedTicks; i++) {
+				const ms = window.MutationSystem;
+				if (!ms || typeof ms.getInventoryRarities !== 'function') break;
+				const inv = ms.getInventoryRarities();
+				if (!inv || inv.length < 2) break;
+				const shuffle = [...inv].sort(
+					() => (typeof Beacon !== 'undefined' ? Beacon.float() : Math.random()) - 0.5
+				);
+				const a = shuffle[0];
+				const b = shuffle[1];
+				if (a.name === b.name) continue;
+				const result = ms.mutate(a.name, b.name);
+				if (!result) continue;
+				const idxA = ms.getRarityIndex(a.name);
+				const idxB = ms.getRarityIndex(b.name);
+				const resultIdx = ms.getRarityIndex(result.name);
+				const wasGood = resultIdx < Math.min(idxA, idxB);
+				const trustDelta = ms.getTrustDelta(wasGood, resultIdx, idxA, idxB);
+				ms.addTrust(trustDelta);
+				ms.addToHistory(a.name, b.name, result, wasGood);
+				ms.renderHistory();
+				ms.renderTrustBalance();
+				if (typeof addToInventory === 'function') addToInventory(result);
+				if (typeof saveAllData === 'function') saveAllData();
+			}
+		}
+	}
+
 	function startAutoMutate() {
 		if (autoMutateInterval) {
 			clearInterval(autoMutateInterval);
 			autoMutateInterval = null;
 		}
 		if (!getOwned().includes('upgrade_automutate')) return;
-		autoMutateInterval = setInterval(() => {
-			const ms = window.MutationSystem;
-			if (!ms || typeof ms.getInventoryRarities !== 'function') return;
-			const inv = ms.getInventoryRarities();
-			if (!inv || inv.length < 2) return;
-			const shuffle = [...inv].sort(
-				() => (typeof Beacon !== 'undefined' ? Beacon.float() : Math.random()) - 0.5
-			);
-			const a = shuffle[0];
-			const b = shuffle[1];
-			if (a.name === b.name) return;
-			const result = ms.mutate(a.name, b.name);
-			if (!result) return;
-			const idxA = ms.getRarityIndex(a.name);
-			const idxB = ms.getRarityIndex(b.name);
-			const resultIdx = ms.getRarityIndex(result.name);
-			const wasGood = resultIdx < Math.min(idxA, idxB);
-			const trustDelta = ms.getTrustDelta(wasGood, resultIdx, idxA, idxB);
-			ms.addTrust(trustDelta);
-			ms.addToHistory(a.name, b.name, result, wasGood);
-			ms.renderHistory();
-			ms.renderTrustBalance();
-			if (typeof addToInventory === 'function') addToInventory(result);
-			if (typeof saveAllData === 'function') saveAllData();
-		}, 20000);
+		window._lastAutoMutateTick = Date.now();
+		autoMutateInterval = setInterval(processAutoMutate, 20000);
 	}
-	// Generated code ends here on 2026-09-25T12:46:00Z:
+
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'visible') {
+			processAutoMutate();
+		}
+	});
+	// Generated code ends here on 2026-03-31T00:00:00Z:
 
 	function initTrail(id) {
 		if (trailCleanup) {
