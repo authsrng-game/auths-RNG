@@ -1,4 +1,5 @@
 // Generated code starts here on 2026-03-31T00:00:00Z:
+/* global window */
 const { test, expect } = require('@playwright/test');
 
 test.describe('Runes Universal Transaction Machine (UTM) exchange logic', () => {
@@ -6,10 +7,26 @@ test.describe('Runes Universal Transaction Machine (UTM) exchange logic', () => 
 		page,
 	}) => {
 		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('startAnimConfig', JSON.stringify({ enabled: false }));
+			const origFetch = window.fetch;
+			window.fetch = function (...args) {
+				if (typeof args[0] === 'string' && args[0].includes('releases/latest')) {
+					return Promise.resolve(
+						new Response(
+							JSON.stringify({
+								tag_name: 'v9.7',
+								body: '',
+								published_at: new Date().toISOString(),
+							}),
+							{ status: 200 }
+						)
+					);
+				}
+				return origFetch.apply(this, args);
+			};
 			if (!localStorage.getItem('runesInitialized')) {
-				localStorage.setItem('seenLegalConsent', '1');
-				localStorage.setItem('seenReleaseTag', 'v9.7');
-				localStorage.setItem('startAnimConfig', JSON.stringify({ enabled: false }));
 				localStorage.setItem('runesUnlocked', '1');
 				localStorage.setItem(
 					'runesData',

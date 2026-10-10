@@ -4,6 +4,10 @@ const { test, expect } = require('@playwright/test');
 
 test.describe('Runes UTM Exchange', () => {
 	test('round-trip conversion is lossy and scales with getExchangeRate', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
 		await page.goto('http://localhost:8080/');
 		await page.evaluate(() => {
 			localStorage.setItem('runesUnlocked', '1');
