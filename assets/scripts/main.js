@@ -2275,6 +2275,7 @@ document.addEventListener('visibilitychange', () => {
 	}
 
 	if (isWellOnCooldown()) {
+		startWellCooldownTimer();
 		updateWellUI();
 	}
 });
