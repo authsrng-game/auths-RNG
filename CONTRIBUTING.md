@@ -26,7 +26,7 @@ cd auths-RNG
 
 ### 3. Install dependencies
 
-Install project dependencies with pnpm (optional):
+Install project dependencies with pnpm (required for linting, testing, and dev tooling):
 
 ```bash
 pnpm install
