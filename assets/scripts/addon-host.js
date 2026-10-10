@@ -150,6 +150,7 @@ const AddonManager = {
 };
 
 window.AddonManager = AddonManager;
+window.ADDON_API_VERSION = 1; // we need something like this so addons dont break on updates
 
 function initAddons() {
 	AddonManager.syncFromIndex().then(() => {
