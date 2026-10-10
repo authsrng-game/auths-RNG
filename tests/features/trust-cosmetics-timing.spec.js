@@ -4,7 +4,9 @@ const { test, expect } = require('@playwright/test');
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
 
 test.describe('Trust Cosmetics timing reconciliation', () => {
-	test('reconciles auto-mutations on visibilitychange when tab was backgrounded', async ({ page }) => {
+	test('reconciles auto-mutations on visibilitychange when tab was backgrounded', async ({
+		page,
+	}) => {
 		await page.addInitScript(() => {
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('seenReleaseTag', 'v9.7');
