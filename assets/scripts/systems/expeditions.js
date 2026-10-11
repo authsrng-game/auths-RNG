@@ -70,6 +70,19 @@
 	}
 	window.startExpedition = startExpedition;
 
+	// Generated code starts here on 2026-03-31T23:00:00Z:
+	/**
+	 * Resolves an active expedition upon completion by simulating offline rolls.
+	 *
+	 * Calculates roll count based on duration and roll speed, capped at MAX_SIM_ROLLS (4,000).
+	 * Risk mode halves roll count (0.5x) in exchange for doubling effective luck (2x).
+	 * Updates `window.rarityTimestamps` for acquired rarities to satisfy gauntlet re-claim
+	 * requirements, awards 1 anomaly for each rarity rarer than 1/10,000, and triggers
+	 * a recovery cooldown equal to 50% of the expedition duration.
+	 *
+	 * @param {Object} d - Persisted expedition state container from localStorage.
+	 */
+	// Generated code ends here on 2026-03-31T23:00:00Z:
 	function resolveExpedition(d) {
 		const exp = d.active;
 		const len = LENGTHS.find((l) => l.id === exp.lengthId);
