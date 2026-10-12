@@ -1166,7 +1166,7 @@ function loadAllData() {
 	pointDivisor = Math.max(1.0, 3.0 - shopUpgrades.pointMult * 0.2);
 
 	recalcLuckMultiplier();
-	console.log("PUKE: filename: /assets/scripts/main.js, line: 1169"); //PKDBG/Point
+	console.log('PUKE: filename: /assets/scripts/main.js, line: 1169'); //PKDBG/Point
 	console.log('[main] all data loaded.');
 }
 
