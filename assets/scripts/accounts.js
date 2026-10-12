@@ -1380,51 +1380,7 @@ console.log(performance.now());
 	}
 
 	function runMigration() {
-		if (localStorage.getItem('accountsMigrationDone_v1') === 'true') return;
-
-		const hadCloudBackup = localStorage.getItem('cloudBackupEnabled') === 'true';
-		const hadLeaderboard = localStorage.getItem('lbEnabled') === 'true';
-		const oldUid = localStorage.getItem('cloudBackupUid');
-
-		if (hadCloudBackup || hadLeaderboard) {
-			if (oldUid) {
-				if (hadCloudBackup) {
-					fetch('https://backup.authsrng.xyz/api/backup/' + oldUid, {
-						method: 'DELETE',
-						headers: { 'X-Backup-Key': oldUid },
-					}).catch(() => {});
-				}
-				if (hadLeaderboard) {
-					fetch('https://leaderboard.authsrng.xyz/api/leaderboard/' + oldUid, {
-						method: 'DELETE',
-						headers: { 'X-Backup-Key': oldUid },
-					}).catch(() => {});
-				}
-			}
-
-			localStorage.removeItem('cloudBackupEnabled');
-			localStorage.removeItem('lastCloudBackup');
-			localStorage.removeItem('cloudBackupInterval');
-			localStorage.removeItem('cloudBackupAgreed');
-			localStorage.removeItem('lbEnabled');
-			localStorage.removeItem('lbUsername');
-			localStorage.removeItem('cloudBackupUid');
-
-			el('migrationText').textContent =
-				'cloud backups and the leaderboard now require an account. your previous backup and leaderboard entry have been removed from the server. create a free account to use these features again.';
-			showOverlay('migrationPopup');
-
-			el('migrationOk').addEventListener(
-				'click',
-				() => {
-					hideOverlay('migrationPopup');
-				},
-				{ once: true }
-			);
-		} else {
-			localStorage.removeItem('cloudBackupUid');
-		}
-
+		localStorage.removeItem('cloudBackupUid');
 		localStorage.setItem('accountsMigrationDone_v1', 'true');
 	}
 

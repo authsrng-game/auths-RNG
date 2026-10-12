@@ -1,374 +1,128 @@
 'use strict';
 
-console.log(performance.now());
-
 (function () {
-	const API = 'https://backup.authsrng.xyz/api/backup';
+	function el(id) {
+		return document.getElementById(id);
+	}
 
-	// Generated code starts here on 2026-10-24T00:00:00Z:
-	const SAVE_KEYS = [
-		'rarityInventory',
-		'totalRolls',
-		'achievementsUnlocked',
-		'anomalies',
-		'anomaliesUsed',
-		'shopPoints',
-		'shopUpgrades',
-		'soldOutRarities',
-		'playerPotions',
-		'activePotions',
-		'wishingWell',
-		'luckBoostState',
-		'totalPlaytime',
-		'daily_lastClaim',
-		'daily_streak',
-		'weekly_lastClaim',
-		'weekly_streak',
-		'gauntletData',
-		'mutationsUnlocked',
-		'starmapData',
-		'starmapUnlocked',
-		'runesData',
-		'runesUnlocked',
-		'runeBlocks',
-		'runeGift',
-		'runeUpgrades',
-		'expeditionData',
-		'expeditionsUnlocked',
-		'dealerData',
-		'dealerUnlocked',
-		'catShrineUnlocked',
-		'catShrineEquipped',
-		'catShrineToggle',
-		'mutationTrust',
-		'mutationTrustOwned',
-		'mutationTrustActive',
-		'mutationHistory',
-		'mutationBestResult',
-		'rarityTimestamps',
-		'notifications',
-		'themeEditorPresets',
-		'themeEditorActive',
-		'startAnimConfig',
-		'_plush_v3',
-		'infoTipsRead',
-	];
-	// Generated code ends here on 2026-10-24T00:00:00Z:
+	function ago(ts) {
+		if (!ts) return 'never';
+		const s = Math.floor((Date.now() - ts) / 1000);
+		if (s < 60) return 'just now';
+		if (s < 3600) return Math.floor(s / 60) + 'm ago';
+		if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+		return Math.floor(s / 86400) + 'd ago';
+	}
 
-	function uid_hash(str) {
-		let h = 0;
-		for (let i = 0; i < str.length; i++) {
-			h = (h << 5) - h + str.charCodeAt(i);
-			h |= 0;
+	const num = (n) =>
+		typeof window.formatNum === 'function' ? window.formatNum(n) : Math.round(n).toLocaleString();
+
+	const KIND = {
+		auto: 'auto',
+		safety: 'before overwrite',
+		peak: 'best progress',
+		stash: 'replaced on this device',
+	};
+
+	function label(s) {
+		if (!window.AuthAccount || !window.AuthAccount.isLoggedIn()) return 'log in to sync your save';
+		if (s.status === 'ok') return 'synced ' + ago(s.lastSyncAt);
+		if (s.status === 'syncing') return 'syncing...';
+		if (s.status === 'offline') return 'offline, will sync when back online';
+		if (s.status === 'conflict') return 'paused: save conflict';
+		if (s.status === 'error') return 'problem: ' + (s.error || 'unknown');
+		return s.status;
+	}
+
+	async function renderHistory(box) {
+		box.textContent = 'loading...';
+		const list = await window.Sync.listHistory();
+		box.textContent = '';
+		if (!list) {
+			box.textContent = 'could not load restore points';
+			return;
 		}
-		return (h >>> 0).toString(16).padStart(8, '0');
-	}
-
-	function bundle() {
-		const obj = {};
-		SAVE_KEYS.forEach((k) => {
-			const v = localStorage.getItem(k);
-			if (v !== null) obj[k] = v;
-		});
-		return obj;
-	}
-
-	/**
-	 * Encodes a local save key-value bundle into a base64-encoded cloud save envelope.
-	 *
-	 * Pairs JSON-stringified save data with a non-cryptographic hash digest (`uid_hash`)
-	 * inside the envelope structure `{ p: payload, h: hash, t: 'save' }` to detect stream
-	 * corruption or tampering prior to remote backup ingestion.
-	 *
-	 * @param {Record<string, string>} b - Key-value map of localStorage save entries to bundle.
-	 * @returns {string} Base64-encoded envelope payload string.
-	 */
-	function encode(b) {
-		const payload = JSON.stringify(b);
-		const env = JSON.stringify({ p: payload, h: uid_hash(payload), t: 'save' });
-		return btoa(unescape(encodeURIComponent(env)));
-	}
-
-	/**
-	 * Decodes and validates a base64-encoded cloud save envelope payload string.
-	 *
-	 * Validates envelope structure, message type (`'save'`), and hash digest integrity (`uid_hash`).
-	 * Sanitizes decoded entries against `SAVE_KEYS` to strip unrecognised keys before save restoration.
-	 *
-	 * @param {string} input - Base64 envelope payload to decode.
-	 * @returns {{ bundle?: Record<string, string>, error?: string }} Result object containing the sanitized bundle or error message.
-	 */
-	function decode(input) {
-		let env;
-		try {
-			env = JSON.parse(decodeURIComponent(escape(atob(input.trim()))));
-		} catch {
-			return { error: 'corrupted data' };
+		if (!list.length) {
+			box.textContent = 'no restore points yet';
+			return;
 		}
-		if (!env?.p || !env?.h || !env?.t) return { error: 'invalid format' };
-		if (env.t !== 'save') return { error: 'wrong type' };
-		if (uid_hash(env.p) !== env.h) return { error: 'tampered or corrupted' };
-		try {
-			const parsedBundle = JSON.parse(env.p);
-			// Generated code starts here on 2026-03-29T00:00:00Z:
-			if (
-				typeof parsedBundle !== 'object' ||
-				parsedBundle === null ||
-				Array.isArray(parsedBundle)
-			) {
-				return { error: 'invalid save format' };
-			}
-			const sanitized = {};
-			for (const key of Object.keys(parsedBundle)) {
-				if (SAVE_KEYS.includes(key) && typeof parsedBundle[key] === 'string') {
-					sanitized[key] = parsedBundle[key];
-				}
-			}
-			return { bundle: sanitized };
-			// Generated code ends here on 2026-03-29T00:00:00Z:
-		} catch {
-			return { error: 'bad json' };
-		}
-	}
-
-	function isEnabled() {
-		return localStorage.getItem('cloudBackupEnabled') === 'true';
-	}
-
-	function setEnabled(v) {
-		localStorage.setItem('cloudBackupEnabled', String(v));
-	}
-
-	function getAutoInterval() {
-		return localStorage.getItem('cloudBackupInterval') || '30m';
-	}
-
-	function setStatus(msg, color) {
-		const el = document.getElementById('cloudBackupStatus');
-		if (!el) return;
-		el.textContent = msg;
-		el.style.color = color || '';
-	}
-
-	// Generated code starts here on 2026-06-18T14:15:00Z:
-	function parseTimestamp(ts) {
-		if (!ts) return null;
-		return !isNaN(ts) ? Number(ts) : ts;
-	}
-
-	function setLastBackupDisplay(ts) {
-		const el = document.getElementById('cloudLastBackup');
-		if (!el) return;
-		const parsed = parseTimestamp(ts);
-		el.textContent = parsed ? 'last backup: ' + new Date(parsed).toLocaleString() : 'no backup yet';
-	}
-	// Generated code ends here on 2026-06-18T14:15:00Z:
-
-	function authHeaders() {
-		const token = window.AuthAccount ? window.AuthAccount.getToken() : null;
-		return token ? { Authorization: 'Bearer ' + token } : {};
-	}
-
-	async function doBackup(silent) {
-		if (!window.AuthAccount || !window.AuthAccount.isLoggedIn()) return false;
-		const payload = encode(bundle());
-		if (!silent) setStatus('backing up...', '');
-
-		try {
-			const r = await fetch(API, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json', ...authHeaders() },
-				body: JSON.stringify({ payload }),
-			});
-			const data = await r.json();
-			if (!r.ok) {
-				const errMsg = data.error || r.status;
-				if (!silent) setStatus('error: ' + errMsg, '#ff8888');
-				// Generated code starts here on 2026-03-31T22:30:00Z:
-				console.warn(
-					'[cloud-backup] ' + (silent ? 'silent auto-backup' : 'backup') + ' rejected:',
-					errMsg
+		list.forEach((e) => {
+			const row = document.createElement('div');
+			row.style.cssText =
+				'display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-color);font-size:0.8em;';
+			const info = document.createElement('div');
+			info.textContent =
+				(KIND[e.kind] || e.kind) + ' - ' + num(e.rolls) + ' rolls - ' + ago(e.createdAt);
+			const b = document.createElement('button');
+			b.className = 'small';
+			b.textContent = 'restore';
+			b.addEventListener('click', async () => {
+				const ok = await window.showConfirm(
+					'restore this save (' +
+						num(e.rolls) +
+						' rolls)? your current cloud save is kept as a restore point.',
+					'restore'
 				);
-				// Generated code ends here on 2026-03-31T22:30:00Z:
-				return false;
-			}
-			localStorage.setItem('lastCloudBackup', data.ts);
-			setLastBackupDisplay(data.ts);
-			if (!silent) setStatus('backed up at ' + new Date(data.ts).toLocaleString(), '#88dd88');
-			return true;
-		} catch (e) {
-			if (!silent) setStatus('backup failed: ' + e.message, '#ff8888');
-			// Generated code starts here on 2026-03-31T22:30:00Z:
-			console.warn(
-				'[cloud-backup] ' + (silent ? 'silent auto-backup' : 'backup') + ' failed:',
-				e.message || e
-			);
-			// Generated code ends here on 2026-03-31T22:30:00Z:
-			return false;
-		}
-	}
-
-	async function doRestore() {
-		if (!window.AuthAccount || !window.AuthAccount.isLoggedIn()) return;
-		if (!confirm('restore from cloud? this will overwrite your current save. are you sure?'))
-			return;
-
-		setStatus('restoring...', '');
-		try {
-			const r = await fetch(API, { headers: authHeaders() });
-			const data = await r.json();
-			if (!r.ok || !data.payload) {
-				const errMsg = data.error || (r.ok ? 'no backup found' : r.status);
-				setStatus('error: ' + errMsg, '#ff8888');
-				// Generated code starts here on 2026-03-31T22:30:00Z:
-				console.warn('[cloud-backup] restore rejected:', errMsg);
-				// Generated code ends here on 2026-03-31T22:30:00Z:
-				return;
-			}
-			const result = decode(data.payload);
-			if (result.error) {
-				setStatus('restore error: ' + result.error, '#ff8888');
-				// Generated code starts here on 2026-03-31T22:30:00Z:
-				console.warn('[cloud-backup] restore decode error:', result.error);
-				// Generated code ends here on 2026-03-31T22:30:00Z:
-				return;
-			}
-			Object.keys(result.bundle).forEach((k) => localStorage.setItem(k, result.bundle[k]));
-			setStatus('restored! reloading...', '#88dd88');
-			setTimeout(() => location.reload(), 600);
-		} catch (e) {
-			setStatus('restore failed: ' + e.message, '#ff8888');
-			// Generated code starts here on 2026-03-31T22:30:00Z:
-			console.warn('[cloud-backup] restore failed:', e.message || e);
-			// Generated code ends here on 2026-03-31T22:30:00Z:
-		}
-	}
-
-	async function doDelete() {
-		if (!window.AuthAccount || !window.AuthAccount.isLoggedIn()) return;
-		if (!confirm('permanently delete your cloud backup? this cannot be undone.')) return;
-
-		setStatus('deleting...', '');
-		try {
-			const r = await fetch(API, { method: 'DELETE', headers: authHeaders() });
-			const data = await r.json();
-			if (!r.ok) {
-				const errMsg = data.error || r.status;
-				setStatus('error: ' + errMsg, '#ff8888');
-				// Generated code starts here on 2026-03-31T22:30:00Z:
-				console.warn('[cloud-backup] delete rejected:', errMsg);
-				// Generated code ends here on 2026-03-31T22:30:00Z:
-				return;
-			}
-			localStorage.removeItem('lastCloudBackup');
-			setLastBackupDisplay(null);
-			setStatus('cloud backup deleted.', '#aaa');
-		} catch (e) {
-			setStatus('delete failed: ' + e.message, '#ff8888');
-			// Generated code starts here on 2026-03-31T22:30:00Z:
-			console.warn('[cloud-backup] delete failed:', e.message || e);
-			// Generated code ends here on 2026-03-31T22:30:00Z:
-		}
-	}
-
-	let autoTimer = null;
-
-	function startAutoBackup() {
-		clearInterval(autoTimer);
-		autoTimer = null;
-		if (!isEnabled() || !window.AuthAccount || !window.AuthAccount.isLoggedIn()) return;
-		const iv = getAutoInterval();
-		const ms = iv === '1h' ? 60 * 60 * 1000 : iv === '3h' ? 3 * 60 * 60 * 1000 : 30 * 60 * 1000;
-		autoTimer = setInterval(() => {
-			if (!document.hidden) doBackup(true);
-		}, ms);
-	}
-
-	function buildUI() {
-		const section = document.getElementById('cloudBackupSection');
-		if (!section) return;
-
-		if (!window.AuthAccount || !window.AuthAccount.isLoggedIn()) {
-			section.innerHTML = `
-      <small class="helper" style="margin-top:6px;display:block;">
-        log in to enable cloud backups.
-      </small>`;
-			return;
-		}
-
-		if (!isEnabled()) {
-			section.innerHTML = `
-      <button id="enableCloudBackupBtn" class="small" style="width:100%;margin-top:4px;">enable cloud backups</button>
-      <small class="helper" style="margin-top:6px;">your save, stored remotely under your account.</small>
-    `;
-			document.getElementById('enableCloudBackupBtn').addEventListener('click', async () => {
-				setEnabled(true);
-				buildUI();
-				startAutoBackup();
-				doBackup(false);
+				if (!ok) return;
+				const out = await window.Sync.restoreFromHistory(e.id);
+				if (!out.ok) window.showAlert(out.error || 'restore failed');
 			});
-			return;
-		}
-
-		// Generated code starts here on 2026-06-18T14:15:00Z:
-		const lastTs = localStorage.getItem('lastCloudBackup');
-		const parsedTs = parseTimestamp(lastTs);
-		const lastStr = parsedTs
-			? 'last backup: ' + new Date(parsedTs).toLocaleString()
-			: 'no backup yet';
-		// Generated code ends here on 2026-06-18T14:15:00Z:
-		const iv = getAutoInterval();
-
-		section.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <span style="font-size:0.85em;opacity:0.8;">cloud backups: <span style="color:#88dd88;">on</span></span>
-      <button id="disableCloudBackupBtn" class="small" style="opacity:0.5;">disable</button>
-    </div>
-    <div id="cloudLastBackup" style="font-size:0.8em;opacity:0.5;margin-bottom:10px;">${lastStr}</div>
-    <label style="display:block;font-size:0.85em;margin-bottom:4px;">auto-backup interval:</label>
-    <select id="cloudIntervalSelect" style="width:100%;margin-bottom:10px;">
-      <option value="30m"${iv === '30m' ? ' selected' : ''}>every 30 minutes</option>
-      <option value="1h"${iv === '1h' ? ' selected' : ''}>every 1 hour</option>
-      <option value="3h"${iv === '3h' ? ' selected' : ''}>every 3 hours</option>
-    </select>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-      <button id="cloudBackupNowBtn" class="small">backup now</button>
-      <button id="cloudRestoreBtn" class="small">restore from cloud</button>
-      <button id="cloudDeleteBtn" class="small" style="opacity:0.5;color:#ff8888;">delete backup</button>
-    </div>
-    <div id="cloudBackupStatus" style="font-size:0.8em;min-height:1.2em;"></div>
-  `;
-
-		document.getElementById('disableCloudBackupBtn').addEventListener('click', () => {
-			if (!confirm('disable cloud backups? your existing cloud data will not be deleted.')) return;
-			setEnabled(false);
-			clearInterval(autoTimer);
-			autoTimer = null;
-			buildUI();
-		});
-
-		document.getElementById('cloudIntervalSelect').addEventListener('change', (e) => {
-			localStorage.setItem('cloudBackupInterval', e.target.value);
-			startAutoBackup();
-		});
-
-		document.getElementById('cloudBackupNowBtn').addEventListener('click', () => doBackup(false));
-		document.getElementById('cloudRestoreBtn').addEventListener('click', doRestore);
-		document.getElementById('cloudDeleteBtn').addEventListener('click', doDelete);
-	}
-
-	function init() {
-		buildUI();
-		if (isEnabled()) startAutoBackup();
-		document.addEventListener('authchange', () => {
-			buildUI();
-			startAutoBackup();
+			row.appendChild(info);
+			row.appendChild(b);
+			box.appendChild(row);
 		});
 	}
 
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', init);
-	} else {
-		init();
+	function build() {
+		const section = el('cloudBackupSection');
+		if (!section) return;
+		section.textContent = '';
+		const s = window.Sync ? window.Sync.status() : { status: 'idle' };
+		const line = document.createElement('div');
+		line.style.cssText = 'font-size:0.85em;opacity:0.8;margin-bottom:10px;';
+		line.textContent = 'cloud sync: ' + label(s);
+		section.appendChild(line);
+		if (!window.AuthAccount || !window.AuthAccount.isLoggedIn() || !window.Sync) return;
+
+		const row = document.createElement('div');
+		row.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;';
+		const mk = (text, fn, style) => {
+			const b = document.createElement('button');
+			b.className = 'small';
+			b.textContent = text;
+			if (style) b.style.cssText = style;
+			b.addEventListener('click', fn);
+			row.appendChild(b);
+			return b;
+		};
+		mk('sync now', async () => {
+			await window.Sync.syncNow();
+			build();
+		});
+		const hist = document.createElement('div');
+		hist.style.cssText = 'max-height:260px;overflow-y:auto;margin-top:6px;';
+		mk('restore points', () => renderHistory(hist));
+		mk(
+			'overwrite cloud with this device',
+			async () => {
+				const ok = await window.showConfirm(
+					'overwrite your cloud save with the save on this device? the current cloud save is kept as a restore point.',
+					'overwrite cloud'
+				);
+				if (!ok) return;
+				const done = await window.Sync.forcePush();
+				window.showAlert(done ? 'cloud save updated' : 'upload failed, try again');
+				build();
+			},
+			'opacity:0.6;'
+		);
+		section.appendChild(row);
+		section.appendChild(hist);
 	}
+
+	document.addEventListener('syncstatus', build);
+	document.addEventListener('authchange', build);
+	document.readyState === 'loading'
+		? document.addEventListener('DOMContentLoaded', build)
+		: build();
 })();

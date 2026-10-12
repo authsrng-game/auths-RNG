@@ -2,6 +2,7 @@
 
 (function () {
 	const API = 'https://accounts.authsrng.xyz/api/accounts';
+	let messages = [];
 
 	function escHtml(s) {
 		return String(s)
@@ -14,63 +15,31 @@
 
 	async function apiCall(path, options) {
 		const opts = options || {};
-		const headers = { 'Content-Type': 'application/json' };
 		const token = window.AuthAccount && window.AuthAccount.getToken();
+		const headers = { 'Content-Type': 'application/json' };
 		if (token) headers['Authorization'] = 'Bearer ' + token;
-		const res = await fetch(API + path, {
-			method: opts.method || 'GET',
-			headers,
-			body: opts.body ? JSON.stringify(opts.body) : undefined,
-		});
-		let data;
+		const res = await fetch(API + path, { method: opts.method || 'GET', headers });
+		let data = {};
 		try {
 			data = await res.json();
-		} catch (_) {
-			data = {};
-		}
+		} catch (_) {}
 		if (!res.ok) throw new Error(data.error || 'request failed');
 		return data;
 	}
 
-	let messages = [];
+	window.getSystemUnread = () => messages.filter((m) => !m.read).length;
 
-	async function loadSystemMessages() {
-		if (!window.AuthAccount || !window.AuthAccount.isLoggedIn()) return;
-		try {
-			const data = await apiCall('/system-messages');
-			messages = data.messages || [];
-			render();
-			// Generated code starts here on 2026-03-31T20:00:00Z:
-		} catch (err) {
-			console.warn('[system-notify] failed to load system messages:', err);
-		}
-		// Generated code ends here on 2026-03-31T20:00:00Z:
-	}
-
-	function render() {
+	window.renderSystemMessages = function () {
 		const list = document.getElementById('notifList');
 		const empty = document.getElementById('notifEmpty');
-		const badge = document.getElementById('notifBadge');
 		if (!list) return;
-
-		const unread = messages.filter((m) => !m.read).length;
-		if (badge) {
-			badge.textContent = unread > 0 ? String(unread) : '';
-			badge.style.display = unread > 0 ? 'inline-block' : 'none';
-		}
-
-		if (!messages.length) {
-			if (empty) empty.style.display = 'block';
-			return;
-		}
-		if (empty) empty.style.display = 'none';
-
+		list.querySelectorAll('.sysmsg-item').forEach((n) => n.remove());
+		if (messages.length && empty) empty.style.display = 'none';
 		const html = messages
 			.slice()
 			.sort((a, b) => b.ts - a.ts)
 			.map(
-				(m) => `
-			<div class="sysmsg-item${m.read ? '' : ' unread'}" data-id="${escHtml(m.id)}">
+				(m) => `<div class="sysmsg-item${m.read ? '' : ' unread'}" data-id="${escHtml(m.id)}">
 				<div class="sysmsg-from">${escHtml(m.from)}</div>
 				<div class="sysmsg-subject">${escHtml(m.subject)}</div>
 				<div class="sysmsg-body">${escHtml(m.body)}</div>
@@ -78,34 +47,42 @@
 			</div>`
 			)
 			.join('');
-
-		// Generated code starts here on 2026-06-18T16:05:00Z:
-		list.querySelectorAll('.sysmsg-item').forEach((el) => el.remove());
-		// Generated code ends here on 2026-06-18T16:05:00Z:
-		list.insertAdjacentHTML('beforeend', html);
-
-		list.querySelectorAll('.sysmsg-item.unread').forEach((el) => {
-			el.addEventListener(
+		list.insertAdjacentHTML('afterbegin', html);
+		list.querySelectorAll('.sysmsg-item.unread').forEach((n) => {
+			n.addEventListener(
 				'click',
 				async () => {
-					const id = el.dataset.id;
+					const id = n.dataset.id;
 					try {
 						await apiCall('/system-messages/' + id + '/read', { method: 'POST' });
 						const m = messages.find((x) => x.id === id);
 						if (m) m.read = true;
-						el.classList.remove('unread');
-						render();
-						// Generated code starts here on 2026-03-31T20:00:00Z:
+						n.classList.remove('unread');
+						if (typeof updateNotifBadge === 'function') updateNotifBadge();
 					} catch (err) {
 						console.warn('[system-notify] failed to mark message read:', id, err);
 					}
-					// Generated code ends here on 2026-03-31T20:00:00Z:
 				},
 				{ once: true }
 			);
 		});
+	};
+
+	async function load() {
+		if (!window.AuthAccount || !window.AuthAccount.isLoggedIn()) {
+			messages = [];
+			window.renderSystemMessages();
+			return;
+		}
+		try {
+			messages = (await apiCall('/system-messages')).messages || [];
+			window.renderSystemMessages();
+			if (typeof updateNotifBadge === 'function') updateNotifBadge();
+		} catch (err) {
+			console.warn('[system-notify] failed to load system messages:', err);
+		}
 	}
 
-	document.addEventListener('authchange', loadSystemMessages);
-	document.addEventListener('DOMContentLoaded', loadSystemMessages);
+	document.addEventListener('authchange', load);
+	document.addEventListener('DOMContentLoaded', load);
 })();
