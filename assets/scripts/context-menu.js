@@ -315,7 +315,20 @@
 		stats.forEach(([label, val]) => {
 			const s = document.createElement('div');
 			s.className = '_ctx-stat';
-			s.innerHTML = `<span class="_ctx-stat-label">${label}</span> <span class="_ctx-stat-val">${val}</span>`;
+
+			const labelSpan = document.createElement('span');
+			labelSpan.className = '_ctx-stat-label';
+			labelSpan.textContent = String(label);
+
+			const spacer = document.createTextNode(' ');
+
+			const valSpan = document.createElement('span');
+			valSpan.className = '_ctx-stat-val';
+			valSpan.textContent = String(val);
+
+			s.appendChild(labelSpan);
+			s.appendChild(spacer);
+			s.appendChild(valSpan);
 			el.appendChild(s);
 		});
 		return el;
