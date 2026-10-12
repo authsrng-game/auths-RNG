@@ -238,6 +238,14 @@
 	window.renderExpeditions = renderExpeditions;
 	setInterval(renderExpeditions, 3000);
 
+// Generated code starts here on 2026-04-02T12:00:00Z:
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'visible') {
+			renderExpeditions();
+		}
+	});
+// Generated code ends here on 2026-04-02T12:00:00Z:
+
 	function tryInit(n) {
 		if (document.getElementById('expeditionsContainer')) renderExpeditions();
 		else if (n > 0) setTimeout(() => tryInit(n - 1), 200);
