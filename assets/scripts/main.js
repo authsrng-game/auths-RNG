@@ -1329,18 +1329,19 @@ document.getElementById('buyPointBtn').addEventListener('click', () => {
 
 // Point printer passive generation
 let _lastShopUIPoints = -1;
-// Generated code starts here on 2026-03-31T20:00:00Z:
+// Generated code starts here on 2026-11-03T12:00:00Z:
 window._lastPrinterTick = Date.now();
 
 function updatePrinterPoints() {
 	if (shopUpgrades.printer > 0) {
 		const now = Date.now();
 		const elapsedMs = now - (window._lastPrinterTick || now);
-		const elapsedSeconds = Math.min(3600, Math.floor(elapsedMs / 1000));
+		const elapsedSeconds = Math.floor(elapsedMs / 1000);
 
 		if (elapsedSeconds > 0) {
-			window._lastPrinterTick = (window._lastPrinterTick || now) + elapsedSeconds * 1000;
-			points += shopUpgrades.printer * elapsedSeconds;
+			const cappedSeconds = Math.min(3600, elapsedSeconds);
+			window._lastPrinterTick = now - (elapsedMs % 1000);
+			points += shopUpgrades.printer * cappedSeconds;
 			updatePointsDisplay();
 
 			const luckCost = Math.floor(25 + shopUpgrades.luck * shopUpgrades.luck * 15);
@@ -1367,7 +1368,7 @@ document.addEventListener('visibilitychange', () => {
 		updatePrinterPoints();
 	}
 });
-// Generated code ends here on 2026-03-31T20:00:00Z.
+// Generated code ends here on 2026-11-03T12:00:00Z.
 
 // Generated code starts here on 2026-09-17T00:00:00Z:
 // Fast-path inventory item updates: preserve running RarityStyle animation loops, attach dblclick sell handler once, and manage new-roll highlight timers to eliminate per-roll allocation and DOM thrashing overhead.
