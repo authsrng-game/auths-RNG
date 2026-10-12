@@ -1,21 +1,7 @@
 'use strict';
 
-console.log(performance.now());
-
 (function () {
 	const API = 'https://leaderboard.authsrng.xyz/api/leaderboard';
-	const SUBMIT_INTERVAL = 15 * 60 * 1000;
-
-	// Generated code starts here on 2026-06-18T01:30:00Z:
-	function escHtml(s) {
-		return String(s)
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;')
-			.replace(/'/g, '&#39;');
-	}
-	// Generated code ends here on 2026-06-18T01:30:00Z:
 
 	function getInventoryArray() {
 		try {
@@ -40,7 +26,6 @@ console.log(performance.now());
 
 	function buildPayload() {
 		const inv = getInventoryArray();
-		const totalRarities = inv.reduce((s, item) => s + (parseInt(item.count) || 0), 0);
 		const rarest = getRarest(inv);
 		let achievements = [];
 		try {
@@ -48,7 +33,7 @@ console.log(performance.now());
 		} catch (_) {}
 		return {
 			rolls: parseInt(localStorage.getItem('totalRolls') || '0'),
-			rarities: totalRarities,
+			rarities: inv.reduce((s, i) => s + (parseInt(i.count) || 0), 0),
 			rarestName: rarest.name || 'none',
 			rarestDenom: rarest.denom,
 			playtime: parseInt(localStorage.getItem('totalPlaytime') || '0'),
@@ -56,156 +41,84 @@ console.log(performance.now());
 			achievements,
 		};
 	}
-	// Generated code ends here on 2026-06-18T15:15:00Z:
 
-	function isEnabled() {
-		return localStorage.getItem('lbEnabled') === 'true';
+	function headers() {
+		const t = window.AuthAccount ? window.AuthAccount.getToken() : null;
+		return { 'Content-Type': 'application/json', ...(t ? { Authorization: 'Bearer ' + t } : {}) };
+	}
+
+	async function call(method, path) {
+		const r = await fetch(API + path, { method, headers: headers() });
+		let d = {};
+		try {
+			d = await r.json();
+		} catch (_) {}
+		if (!r.ok) throw new Error(d.error || 'request failed');
+		return d;
 	}
 
 	function setStatus(msg, color) {
-		const el = document.getElementById('lbStatus');
-		if (!el) return;
-		el.textContent = msg;
-		el.style.color = color || '';
+		const s = document.getElementById('lbStatus');
+		if (!s) return;
+		s.textContent = msg;
+		s.style.color = color || '';
 	}
 
-	function authHeaders() {
-		const token = window.AuthAccount ? window.AuthAccount.getToken() : null;
-		return token ? { Authorization: 'Bearer ' + token } : {};
-	}
-
-	async function submit(silent) {
-		if (!isEnabled() || !window.AuthAccount || !window.AuthAccount.isLoggedIn()) return false;
-		if (!silent) setStatus('submitting...', '');
-		try {
-			const r = await fetch(API, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json', ...authHeaders() },
-				body: JSON.stringify(buildPayload()),
-			});
-			const data = await r.json();
-			if (!r.ok) {
-				if (!silent) setStatus('error: ' + (data.error || r.status), '#ff8888');
-				else console.warn('[leaderboard] silent auto-submit rejected:', data.error || r.status);
-				return false;
-			}
-			if (!silent) setStatus('updated!', '#88dd88');
-			return true;
-		} catch (e) {
-			if (!silent) setStatus('failed: ' + e.message, '#ff8888');
-			else console.warn('[leaderboard] silent auto-submit failed:', e.message);
-			return false;
-		}
-	}
-
-	// Generated code starts here on 2026-03-31T15:00:00Z:
-	async function deleteEntry() {
-		try {
-			const r = await fetch(API, { method: 'DELETE', headers: authHeaders() });
-			if (!r.ok) {
-				const data = await r.json().catch(() => ({}));
-				console.warn('[leaderboard] delete entry rejected:', data.error || r.status);
-			}
-		} catch (e) {
-			console.warn('[leaderboard] delete entry request failed:', e.message || e);
-		}
-	}
-	// Generated code ends here on 2026-03-31T15:00:00Z:
-
-	let autoTimer = null;
-
-	function startAuto() {
-		clearInterval(autoTimer);
-		if (!isEnabled() || !window.AuthAccount || !window.AuthAccount.isLoggedIn()) return;
-		autoTimer = setInterval(() => {
-			if (!document.hidden) submit(true);
-		}, SUBMIT_INTERVAL);
-	}
-
-	function buildUI() {
+	async function buildUI() {
 		const section = document.getElementById('leaderboardSection');
 		if (!section) return;
-
 		if (!window.AuthAccount || !window.AuthAccount.isLoggedIn()) {
-			section.innerHTML = `
-      <small class="helper" style="margin-top:6px;display:block;">
-        log in to join the leaderboard.
-      </small>`;
+			section.innerHTML =
+				'<small class="helper" style="margin-top:6px;display:block;">log in to join the leaderboard.</small>';
 			return;
 		}
-
-		const rolls = parseInt(localStorage.getItem('totalRolls') || '0');
-
-		if (!isEnabled()) {
-			if (rolls < 1100) {
-				section.innerHTML = `
-        <small class="helper" style="margin-top:6px;display:block;">
-          reach 1,100 rolls to unlock the leaderboard.
-          <span style="opacity:0.5;">(you have ${rolls})</span>
-        </small>`;
-				return;
-			}
-
-			section.innerHTML = `
-      <button id="enableLbBtn" class="small" style="width:100%;margin-top:4px;">join leaderboard</button>
-      <small class="helper" style="margin-top:6px;display:block;">
-        your stats shown publicly under your account username.
-        <a href="/assets/frontend/leaderboard.html" style="opacity:0.6;" target="_blank" rel="noopener noreferrer">view leaderboard</a>
-      </small>`;
-
+		let me;
+		try {
+			me = await call('GET', '/me');
+		} catch (e) {
+			section.innerHTML =
+				'<small class="helper" style="margin-top:6px;display:block;">leaderboard unavailable right now.</small>';
+			return;
+		}
+		if (!me.optedIn && !me.eligible) {
+			section.innerHTML =
+				'<small class="helper" style="margin-top:6px;display:block;">reach ' +
+				me.minRolls.toLocaleString() +
+				' synced rolls to unlock the leaderboard. <span style="opacity:0.5;">(you have ' +
+				me.rolls.toLocaleString() +
+				')</span></small>';
+			return;
+		}
+		if (!me.optedIn) {
+			section.innerHTML =
+				'<button id="enableLbBtn" class="small" style="width:100%;margin-top:4px;">join leaderboard</button><small class="helper" style="margin-top:6px;display:block;">your stats are shown publicly under your account username and update automatically from your cloud save. <a href="/assets/frontend/leaderboard.html" style="opacity:0.6;" target="_blank" rel="noopener noreferrer">view leaderboard</a></small><div id="lbStatus" style="font-size:0.8em;min-height:1.2em;"></div>';
 			document.getElementById('enableLbBtn').addEventListener('click', async () => {
-				localStorage.setItem('lbEnabled', 'true');
-				buildUI();
-				startAuto();
-				await submit(false);
+				try {
+					if (window.Sync) await window.Sync.syncNow();
+					await call('POST', '/join');
+					buildUI();
+				} catch (e) {
+					setStatus(e.message, '#ff8888');
+				}
 			});
-
 			return;
 		}
-
-		const username = window.AuthAccount.getUsername();
-
-		section.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <span style="font-size:0.85em;opacity:0.8;">
-        leaderboard: <span style="color:#88dd88;">on</span>
-        <span style="opacity:0.4;"> - ${escHtml(username)}</span>
-      </span>
-      <button id="disableLbBtn" class="small" style="opacity:0.5;">opt out</button>
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-      <button id="lbSubmitNowBtn" class="small">update now</button>
-      <a href="/assets/frontend/leaderboard.html" class="small"
-         style="display:inline-block;padding:4px 10px;border:1px solid var(--border-color,#333);text-decoration:none;color:inherit;">
-        view leaderboard →
-      </a>
-    </div>
-    <div id="lbStatus" style="font-size:0.8em;min-height:1.2em;"></div>`;
-
+		section.innerHTML =
+			'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-size:0.85em;opacity:0.8;">leaderboard: <span style="color:#88dd88;">on</span></span><button id="disableLbBtn" class="small" style="opacity:0.5;">opt out</button></div><a href="/assets/frontend/leaderboard.html" target="_blank" rel="noopener noreferrer">view leaderboard</a><div id="lbStatus" style="font-size:0.8em;min-height:1.2em;"></div>';
 		document.getElementById('disableLbBtn').addEventListener('click', async () => {
-			if (!confirm('opt out and delete your leaderboard entry permanently?')) return;
-			await deleteEntry();
-			localStorage.removeItem('lbEnabled');
-			clearInterval(autoTimer);
-			buildUI();
-		});
-
-		document.getElementById('lbSubmitNowBtn').addEventListener('click', () => submit(false));
-	}
-
-	function init() {
-		buildUI();
-		if (isEnabled()) {
-			startAuto();
-			submit(true);
-		}
-		document.addEventListener('authchange', () => {
-			buildUI();
-			startAuto();
+			if (!confirm('opt out and remove your leaderboard entry?')) return;
+			try {
+				await call('DELETE', '');
+				buildUI();
+			} catch (e) {
+				setStatus(e.message, '#ff8888');
+			}
 		});
 	}
 
 	window.LeaderboardSubmit = { buildPayload, getRarest };
-
-	document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', init) : init();
+	document.addEventListener('authchange', buildUI);
+	document.readyState === 'loading'
+		? document.addEventListener('DOMContentLoaded', buildUI)
+		: buildUI();
 })();
