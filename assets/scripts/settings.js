@@ -1943,57 +1943,6 @@
 		}
 	}
 
-	// -- Save / settings transfer ------------------------------------------
-	// Generated code starts here on 2026-10-24T00:00:00Z:
-	const SAVE_KEYS = [
-		'rarityInventory',
-		'totalRolls',
-		'achievementsUnlocked',
-		'anomalies',
-		'anomaliesUsed',
-		'shopPoints',
-		'shopUpgrades',
-		'soldOutRarities',
-		'playerPotions',
-		'activePotions',
-		'wishingWell',
-		'luckBoostState',
-		'totalPlaytime',
-		'daily_lastClaim',
-		'daily_streak',
-		'weekly_lastClaim',
-		'weekly_streak',
-		'gauntletData',
-		'mutationsUnlocked',
-		'starmapData',
-		'starmapUnlocked',
-		'runesData',
-		'runesUnlocked',
-		'runeBlocks',
-		'runeGift',
-		'runeUpgrades',
-		'expeditionData',
-		'expeditionsUnlocked',
-		'dealerData',
-		'dealerUnlocked',
-		'catShrineUnlocked',
-		'catShrineEquipped',
-		'catShrineToggle',
-		'mutationTrust',
-		'mutationTrustOwned',
-		'mutationTrustActive',
-		'mutationHistory',
-		'mutationBestResult',
-		'rarityTimestamps',
-		'notifications',
-		'themeEditorPresets',
-		'themeEditorActive',
-		'startAnimConfig',
-		'_plush_v3',
-		'infoTipsRead',
-	];
-	// Generated code ends here on 2026-10-24T00:00:00Z:
-
 	function simpleHash(str) {
 		let h = 0;
 		for (let i = 0; i < str.length; i++) {
@@ -2004,12 +1953,7 @@
 	}
 
 	function bundleSaveKeys() {
-		const obj = {};
-		SAVE_KEYS.forEach((k) => {
-			const v = localStorage.getItem(k);
-			if (v !== null) obj[k] = v;
-		});
-		return obj;
+		return window.SaveKeys.collect();
 	}
 
 	function encode(bundle, tag) {
@@ -2144,7 +2088,7 @@
 			['refreshSaveBtn', refreshSave],
 			[
 				'importSaveBtn',
-				() => {
+				async () => {
 					const input = prompt('paste your save data export:');
 					if (!input?.trim()) return;
 					const result = decode(input, 'save');
@@ -2152,7 +2096,16 @@
 						window.showAlert(result.error);
 						return;
 					}
-					Object.keys(result.bundle).forEach((k) => localStorage.setItem(k, result.bundle[k]));
+					const clean = {};
+					Object.keys(result.bundle).forEach((k) => {
+						if (window.SaveKeys.isSaveKey(k) && typeof result.bundle[k] === 'string')
+							clean[k] = result.bundle[k];
+					});
+					if (!Object.keys(clean).length) {
+						window.showAlert('that export has no save data');
+						return;
+					}
+					await window.Sync.importBundle(clean);
 					window.showAlert('save imported! reloading...');
 					setTimeout(() => location.reload(), 500);
 				},

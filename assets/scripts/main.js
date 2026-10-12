@@ -1093,7 +1093,7 @@ function saveAllData() {
 		chance: rarityObj.chance,
 		count,
 	}));
-	localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+	localStorage.setItem(STORAGE_KEY, JSON.stringify(arr.concat(window._orphanInventory || [])));
 	localStorage.setItem(TOTAL_ROLLS_KEY, totalRolls);
 	localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(Array.from(achievementsUnlocked)));
 	localStorage.setItem(ANOMALIES_KEY, String(anomalies));
@@ -1136,6 +1136,8 @@ function loadAllData() {
 					});
 					updateItem(inventoryData.get(o.name));
 					inventoryList.appendChild(li);
+				} else {
+					(window._orphanInventory = window._orphanInventory || []).push(item);
 				}
 			});
 		} catch (e) {
@@ -1164,6 +1166,7 @@ function loadAllData() {
 	pointDivisor = Math.max(1.0, 3.0 - shopUpgrades.pointMult * 0.2);
 
 	recalcLuckMultiplier();
+	console.log('PUKE: filename: /assets/scripts/main.js, line: 1169'); //PKDBG/Point
 	console.log('[main] all data loaded.');
 }
 
@@ -1478,7 +1481,7 @@ function checkAchievements(currentRarity) {
 function updateAnomalyUI() {
 	const el = document.getElementById('anomalyCount');
 	if (!el) return;
-	el.textContent = `Anomalies: ${anomalies}`;
+	el.textContent = `anomalies: ${anomalies}`;
 
 	const btn = document.getElementById('consumeAnomalyBtn');
 	if (btn) btn.disabled = anomalies <= 0;
@@ -1570,7 +1573,9 @@ function updateNotifBadge() {
 	const badge = document.getElementById('notifBadge');
 	const bell = document.getElementById('notifBell');
 	if (!badge) return;
-	const unread = notifications.filter((n) => !n.read).length;
+	const unread =
+		notifications.filter((n) => !n.read).length +
+		(typeof window.getSystemUnread === 'function' ? window.getSystemUnread() : 0);
 	if (unread === 0) {
 		badge.textContent = '';
 		badge.classList.remove('visible');
@@ -1586,37 +1591,22 @@ function renderNotifList() {
 	const list = document.getElementById('notifList');
 	const empty = document.getElementById('notifEmpty');
 	if (!list) return;
-
-	if (notifications.length === 0) {
-		list.innerHTML = '';
-		if (empty) empty.style.display = 'block';
-		return;
-	}
-	if (empty) empty.style.display = 'none';
-
 	list.innerHTML = '';
-	// newest first
 	[...notifications].reverse().forEach((notif) => {
 		const item = document.createElement('div');
 		item.className = 'notif-item ' + (notif.read ? 'notif-read' : 'notif-unread');
-
 		const body = document.createElement('div');
 		body.className = 'notif-body';
-
 		const txt = document.createElement('div');
 		txt.className = 'notif-text';
 		txt.textContent = notif.text;
-
 		const time = document.createElement('div');
 		time.className = 'notif-time';
 		time.textContent = formatNotifTime(notif.ts);
-
 		body.appendChild(txt);
 		body.appendChild(time);
-
 		const acts = document.createElement('div');
 		acts.className = 'notif-actions';
-
 		if (!notif.read) {
 			const readBtn = document.createElement('button');
 			readBtn.className = 'notif-btn notif-check';
@@ -1628,7 +1618,6 @@ function renderNotifList() {
 			};
 			acts.appendChild(readBtn);
 		}
-
 		const delBtn = document.createElement('button');
 		delBtn.className = 'notif-btn notif-del';
 		delBtn.title = 'delete';
@@ -1638,12 +1627,15 @@ function renderNotifList() {
 			notifDelete(notif.id);
 		};
 		acts.appendChild(delBtn);
-
 		item.appendChild(body);
 		item.appendChild(acts);
 		item.addEventListener('click', () => notifMarkRead(notif.id));
 		list.appendChild(item);
 	});
+	if (typeof window.renderSystemMessages === 'function') window.renderSystemMessages();
+	const hasSystem =
+		typeof window.getSystemUnread === 'function' && list.querySelector('.sysmsg-item');
+	if (empty) empty.style.display = notifications.length || hasSystem ? 'none' : 'block';
 }
 
 function notifMarkRead(id) {
@@ -1852,6 +1844,8 @@ async function resetInventory() {
 		'reset data'
 	);
 	if (!confirmed) return;
+	if (window.Sync) window.Sync.markReset();
+	window._orphanInventory = [];
 	localStorage.removeItem(STORAGE_KEY);
 	localStorage.removeItem(TOTAL_ROLLS_KEY);
 	localStorage.removeItem(ACHIEVEMENTS_KEY);
@@ -1959,6 +1953,7 @@ async function resetInventory() {
 	updateAnomalyUI();
 	updatePlaytimeDisplay();
 	updateLuckDisplay();
+	if (window.Sync) await window.Sync.flush();
 	await window.showAlert('all data reset! it was your choice btw', 'reset complete');
 	location.reload();
 }

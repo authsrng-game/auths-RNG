@@ -106,17 +106,12 @@ window.Revisory = (function () {
 	}
 
 	function snapshotAllKeys() {
-		const out = {};
-		const n = localStorage.length;
-		for (let i = 0; i < n; i++) {
-			const k = localStorage.key(i);
-			if (k === null) continue;
-			if (k === DEVICE_ID_KEY) continue;
-			if (k.startsWith('__revisory')) continue;
-			const v = localStorage.getItem(k);
-			if (v !== null) out[k] = v;
-		}
-		return out;
+		return Object.assign(
+			window.SaveKeys.collect(),
+			localStorage.getItem('userSettings') !== null
+				? { userSettings: localStorage.getItem('userSettings') }
+				: {}
+		);
 	}
 
 	function classifyValue(raw) {
@@ -478,11 +473,12 @@ window.Revisory = (function () {
 		}
 		if (!opts.additiveOnly) {
 			for (const k of currentKeys) {
-				if (k === DEVICE_ID_KEY || k.startsWith('__revisory')) continue;
+				if (!window.SaveKeys.isSaveKey(k) && k !== 'userSettings') continue;
 				if (!(k in snapshot)) localStorage.removeItem(k);
 			}
 		}
 		for (const k of Object.keys(snapshot)) {
+			if (!window.SaveKeys.isSaveKey(k) && k !== 'userSettings') continue;
 			localStorage.setItem(k, snapshot[k]);
 		}
 	}
