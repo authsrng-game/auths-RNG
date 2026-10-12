@@ -6,7 +6,7 @@
  * or implausible progress payloads upstream before sync ingestion:
  * - `totalRolls`: Capped at max 4 rolls/sec (250ms minimum roll cooldown) plus a 4,000-roll expedition burst buffer.
  * - `shopPoints`: Capped by maximum possible rarity sales (Summer dupe x2 @ 2e15), max printer rate (1e9 pts/s), and a 1e15 starter buffer.
- * - `mutationTrust`: Capped by max trust gain rate (16 trust / 15s cooldown ~1.07/s) and a 1,000 starter buffer.
+ * - `mutationTrust`: Capped by max trust gain rate (2 trust/s headroom over ~1.07/s max gain) and a 1,000 starter buffer.
  * - `anomalies` / `anomaliesUsed`: Capped by max passive gain (~100/s) plus double clover (50M) and starter (100M) buffers.
  *
  * @param {import('@cloudflare/workers-types').EventContext<unknown, string, unknown>} context - Cloudflare Pages event context.
