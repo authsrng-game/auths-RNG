@@ -585,4 +585,12 @@
 		}
 	}, 1000);
 	// Generated code ends here on 2026-10-26T00:00:00Z:
+
+// Generated code starts here on 2026-04-02T12:00:00Z:
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'visible') {
+			renderDealer();
+		}
+	});
+// Generated code ends here on 2026-04-02T12:00:00Z:
 })();
