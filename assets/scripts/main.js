@@ -2270,12 +2270,12 @@ document.addEventListener('visibilitychange', () => {
 		updateLuckTimer();
 	}
 
-// Generated code starts here on 2026-04-02T12:00:00Z:
+	// Generated code starts here on 2026-04-02T12:00:00Z:
 	updateWellUI();
 	if (isWellOnCooldown()) {
 		startWellCooldownTimer();
 	}
-// Generated code ends here on 2026-04-02T12:00:00Z:
+	// Generated code ends here on 2026-04-02T12:00:00Z:
 });
 
 if (sortSelect) {

@@ -33,7 +33,7 @@ test.describe('Wishing Well timing reconciliation', () => {
 		expect(result).toContain('available in:');
 	});
 
-// Generated code starts here on 2026-04-02T12:00:00Z:
+	// Generated code starts here on 2026-04-02T12:00:00Z:
 	test('updates well UI on visibilitychange when well cooldown expired', async ({ page }) => {
 		await page.goto(BASE_URL);
 		await page.evaluate(() => {
@@ -61,5 +61,5 @@ test.describe('Wishing Well timing reconciliation', () => {
 
 		expect(status).toContain('ready to accept your offering');
 	});
-// Generated code ends here on 2026-04-02T12:00:00Z:
+	// Generated code ends here on 2026-04-02T12:00:00Z:
 });

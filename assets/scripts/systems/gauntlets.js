@@ -745,13 +745,13 @@ console.log(performance.now());
 	checkRotationChange(); // run once on load
 	setInterval(renderGauntlets, 4000);
 
-// Generated code starts here on 2026-04-02T12:00:00Z:
+	// Generated code starts here on 2026-04-02T12:00:00Z:
 	document.addEventListener('visibilitychange', () => {
 		if (document.visibilityState === 'visible') {
 			renderGauntlets();
 		}
 	});
-// Generated code ends here on 2026-04-02T12:00:00Z:
+	// Generated code ends here on 2026-04-02T12:00:00Z:
 
 	// Wait for main.js to finish loading inventoryData before first render
 	function tryFirstRender(attempts) {
