@@ -165,27 +165,43 @@
 
 			<script>
 				(async () => {
-					const res = await fetch(
-						'https://api.github.com/repos/authsrng-game/auths-RNG/contributors?per_page=100'
-					);
-					const users = await res.json();
+					// Generated code starts here on 2026-03-31T00:00:00Z:
+					function esc(s) {
+						return String(s || '')
+							.replace(/&/g, '&amp;')
+							.replace(/</g, '&lt;')
+							.replace(/>/g, '&gt;')
+							.replace(/"/g, '&quot;')
+							.replace(/'/g, '&#39;');
+					}
+					// Generated code ends here on 2026-03-31T00:00:00Z:
+					try {
+						const res = await fetch(
+							'https://api.github.com/repos/authsrng-game/auths-RNG/contributors?per_page=100'
+						);
+						const users = await res.json();
 
-					const root = document.getElementById('contributors');
+						const root = document.getElementById('contributors');
+						if (!Array.isArray(users)) return;
 
-					users.forEach((u) => {
-						const a = document.createElement('a');
-						a.className = 'contributor';
-						a.href = u.html_url;
-						a.target = '_blank';
+						users.forEach((u) => {
+							const a = document.createElement('a');
+							a.className = 'contributor';
+							a.href = u.html_url;
+							a.target = '_blank';
+							// Generated code starts here on 2026-03-31T00:00:00Z:
+							a.rel = 'noopener noreferrer';
 
-						a.innerHTML = `
-      <img src="${u.avatar_url}">
-      <span class="name">${u.login}</span>
-      <span class="count">${u.contributions}</span>
+							a.innerHTML = `
+      <img src="${esc(u.avatar_url)}">
+      <span class="name">${esc(u.login)}</span>
+      <span class="count">${esc(u.contributions)}</span>
     `;
+							// Generated code ends here on 2026-03-31T00:00:00Z:
 
-						root.appendChild(a);
-					});
+							root.appendChild(a);
+						});
+					} catch (_) {}
 				})();
 			</script>
 			<br />

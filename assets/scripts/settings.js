@@ -13,11 +13,13 @@
 		return document.getElementById(id);
 	}
 
-	// ── State ──────────────────────────────────────────────────────────────
+	// -- State --------------------------------------------------------------
 	let particles = [];
 	let particleInterval = null;
 	let particleRaf = null;
 	let devInterval = null;
+	let watchInterval = null;
+	let fpsRaf = null;
 	let visibilitySeasonListenerAdded = false;
 
 	// Discord-style pending changes
@@ -51,7 +53,7 @@
 		return defaultTierTracks[defaultTierTracks.length - 1];
 	}
 
-	// ── IndexedDB helpers ──────────────────────────────────────────────────
+	// -- IndexedDB helpers --------------------------------------------------
 	// Tracks are stored as { id (auto), name, buffer (ArrayBuffer), type (MIME) }
 	// The music select uses 'custom_{id}' where id is the IDB record key.
 
@@ -219,7 +221,7 @@
 		});
 	}
 
-	// ── One-time migration from old base64 localStorage format ─────────────
+	// -- One-time migration from old base64 localStorage format -------------
 	async function migrateFromLocalStorage() {
 		const raw = localStorage.getItem('customMusic');
 		if (!raw) return;
@@ -251,13 +253,13 @@
 		console.log('[music] migration complete, localStorage entry removed');
 	}
 
-	// ── Pending bar ────────────────────────────────────────────────────────
+	// -- Pending bar --------------------------------------------------------
 	function createPendingBar() {
 		if (el('settingsPendingBar')) return;
 		const bar = document.createElement('div');
 		bar.id = 'settingsPendingBar';
 		bar.innerHTML = `
-      <span class="pending-label">careful — unsaved changes</span>
+      <span class="pending-label">careful - unsaved changes</span>
       <div class="pending-bar-actions">
         <button id="settingsDiscardBtn" class="small">reset</button>
         <button id="settingsSaveBtn" class="small">save changes</button>
@@ -290,7 +292,7 @@
 		hidePendingBar();
 	}
 
-	// ── Background pattern ────────────────────────────────────────────────
+	// -- Background pattern ------------------------------------------------
 	function applyBackgroundPattern(pattern) {
 		const body = document.body;
 		body.style.backgroundImage = '';
@@ -319,7 +321,7 @@
 		}
 	}
 
-	// ── Seasonal particles ────────────────────────────────────────────────
+	// -- Seasonal particles ------------------------------------------------
 	// Generated code starts here on 2026-10-25T12:00:00Z:
 	function startSeasonalParticles(season, density) {
 		if (particleInterval) {
@@ -368,17 +370,31 @@
 		if (!visibilitySeasonListenerAdded) {
 			document.addEventListener('visibilitychange', () => {
 				const sel = el('seasonSelect');
+				const currentSeason = sel?.value || savedSettings?.season || 'none';
 				if (document.hidden) {
 					if (particleInterval) {
 						clearInterval(particleInterval);
 						particleInterval = null;
 					}
-				} else if (sel && sel.value !== 'none') startInterval();
+					if (particleRaf) {
+						cancelAnimationFrame(particleRaf);
+						particleRaf = null;
+					}
+				} else if (currentSeason !== 'none') {
+					startInterval();
+					if (!particleRaf) {
+						particleRaf = requestAnimationFrame(loop);
+					}
+				}
 			});
 			visibilitySeasonListenerAdded = true;
 		}
 
-		(function loop() {
+		function loop() {
+			if (document.hidden) {
+				particleRaf = null;
+				return;
+			}
 			ctx.clearRect(0, 0, w, h);
 			particles.forEach((p) => {
 				p.y += p.speed;
@@ -389,12 +405,13 @@
 			});
 			particles = particles.filter((p) => p.y < h + 30);
 			particleRaf = requestAnimationFrame(loop);
-		})();
+		}
+		particleRaf = requestAnimationFrame(loop);
 	}
 	// Generated code ends here on 2026-10-25T12:00:00Z:
 
-	// ── Dev overlay ───────────────────────────────────────────────────────
-	// Generated code starts here on 2026-06-18T00:35:00Z:
+	// -- Dev overlay -------------------------------------------------------
+	// Generated code starts here on 2026-11-01T12:00:00Z:
 	function startDevOverlay(settings) {
 		const panel = document.getElementById('devOverlayPanel');
 		if (!panel) return;
@@ -405,6 +422,19 @@
 				clearInterval(devInterval);
 				devInterval = null;
 			}
+			if (watchInterval) {
+				clearInterval(watchInterval);
+				watchInterval = null;
+			}
+			if (fpsRaf) {
+				cancelAnimationFrame(fpsRaf);
+				fpsRaf = null;
+			}
+			// Generated code starts here on 2026-11-02T00:00:00Z:
+			if (typeof panel._stopPerfTab === 'function') {
+				panel._stopPerfTab();
+			}
+			// Generated code ends here on 2026-11-02T00:00:00Z:
 			return;
 		}
 
@@ -413,13 +443,15 @@
 		if (!panel._dcInit) {
 			panel._dcInit = true;
 			initDevConsole(panel);
+		} else if (typeof panel._startFpsLoop === 'function') {
+			panel._startFpsLoop();
 		}
 
 		if (!devInterval) {
 			devInterval = setInterval(() => updateDevStats(panel, settings), 500);
 		}
 	}
-	// Generated code ends here on 2026-06-18T00:35:00Z:
+	// Generated code ends here on 2026-11-01T12:00:00Z:
 
 	function updateDevStats(panel, settings) {
 		const fps = window._devFPS || '--';
@@ -511,7 +543,7 @@
 			});
 		}
 
-		// ── Tabs ──────────────────────────────────────────────────────────────
+		// -- Tabs --------------------------------------------------------------
 		document.querySelectorAll('.dev-tab').forEach((btn) => {
 			btn.addEventListener('click', () => {
 				document.querySelectorAll('.dev-tab').forEach((b) => b.classList.remove('active'));
@@ -530,7 +562,7 @@
 			});
 		});
 
-		// ── Storage tab ────────────────────────────────────────────────────────
+		// -- Storage tab --------------------------------------------------------
 		let storageEditKey = null;
 
 		function renderStorage(filter) {
@@ -593,7 +625,7 @@
 			storageEditKey = null;
 		});
 
-		// ── Network tab ────────────────────────────────────────────────────────
+		// -- Network tab --------------------------------------------------------
 		const netLog = [];
 		const _origFetch = window.fetch;
 		let netPaused = false;
@@ -654,10 +686,20 @@
 			netPaused = e.target.checked;
 		});
 
-		// ── Perf tab ───────────────────────────────────────────────────────────
+		// -- Perf tab -----------------------------------------------------------
 		const perfSamples = { fps: [], rollMs: [] };
 		let perfTabActive = false;
 		let perfRAF = null;
+
+		// Generated code starts here on 2026-11-02T00:00:00Z:
+		panel._stopPerfTab = function () {
+			perfTabActive = false;
+			if (perfRAF) {
+				clearTimeout(perfRAF);
+				perfRAF = null;
+			}
+		};
+		// Generated code ends here on 2026-11-02T00:00:00Z:
 
 		window._perfMarkRollStart = function () {
 			window._rollPerfStart = performance.now();
@@ -747,7 +789,7 @@
 			}
 		});
 
-		// ── Watch tab ────────────────────────────────────────────────────────── why do i love em fdashessssssssss
+		// -- Watch tab ---------------------------------------------------------- why do i love em fdashessssssssss
 		const watchExprs = [];
 
 		function evalWatch(expr) {
@@ -796,7 +838,8 @@
 			if (e.key === 'Enter') document.getElementById('dc-watch-add')?.click();
 		});
 
-		setInterval(() => {
+		if (watchInterval) clearInterval(watchInterval);
+		watchInterval = setInterval(() => {
 			const watchTab = document.getElementById('dct-watch');
 			if (watchTab && watchTab.style.display !== 'none' && watchExprs.length) renderWatchList();
 		}, 500);
@@ -873,21 +916,21 @@
 			set: 'set &lt;points|rolls|luck|anomalies|trust&gt; &lt;value&gt;',
 			give: 'give &lt;potion|anomaly&gt; [type] [count]',
 			shop: 'shop &lt;luck|speed|points|magnet|printer|dupe&gt; &lt;level&gt;',
-			flag: 'flag &lt;name&gt; — toggle a flag',
+			flag: 'flag &lt;name&gt; - toggle a flag',
 			inspect: 'inspect &lt;luck|inventory|potions|save|shop|runes|starmap&gt;',
-			roll: 'roll &lt;rarity name&gt; — force a specific roll result',
+			roll: 'roll &lt;rarity name&gt; - force a specific roll result',
 			goto: 'goto &lt;page 1-9&gt;',
 			clear: 'clear the log',
 			reset: 'reset &lt;save|luck|points|shop|potions|anomalies&gt;',
 			reload: 'reload the page',
-			eval: 'eval &lt;js expression&gt; — execute arbitrary js',
-			ls: 'ls [prefix] — list localStorage keys',
-			get: 'get &lt;key&gt; — read a localStorage key',
-			del: 'del &lt;key&gt; — delete a localStorage key',
-			find: 'find &lt;name&gt; — search rarities list',
-			rarity: 'rarity &lt;name&gt; — show rarity info',
-			boost: 'boost — trigger a 4x luck boost immediately',
-			potion: 'potion &lt;type&gt; — use a potion by name',
+			eval: 'eval &lt;js expression&gt; - execute arbitrary js',
+			ls: 'ls [prefix] - list localStorage keys',
+			get: 'get &lt;key&gt; - read a localStorage key',
+			del: 'del &lt;key&gt; - delete a localStorage key',
+			find: 'find &lt;name&gt; - search rarities list',
+			rarity: 'rarity &lt;name&gt; - show rarity info',
+			boost: 'boost - trigger a 4x luck boost immediately',
+			potion: 'potion &lt;type&gt; - use a potion by name',
 			help: 'list all commands',
 			off: 'close the console',
 		};
@@ -908,7 +951,7 @@
 			},
 			help() {
 				dcLog('commands:', 'info');
-				Object.entries(hints).forEach(([k, v]) => dcLog(`  :${k} — ${v}`, 'dim'));
+				Object.entries(hints).forEach(([k, v]) => dcLog(`  :${k} - ${v}`, 'dim'));
 			},
 			clear() {
 				logEl.innerHTML = '';
@@ -932,7 +975,7 @@
 					totalRolls = val;
 					if (typeof updateTotalRolls === 'function') updateTotalRolls();
 				} else if (field === 'luck' && typeof anomaliesUsed !== 'undefined') {
-					dcLog('luck is computed — use anomalies or shop to change it', 'warn');
+					dcLog('luck is computed - use anomalies or shop to change it', 'warn');
 					return;
 				} else if (field === 'anomalies' && typeof anomalies !== 'undefined') {
 					anomalies = val;
@@ -1096,7 +1139,7 @@
 				}
 				const r = rarities.find((x) => x.name.toLowerCase() === name.toLowerCase());
 				if (!r) {
-					dcLog(`rarity "${name}" not found — try :find ${name}`, 'err');
+					dcLog(`rarity "${name}" not found - try :find ${name}`, 'err');
 					return;
 				}
 				dcLog(`forcing roll → "${r.name}"`, 'warn');
@@ -1123,7 +1166,7 @@
 					return;
 				}
 				res.forEach((r) =>
-					dcLog(`${r.name} — 1/${Math.round(1 / r.chance).toLocaleString()}`, 'dim')
+					dcLog(`${r.name} - 1/${Math.round(1 / r.chance).toLocaleString()}`, 'dim')
 				);
 				if (rarities.filter((r) => r.name.toLowerCase().includes(q)).length > 10)
 					dcLog('...and more', 'dim');
@@ -1146,7 +1189,7 @@
 				const denom = Math.round(1 / r.chance);
 				const owned = typeof inventoryData !== 'undefined' && inventoryData.has(r.name);
 				dcLog(
-					`${r.name} — 1/${denom.toLocaleString()} · ${owned ? `owned x${inventoryData.get(r.name).count}` : 'not owned'} · style: ${r.style ? 'yes' : 'none'}`,
+					`${r.name} - 1/${denom.toLocaleString()} · ${owned ? `owned x${inventoryData.get(r.name).count}` : 'not owned'} · style: ${r.style ? 'yes' : 'none'}`,
 					'info'
 				);
 			},
@@ -1259,23 +1302,35 @@
 			},
 		};
 
-		dcLog('dev console — type : to open · :help for commands', 'info');
+		dcLog('dev console - type : to open · :help for commands', 'info');
 		dcLog(`build: ${location.hostname} · ${new Date().toLocaleTimeString()}`, 'dim');
 
 		rebuildFlags();
 
 		let frameCount = 0,
 			lastFPSTime = performance.now();
-		(function fpsLoop() {
-			frameCount++;
-			const now = performance.now();
-			if (now - lastFPSTime >= 1000) {
-				window._devFPS = Math.round((frameCount * 1000) / (now - lastFPSTime));
-				frameCount = 0;
-				lastFPSTime = now;
+		function startFpsLoop() {
+			if (fpsRaf) return;
+			frameCount = 0;
+			lastFPSTime = performance.now();
+			function fpsLoop() {
+				if (!savedSettings || !savedSettings.dev) {
+					fpsRaf = null;
+					return;
+				}
+				frameCount++;
+				const now = performance.now();
+				if (now - lastFPSTime >= 1000) {
+					window._devFPS = Math.round((frameCount * 1000) / (now - lastFPSTime));
+					frameCount = 0;
+					lastFPSTime = now;
+				}
+				fpsRaf = requestAnimationFrame(fpsLoop);
 			}
-			requestAnimationFrame(fpsLoop);
-		})();
+			fpsRaf = requestAnimationFrame(fpsLoop);
+		}
+		panel._startFpsLoop = startFpsLoop;
+		startFpsLoop();
 
 		document.addEventListener('keydown', (e) => {
 			if (e.target.id === 'dc-input') return;
@@ -1324,7 +1379,7 @@
 			dcLog(':' + raw, 'cmd');
 			const [cmd, ...args] = raw.replace(/^:/, '').split(/\s+/);
 			if (commands[cmd]) commands[cmd](args);
-			else dcLog(`unknown command "${cmd}" — try :help`, 'err');
+			else dcLog(`unknown command "${cmd}" - try :help`, 'err');
 			inp.value = '';
 			hintEl.textContent = 'type a command · :help for list · :off to close';
 		});
@@ -1332,11 +1387,11 @@
 		inp.addEventListener('input', () => {
 			const v = inp.value.trim().replace(/^:/, '').split(/\s+/)[0];
 			hintEl.textContent = hints[v]
-				? `:${v} — ${hints[v]}`
+				? `:${v} - ${hints[v]}`
 				: 'type a command · :help for list · :off to close';
 		});
 	}
-	// ── applyMusic ─hdvsj
+	// -- applyMusic -hdvsj
 	let _musicApplyToken = 0;
 
 	async function applyMusic(settings) {
@@ -1354,15 +1409,9 @@
 				window.backgroundMusic.pause();
 				window.backgroundMusic.volume = 0;
 			}
-			if (window.lunarMusic) {
-				window.lunarMusic.pause();
-				window.lunarMusic.volume = 0;
-			}
 			if (window.stopCustomAudio) window.stopCustomAudio();
 			return;
 		}
-
-		if (window.lunarMusic) window.lunarMusic.volume = 0.6;
 
 		if (window.stopCustomAudio) window.stopCustomAudio();
 		if (window.backgroundMusic) {
@@ -1449,7 +1498,7 @@
 		});
 	}
 
-	// ── applyVisuals ──────────────────────────────────────────────────────
+	// -- applyVisuals ------------------------------------------------------
 	function applyVisuals(settings) {
 		document.body.classList.toggle('legacy-mode', !!settings.legacyMode);
 		document.body.classList.toggle('blur-panels', !!settings.blurPanels);
@@ -1537,7 +1586,7 @@
 		if (window.refreshAllDisplays) window.refreshAllDisplays();
 	}
 
-	// ── syncUIToSettings ──────────────────────────────────────────────────
+	// -- syncUIToSettings --------------------------------------------------
 	function syncUIToSettings(settings) {
 		if (el('musicSelect')) el('musicSelect').value = settings.music || 'default';
 		if (el('muteMusic')) el('muteMusic').checked = !!settings.muted;
@@ -1550,7 +1599,7 @@
 	}
 	// blah!
 
-	// ── getCurrentSettings ────────────────────────────────────────────────
+	// -- getCurrentSettings ------------------------------------------------
 	function getCurrentSettings() {
 		return {
 			music: (el('musicSelect') || {}).value || 'default',
@@ -1590,7 +1639,7 @@
 		hidePendingBar();
 	}
 
-	// ── Event binding ─────────────────────────────────────────────────────
+	// -- Event binding -----------------------------------------------------
 	function bindSettings() {
 		const ids = ['legacyMode', 'rawNumbers', 'devOverlay'];
 		ids.forEach((id) => {
@@ -1613,7 +1662,7 @@
 		});
 	}
 
-	// ── Web Audio API (custom music) ──────────────────────────────────────
+	// -- Web Audio API (custom music) --------------------------------------
 	// Now takes an ArrayBuffer (from IDB) + MIME type instead of a base64 data URL.
 	window.audioContext = null;
 	window.customAudioSource = null;
@@ -1679,7 +1728,7 @@
 		}
 	};
 
-	// ── Custom music upload UI ─────────────────────────────────────────────
+	// -- Custom music upload UI ---------------------------------------------
 	async function loadCustomMusicUI() {
 		const musicSel = el('musicSelect');
 		const listWrapper = el('customMusicList');
@@ -1805,7 +1854,7 @@
 			const file = e.target.files[0];
 			if (!file) return;
 
-			// 100 MB limit — IndexedDB can handle it, localStorage couldn't
+			// 100 MB limit - IndexedDB can handle it, localStorage couldn't
 			if (file.size > 100 * 1024 * 1024) {
 				window.showAlert('file too large! max 100MB');
 				upload.value = '';
@@ -1894,57 +1943,6 @@
 		}
 	}
 
-	// ── Save / settings transfer ──────────────────────────────────────────
-	// Generated code starts here on 2026-10-24T00:00:00Z:
-	const SAVE_KEYS = [
-		'rarityInventory',
-		'totalRolls',
-		'achievementsUnlocked',
-		'anomalies',
-		'anomaliesUsed',
-		'shopPoints',
-		'shopUpgrades',
-		'soldOutRarities',
-		'playerPotions',
-		'activePotions',
-		'wishingWell',
-		'luckBoostState',
-		'totalPlaytime',
-		'daily_lastClaim',
-		'daily_streak',
-		'weekly_lastClaim',
-		'weekly_streak',
-		'gauntletData',
-		'mutationsUnlocked',
-		'starmapData',
-		'starmapUnlocked',
-		'runesData',
-		'runesUnlocked',
-		'runeBlocks',
-		'runeGift',
-		'runeUpgrades',
-		'expeditionData',
-		'expeditionsUnlocked',
-		'dealerData',
-		'dealerUnlocked',
-		'catShrineUnlocked',
-		'catShrineEquipped',
-		'catShrineToggle',
-		'mutationTrust',
-		'mutationTrustOwned',
-		'mutationTrustActive',
-		'mutationHistory',
-		'mutationBestResult',
-		'rarityTimestamps',
-		'notifications',
-		'themeEditorPresets',
-		'themeEditorActive',
-		'startAnimConfig',
-		'_plush_v3',
-		'infoTipsRead',
-	];
-	// Generated code ends here on 2026-10-24T00:00:00Z:
-
 	function simpleHash(str) {
 		let h = 0;
 		for (let i = 0; i < str.length; i++) {
@@ -1955,12 +1953,7 @@
 	}
 
 	function bundleSaveKeys() {
-		const obj = {};
-		SAVE_KEYS.forEach((k) => {
-			const v = localStorage.getItem(k);
-			if (v !== null) obj[k] = v;
-		});
-		return obj;
+		return window.SaveKeys.collect();
 	}
 
 	function encode(bundle, tag) {
@@ -2095,7 +2088,7 @@
 			['refreshSaveBtn', refreshSave],
 			[
 				'importSaveBtn',
-				() => {
+				async () => {
 					const input = prompt('paste your save data export:');
 					if (!input?.trim()) return;
 					const result = decode(input, 'save');
@@ -2103,7 +2096,16 @@
 						window.showAlert(result.error);
 						return;
 					}
-					Object.keys(result.bundle).forEach((k) => localStorage.setItem(k, result.bundle[k]));
+					const clean = {};
+					Object.keys(result.bundle).forEach((k) => {
+						if (window.SaveKeys.isSaveKey(k) && typeof result.bundle[k] === 'string')
+							clean[k] = result.bundle[k];
+					});
+					if (!Object.keys(clean).length) {
+						window.showAlert('that export has no save data');
+						return;
+					}
+					await window.Sync.importBundle(clean);
 					window.showAlert('save imported! reloading...');
 					setTimeout(() => location.reload(), 500);
 				},
@@ -2160,7 +2162,7 @@
 		refreshSettingsCode();
 	}
 
-	// ── Legacy mode content mover ─────────────────────────────────────────
+	// -- Legacy mode content mover -----------------------------------------
 	function bindLegacyMode() {
 		const legacyShopBtn = el('legacyShopBtn');
 		const legacySettingsBtn = el('legacySettingsBtn');
@@ -2222,7 +2224,7 @@
 		});
 	}
 
-	// ── Init ──────────────────────────────────────────────────────────────
+	// -- Init --------------------------------------------------------------
 	async function init() {
 		console.log('[settings] initializing...');
 		createPendingBar();

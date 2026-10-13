@@ -356,10 +356,10 @@
 	function contrastLabel(ratio) {
 		if (ratio === null) return { text: 'invalid color', cls: 'ctr-fail' };
 		const r = ratio.toFixed(2);
-		if (ratio >= 7) return { text: `${r}:1 — AAA`, cls: 'ctr-pass' };
-		if (ratio >= 4.5) return { text: `${r}:1 — AA`, cls: 'ctr-pass' };
-		if (ratio >= 3) return { text: `${r}:1 — AA large text only`, cls: 'ctr-warn' };
-		return { text: `${r}:1 — fails`, cls: 'ctr-fail' };
+		if (ratio >= 7) return { text: `${r}:1 - AAA`, cls: 'ctr-pass' };
+		if (ratio >= 4.5) return { text: `${r}:1 - AA`, cls: 'ctr-pass' };
+		if (ratio >= 3) return { text: `${r}:1 - AA large text only`, cls: 'ctr-warn' };
+		return { text: `${r}:1 - fails`, cls: 'ctr-fail' };
 	}
 
 	function hexToRgb(hex) {
@@ -1337,12 +1337,12 @@
 		document.getElementById('startanim-style')?.remove();
 
 		if (!el('te-sa-enabled')?.checked) {
-			showStartAnimError('animation is disabled — nothing to preview.');
+			showStartAnimError('animation is disabled - nothing to preview.');
 			return;
 		}
 		const preset = el('te-sa-preset')?.value;
 		if (!preset || preset === 'none') {
-			showStartAnimError('preset is set to "none" — nothing to preview.');
+			showStartAnimError('preset is set to "none" - nothing to preview.');
 			return;
 		}
 		if (!window._saRunPreview) {
@@ -1411,7 +1411,7 @@
 		const rgb = hexToRgb(bgHex);
 		if (!rgb) return;
 
-		// Perceived luminance (0–255)
+		// Perceived luminance (0-255)
 		const lum = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
 		const isDark = lum < 128;
 

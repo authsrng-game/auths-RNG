@@ -90,8 +90,8 @@
 		return wrap;
 	}
 
-	// Generated code starts here on 2026-09-12T14:00:00Z:
-	// Cache tip icon elements and avoid redundant getComputedStyle layout flushes on periodic scans.
+	// Generated code starts here on 2026-10-27T00:00:00Z:
+	// Cache tip icon elements, avoid redundant getComputedStyle layout flushes, and guard display style assignment to eliminate DOM style write overhead on periodic scans.
 	function tryPlace(tip) {
 		const container = tip.container();
 		if (!container) return;
@@ -113,9 +113,12 @@
 			}
 		}
 
-		icon.style.display = isVisible(container) ? '' : 'none';
+		const desiredDisplay = isVisible(container) ? '' : 'none';
+		if (icon.style.display !== desiredDisplay) {
+			icon.style.display = desiredDisplay;
+		}
 	}
-	// Generated code ends here on 2026-09-12T14:00:00Z:
+	// Generated code ends here on 2026-10-27T00:00:00Z:
 
 	function scanAll() {
 		TOOLTIPS.forEach(tryPlace);

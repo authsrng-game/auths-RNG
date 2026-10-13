@@ -218,38 +218,37 @@
 			<h1>legal</h1>
 			<p>privacy policy &amp; terms of service for auth's RNG.</p>
 			<p class="meta-line">
-				jurisdiction: canada · province: alberta · effective date: 2026 · last updated: august 2026
+				jurisdiction: canada · province: alberta · effective date: 2026 · last updated: october 2026
 			</p>
 
 			<div class="tab-bar">
-				<button class="tab active" onclick="switchTab('privacy')">privacy policy</button>
-				<button class="tab" onclick="switchTab('terms')">terms of service</button>
+				<button class="tab active" onclick="switchTab('privacy', this)">privacy policy</button>
+				<button class="tab" onclick="switchTab('terms', this)">terms of service</button>
 			</div>
 
-			<!-- ======================== PRIVACY POLICY ======================== -->
+			<!-- ================= PRIVACY==================-->
 			<div id="tab-privacy" class="tab-content active">
 				<div class="toc">
 					<div class="toc-title">sections</div>
-					<a href="#pp-who" target="_blank" rel="noopener noreferrer">who we are</a>
-					<a href="#pp-collect" target="_blank" rel="noopener noreferrer">what we collect</a>
-					<a href="#pp-how" target="_blank" rel="noopener noreferrer">how we use it</a>
-					<a href="#pp-storage" target="_blank" rel="noopener noreferrer">where data is stored</a>
-					<a href="#pp-share" target="_blank" rel="noopener noreferrer">do we share your data?</a>
-					<a href="#pp-cloud" target="_blank" rel="noopener noreferrer">cloud backups</a>
-					<a href="#pp-leaderboard" target="_blank" rel="noopener noreferrer">leaderboard</a>
-					<a href="#pp-cookies" target="_blank" rel="noopener noreferrer"
-						>cookies &amp; local storage</a
-					>
-					<a href="#pp-thirdparty" target="_blank" rel="noopener noreferrer"
-						>third-party services</a
-					>
-					<a href="#pp-retention" target="_blank" rel="noopener noreferrer">data retention</a>
-					<a href="#pp-breach" target="_blank" rel="noopener noreferrer">breach notification</a>
-					<a href="#pp-rights" target="_blank" rel="noopener noreferrer"
-						>your rights (pipeda / alberta pipa)</a
-					>
-					<a href="#pp-minors" target="_blank" rel="noopener noreferrer">children &amp; minors</a>
-					<a href="#pp-contact" target="_blank" rel="noopener noreferrer">contact</a>
+					<a href="#pp-who">who we are</a>
+					<a href="#pp-changes">what changed in october 2026</a>
+					<a href="#pp-collect">what we collect</a>
+					<a href="#pp-account">accounts</a>
+					<a href="#pp-how">how we use it</a>
+					<a href="#pp-storage">where data is stored</a>
+					<a href="#pp-share">do we share your data?</a>
+					<a href="#pp-cloud">cloud saves &amp; restore points</a>
+					<a href="#pp-leaderboard">leaderboard</a>
+					<a href="#pp-social">friends, messaging &amp; public profiles</a>
+					<a href="#pp-discord">linking discord</a>
+					<a href="#pp-moderation">reports &amp; moderation</a>
+					<a href="#pp-cookies">cookies &amp; local storage</a>
+					<a href="#pp-thirdparty">third-party services</a>
+					<a href="#pp-retention">data retention</a>
+					<a href="#pp-breach">breach notification</a>
+					<a href="#pp-rights">your rights (pipeda / alberta pipa)</a>
+					<a href="#pp-minors">children &amp; minors</a>
+					<a href="#pp-contact">contact</a>
 				</div>
 
 				<div class="section-item" id="pp-who">
@@ -260,13 +259,43 @@
 						"auth," "we," "us," or "the developer" throughout this policy refer to Ivy Lopez as the
 						sole operator of the service. Ivy Lopez is an individual based in canada. this privacy
 						policy explains how data is handled when you play at <strong>authsrng.xyz</strong> and
-						any subdomains (nightly.authsrng.xyz, backup.authsrng.xyz, leaderboard.authsrng.xyz).
+						any subdomains (nightly.authsrng.xyz, backup.authsrng.xyz, leaderboard.authsrng.xyz,
+						accounts.authsrng.xyz).
 						<div class="highlight-note">
-							tl;dr: most of your game data lives in your own browser and never touches our servers!
-							creating an account is optional and only needed for cloud saves, the leaderboard, and
-							social features like friends and messaging. no ads, no analytics, no data selling,
-							nothing sketchy at all.
+							tl;dr: you can play the whole game without an account, and then your game data lives
+							only in your own browser. creating an account is optional and is what turns on cloud
+							saves, the leaderboard, and social features like friends and messaging. no ads, no
+							analytics, no data selling, nothing sketchy at all.
 						</div>
+					</div>
+				</div>
+
+				<div class="section-item" id="pp-changes">
+					<div class="section-title">what changed in october 2026</div>
+					<div class="section-body">
+						we rebuilt how cloud saves work, so several parts of this policy were rewritten:
+						<ul>
+							<li>
+								cloud saves now sync automatically for any account that is logged in, instead of
+								being a separate switch
+							</li>
+							<li>
+								the server now keeps restore points (extra copies of your save) so a mistake or a
+								sync conflict can be undone
+							</li>
+							<li>
+								leaderboard stats now come from your synced cloud save instead of being submitted
+								separately
+							</li>
+							<li>
+								deleting your account now also deletes every restore point, and daily database
+								backups are described under data retention
+							</li>
+							<li>
+								linking a discord account, reports, and moderation records are now described
+								explicitly
+							</li>
+						</ul>
 					</div>
 				</div>
 
@@ -274,8 +303,8 @@
 					<div class="section-title">what data we collect</div>
 					<div class="section-body">
 						<strong
-							>data stored only in your browser (we never see this unless you have an account with
-							sync enabled):</strong
+							>data stored only in your browser (we never see this unless you are logged in to an
+							account, which syncs it as described below):</strong
 						>
 						<ul>
 							<li>
@@ -289,7 +318,7 @@
 						<ul>
 							<li>
 								<strong>username and password</strong> (password is hashed and never stored in plain
-								text)
+								text). we do not ask for an email address or your real name
 							</li>
 							<li>
 								<strong>backup keys</strong>, generated for password recovery, shown once at
@@ -297,43 +326,64 @@
 							</li>
 							<li>
 								<strong>profile info you choose to add</strong>: bio, pronouns, avatar image, banner
-								image, profile theme colors, and your layout preferences. all optional and
+								image, profile theme colors, your layout preferences, social handles (discord,
+								youtube, tiktok, github, twitch) and one custom link. all optional and
 								editable/removable at any time
 							</li>
 							<li>
-								<strong>session data</strong>: device/browser type and a rough "last active"
-								timestamp for each device you're logged into, so you can review and revoke active
-								sessions from your account settings
+								<strong>session data</strong>: the device/browser type, a creation time and a rough
+								"last active" time for each device you're logged into (up to 20 per account), so you
+								can review and revoke sessions from your account settings
+							</li>
+							<li>
+								<strong>login and activity times</strong>: when you last logged in and when you were
+								last active, used for the rough "online" status shown on your profile
 							</li>
 							<li><strong>friend relationships and friend requests</strong> you send or receive</li>
 							<li>
-								<strong>direct messages</strong> you send to other players through the in-game
-								messaging feature
+								<strong>messages</strong> you send in the in-game messaging feature (direct and
+								group conversations), along with emoji reactions and read status
 							</li>
 							<li>
-								<strong>cloud save data</strong>, if you enable sync, mirrored to our server and
-								kept in step with your local save automatically
+								<strong>inbox messages</strong> the developer sends you (for example account
+								notices)
+							</li>
+							<li>
+								<strong>cloud save data</strong>: a copy of your game progress and some game
+								preferences, kept in step with your local save automatically, plus restore points
+								and a label for the device that last saved (the browser type and a random id). see
+								<a href="#pp-cloud">cloud saves &amp; restore points</a>
 							</li>
 							<li>
 								<strong>leaderboard stats</strong>, if you opt in: total rolls, rarities collected,
 								rarest rarity, playtime, points, and unlocked achievements, tied to your account
 								username
 							</li>
+							<li>
+								<strong>linked discord account</strong>, if you link one: your discord user id and
+								discord username, and when you linked it
+							</li>
+							<li>
+								<strong>reports and moderation records</strong>: see
+								<a href="#pp-moderation">reports &amp; moderation</a>
+							</li>
 						</ul>
 						<strong>data collected automatically (server logs):</strong>
 						<ul>
 							<li>
-								standard web server access logs may temporarily capture ip addresses and user-agent
-								strings as part of normal http operations. these are not processed for profiling,
-								are not sold or shared, and are rotated regularly.
+								standard web server logs may temporarily capture ip addresses and user-agent strings
+								as part of normal http operations. these are not processed for profiling, are not
+								sold or shared, and are rotated regularly.
+							</li>
+							<li>
+								ip addresses are also used in memory to rate-limit requests. they are not stored
+								with your account.
 							</li>
 						</ul>
 						<div class="note">
 							we do not use analytics platforms, advertising networks, fingerprinting scripts, or
 							third-party tracking. external services loaded by the game are listed in the
-							<a href="#pp-thirdparty" target="_blank" rel="noopener noreferrer"
-								>third-party services</a
-							>
+							<a href="#pp-thirdparty">third-party services</a>
 							section below.
 						</div>
 					</div>
@@ -343,8 +393,8 @@
 					<div class="section-title">accounts</div>
 					<div class="section-body">
 						creating an account is optional. you can play the entire game without one. an account is
-						only needed for cloud save sync, the leaderboard, and social features (friends,
-						messaging, public profiles).
+						needed for cloud saves, the leaderboard, and social features (friends, messaging, public
+						profiles).
 						<ul>
 							<li>
 								passwords are hashed before storage; we cannot see or recover your actual password
@@ -360,10 +410,12 @@
 							</li>
 							<li>
 								you can delete your account at any time. doing so permanently removes your cloud
-								backup, leaderboard entry, avatar, banner, and profile customization from our
-								servers. your local, in-browser save is not affected. message history with other
-								players is not deleted, since it's shared data belonging to a conversation, but your
-								account will show as "[deleted user]" in any remaining threads
+								save and every restore point, your leaderboard entry, avatar, banner, profile
+								customization, social links and linked discord details from our servers. your local,
+								in-browser save is not affected. message history with other players is not deleted,
+								since it's shared data belonging to a conversation, but your account will show as
+								"[deleted user]" in any remaining threads. a few records can outlive deletion, as
+								described under <a href="#pp-retention">data retention</a>
 							</li>
 						</ul>
 					</div>
@@ -374,10 +426,21 @@
 					<div class="section-body">
 						we use data only to provide the game's features:
 						<ul>
-							<li>cloud backup data is used solely to restore your save when you request it</li>
 							<li>
-								leaderboard data is displayed publicly on the leaderboard page, as you agreed when
-								opting in
+								cloud save data and restore points are used to sync your progress between devices
+								and to recover it when you or the developer need to undo a mistake
+							</li>
+							<li>
+								leaderboard data is displayed publicly on the leaderboard page and your profile, as
+								you agreed when opting in
+							</li>
+							<li>
+								a linked discord id is used only to give you roll milestone roles in the auth's RNG
+								discord server
+							</li>
+							<li>
+								reports, moderation records and recent account activity are used to review abuse and
+								keep the community safe
 							</li>
 							<li>
 								server logs are used only for diagnosing technical issues and maintaining uptime
@@ -394,29 +457,37 @@
 						there are two distinct hosting layers:
 						<ul>
 							<li>
-								<strong>game files (static frontend)</strong> — authsrng.xyz is hosted on
+								<strong>game files (static frontend)</strong>: authsrng.xyz is hosted on
 								<strong>cloudflare pages</strong>, a global edge network. the game's html, js, and
 								assets are served from cloudflare's infrastructure worldwide, not from a single
 								server in canada.
 							</li>
 							<li>
-								<strong>backend data (cloud backups &amp; leaderboard)</strong> — stored on servers
-								operated by the developer, physically located in canada, and accessed via a
-								cloudflare tunnel (no port forwarding).
+								<strong>backend data (accounts, cloud saves &amp; leaderboard)</strong>: stored in
+								databases on servers operated by the developer, physically located in canada, and
+								accessed via a cloudflare tunnel (no port forwarding). the developer makes daily
+								backups of these databases on the same infrastructure.
 							</li>
 						</ul>
 						<div class="highlight-note">
 							because the frontend is served via cloudflare pages and all backend traffic routes
 							through a cloudflare tunnel, cloudflare's infrastructure processes every request made
-							to the game — including ip addresses and request headers — subject to
-							<a href="https://www.cloudflare.com/privacypolicy/" target="_blank"
+							to the game, including ip addresses and request headers, subject to
+							<a
+								href="https://www.cloudflare.com/privacypolicy/"
+								target="_blank"
+								rel="noopener noreferrer"
 								>cloudflare's privacy policy</a
 							>. cloudflare acts as a data processor on our behalf and is not permitted to use your
 							data for its own purposes.
 						</div>
 						<div class="note">
-							your local game data never leaves your device unless you explicitly enable cloud
-							backups or join the leaderboard.
+							cloud saves and messages are protected in transit by https, but they are not
+							end-to-end encrypted. that means the developer can technically access them on the
+							server, and we only do so for support, moderation, and fixing problems.
+						</div>
+						<div class="note">
+							your local game data never leaves your device unless you log in to an account.
 						</div>
 					</div>
 				</div>
@@ -429,8 +500,16 @@
 						so-called "sharing" that occurs is:
 						<ul>
 							<li>
-								leaderboard stats are displayed publicly on the leaderboard page (only if you opted
-								in)
+								leaderboard stats are displayed publicly on the leaderboard page and on your public
+								profile (only if you opted in)
+							</li>
+							<li>
+								things you choose to make public on your profile (avatar, banner, bio, pronouns,
+								social links, rough online status) are visible to anyone with the link
+							</li>
+							<li>
+								if you link discord, our discord bot asks discord to give your discord account roles
+								in our server based on your roll count
 							</li>
 							<li>
 								if we were ever compelled by canadian law (e.g. a valid court order), we would
@@ -442,39 +521,86 @@
 				</div>
 
 				<div class="section-item" id="pp-cloud">
-					<div class="section-title">cloud backups &amp; save sync</div>
+					<div class="section-title">cloud saves &amp; restore points</div>
 					<div class="section-body">
-						cloud sync requires an account and is entirely opt-in. when enabled:
+						cloud saves require an account. while you are logged in, your save syncs automatically:
 						<ul>
 							<li>
-								your save data is synced to our server automatically as you play, tied to your
-								account, not an anonymous identifier
+								<strong>what is synced</strong>: your game progress (inventory, rolls, achievements,
+								shop, potions, runes, starmap, expeditions, and similar progress data) plus a few
+								game preferences such as theme editor presets, the start animation setting and
+								notification history. it is stored as a compressed copy tied to your account
 							</li>
 							<li>
-								you can disable sync or delete your account at any time; deleting your account
-								permanently removes your cloud save from our server
+								<strong>what is not synced</strong>: your password or login tokens, your general
+								settings, and custom music files. these stay on your device
 							</li>
 							<li>
-								backups are provided as-is with no uptime guarantee. we recommend also keeping local
-								save exports as a backup
+								<strong>when it syncs</strong>: shortly after your progress changes, when you leave
+								the page, and when you open the game on another device. only one open tab at a time
+								saves, so an older copy cannot overwrite a newer one
+							</li>
+							<li>
+								<strong>conflicts</strong>: if two devices changed your save, the game shows both
+								and you choose which to keep. the one you don't keep is stored as a restore point
+							</li>
+							<li>
+								<strong>protections</strong>: the server rejects automatic uploads that would lower
+								your total rolls or replace your save with an empty one. deliberate actions such as
+								reset, import or "overwrite cloud with this device" are allowed, and the previous
+								cloud save is kept as a restore point first
+							</li>
+							<li>
+								<strong>to stop syncing</strong>: log out (your local save stays on your device) or
+								delete your account. there is no separate sync switch while you are logged in
 							</li>
 						</ul>
+						<strong>restore points</strong> are extra copies of your cloud save that the server
+						keeps so mistakes can be undone. they include automatic snapshots (taken at most every
+						15 minutes, the newest 24 kept), copies saved right before an overwrite (the newest 20
+						kept), best-progress copies (the 3 most recent kept), and copies of saves you discarded
+						from a device (the newest 10 kept). you can see and restore them from your settings. the
+						developer can also restore one from them to fix an error or when you ask.
+						<div class="note">
+							restore points are a safety net, not a guarantee. they are limited in number and older
+							ones are replaced automatically. cloud saves and restore points are provided as-is
+							with no uptime guarantee, so we still recommend keeping local save exports as a
+							backup.
+						</div>
+						<div class="note">
+							when we moved to this system in october 2026, existing cloud saves were migrated and
+							the better of your older copies was kept as your current cloud save, with the others
+							kept as restore points. the previous backup files from the old system are no longer
+							used and will be deleted.
+						</div>
 					</div>
 				</div>
 
 				<div class="section-item" id="pp-leaderboard">
 					<div class="section-title">leaderboard</div>
 					<div class="section-body">
-						the leaderboard is entirely opt-in. when you join:
+						the leaderboard is entirely opt-in and requires an account with at least 1,100 synced
+						rolls. when you join:
 						<ul>
-							<li>you pick a permanent public username (3–20 characters)</li>
-							<li>your game stats are submitted automatically every 15 minutes while you play</li>
+							<li>your public name on the leaderboard is your account username</li>
 							<li>
-								submitted stats are publicly visible to anyone who visits the leaderboard page
+								your stats are read from your synced cloud save and updated automatically whenever
+								it syncs, so there is nothing to submit
 							</li>
-							<li>your username cannot be changed after joining</li>
 							<li>
-								you can opt out at any time — this permanently deletes your entry from our server
+								the public leaderboard page refreshes about every 15 minutes, so numbers there can
+								lag behind your game
+							</li>
+							<li>
+								these stats are publicly visible to anyone who visits the leaderboard page: total
+								rolls, rarities collected, rarest rarity, playtime, points, achievements, and any
+								tag the developer has added to your entry (for example for developers). they also
+								appear on your public profile
+							</li>
+							<li>your friends can also see you on their friends-only view of the leaderboard</li>
+							<li>
+								you can opt out at any time. this permanently deletes your entry from our server
+								(your cloud save is not affected)
 							</li>
 						</ul>
 						your leaderboard identity is your account username. it is not anonymous once you opt in,
@@ -485,23 +611,25 @@
 				<div class="section-item" id="pp-social">
 					<div class="section-title">friends, messaging &amp; public profiles</div>
 					<div class="section-body">
-						if you create an account, the following social features are available, all opt-in beyond
-						having an account:
+						if you create an account, the following social features are available:
 						<ul>
 							<li>
 								<strong>friends</strong>: you can send friend requests by username. the other player
 								must accept before you're connected. either side can remove a friendship at any time
 							</li>
 							<li>
-								<strong>messaging</strong>: you can send direct messages to any account by username,
-								whether or not you're friends. messages are not end-to-end encrypted and are stored
-								on our server so both participants can read them later
+								<strong>messaging</strong>: you can send direct and group messages to accounts by
+								username, whether or not you're friends, and react to messages with emoji. messages
+								are not end-to-end encrypted and are stored on our server so everyone in the
+								conversation can read them later
 							</li>
 							<li>
 								<strong>public profile page</strong>: if you have an account, a public profile page
 								exists at a url based on your username, showing whatever you've chosen to make
-								visible: avatar, banner, bio, pronouns, leaderboard stats, and achievements. anyone
-								with the link can view it, whether or not they're logged in
+								visible: avatar, banner, bio, pronouns, social links, leaderboard stats and
+								achievements (if you joined the leaderboard), and a rough online status such as
+								"online now" or "active 3h ago". anyone with the link can view it, whether or not
+								they're logged in
 							</li>
 						</ul>
 						<div class="note">
@@ -511,16 +639,68 @@
 					</div>
 				</div>
 
+				<div class="section-item" id="pp-discord">
+					<div class="section-title">linking discord</div>
+					<div class="section-body">
+						you can optionally link a discord account to your auth's RNG account.
+						<ul>
+							<li>
+								we store your discord user id, your discord username, and the time you linked it
+							</li>
+							<li>
+								our discord bot uses this link to check your total rolls and give you milestone
+								roles in the auth's RNG discord server
+							</li>
+							<li>
+								you can unlink at any time. unlinking removes the stored discord details and stops
+								future role updates. roles you already received are not removed automatically
+							</li>
+							<li>
+								discord has its own privacy policy that covers your discord account. we only receive
+								your id and username when you link
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="section-item" id="pp-moderation">
+					<div class="section-title">reports &amp; moderation</div>
+					<div class="section-body">
+						to keep the community safe, we keep some records:
+						<ul>
+							<li>
+								<strong>reports</strong>: when a player reports someone, we store the reporter's
+								username, the reported player's username, the reason, any context they add, and the
+								time. only the developer sees reports
+							</li>
+							<li>
+								<strong>recent account activity</strong>: a short rolling log (the most recent 200
+								entries per account) of actions on your account, used only to review reports
+							</li>
+							<li>
+								<strong>moderation log</strong>: a record of actions the developer takes on accounts
+								and the leaderboard (bans, renames, profile clearing, tag edits, stat overrides,
+								save restores, and similar), with timestamps. the most recent 5000 entries are kept
+							</li>
+						</ul>
+						<div class="note">
+							these records contain usernames, so some can remain after an account is deleted. see
+							<a href="#pp-retention">data retention</a>.
+						</div>
+					</div>
+				</div>
+
 				<div class="section-item" id="pp-cookies">
 					<div class="section-title">cookies &amp; local storage</div>
 					<div class="section-body">
 						auth's RNG does not use cookies for tracking or advertising. game data is stored in your
 						browser's <code>localStorage</code> (not cookies). localStorage data stays on your
-						device and is not sent to any server unless you opt into cloud backups.
+						device and is only sent to our servers while you are logged in to an account.
 						<div class="note">
 							you can clear your localStorage at any time through your browser settings. doing so
-							will permanently delete your local save data. if you have cloud backups enabled, you
-							can restore from there afterward.
+							will permanently delete your local save data. if you have an account, you can log in
+							again and your cloud save will be restored, or pick an older copy from your restore
+							points.
 						</div>
 					</div>
 				</div>
@@ -528,37 +708,57 @@
 				<div class="section-item" id="pp-thirdparty">
 					<div class="section-title">third-party services</div>
 					<div class="section-body">
-						the following third-party scripts or services are loaded when you visit the game. we do
-						not control their data practices — please review their own privacy policies:
+						the following third-party scripts or services are loaded or used when you visit the
+						game. we do not control their data practices, so please review their own privacy
+						policies:
 						<ul>
 							<li>
-								<strong>cloudflare</strong> — serves the game frontend via cloudflare pages (global
+								<strong>cloudflare</strong>: serves the game frontend via cloudflare pages (global
 								edge CDN) and proxies all backend api traffic via cloudflare tunnel. sees all
 								request traffic (ip, headers) for both.
-								<a href="https://www.cloudflare.com/privacypolicy/" target="_blank"
+								<a
+									href="https://www.cloudflare.com/privacypolicy/"
+									target="_blank"
+									rel="noopener noreferrer"
 									>cloudflare privacy policy</a
 								>
 							</li>
 							<li>
-								<strong>instant.page</strong> — preloading library served via cdnjs. may record
+								<strong>instant.page</strong>: preloading library served via cdnjs. may record
 								requests to cdnjs infrastructure.
-								<a href="https://instant.page/" target="_blank">instant.page</a>
+								<a href="https://instant.page/" target="_blank" rel="noopener noreferrer"
+									>instant.page</a
+								>
 							</li>
 							<li>
-								<strong>altcha</strong> — self-hosted, privacy-first captcha widget used on login
-								and signup to prevent bot abuse. altcha does not use tracking, cookies, or
-								third-party requests, and does not collect any personal data. the verification
-								challenge is generated and checked entirely on our own servers. choosing altcha was
-								intentional to protect the privacy of our users.
-								<a href="https://altcha.org" target="_blank">altcha.org</a>
+								<strong>altcha</strong>: self-hosted, privacy-first captcha widget used on login and
+								signup to prevent bot abuse. altcha does not use tracking, cookies, or third-party
+								requests, and does not collect any personal data. the verification challenge is
+								generated and checked entirely on our own servers. choosing altcha was intentional
+								to protect the privacy of our users.
+								<a href="https://altcha.org" target="_blank" rel="noopener noreferrer"
+									>altcha.org</a
+								>
 							</li>
 							<li>
-								<strong>librecounter</strong> — open-source hit counter. records a page view when
-								you visit. <a href="https://librecounter.org/" target="_blank">librecounter.org</a>
+								<strong>librecounter</strong>: open-source hit counter. records a page view when you
+								visit.
+								<a href="https://librecounter.org/" target="_blank" rel="noopener noreferrer"
+									>librecounter.org</a
+								>
 							</li>
 							<li>
-								<strong>hitscounter.dev</strong> — visit counter. records a page view when you
-								visit. <a href="https://hitscounter.dev/" target="_blank">hitscounter.dev</a>
+								<strong>hitscounter.dev</strong>: visit counter. records a page view when you visit.
+								<a href="https://hitscounter.dev/" target="_blank" rel="noopener noreferrer"
+									>hitscounter.dev</a
+								>
+							</li>
+							<li>
+								<strong>discord</strong>: only if you link a discord account or join our discord
+								server. discord handles the link and our bot gives roles through discord's api.
+								<a href="https://discord.com/privacy" target="_blank" rel="noopener noreferrer"
+									>discord privacy policy</a
+								>
 							</li>
 						</ul>
 						<div class="note">
@@ -574,21 +774,36 @@
 					<div class="section-body">
 						we retain data only as long as necessary:
 						<ul>
+							<li><strong>accounts and profiles</strong>: kept until you delete your account</li>
 							<li>
-								<strong>cloud backups</strong> — kept indefinitely until you delete them via the
-								in-game settings, or until you contact us requesting removal
+								<strong>cloud saves</strong>: kept until you delete your account, or until you
+								contact us requesting removal
 							</li>
 							<li>
-								<strong>leaderboard entries</strong> — kept until you opt out in-game, at which
-								point they are permanently deleted from our server
+								<strong>restore points</strong>: replaced automatically as newer ones are made (see
+								the limits under cloud saves) and deleted when you delete your account
 							</li>
 							<li>
-								<strong>server access logs</strong> — rotated and deleted on a rolling basis
-								(typically within 30 days). not processed for profiling.
+								<strong>leaderboard entries</strong>: kept until you opt out or delete your account,
+								at which point they are permanently deleted from our server
 							</li>
 							<li>
-								<strong>concurrent user session ids</strong> — not stored at all. they exist only in
-								memory for the duration of the request.
+								<strong>login sessions</strong>: kept until you log out, revoke them, or delete your
+								account, with a maximum of 20 per account (the oldest are removed first)
+							</li>
+							<li>
+								<strong>database backups</strong>: the developer takes daily backups of the account
+								and cloud save databases and keeps the newest 14. data you delete can remain in
+								these backups for up to 14 days after deletion, then it is gone
+							</li>
+							<li>
+								<strong>reports and moderation records</strong>: kept for as long as needed to
+								handle reports and prevent abuse. they contain usernames, so they can remain after
+								an account is deleted until they age out of the rolling logs
+							</li>
+							<li>
+								<strong>server logs</strong>: rotated and deleted on a rolling basis (typically
+								within 30 days). not processed for profiling.
 							</li>
 						</ul>
 						<div class="note">
@@ -612,10 +827,10 @@
 							<li>maintain a record of the breach as required by law</li>
 						</ul>
 						<div class="note">
-							given that we hold almost no identifying personal information, the practical scope of
-							any breach would be limited — your game data is not linked to your name, email, or any
-							account. the highest-risk scenario would be exposure of leaderboard usernames paired
-							with game statistics, which are already public.
+							we do not collect email addresses, real names, or payment details. what we do hold is
+							account data: usernames, hashed passwords and backup keys, profile content, cloud
+							saves, friend lists, and messages (which are not end-to-end encrypted). those are what
+							a breach could expose, and we would tell affected players as described above.
 						</div>
 					</div>
 				</div>
@@ -628,30 +843,35 @@
 						and alberta's
 						<strong>personal information protection act (pipa)</strong>, you have the right to:
 						<ul>
-							<li><strong>access</strong> — request what personal information we hold about you</li>
+							<li><strong>access</strong>: request what personal information we hold about you</li>
 							<li>
-								<strong>correction</strong> — request correction of inaccurate personal information
+								<strong>correction</strong>: request correction of inaccurate personal information
 							</li>
 							<li>
-								<strong>withdrawal of consent</strong> — opt out of data collection at any time (for
-								cloud backups and leaderboard, use the in-game settings)
+								<strong>withdrawal of consent</strong>: opt out of data collection at any time (log
+								out to stop cloud sync, opt out of the leaderboard or unlink discord in the in-game
+								settings)
 							</li>
 							<li>
-								<strong>deletion</strong> — request deletion of any server-side data we hold about
+								<strong>deletion</strong>: request deletion of any server-side data we hold about
 								you
 							</li>
 							<li>
-								<strong>complaint</strong> — file a complaint with the office of the privacy
+								<strong>complaint</strong>: file a complaint with the office of the privacy
 								commissioner of canada (OPC) at
-								<a href="https://www.priv.gc.ca" target="_blank">priv.gc.ca</a>, or the office of
-								the information and privacy commissioner of alberta at
-								<a href="https://www.oipc.ab.ca" target="_blank">oipc.ab.ca</a>
+								<a href="https://www.priv.gc.ca" target="_blank" rel="noopener noreferrer"
+									>priv.gc.ca</a
+								>, or the office of the information and privacy commissioner of alberta at
+								<a href="https://www.oipc.ab.ca" target="_blank" rel="noopener noreferrer"
+									>oipc.ab.ca</a
+								>
 							</li>
 						</ul>
 						if you have an account, most of these rights are self-serviceable in-game: edit or
-						delete your profile info, revoke sessions, remove friends, and delete your account
-						entirely, all from account settings. for anything not available in-game, or if you never
-						created an account but believe we hold data about you, contact us at the address below.
+						delete your profile info, revoke sessions, remove friends, restore or review your
+						restore points, and delete your account entirely, all from account settings. for
+						anything not available in-game, or if you never created an account but believe we hold
+						data about you, contact us at the address below.
 					</div>
 				</div>
 
@@ -662,8 +882,9 @@
 						information from children under 13. if you believe a child has submitted personal
 						information to our services, please contact us and we will delete it promptly.
 						<div class="note">
-							because we don't require accounts or personal info, children are not identifiable in
-							our systems unless a parent/guardian specifically contacts us about an account.
+							because we don't require accounts, emails, or real names, children are not
+							identifiable in our systems unless a parent/guardian specifically contacts us about an
+							account.
 						</div>
 					</div>
 				</div>
@@ -681,11 +902,16 @@
 							</li>
 							<li>
 								discord:
-								<a href="https://discord.gg/mTDw8jJYqX" target="_blank">discord.gg/mTDw8jJYqX</a>
+								<a href="https://discord.gg/mTDw8jJYqX" target="_blank" rel="noopener noreferrer"
+									>discord.gg/mTDw8jJYqX</a
+								>
 							</li>
 							<li>
 								github:
-								<a href="https://github.com/authsrng-game/auths-RNG" target="_blank"
+								<a
+									href="https://github.com/authsrng-game/auths-RNG"
+									target="_blank"
+									rel="noopener noreferrer"
 									>github.com/authsrng-game/auths-RNG</a
 								>
 							</li>
@@ -701,34 +927,22 @@
 				</p>
 			</div>
 
-			<!-- ======================== TERMS OF SERVICE ======================== -->
+			<!-- ========================  TERMS ======================== -->
 			<div id="tab-terms" class="tab-content">
 				<div class="toc">
 					<div class="toc-title">sections</div>
-					<a href="#tos-acceptance" target="_blank" rel="noopener noreferrer"
-						>acceptance of terms</a
-					>
-					<a href="#tos-service" target="_blank" rel="noopener noreferrer">about the service</a>
-					<a href="#tos-use" target="_blank" rel="noopener noreferrer">acceptable use</a>
-					<a href="#tos-data" target="_blank" rel="noopener noreferrer">your data &amp; saves</a>
-					<a href="#tos-ip" target="_blank" rel="noopener noreferrer">intellectual property</a>
-					<a href="#tos-leaderboard" target="_blank" rel="noopener noreferrer"
-						>leaderboard conduct</a
-					>
-					<a href="#tos-conduct" target="_blank" rel="noopener noreferrer"
-						>accounts &amp; user conduct</a
-					>
-					<a href="#tos-disclaimer" target="_blank" rel="noopener noreferrer"
-						>disclaimer of warranties</a
-					>
-					<a href="#tos-liability" target="_blank" rel="noopener noreferrer"
-						>limitation of liability</a
-					>
-					<a href="#tos-changes" target="_blank" rel="noopener noreferrer"
-						>changes to the service</a
-					>
-					<a href="#tos-law" target="_blank" rel="noopener noreferrer">governing law</a>
-					<a href="#tos-contact" target="_blank" rel="noopener noreferrer">contact</a>
+					<a href="#tos-acceptance">acceptance of terms</a>
+					<a href="#tos-service">about the service</a>
+					<a href="#tos-use">acceptable use</a>
+					<a href="#tos-data">your data &amp; saves</a>
+					<a href="#tos-ip">intellectual property</a>
+					<a href="#tos-leaderboard">leaderboard conduct</a>
+					<a href="#tos-conduct">accounts &amp; user conduct</a>
+					<a href="#tos-disclaimer">disclaimer of warranties</a>
+					<a href="#tos-liability">limitation of liability</a>
+					<a href="#tos-changes">changes to the service</a>
+					<a href="#tos-law">governing law</a>
+					<a href="#tos-contact">contact</a>
 				</div>
 
 				<div class="section-item" id="tos-acceptance">
@@ -748,12 +962,15 @@
 					<div class="section-body">
 						auth's RNG is a free, browser-based incremental/idle game, developed and operated by
 						<strong>Ivy Lopez</strong> under the name <strong>auth</strong>. it is provided at no
-						cost and is intended for entertainment purposes. the game includes optional features
-						such as cloud save backups and a public leaderboard, which are opt-in and described in
-						the privacy policy.
+						cost and is intended for entertainment purposes. the game includes optional accounts,
+						cloud saves, a public leaderboard, and social features (friends, messaging, public
+						profiles), described in the privacy policy.
 						<div class="note">
 							the source code is open-source and available at
-							<a href="https://github.com/authsrng-game/auths-RNG" target="_blank"
+							<a
+								href="https://github.com/authsrng-game/auths-RNG"
+								target="_blank"
+								rel="noopener noreferrer"
 								>github.com/authsrng-game/auths-RNG</a
 							>. use of the source code is subject to the license file included in that repository.
 						</div>
@@ -767,19 +984,19 @@
 						<ul>
 							<li>
 								attempt to cheat, manipulate, or exploit the game's systems in ways that unfairly
-								affect other players (e.g. submitting fabricated stats to the leaderboard)
+								affect other players (e.g. uploading a fabricated save to get onto the leaderboard)
 							</li>
 							<li>
 								reverse-engineer or tamper with server-side components (note: client-side code is
 								open-source and tinkering with your own local save is fine, that's your data)
 							</li>
 							<li>
-								use automated tools to generate excessive server requests (e.g. hammering the backup
-								or leaderboard apis)
+								use automated tools to generate excessive server requests (e.g. hammering the save
+								sync, leaderboard or account apis), or try to get around rate limits
 							</li>
 							<li>
-								attempt to access, alter, or delete another player's cloud backup or leaderboard
-								entry
+								attempt to access, alter, or delete another player's cloud save, restore points or
+								leaderboard entry
 							</li>
 							<li>use the service for any illegal purpose under canadian law or alberta law</li>
 							<li>impersonate other players on the leaderboard</li>
@@ -796,8 +1013,8 @@
 								someone else's copyright
 							</li>
 						</ul>
-						violation of these terms may result in your leaderboard entry being removed and/or your
-						cloud backup access being revoked, or potentially your account.
+						violation of these terms may result in your leaderboard entry being removed, your cloud
+						save access being restricted, or your account being suspended or deleted.
 					</div>
 				</div>
 
@@ -808,13 +1025,31 @@
 						claim ownership of your game progress.
 						<div class="note">
 							however, we are not responsible for data loss resulting from browser data clearing,
-							localStorage corruption, device failure, or discontinuation of the service. cloud
-							backups are provided as a convenience with no uptime guarantee. keep your own local
-							exports using the save transfer feature.
+							localStorage corruption, device failure, bugs, or discontinuation of the service.
+							cloud saves and restore points are provided as a convenience with no uptime or
+							recovery guarantee. restore points are limited in number and replaced automatically.
+							keep your own local exports using the save transfer feature.
 						</div>
-						if you choose to delete your cloud backup or opt out of the leaderboard, your data will
-						be removed from our servers as described in the privacy policy. we do not retain deleted
-						data.
+						<ul>
+							<li>
+								while you are logged in, your save syncs automatically. when two devices disagree,
+								you choose which save to keep, and you accept the result of that choice
+							</li>
+							<li>
+								the developer may restore, correct or remove a cloud save, for example to fix an
+								error, at your request, or when it contains fabricated data
+							</li>
+							<li>
+								if you delete your account, your data is removed from our servers as described in
+								the privacy policy. data you delete can remain in routine backups for up to 14 days,
+								and shared records such as messages and moderation records can remain as described
+								there
+							</li>
+							<li>
+								the nightly build shares your account and cloud save with the main game, so an
+								unstable build can affect your cloud save. use nightly at your own risk
+							</li>
+						</ul>
 					</div>
 				</div>
 
@@ -846,19 +1081,22 @@
 					<div class="section-body">
 						by joining the leaderboard you agree that:
 						<ul>
-							<li>your chosen username and stats are displayed publicly</li>
-							<li>your username is permanent and cannot be changed</li>
-							<li>you will not submit false or manipulated statistics</li>
+							<li>
+								your account username and your stats (read from your synced cloud save) are
+								displayed publicly, including on your public profile
+							</li>
+							<li>you will not upload false or manipulated saves or statistics</li>
 							<li>
 								your username is user-generated content. the developer reserves the right to remove
-								any leaderboard entry, without notice and without breach of these terms, that
-								contains fabricated data, an offensive or inappropriate username, impersonation of
-								another player or person, or any other violation of these terms
+								any leaderboard entry, rename an account, add a tag to an entry, correct or override
+								its stats, or lock it from updating, without notice and without breach of these
+								terms, when it contains fabricated data, an offensive or inappropriate username,
+								impersonation of another player or person, or any other violation of these terms
 							</li>
 						</ul>
 						<div class="note">
-							removal of your leaderboard entry does not delete your cloud backup data. your local
-							save is unaffected.
+							removal of your leaderboard entry does not delete your cloud save. your local save is
+							unaffected.
 						</div>
 					</div>
 				</div>
@@ -867,8 +1105,8 @@
 					<div class="section-title">accounts &amp; user conduct</div>
 					<div class="section-body">
 						you are responsible for keeping your password and backup keys secure. we cannot recover
-						a lost password without a valid backup key, and if all three are lost along with your
-						password, the account may be permanently inaccessible.
+						a lost password without a valid backup key, and if you also lose your backup keys, the
+						account may be permanently inaccessible.
 						<div class="note">
 							the developer reserves the right to suspend or delete any account, remove any profile
 							content (bio, avatar, banner, messages), or restrict access to social features,
@@ -883,9 +1121,9 @@
 							for the internet at large, but we reserve the right to disassociate our platform from
 							someone we have credible reason to believe engaged in it.
 						</div>
-						profile content (bio, pronouns, avatar, banner) is user-generated content you are solely
-						responsible for. don't upload or write anything you don't have the right to post. you
-						can also view the official community
+						profile content (bio, pronouns, avatar, banner, social links) and messages are
+						user-generated content you are solely responsible for. don't upload or write anything
+						you don't have the right to post. you can also view the official community
 						<a href="/boring/community.html" target="_blank" rel="noopener noreferrer"
 							>code of conduct</a
 						>.
@@ -971,11 +1209,16 @@
 							</li>
 							<li>
 								discord:
-								<a href="https://discord.gg/mTDw8jJYqX" target="_blank">discord.gg/mTDw8jJYqX</a>
+								<a href="https://discord.gg/mTDw8jJYqX" target="_blank" rel="noopener noreferrer"
+									>discord.gg/mTDw8jJYqX</a
+								>
 							</li>
 							<li>
 								github issues:
-								<a href="https://github.com/authsrng-game/auths-RNG/issues" target="_blank"
+								<a
+									href="https://github.com/authsrng-game/auths-RNG/issues"
+									target="_blank"
+									rel="noopener noreferrer"
 									>github.com/authsrng-game/auths-RNG</a
 								>
 							</li>
@@ -983,7 +1226,7 @@
 					</div>
 				</div>
 				<p>
-					FYI: just don't harrass other members in the community, upload extreme content, or hammer
+					FYI: just don't harass other members in the community, upload extreme content, or hammer
 					the servers. it's common sense really.
 				</p>
 			</div>
@@ -992,11 +1235,17 @@
 		</div>
 
 		<script>
-			function switchTab(tab) {
+			function switchTab(tab, btn) {
 				document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
 				document.querySelectorAll('.tab-content').forEach((c) => c.classList.remove('active'));
 				document.getElementById('tab-' + tab).classList.add('active');
-				event.currentTarget.classList.add('active');
+				if (btn) btn.classList.add('active');
+			}
+
+			if (location.hash.indexOf('#tos-') === 0) {
+				switchTab('terms', document.querySelectorAll('.tab')[1]);
+				const target = document.getElementById(location.hash.slice(1));
+				if (target) target.scrollIntoView();
 			}
 		</script>
 	</body>

@@ -29,14 +29,7 @@
 			.replace(/'/g, '&#39;');
 	}
 
-	function escAttr(s) {
-		return String(s)
-			.replace(/&/g, '&amp;')
-			.replace(/</g, '&lt;')
-			.replace(/>/g, '&gt;')
-			.replace(/"/g, '&quot;')
-			.replace(/'/g, '&#39;');
-	}
+	const escAttr = escHtml;
 	// Generated code ends here on 2026-09-16T00:00:00Z:
 
 	function fmtLastSeenShort(ts) {

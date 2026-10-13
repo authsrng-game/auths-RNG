@@ -461,6 +461,17 @@
 
 				grid.innerHTML = '<div class="load-state">loading addons...</div>';
 
+				// Generated code starts here on 2026-03-31T00:00:00Z:
+				function escHtml(s) {
+					return String(s || '')
+						.replace(/&/g, '&amp;')
+						.replace(/</g, '&lt;')
+						.replace(/>/g, '&gt;')
+						.replace(/"/g, '&quot;')
+						.replace(/'/g, '&#39;');
+				}
+				// Generated code ends here on 2026-03-31T00:00:00Z:
+
 				function getPermissionDetails(entry) {
 					const perms = [];
 					if (entry.permissions.includes('theme')) {
@@ -517,12 +528,13 @@
 								.join('')}</ul>`
 						: `<div class="perm-none">this addon does not request any special permissions</div>`;
 
+					// Generated code starts here on 2026-03-31T00:00:00Z:
 					permBody.innerHTML = `
-      <div class="modal-name">${entry.name}</div>
-      <div class="modal-author">by ${entry.author} &middot; v${entry.version}</div>
+      <div class="modal-name">${escHtml(entry.name)}</div>
+      <div class="modal-author">by ${escHtml(entry.author)} &middot; v${escHtml(entry.version)}</div>
       ${permsHtml}
       <div class="perm-source">
-        <span>author: ${entry.author}</span>
+        <span>author: ${escHtml(entry.author)}</span>
         <span>reviewed via github PR</span>
       </div>
       <div class="perm-btn-row">
@@ -530,6 +542,7 @@
         <button class="install perm-allow" id="permAllowBtn">${isInstalled ? 'uninstall' : 'allow & install'}</button>
       </div>
     `;
+					// Generated code ends here on 2026-03-31T00:00:00Z:
 
 					document.getElementById('permCancelBtn').addEventListener('click', closePermModal);
 					document.getElementById('permAllowBtn').addEventListener('click', () => {
@@ -559,11 +572,13 @@
 
 				function openModal(entry) {
 					const isInstalled = AddonManager.isInstalled(entry.id);
+					// Generated code starts here on 2026-03-31T00:00:00Z:
 					modalBody.innerHTML = `
-      <div class="modal-name">${entry.name}</div>
-      <div class="modal-author">by ${entry.author} &middot; v${entry.version}</div>
+      <div class="modal-name">${escHtml(entry.name)}</div>
+      <div class="modal-author">by ${escHtml(entry.author)} &middot; v${escHtml(entry.version)}</div>
       <button class="install modal-install ${isInstalled ? 'installed' : ''}" id="modalInstallBtn">${isInstalled ? 'installed' : 'install'}</button>
     `;
+					// Generated code ends here on 2026-03-31T00:00:00Z:
 					document.getElementById('modalInstallBtn').addEventListener('click', () => {
 						modalOverlay.classList.remove('show');
 						openPermModal(entry);
@@ -612,18 +627,20 @@
 						const isInstalled = AddonManager.isInstalled(entry.id);
 						const card = document.createElement('div');
 						card.className = 'card';
+						// Generated code starts here on 2026-03-31T00:00:00Z:
 						card.innerHTML = `
         <div class="card-top">
           <div>
-            <div class="card-name">${entry.name} ${entry.author === 'auth' ? '<span class="official-badge">official</span>' : ''}</div>
-            <div class="card-author">by ${entry.author}</div>
+            <div class="card-name">${escHtml(entry.name)} ${entry.author === 'auth' ? '<span class="official-badge">official</span>' : ''}</div>
+            <div class="card-author">by ${escHtml(entry.author)}</div>
           </div>
         </div>
-        <div class="card-tags">${entry.permissions.map((t) => `<span class="tag">${t}</span>`).join('')}</div>
+        <div class="card-tags">${(entry.permissions || []).map((t) => `<span class="tag">${escHtml(t)}</span>`).join('')}</div>
         <div class="card-footer">
           <button class="install ${isInstalled ? 'installed' : ''}">${isInstalled ? 'installed' : 'install'}</button>
         </div>
       `;
+						// Generated code ends here on 2026-03-31T00:00:00Z:
 						card.querySelector('.card-top').addEventListener('click', () => openModal(entry));
 						const btn = card.querySelector('button.install');
 						btn.addEventListener('click', (e) => {

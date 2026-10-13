@@ -378,9 +378,7 @@ Last release date on nightly: ${nightlyRDate}`;
 		<!-- BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~ -->
 
 		<div class="site-header lazy">
-			<div class="header-chip" role="button" tabindex="0" aria-label="view changelog">
-				update 9.71-hf
-			</div>
+			<div class="header-chip">update 9.8</div>
 			<h1>welcome to auth's RNG!</h1>
 			<style>
 				.header-chip {
@@ -1064,9 +1062,10 @@ Last release date on nightly: ${nightlyRDate}`;
 								</label>
 							</div>
 
+							<!-- Generated code starts here on 2026-03-31T15:00:00Z: -->
 							<div class="setting-row setting-row--stacked">
-								<span class="setting-name">background music</span>
-								<select id="musicSelect" class="setting-select">
+								<label for="musicSelect" class="setting-name">background music</label>
+								<select id="musicSelect" class="setting-select" aria-label="Background music">
 									<option value="default">auth's RNG ost (progresses with rolls)</option>
 									<option value="wavelocity">leon chang - wavelocity</option>
 									<option value="nocturne">Chopin - Nocturne op.9 No.2</option>
@@ -1075,14 +1074,15 @@ Last release date on nightly: ${nightlyRDate}`;
 							</div>
 
 							<div class="setting-row setting-row--stacked">
-								<span class="setting-name">roll sound</span>
-								<select id="rollSound" class="setting-select">
+								<label for="rollSound" class="setting-name">roll sound</label>
+								<select id="rollSound" class="setting-select" aria-label="Roll sound">
 									<option value="none">none</option>
 									<option value="click">click</option>
 									<option value="whoosh">whoosh</option>
 									<option value="coin">coin</option>
 								</select>
 							</div>
+							<!-- Generated code ends here on 2026-03-31T15:00:00Z: -->
 
 							<div class="setting-row setting-row--stacked">
 								<div class="setting-info">
@@ -1157,9 +1157,10 @@ Last release date on nightly: ${nightlyRDate}`;
 						<div class="settings-group">
 							<div class="settings-group-label">gameplay</div>
 
+							<!-- Generated code starts here on 2026-03-31T15:00:00Z: -->
 							<div class="setting-row setting-row--stacked">
 								<div class="setting-info">
-									<span class="setting-name">"rare" threshold</span>
+									<label for="rareThreshold" class="setting-name">"rare" threshold</label>
 									<span class="setting-desc"
 										>1/X and rarer · used for highlights and the rolls-since-rare counter</span
 									>
@@ -1170,12 +1171,13 @@ Last release date on nightly: ${nightlyRDate}`;
 									min="0"
 									value="1000"
 									class="setting-input"
+									aria-label="Rare threshold"
 								/>
 							</div>
 
 							<div class="setting-row setting-row--stacked">
 								<div class="setting-info">
-									<span class="setting-name">auto-sell threshold</span>
+									<label for="autoSellThreshold" class="setting-name">auto-sell threshold</label>
 									<span class="setting-desc"
 										>sell rarities below 1/X for points automatically · 0 = off</span
 									>
@@ -1186,8 +1188,10 @@ Last release date on nightly: ${nightlyRDate}`;
 									min="0"
 									value="0"
 									class="setting-input"
+									aria-label="Auto sell threshold"
 								/>
 							</div>
+							<!-- Generated code ends here on 2026-03-31T15:00:00Z: -->
 						</div>
 
 						<div class="settings-group">
@@ -1269,6 +1273,79 @@ Last release date on nightly: ${nightlyRDate}`;
 
 				<div class="page" id="page-11">
 					<h2 style="margin-top: 0">links and widgets</h2>
+
+					<div id="irc-widget" class="irc-widget">
+						<div class="irc-title">chat with us on irc!</div>
+						<div class="irc-sub">##authsrng on libera.chat</div>
+						<div class="irc-actions">
+							<a
+								class="irc-btn"
+								target="_blank"
+								rel="noopener"
+								href="https://web.libera.chat/?channel=%23authsrng"
+								>join in browser</a
+							>
+							<a class="irc-btn" href="ircs://irc.libera.chat:6697/%23%23authsrng"
+								>open in irc client</a
+							>
+							<button class="irc-btn" id="irc-copy" type="button">copy /join</button>
+						</div>
+					</div>
+
+					<style>
+						.irc-widget {
+							display: inline-block;
+							padding: 12px 14px;
+							border: 1px solid currentColor;
+							border-radius: 6px;
+							font-family: inherit;
+						}
+						.irc-title {
+							font-weight: bold;
+						}
+						.irc-sub {
+							opacity: 0.7;
+							font-size: 0.85em;
+							margin-bottom: 8px;
+						}
+						.irc-actions {
+							display: flex;
+							gap: 6px;
+							flex-wrap: wrap;
+						}
+						.irc-btn {
+							padding: 4px 10px;
+							border: 1px solid currentColor;
+							border-radius: 4px;
+							background: none;
+							color: inherit;
+							font: inherit;
+							font-size: 0.85em;
+							text-decoration: none;
+							cursor: pointer;
+						}
+						.irc-btn:hover {
+							opacity: 0.7;
+						}
+					</style>
+
+					<script>
+						(function () {
+							var btn = document.getElementById('irc-copy');
+							btn.addEventListener('click', function () {
+								var text = '/server add libera irc.libera.chat/6697 -tls\n/join ##authsrng';
+								var done = function () {
+									btn.textContent = 'copied';
+									setTimeout(function () {
+										btn.textContent = 'copy /join';
+									}, 1500);
+								};
+								if (navigator.clipboard) navigator.clipboard.writeText(text).then(done);
+							});
+						})();
+					</script>
+
+					<br />
 
 					<a
 						class="lazy"
@@ -1579,6 +1656,7 @@ Last release date on nightly: ${nightlyRDate}`;
 		<div class="swipe-indicator">swipe to navigate!!!</div>
 
 		<!-- big ahh block hahahahhaah -->
+		<script src="assets/scripts/save-keys.js"></script>
 		<script src="assets/scripts/engine/plush-logger.js"></script>
 		<script src="assets/scripts/engine/epic/plush-epic.js"></script>
 		<script src="assets/scripts/engine/plush-xoshiro256ss.js"></script>
@@ -1591,6 +1669,8 @@ Last release date on nightly: ${nightlyRDate}`;
 		<script src="assets/scripts/engine/plush-resistance.js"></script>
 		<script src="assets/scripts/engine/plush-roller.js"></script>
 		<script src="assets/scripts/engine/plush-core.js"></script>
+		<script src="assets/scripts/services/revisory/revisory.js"></script>
+		<script src="assets/scripts/services/revisory/revisory-lang.js"></script>
 		<script src="assets/scripts/popup.js"></script>
 		<script src="assets/scripts/sync.js"></script>
 		<script src="assets/scripts/social.js" defer></script>
@@ -1641,6 +1721,8 @@ Last release date on nightly: ${nightlyRDate}`;
 
 		<script src="assets/scripts/icons.js" defer></script>
 		<script src="assets/scripts/settings.js" defer></script>
+		<script src="assets/scripts/services/revisory/revisory-settings.js" defer></script>
+		<script src="assets/scripts/services/revisory/revisory-dashboard.js" defer></script>
 		<script src="assets/scripts/jukebox.js" defer></script>
 
 		<div id="cutsceneOverlay">
@@ -2144,8 +2226,6 @@ Last release date on nightly: ${nightlyRDate}`;
 						requestAnimationFrame(() => {
 							pill.style.opacity = '1';
 						});
-
-						const trailWidth = trail.offsetWidth;
 
 						setTimeout(() => {
 							for (let i = items.length - 1; i >= 0; i--) {

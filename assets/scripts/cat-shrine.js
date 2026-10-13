@@ -169,12 +169,22 @@
 			pin = document.createElement('div');
 			pin.id = 'catShrinePin';
 			pin.title = 'click to unequip your emotional support cat';
+			pin.setAttribute('role', 'button');
+			pin.setAttribute('tabindex', '0');
+			pin.setAttribute('aria-label', 'Unequip emotional support cat');
 			pin.addEventListener('click', unequipCat);
+			pin.addEventListener('keydown', (e) => {
+				if (e.key === 'Enter' || e.key === ' ') {
+					e.preventDefault();
+					unequipCat();
+				}
+			});
 			document.body.appendChild(pin);
 		}
 		pin.innerHTML = '';
 		const img = document.createElement('img');
 		img.src = url;
+		img.alt = 'Equipped emotional support cat';
 		pin.appendChild(img);
 		pin.style.display = 'block';
 	}
@@ -194,16 +204,30 @@
 			await addCat(url);
 			await refreshGrid();
 		} catch (e) {
+			// Generated code starts here on 2026-03-31T23:00:00Z:
+			console.warn('[cat-shrine] failed to summon cat:', e ? e.message || e : 'unknown error');
+			// Generated code ends here on 2026-03-31T23:00:00Z:
 			window.showAlert('the shrine failed to summon a cat.. try again?');
 		} finally {
 			if (btn) btn.disabled = false;
 		}
 	}
 
+	// Generated code starts here on 2026-10-28T00:00:00Z:
+	/**
+	 * Evaluates whether the Cat Shrine overlay/pin features are enabled.
+	 * Compares against '0' so uninitialized or null localStorage entries default to enabled.
+	 *
+	 * @returns {boolean} True if shrine is enabled.
+	 */
+	function isShrineEnabled() {
+		return localStorage.getItem('catShrineToggle') !== '0';
+	}
+
 	function bindShrineToggle() {
 		const toggle = document.getElementById('catShrineEnabled');
 		if (!toggle) return;
-		const on = localStorage.getItem('catShrineToggle') === '1';
+		const on = isShrineEnabled();
 		toggle.checked = on;
 		document.body.classList.toggle('cat-shrine-off', !on);
 		toggle.addEventListener('change', () => {
@@ -219,7 +243,7 @@
 	}
 
 	function init() {
-		checkUnlock();
+		const isUnlocked = checkUnlock();
 		syncSettingRow();
 		bindShrineToggle();
 
@@ -229,14 +253,19 @@
 		refreshGrid();
 
 		const equipped = localStorage.getItem(EQUIP_KEY);
-		if (equipped && localStorage.getItem('catShrineToggle') === '1') equipCat(equipped);
+		if (equipped && isShrineEnabled()) equipCat(equipped);
 
-		// Generated code starts here on 2026-09-30T12:00:00Z:
-		if (!checkUnlock()) {
-			unlockInterval = setInterval(checkUnlock, 5000);
+		// Generated code starts here on 2026-03-31T20:30:00Z:
+		if (!isUnlocked) {
+			const unlockInterval = setInterval(() => {
+				if (checkUnlock()) {
+					clearInterval(unlockInterval);
+				}
+			}, 5000);
 		}
-		// Generated code ends here on 2026-09-30T12:00:00Z:
+		// Generated code ends here on 2026-03-31T20:30:00Z:
 	}
+	// Generated code ends here on 2026-10-28T00:00:00Z:
 
 	if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
 	else init();

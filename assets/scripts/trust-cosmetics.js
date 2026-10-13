@@ -97,10 +97,25 @@
 		click: '💥 click effects',
 	};
 
+	// Generated code starts here on 2026-03-31T22:00:00Z:
 	function getTrust() {
-		const val = parseInt(localStorage.getItem(TRUST_KEY) || '0', 10);
+		const raw = localStorage.getItem(TRUST_KEY);
+		if (raw !== null && (raw.trim().startsWith('[') || raw.trim().startsWith('{'))) {
+			try {
+				const parsed = JSON.parse(raw);
+				if (Array.isArray(parsed)) {
+					if (!localStorage.getItem('mutationHistory')) {
+						localStorage.setItem('mutationHistory', JSON.stringify(parsed));
+					}
+					localStorage.removeItem(TRUST_KEY);
+					return 0;
+				}
+			} catch (_) {}
+		}
+		const val = parseInt(raw || '0', 10);
 		return Number.isNaN(val) ? 0 : val;
 	}
+	// Generated code ends here on 2026-03-31T22:00:00Z:
 	function setTrust(v) {
 		localStorage.setItem(TRUST_KEY, String(Math.max(0, v)));
 	}
@@ -172,37 +187,62 @@
 	let trailCleanup = null;
 	let autoMutateInterval = null;
 
-	// Generated code starts here on 2026-09-25T12:46:00Z:
-	function startAutoMutate() {
+	// Generated code starts here on 2026-03-31T00:00:00Z:
+	function processAutoMutate() {
 		if (!getOwned().includes('upgrade_automutate')) return;
-		if (autoMutateInterval) clearInterval(autoMutateInterval);
-		autoMutateInterval = setInterval(() => {
-			const ms = window.MutationSystem;
-			if (!ms || typeof ms.getInventoryRarities !== 'function') return;
-			const inv = ms.getInventoryRarities();
-			if (!inv || inv.length < 2) return;
-			const shuffle = [...inv].sort(
-				() => (typeof Beacon !== 'undefined' ? Beacon.float() : Math.random()) - 0.5
-			);
-			const a = shuffle[0];
-			const b = shuffle[1];
-			if (a.name === b.name) return;
-			const result = ms.mutate(a.name, b.name);
-			if (!result) return;
-			const idxA = ms.getRarityIndex(a.name);
-			const idxB = ms.getRarityIndex(b.name);
-			const resultIdx = ms.getRarityIndex(result.name);
-			const wasGood = resultIdx < Math.min(idxA, idxB);
-			const trustDelta = ms.getTrustDelta(wasGood, resultIdx, idxA, idxB);
-			ms.addTrust(trustDelta);
-			ms.addToHistory(a.name, b.name, result, wasGood);
-			ms.renderHistory();
-			ms.renderTrustBalance();
-			if (typeof addToInventory === 'function') addToInventory(result);
-			if (typeof saveAllData === 'function') saveAllData();
-		}, 20000);
+		const now = Date.now();
+		const lastTick = window._lastAutoMutateTick || now;
+		const elapsedMs = now - lastTick;
+		const elapsedTicks = Math.floor(elapsedMs / 20000);
+
+		if (elapsedTicks > 0) {
+			const cappedTicks = Math.min(180, elapsedTicks);
+			window._lastAutoMutateTick = now - (elapsedMs % 20000);
+
+			for (let i = 0; i < cappedTicks; i++) {
+				const ms = window.MutationSystem;
+				if (!ms || typeof ms.getInventoryRarities !== 'function') break;
+				const inv = ms.getInventoryRarities();
+				if (!inv || inv.length < 2) break;
+				const shuffle = [...inv].sort(
+					() => (typeof Beacon !== 'undefined' ? Beacon.float() : Math.random()) - 0.5
+				);
+				const a = shuffle[0];
+				const b = shuffle[1];
+				if (a.name === b.name) continue;
+				const result = ms.mutate(a.name, b.name);
+				if (!result) continue;
+				const idxA = ms.getRarityIndex(a.name);
+				const idxB = ms.getRarityIndex(b.name);
+				const resultIdx = ms.getRarityIndex(result.name);
+				const wasGood = resultIdx < Math.min(idxA, idxB);
+				const trustDelta = ms.getTrustDelta(wasGood, resultIdx, idxA, idxB);
+				ms.addTrust(trustDelta);
+				ms.addToHistory(a.name, b.name, result, wasGood);
+				ms.renderHistory();
+				ms.renderTrustBalance();
+				if (typeof addToInventory === 'function') addToInventory(result);
+				if (typeof saveAllData === 'function') saveAllData();
+			}
+		}
 	}
-	// Generated code ends here on 2026-09-25T12:46:00Z:
+
+	function startAutoMutate() {
+		if (autoMutateInterval) {
+			clearInterval(autoMutateInterval);
+			autoMutateInterval = null;
+		}
+		if (!getOwned().includes('upgrade_automutate')) return;
+		window._lastAutoMutateTick = Date.now();
+		autoMutateInterval = setInterval(processAutoMutate, 20000);
+	}
+
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'visible') {
+			processAutoMutate();
+		}
+	});
+	// Generated code ends here on 2026-03-31T00:00:00Z:
 
 	function initTrail(id) {
 		if (trailCleanup) {
@@ -611,5 +651,5 @@
 		init();
 	}
 
-	window.trustCosmetics = { renderShop, buy, equip, unequip };
+	window.trustCosmetics = { renderShop, buy, equip, unequip, startAutoMutate };
 })();

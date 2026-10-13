@@ -77,7 +77,7 @@ let anomaliesUsed = 0;
 
 const POTIONS_KEY = 'playerPotions';
 
-// ── Notification Center state ──────────────────────────────────────────
+// notification center state
 const NOTIF_KEY = 'notifications';
 const NOTIF_MAX = 200; // cap stored; badge shows 100+ beyond 99
 
@@ -193,7 +193,7 @@ const potionData = {
 	duplicate: { name: 'duplicate', rolls: 10, cost: 5000, emoji: '🎭' },
 };
 
-// ── roll sound ────────────────────────────────────────────────────────────
+// roll sound
 function playRollSound() {
 	const sound = window.rollSoundSetting || 'none';
 	if (sound === 'none') return;
@@ -231,7 +231,8 @@ function playRollSound() {
 	} catch (e) {}
 }
 
-// ── confetti ──────────────────────────────────────────────────────────────
+// confetti! yay!
+// TODO: remove confetti all at once because i doubt anyone genuinely uses this feature
 function triggerConfetti() {
 	if (document.body.classList.contains('reduce-motion')) return;
 	const canvas = document.createElement('canvas');
@@ -279,7 +280,7 @@ function triggerConfetti() {
 	draw();
 }
 
-// ── rolls since last rare ─────────────────────────────────────────────────
+// rolls since last rare
 let rollsSinceLastRare = 0;
 function updateRollsSinceRare(rolledRarity) {
 	const thresh = window.rareThreshold ?? 1000;
@@ -306,7 +307,37 @@ function calculateRarityPoints(rarity) {
 
 function updatePointsDisplay() {
 	document.getElementById('pointsValue').textContent = formatNum(points);
+	document.dispatchEvent(new CustomEvent('pointsChanged', { detail: { points } }));
 }
+
+window.getPoints = function () {
+	return points;
+};
+
+window.spendPoints = function (amount) {
+	if (!Number.isSafeInteger(amount) || amount <= 0) {
+		console.warn('[addon] spendPoints expects a positive integer, got:', amount);
+		return false;
+	}
+	if (amount > points) return false;
+	points -= amount;
+	updatePointsDisplay();
+	updateShopUI();
+	saveAllData();
+	return true;
+};
+
+window.awardPoints = function (amount) {
+	if (!Number.isSafeInteger(amount) || amount <= 0) {
+		console.warn('[addon] awardPoints expects a positive integer, got:', amount);
+		return false;
+	}
+	points += amount;
+	updatePointsDisplay();
+	updateShopUI();
+	saveAllData();
+	return true;
+};
 
 function updateShopUI() {
 	document.getElementById('luckLevel').textContent = shopUpgrades.luck;
@@ -469,47 +500,110 @@ function recalcPotionLuck() {
 	recalcLuckMultiplier();
 }
 
-function updateActivePotionsDisplay() {
-	const display = document.getElementById('activePotionsDisplay');
-	const list = document.getElementById('activePotionsList');
+// Generated code starts here on 2026-11-02T00:00:00Z:
+// Lazily cache DOM elements and update textContent on active potion list items in-place to prevent DOM churn and redundant style setter calls on periodic timer ticks.
+let _activePotionsDisplayEl = null;
+let _activePotionsListEl = null;
 
-	if (!display || !list) return;
+function updateActivePotionsDisplay() {
+	if (!_activePotionsDisplayEl)
+		_activePotionsDisplayEl = document.getElementById('activePotionsDisplay');
+	if (!_activePotionsListEl) _activePotionsListEl = document.getElementById('activePotionsList');
+
+	if (!_activePotionsDisplayEl || !_activePotionsListEl) return;
 
 	if (activePotions.length === 0 && duplicateRollsLeft === 0) {
-		display.style.display = 'none';
+		if (_activePotionsDisplayEl.style.display !== 'none') {
+			_activePotionsDisplayEl.style.display = 'none';
+		}
 		return;
 	}
 
-	display.style.display = 'block';
-	list.innerHTML = '';
+	if (_activePotionsDisplayEl.style.display !== 'block') {
+		_activePotionsDisplayEl.style.display = 'block';
+	}
+
+	const totalItems = activePotions.length + (duplicateRollsLeft > 0 ? 1 : 0);
+	const children = _activePotionsListEl.children;
+
+	// In-place update if element count matches
+	if (children.length === totalItems) {
+		for (let i = 0; i < activePotions.length; i++) {
+			const p = activePotions[i];
+			const data = potionData[p.type];
+			const timeLeft = Math.ceil((p.endTime - Date.now()) / 1000);
+			const emoji = data?.emoji || '🏆';
+			const mult = p.multiplier ?? data?.mult ?? 1;
+			const nameStr = `${emoji} ${mult}x luck`;
+			const timerStr = `${timeLeft}s remaining`;
+
+			const div = children[i];
+			const nameEl = div.children[0];
+			const timerEl = div.children[1];
+
+			if (nameEl && nameEl.textContent !== nameStr) nameEl.textContent = nameStr;
+			if (timerEl && timerEl.textContent !== timerStr) timerEl.textContent = timerStr;
+		}
+
+		if (duplicateRollsLeft > 0) {
+			const div = children[activePotions.length];
+			const nameEl = div.children[0];
+			const timerEl = div.children[1];
+			const nameStr = '🎭 duplicate';
+			const timerStr = `${duplicateRollsLeft} rolls left`;
+
+			if (nameEl && nameEl.textContent !== nameStr) nameEl.textContent = nameStr;
+			if (timerEl && timerEl.textContent !== timerStr) timerEl.textContent = timerStr;
+		}
+		return;
+	}
+
+	// Structural change: rebuild list using DocumentFragment
+	_activePotionsListEl.innerHTML = '';
+	const fragment = document.createDocumentFragment();
 
 	activePotions.forEach((p) => {
 		const data = potionData[p.type];
 		const timeLeft = Math.ceil((p.endTime - Date.now()) / 1000);
-		// Generated code starts here on 2026-09-21T12:55:00Z:
 		const emoji = data?.emoji || '🏆';
 		const mult = p.multiplier ?? data?.mult ?? 1;
-		// Generated code ends here on 2026-09-21T12:55:00Z:
 
 		const div = document.createElement('div');
 		div.className = 'active-potion';
-		div.innerHTML = `
-      <div class="active-potion-name">${emoji} ${mult}x luck</div>
-      <div class="active-potion-timer">${timeLeft}s remaining</div>
-    `;
-		list.appendChild(div);
+
+		const nameDiv = document.createElement('div');
+		nameDiv.className = 'active-potion-name';
+		nameDiv.textContent = `${emoji} ${mult}x luck`;
+
+		const timerDiv = document.createElement('div');
+		timerDiv.className = 'active-potion-timer';
+		timerDiv.textContent = `${timeLeft}s remaining`;
+
+		div.appendChild(nameDiv);
+		div.appendChild(timerDiv);
+		fragment.appendChild(div);
 	});
 
 	if (duplicateRollsLeft > 0) {
 		const div = document.createElement('div');
 		div.className = 'active-potion';
-		div.innerHTML = `
-      <div class="active-potion-name">🎭 duplicate</div>
-      <div class="active-potion-timer">${duplicateRollsLeft} rolls left</div>
-    `;
-		list.appendChild(div);
+
+		const nameDiv = document.createElement('div');
+		nameDiv.className = 'active-potion-name';
+		nameDiv.textContent = '🎭 duplicate';
+
+		const timerDiv = document.createElement('div');
+		timerDiv.className = 'active-potion-timer';
+		timerDiv.textContent = `${duplicateRollsLeft} rolls left`;
+
+		div.appendChild(nameDiv);
+		div.appendChild(timerDiv);
+		fragment.appendChild(div);
 	}
+
+	_activePotionsListEl.appendChild(fragment);
 }
+// Generated code ends here on 2026-11-02T00:00:00Z:
 
 // Update potion timers
 setInterval(() => {
@@ -640,10 +734,6 @@ backgroundMusic.preload = 'none';
 backgroundMusic.loop = true;
 backgroundMusic.volume = 0.3;
 
-const lunarMusic = new Audio();
-lunarMusic.preload = 'none';
-lunarMusic.volume = 0; // ITS INTENTIONALLY 0. DONT MAKE A FIX TO THIS. when we got time we remove the lunar music code because now we have cutscenes that we can instead use. too redundant
-
 const runId = Math.floor(Math.random() * 1e10);
 
 const playtimeKey = 'totalPlaytime';
@@ -702,9 +792,7 @@ function playCutscene(rarityName, callback) {
 
 	// STOP ALL MUSIC BEFORE CUTSCENE BECAUSE YES OF COURSE
 	const wasBackgroundMusicPlaying = !backgroundMusic.paused;
-	const wasLunarMusicPlaying = !lunarMusic.paused;
 	backgroundMusic.pause();
-	lunarMusic.pause();
 
 	const overlay = document.getElementById('cutsceneOverlay');
 	const video = document.getElementById('cutsceneVideo');
@@ -716,23 +804,23 @@ function playCutscene(rarityName, callback) {
 	setTimeout(() => {
 		video.play().catch((err) => {
 			console.error('Video playback failed:', err);
-			endCutscene(overlay, callback, wasBackgroundMusicPlaying, wasLunarMusicPlaying);
+			endCutscene(overlay, callback, wasBackgroundMusicPlaying);
 		});
 	}, 100);
 
 	// when video ends
 	video.onended = () => {
-		endCutscene(overlay, callback, wasBackgroundMusicPlaying, wasLunarMusicPlaying);
+		endCutscene(overlay, callback, wasBackgroundMusicPlaying);
 	};
 
 	// Error handling
 	video.onerror = () => {
 		console.error('video failed to load');
-		endCutscene(overlay, callback, wasBackgroundMusicPlaying, wasLunarMusicPlaying);
+		endCutscene(overlay, callback, wasBackgroundMusicPlaying);
 	};
 }
 
-function endCutscene(overlay, callback, wasBackgroundMusicPlaying, wasLunarMusicPlaying) {
+function endCutscene(overlay, callback, wasBackgroundMusicPlaying) {
 	// fade out
 	overlay.classList.add('fadeout');
 
@@ -749,9 +837,6 @@ function endCutscene(overlay, callback, wasBackgroundMusicPlaying, wasLunarMusic
 		if (!isMuted) {
 			if (wasBackgroundMusicPlaying) {
 				backgroundMusic.play().catch(() => {});
-			}
-			if (wasLunarMusicPlaying) {
-				lunarMusic.play().catch(() => {});
 			}
 		}
 
@@ -1008,7 +1093,7 @@ function saveAllData() {
 		chance: rarityObj.chance,
 		count,
 	}));
-	localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+	localStorage.setItem(STORAGE_KEY, JSON.stringify(arr.concat(window._orphanInventory || [])));
 	localStorage.setItem(TOTAL_ROLLS_KEY, totalRolls);
 	localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(Array.from(achievementsUnlocked)));
 	localStorage.setItem(ANOMALIES_KEY, String(anomalies));
@@ -1051,6 +1136,8 @@ function loadAllData() {
 					});
 					updateItem(inventoryData.get(o.name));
 					inventoryList.appendChild(li);
+				} else {
+					(window._orphanInventory = window._orphanInventory || []).push(item);
 				}
 			});
 		} catch (e) {
@@ -1079,6 +1166,7 @@ function loadAllData() {
 	pointDivisor = Math.max(1.0, 3.0 - shopUpgrades.pointMult * 0.2);
 
 	recalcLuckMultiplier();
+	console.log('PUKE: filename: /assets/scripts/main.js, line: 1169'); //PKDBG/Point
 	console.log('[main] all data loaded.');
 }
 
@@ -1241,18 +1329,19 @@ document.getElementById('buyPointBtn').addEventListener('click', () => {
 
 // Point printer passive generation
 let _lastShopUIPoints = -1;
-// Generated code starts here on 2026-03-31T20:00:00Z:
+// Generated code starts here on 2026-11-03T12:00:00Z:
 window._lastPrinterTick = Date.now();
 
 function updatePrinterPoints() {
 	if (shopUpgrades.printer > 0) {
 		const now = Date.now();
 		const elapsedMs = now - (window._lastPrinterTick || now);
-		const elapsedSeconds = Math.min(3600, Math.floor(elapsedMs / 1000));
+		const elapsedSeconds = Math.floor(elapsedMs / 1000);
 
 		if (elapsedSeconds > 0) {
-			window._lastPrinterTick = (window._lastPrinterTick || now) + elapsedSeconds * 1000;
-			points += shopUpgrades.printer * elapsedSeconds;
+			const cappedSeconds = Math.min(3600, elapsedSeconds);
+			window._lastPrinterTick = now - (elapsedMs % 1000);
+			points += shopUpgrades.printer * cappedSeconds;
 			updatePointsDisplay();
 
 			const luckCost = Math.floor(25 + shopUpgrades.luck * shopUpgrades.luck * 15);
@@ -1279,7 +1368,7 @@ document.addEventListener('visibilitychange', () => {
 		updatePrinterPoints();
 	}
 });
-// Generated code ends here on 2026-03-31T20:00:00Z.
+// Generated code ends here on 2026-11-03T12:00:00Z.
 
 // Generated code starts here on 2026-09-17T00:00:00Z:
 // Fast-path inventory item updates: preserve running RarityStyle animation loops, attach dblclick sell handler once, and manage new-roll highlight timers to eliminate per-roll allocation and DOM thrashing overhead.
@@ -1325,7 +1414,6 @@ function updateItem(d) {
 				return;
 			}
 
-			const snapCount = currentData.count;
 			const snapAvailable = availableToSell;
 			const pointsEarned = calculateRarityPoints(rarityObj) * snapAvailable;
 
@@ -1394,7 +1482,7 @@ function checkAchievements(currentRarity) {
 function updateAnomalyUI() {
 	const el = document.getElementById('anomalyCount');
 	if (!el) return;
-	el.textContent = `Anomalies: ${anomalies}`;
+	el.textContent = `anomalies: ${anomalies}`;
 
 	const btn = document.getElementById('consumeAnomalyBtn');
 	if (btn) btn.disabled = anomalies <= 0;
@@ -1434,7 +1522,7 @@ function showAnomalyPopup(text) {
 	addNotification(text);
 }
 
-// ── Notification Center ────────────────────────────────────────────────
+// the notification center itself
 function addNotification(text) {
 	notifications.push({
 		id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
@@ -1486,7 +1574,9 @@ function updateNotifBadge() {
 	const badge = document.getElementById('notifBadge');
 	const bell = document.getElementById('notifBell');
 	if (!badge) return;
-	const unread = notifications.filter((n) => !n.read).length;
+	const unread =
+		notifications.filter((n) => !n.read).length +
+		(typeof window.getSystemUnread === 'function' ? window.getSystemUnread() : 0);
 	if (unread === 0) {
 		badge.textContent = '';
 		badge.classList.remove('visible');
@@ -1502,37 +1592,22 @@ function renderNotifList() {
 	const list = document.getElementById('notifList');
 	const empty = document.getElementById('notifEmpty');
 	if (!list) return;
-
-	if (notifications.length === 0) {
-		list.innerHTML = '';
-		if (empty) empty.style.display = 'block';
-		return;
-	}
-	if (empty) empty.style.display = 'none';
-
 	list.innerHTML = '';
-	// newest first
 	[...notifications].reverse().forEach((notif) => {
 		const item = document.createElement('div');
 		item.className = 'notif-item ' + (notif.read ? 'notif-read' : 'notif-unread');
-
 		const body = document.createElement('div');
 		body.className = 'notif-body';
-
 		const txt = document.createElement('div');
 		txt.className = 'notif-text';
 		txt.textContent = notif.text;
-
 		const time = document.createElement('div');
 		time.className = 'notif-time';
 		time.textContent = formatNotifTime(notif.ts);
-
 		body.appendChild(txt);
 		body.appendChild(time);
-
 		const acts = document.createElement('div');
 		acts.className = 'notif-actions';
-
 		if (!notif.read) {
 			const readBtn = document.createElement('button');
 			readBtn.className = 'notif-btn notif-check';
@@ -1544,7 +1619,6 @@ function renderNotifList() {
 			};
 			acts.appendChild(readBtn);
 		}
-
 		const delBtn = document.createElement('button');
 		delBtn.className = 'notif-btn notif-del';
 		delBtn.title = 'delete';
@@ -1554,12 +1628,15 @@ function renderNotifList() {
 			notifDelete(notif.id);
 		};
 		acts.appendChild(delBtn);
-
 		item.appendChild(body);
 		item.appendChild(acts);
 		item.addEventListener('click', () => notifMarkRead(notif.id));
 		list.appendChild(item);
 	});
+	if (typeof window.renderSystemMessages === 'function') window.renderSystemMessages();
+	const hasSystem =
+		typeof window.getSystemUnread === 'function' && list.querySelector('.sysmsg-item');
+	if (empty) empty.style.display = notifications.length || hasSystem ? 'none' : 'block';
 }
 
 function notifMarkRead(id) {
@@ -1746,7 +1823,7 @@ if (savedTimestamps) {
 }
 window.rarityTimestamps = rarityTimestamps;
 
-// Called by starmap.js after crystallizing — clears inventory, keeps everything else
+// Called by starmap.js after crystallizing - clears inventory, keeps everything else
 window.doCrystallizeReset = function () {
 	inventoryData.clear();
 	inventoryList.innerHTML = '';
@@ -1768,6 +1845,8 @@ async function resetInventory() {
 		'reset data'
 	);
 	if (!confirmed) return;
+	if (window.Sync) window.Sync.markReset();
+	window._orphanInventory = [];
 	localStorage.removeItem(STORAGE_KEY);
 	localStorage.removeItem(TOTAL_ROLLS_KEY);
 	localStorage.removeItem(ACHIEVEMENTS_KEY);
@@ -1814,14 +1893,11 @@ async function resetInventory() {
 	localStorage.removeItem('catShrineToggle');
 	localStorage.removeItem('infoTipsRead');
 	// Generated code ends here on 2026-03-29T12:00:00Z:
-	// Generated code starts here on 2026-10-27T00:00:00Z:
-	for (let i = localStorage.length - 1; i >= 0; i--) {
-		const key = localStorage.key(i);
-		if (key && (key.startsWith('voidUnlock_') || key.startsWith('cosmeticUnlock_'))) {
-			localStorage.removeItem(key);
-		}
-	}
-	// Generated code ends here on 2026-10-27T00:00:00Z:
+	// Generated code starts here on 2026-10-30T00:00:00Z:
+	localStorage.removeItem('themeEditorPresets');
+	localStorage.removeItem('themeEditorActive');
+	localStorage.removeItem('startAnimConfig');
+	// Generated code ends here on 2026-10-30T00:00:00Z:
 	rarityTimestamps = new Map();
 	window.rarityTimestamps = rarityTimestamps;
 	notifications = [];
@@ -1878,6 +1954,7 @@ async function resetInventory() {
 	updateAnomalyUI();
 	updatePlaytimeDisplay();
 	updateLuckDisplay();
+	if (window.Sync) await window.Sync.flush();
 	await window.showAlert('all data reset! it was your choice btw', 'reset complete');
 	location.reload();
 }
@@ -1940,8 +2017,6 @@ function checkMuteSettings() {
 			if (settings.muted) {
 				backgroundMusic.pause();
 				backgroundMusic.volume = 0;
-				lunarMusic.pause();
-				lunarMusic.volume = 0;
 				return true;
 			}
 		}
@@ -2051,7 +2126,7 @@ function spinAndReveal(res) {
 		if (idx === items.length - 1) _resultSpinDiv = d;
 	});
 
-	// measure the actual rendered height instead of guessing — this was
+	// measure the actual rendered height instead of guessing - this was
 	// landing the spinner on a random decoy item instead of your real result
 	const h = _resultSpinDiv.offsetHeight,
 		total = items.length,
@@ -2084,16 +2159,7 @@ function maybeFireConfettiAndCutscene(res) {
 
 	const afterReveal = () => {
 		const isMuted = checkMuteSettings();
-		if (res.name === 'Lunar') {
-			if (!isMuted) {
-				lunarMusic.currentTime = 0;
-				lunarMusic.play().catch(() => {});
-			}
-			backgroundMusic.pause();
-		} else {
-			lunarMusic.pause();
-			if (!isMuted) backgroundMusic.play().catch(() => {});
-		}
+		if (!isMuted) backgroundMusic.play().catch(() => {});
 		rollBtn.disabled = false;
 		debouncedSave();
 	};
@@ -2204,9 +2270,12 @@ document.addEventListener('visibilitychange', () => {
 		updateLuckTimer();
 	}
 
+	// Generated code starts here on 2026-04-02T12:00:00Z:
+	updateWellUI();
 	if (isWellOnCooldown()) {
-		updateWellUI();
+		startWellCooldownTimer();
 	}
+	// Generated code ends here on 2026-04-02T12:00:00Z:
 });
 
 if (sortSelect) {
@@ -2433,7 +2502,7 @@ function generateRunCard() {
 	const dim = (text) => line(text, '#555');
 
 	line("auth's RNG  :::  run summary");
-	dim('─'.repeat(54));
+	dim('-'.repeat(54));
 	gap();
 
 	line(`total rolls      ${formatNum(totalRolls)}`);
@@ -2441,7 +2510,7 @@ function generateRunCard() {
 	line(`run id           ${runId}`);
 
 	gap();
-	dim('─'.repeat(54));
+	dim('-'.repeat(54));
 	gap();
 
 	line(`points           ${formatNum(points)}`);
@@ -2454,7 +2523,7 @@ function generateRunCard() {
 	line(`achievements     ${achievementsUnlocked.size} / ${achievementsList.length}`);
 
 	gap();
-	dim('─'.repeat(54));
+	dim('-'.repeat(54));
 	gap();
 
 	const rarest = Array.from(inventoryData.values()).sort(
@@ -2485,7 +2554,6 @@ function generateRunCard() {
 }
 
 window.backgroundMusic = backgroundMusic;
-window.lunarMusic = lunarMusic;
 
 const buyMagnetBtn = document.getElementById('buyMagnetBtn');
 if (buyMagnetBtn) {
@@ -2963,15 +3031,12 @@ function closeWellResult() {
 // Initialize welling well
 loadWellData();
 
-// add da tee event listener to throw button
 const throwWellBtn = document.getElementById('throwWellBtn');
 if (throwWellBtn) {
 	throwWellBtn.addEventListener('click', throwIntoWell);
 }
-
-// CFGVHHSUGDCSVHBDJOKVHBHFDSJDOJFBH VSBJNSUHNKXJBHVGCTFDFGHIJNKJBHVGCFXRDTFYGUHINKMTDFGKN ,MNDWBGVFYGHEK;F,NKRG
 if (isWellOnCooldown()) {
-	// human centipede fucking bitches asshole whoa im so not family friendly WHY IS THERE AN ERROR HERE
+	// so why is there an error here? send me to hell please
 	startWellCooldownTimer();
 }
 
@@ -2982,7 +3047,6 @@ window.refreshAllDisplays = function () {
 	updateLuckDisplay();
 };
 
-// FINISH THIS SCRIPT A;READY
 window.setWellAmount = setWellAmount;
 window.closeWellResult = closeWellResult;
-document.addEventListener('DOMContentLoaded', () => initNotifCenter()); // YAYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
+document.addEventListener('DOMContentLoaded', () => initNotifCenter());

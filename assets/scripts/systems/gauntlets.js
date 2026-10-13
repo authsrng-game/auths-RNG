@@ -108,7 +108,7 @@ console.log(performance.now());
 		'Process',
 		'Celestial',
 
-		// --- easier end (~1/500–~1/749) ---
+		// --- easier end (~1/500-~1/749) ---
 		'Divinity',
 		'Lonely',
 		'Storm',
@@ -121,7 +121,7 @@ console.log(performance.now());
 		'Astral',
 		'Fearful',
 
-		// --- er end (~1/2101–~1/3000) ---
+		// --- er end (~1/2101-~1/3000) ---
 		'horsehead hahahaha',
 		'Pillars',
 		'Verbose',
@@ -212,48 +212,52 @@ console.log(performance.now());
 			],
 		},
 		// Generated code starts here on 2026-03-31T12:00:00Z:
+		// Rarity denominator range: 3,000 - 3,300 (~1x minRolls)
 		{
 			id: 'insane',
 			name: 'insane',
 			emoji: '💀',
 			minRolls: 3000,
-			rarities: ['Breakdown', 'panic!', 'kill me', 'Pulsar'],
+			rarities: ['The End?', 'Zenith', 'Spectrum', 'Abandoned'],
 			rewards: [
 				{ type: 'points', amount: 100000, label: '100,000 pts' },
 				{ type: 'anomaly', amount: 100, label: '100 anomalies' },
 				{ type: 'unlock_dealer', label: 'unlock the dealer 🎭' },
 			],
 		},
+		// Rarity denominator range: 10,100 - 20,000 (~3x minRolls)
 		{
 			id: 'godlike',
 			name: 'godlike',
 			emoji: '✨',
 			minRolls: 6000,
-			rarities: ['Event Horizon', 'Neurosis', 'Cosmic'],
+			rarities: ['Stellar', 'Hypernova', 'Bipolar', 'Catatonia'],
 			rewards: [
 				{ type: 'points', amount: 500000, label: '500,000 pts' },
 				{ type: 'anomaly', amount: 1000, label: '1,000 anomalies' },
 				{ type: 'luck', mult: 4, dur: 180, label: '3m 4x luck' },
 			],
 		},
+		// Rarity denominator range: 30,000 - 50,000 (~5x minRolls)
 		{
 			id: 'inferno',
 			name: 'inferno',
 			emoji: '🔥',
 			minRolls: 10000,
-			rarities: ['Galactic', 'rare rarity :3', 'Disorder'],
+			rarities: ['rare rarity :3', 'Starborn', 'Nebulous', 'Intel'],
 			rewards: [
 				{ type: 'points', amount: 1000000, label: '1,000,000 pts' },
 				{ type: 'anomaly', amount: 1800, label: '1,800 anomalies' },
 				{ type: 'luck', mult: 5, dur: 300, label: '5m 5x luck' },
 			],
 		},
+		// Rarity denominator range: 100,000 - 250,000 (~12.5x minRolls)
 		{
 			id: 'snowy',
 			name: 'snowy',
 			emoji: '❄️',
 			minRolls: 20000,
-			rarities: ['Cosmic', 'Neurosis', 'anxiety...', 'Mania'],
+			rarities: ['kill me', 'Event Horizon', 'Neurosis', 'Cosmic'],
 			rewards: [
 				{ type: 'points', amount: 1200000, label: '1,200,000 pts' },
 				{ type: 'anomaly', amount: 3000, label: '3,000 anomalies' },
@@ -261,72 +265,78 @@ console.log(performance.now());
 			],
 		},
 		// Generated code ends here on 2026-03-31T12:00:00Z:
+		// Rarity denominator range: 500,000 - 1,000,000 (~25x minRolls)
 		{
 			id: 'eon',
 			name: 'eon',
 			emoji: '🌌',
 			minRolls: 40000,
-			rarities: ['Interstellar', 'Delusion', 'Psychosis', 'STOP PLAYING'],
+			rarities: ['Mania', 'Dissociative', 'Interstellar', 'Impossible...'],
 			rewards: [
 				{ type: 'anomaly', amount: 10000, label: '10,000 anomalies' },
 				{ type: 'luck', mult: 8, dur: 480, label: '8m 8x luck' },
 				{ type: 'unlock_mutations', label: 'unlock mutations! 🧬' },
 			],
 		},
+		// Rarity denominator range: 1,200,000 - 5,000,000 (~62.5x minRolls)
 		{
 			id: 'void',
 			name: 'void',
 			emoji: '🌑',
 			minRolls: 80000,
-			rarities: ['Nebulous', 'panic!', 'just let go already', 'kill me'],
+			rarities: ['Obsession', 'Kyawthuite', 'Delusion', 'Supermassive'],
 			rewards: [
 				{ type: 'points', amount: 5000000, label: '5,000,000 pts' },
 				{ type: 'anomaly', amount: 8000, label: '8,000 anomalies' },
 				{ type: 'luck', mult: 10, dur: 600, label: '10m 10x luck' },
 			],
 		},
+		// Rarity denominator range: 8,000,000 - 30,000,000 (~170x minRolls)
 		{
 			id: 'abyss',
 			name: 'abyss',
 			emoji: '🕳️',
 			minRolls: 175000,
-			rarities: ['Event Horizon', 'anxiety...', 'Gravitational', 'Dissociative'],
+			rarities: ['some sort of paranoia', 'STOP PLAYING', 'smoking gun', 'Extinction'],
 			rewards: [
 				{ type: 'points', amount: 20000000, label: '20,000,000 pts' },
 				{ type: 'anomaly', amount: 25000, label: '25,000 anomalies' },
 				{ type: 'unlock_runes', label: 'unlock runes 🔷' },
 			],
 		},
+		// Rarity denominator range: 50,000,000 - 1,000,000,000 (~2,500x minRolls)
 		{
 			id: 'eclipse_gate',
 			name: 'eclipse',
 			emoji: '🌒',
 			minRolls: 400000,
-			rarities: ['Impossible...', 'Obsession', 'Kyawthuite', 'Supermassive'],
+			rarities: ['Psychosis', 'SCHIZOPHRENIC', 'brother what', 'Void'],
 			rewards: [
 				{ type: 'points', amount: 100000000, label: '100,000,000 pts' },
 				{ type: 'anomaly', amount: 75000, label: '75,000 anomalies' },
 				{ type: 'luck', mult: 20, dur: 900, label: '15m 20x luck' },
 			],
 		},
+		// Rarity denominator range: 2,000,000,000 - 8,200,000,000 (~9,100x minRolls)
 		{
 			id: 'oblivion',
 			name: 'oblivion',
 			emoji: '💫',
 			minRolls: 900000,
-			rarities: ['some sort of paranoia', 'smoking gun', 'Extinction', 'Multiverse'],
+			rarities: ['Dissociation', 'Antimatter', 'the world'],
 			rewards: [
 				{ type: 'points', amount: 500000000, label: '500,000,000 pts' },
 				{ type: 'anomaly', amount: 250000, label: '250,000 anomalies' },
 				{ type: 'unlock_starmap', label: 'unlock starmap ✦' },
 			],
 		},
+		// Rarity denominator range: 10,000,000,000,000 - 1,000,000,000,000,000 (~400,000,000x minRolls)
 		{
 			id: 'transcendence',
 			name: 'transcendence',
 			emoji: '☀️',
 			minRolls: 2500000,
-			rarities: ['Void', 'Dissociation', 'Antimatter', 'the world'],
+			rarities: ['pseudopseudohypoparathyroidism', 'finished.', 'SUMMER'],
 			rewards: [
 				{ type: 'points', amount: 1000000000, label: '1,000,000,000 pts' },
 				{ type: 'anomaly', amount: 1000000, label: '1,000,000 anomalies' },
@@ -361,7 +371,7 @@ console.log(performance.now());
 		return s + 's';
 	}
 
-	// ── helpers ──────────────────────────────────────────────────────────
+	// -- helpers ----------------------------------------------------------
 	function loadData() {
 		try {
 			return JSON.parse(localStorage.getItem(GAUNTLET_KEY) || '{}');
@@ -437,6 +447,19 @@ console.log(performance.now());
 	function isLocked(t) {
 		return (typeof totalRolls !== 'undefined' ? totalRolls : 0) < t.minRolls;
 	}
+
+	/**
+	 * Evaluates whether a gauntlet tier's completion requirements are currently met.
+	 *
+	 * For initial claims (no tier state), checks if all required rarities exist in inventory.
+	 * For subsequent re-claims, requires that every required rarity was freshly obtained
+	 * AFTER the tier's `lastClaimTime` using `window.rarityTimestamps` to prevent re-claiming
+	 * with pre-existing inventory items.
+	 *
+	 * @param {Object} t - Gauntlet tier configuration object.
+	 * @param {Object} d - Persisted gauntlet state data from localStorage.
+	 * @returns {boolean} True if all tier rarities are satisfied for the current claim cycle.
+	 */
 	function isComplete(t, d) {
 		if (typeof inventoryData === 'undefined') return false;
 
@@ -474,7 +497,7 @@ console.log(performance.now());
 		return rem > 0 ? 'cooldown: ' + formatWellTime(rem) : null;
 	}
 
-	// ── reward application ───────────────────────────rfvgbhgvfcdfvgbvfc────────────────────
+	// -- reward application ---------------------------rfvgbhgvfcdfvgbvfc--------------------
 	function applyReward(rew, tierId) {
 		if (rew.type === 'points') {
 			points += rew.amount;
@@ -535,7 +558,7 @@ console.log(performance.now());
 		}
 	}
 
-	// ── claim (exposed globally for onclick) ────────────────────────────
+	// -- claim (exposed globally for onclick) ----------------------------
 	window.claimGauntletReward = function (tierId, rewIdx) {
 		const tier = TIERS.find((t) => t.id === tierId);
 		if (!tier) return;
@@ -556,7 +579,7 @@ console.log(performance.now());
 		renderGauntlets();
 	};
 
-	// ── render ───────────────────────────────────────────────────────────
+	// -- render -----------------------------------------------------------
 	function renderGauntlets() {
 		const container = document.getElementById('gauntletContainer');
 		if (!container) return;
@@ -627,7 +650,7 @@ console.log(performance.now());
 			if (!locked) {
 				const progEl = document.createElement('div');
 				progEl.className = 'gauntlet-progress-text';
-				progEl.textContent = got + ' / ' + rarNames.length + ' — ' + pct + '%';
+				progEl.textContent = got + ' / ' + rarNames.length + ' - ' + pct + '%';
 				el.appendChild(progEl);
 
 				const barWrap = document.createElement('div');
@@ -708,6 +731,14 @@ console.log(performance.now());
 	// refresh every 4 s (timers + post-roll sync) as well as check the rotation change.
 	checkRotationChange(); // run once on load
 	setInterval(renderGauntlets, 4000);
+
+	// Generated code starts here on 2026-04-02T12:00:00Z:
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'visible') {
+			renderGauntlets();
+		}
+	});
+	// Generated code ends here on 2026-04-02T12:00:00Z:
 
 	// Wait for main.js to finish loading inventoryData before first render
 	function tryFirstRender(attempts) {

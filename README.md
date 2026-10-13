@@ -8,7 +8,7 @@
 [![Discord](https://img.shields.io/discord/1443019622109675682?color=5BCEFA)](https://discord.gg/mTDw8jJYqX)
 [![CI](https://img.shields.io/github/actions/workflow/status/authsrng-game/auths-RNG/autofix.yml?branch=nightly&label=autofix&color=5BCEFA)](https://github.com/authsrng-game/auths-RNG/actions/workflows/autofix.yml)
 ![Status](https://img.shields.io/badge/status-actively%20developed-5BCEFA)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/authsrng-game/auths-RNG)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15178/badge)](https://www.bestpractices.dev/projects/15178)
 
 <!-- RELEASE-NOTES:START -->
 <!-- RELEASE-NOTES:END -->
@@ -30,6 +30,8 @@ The greatest RNG webgame of all time.
 > roll, sell, buy, repeat, and customize.
 
 Inspired by Roblox RNG games like Sol's RNG and Juke's RNG.
+
+Join us at our Discord server and/or IRC channel at #authsrng!
 
 ---
 
@@ -61,6 +63,10 @@ Contributions are welcome. Good PRs look like UI tweaks, balance changes, or bug
 Human-written contributions are preferred. If you use AI-assisted tools, read `AGENTS.md` first and share it with the AI too.
 
 See `CONTRIBUTING.md` for more details.
+
+Become a tester! We are open to testers and there is barely any requirements to do so! You must join the auth's RNG Discord server beforehand.
+- https://forms.gle/w7ARGAhSHHEucKucA
+- https://discord.gg/mTDw8jJYqX
 
 ---
 

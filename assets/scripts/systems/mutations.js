@@ -8,8 +8,6 @@
 	const MUTATION_HISTORY_MAX = 50;
 
 	const TRUST_KEY = 'mutationTrust';
-	const TRUST_OWNED_KEY = 'mutationTrustOwned';
-	const TRUST_ACTIVE_KEY = 'mutationTrustActive';
 
 	document.addEventListener('click', (e) => {
 		const dot = e.target.closest('.page-dot[data-page="3"]');
@@ -28,7 +26,17 @@
 	});
 
 	function getTrust() {
-		const val = parseInt(localStorage.getItem(TRUST_KEY) || '0', 10);
+		const raw = localStorage.getItem(TRUST_KEY);
+		if (raw !== null && (raw.trim().startsWith('[') || raw.trim().startsWith('{'))) {
+			try {
+				const parsed = JSON.parse(raw);
+				if (Array.isArray(parsed)) {
+					loadHistory();
+					return 0;
+				}
+			} catch {}
+		}
+		const val = parseInt(raw || '0', 10);
 		return Number.isNaN(val) ? 0 : val;
 	}
 	function setTrust(v) {
@@ -147,12 +155,12 @@
 		return rarities.findIndex((r) => r.name === name);
 	}
 
-	// deterministic pair bias — same two rarities always skew the same way
+	// deterministic pair bias - same two rarities always skew the same way
 	function hashPair(nameA, nameB) {
 		const s = [nameA, nameB].sort().join('|');
 		let h = 0;
 		for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
-		return ((h >>> 0) % 100) / 100; // 0–1 unique per pair
+		return ((h >>> 0) % 100) / 100; // 0-1 unique per pair
 	}
 
 	function rng() {
@@ -187,7 +195,7 @@
 			// good: rarer than better input, capped above excluded tier
 			const maxGood = Math.max(EXCLUDED_COUNT, betterIdx - 1);
 			if (maxGood <= EXCLUDED_COUNT) {
-				// inputs are already near the ceiling — still give something near top
+				// inputs are already near the ceiling - still give something near top
 				targetIdx = EXCLUDED_COUNT + Math.floor(rng() * 15);
 			} else {
 				// power curve: biased toward less extreme (not always jackpot)
@@ -375,17 +383,6 @@
 		renderTrustBalance,
 	};
 	// Generated code ends here on 2026-09-25T12:46:00Z:
-
-	function tryInit(n) {
-		if (!isUnlocked()) return;
-		if (
-			typeof inventoryData !== 'undefined' &&
-			inventoryData instanceof Map &&
-			inventoryData.size > 0
-		)
-			renderMutations();
-		else if (n > 0) setTimeout(() => tryInit(n - 1), 200);
-	}
 
 	// Generated code starts here on 2026-10-24T00:00:00Z:
 	loadHistory();
