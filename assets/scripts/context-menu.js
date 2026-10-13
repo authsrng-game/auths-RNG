@@ -45,7 +45,6 @@
 	];
 
 	function getDailyQuote() {
-		console.log('PUKE: filename: /assets/scripts/context-menu.js, line: 48'); //PKDBG/Point
 		const day = Math.floor(Date.now() / 86400000);
 		return QUOTES[day % QUOTES.length];
 	}
