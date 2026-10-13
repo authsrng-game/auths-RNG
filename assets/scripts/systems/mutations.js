@@ -151,10 +151,21 @@
 			.filter((r) => !EXCLUDED_NAMES.has(r.name));
 	}
 
+	// Generated code starts here on 2026-11-03T00:00:00Z:
+	let _rarityIndexMap = null;
+
 	function getRarityIndex(name) {
 		if (typeof rarities === 'undefined') return -1;
-		return rarities.findIndex((r) => r.name === name);
+		if (!_rarityIndexMap || _rarityIndexMap.size !== rarities.length) {
+			_rarityIndexMap = new Map();
+			for (let i = 0; i < rarities.length; i++) {
+				_rarityIndexMap.set(rarities[i].name, i);
+			}
+		}
+		const idx = _rarityIndexMap.get(name);
+		return idx !== undefined ? idx : -1;
 	}
+	// Generated code ends here on 2026-11-03T00:00:00Z:
 
 	// deterministic pair bias - same two rarities always skew the same way
 	function hashPair(nameA, nameB) {
