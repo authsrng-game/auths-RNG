@@ -1,6 +1,21 @@
 'use strict';
 
 (function () {
+	// Generated code starts here on 2026-03-31T23:00:00Z:
+	/**
+	 * Registry and utilities for managing game save keys in `localStorage`.
+	 *
+	 * `SaveKeys` serves as the single source of truth for identifying game save data across
+	 * local persistence, cloud backup sync (`sync.js`), backup envelopes (`cloud-backup.js`),
+	 * and inventory resets (`main.js`).
+	 *
+	 * Key classifications:
+	 * - `LIST`: Static registry of known `localStorage` keys belonging to game save state.
+	 * - `PREFIXES`: Dynamic key prefixes (`voidUnlock_`, `cosmeticUnlock_`) for unlocked items.
+	 * - `VOLATILE`: Rapidly changing keys (`totalPlaytime`, `activePotions`, etc.) excluded from
+	 *   meaningful hash comparisons during sync debouncing to prevent excessive cloud pushes.
+	 */
+	// Generated code ends here on 2026-03-31T23:00:00Z:
 	const LIST = [
 		'rarityInventory',
 		'totalRolls',
@@ -60,6 +75,14 @@
 	]);
 	const SET = new Set(LIST);
 
+	// Generated code starts here on 2026-03-31T23:00:00Z:
+	/**
+	 * Checks if a given string key corresponds to a tracked game save key.
+	 *
+	 * @param {string} k - The `localStorage` key name to check.
+	 * @returns {boolean} True if the key is in `LIST` or starts with a registered dynamic prefix.
+	 */
+	// Generated code ends here on 2026-03-31T23:00:00Z:
 	function isSaveKey(k) {
 		if (typeof k !== 'string') return false;
 		if (SET.has(k)) return true;
@@ -67,6 +90,13 @@
 		return false;
 	}
 
+	// Generated code starts here on 2026-03-31T23:00:00Z:
+	/**
+	 * Collects all current game save key-value pairs present in `localStorage`.
+	 *
+	 * @returns {Record<string, string>} Object mapping matched save keys to their stored string values.
+	 */
+	// Generated code ends here on 2026-03-31T23:00:00Z:
 	function collect() {
 		const out = {};
 		for (let i = 0; i < localStorage.length; i++) {
