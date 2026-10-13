@@ -49,13 +49,8 @@
 
 	function h(tag, props, kids) {
 		const e = document.createElement(tag);
-		if (props)
-			Object.keys(props).forEach((k) =>
-				k === 'style' ? (e.style.cssText = props[k]) : (e[k] = props[k])
-			);
-		(kids || []).forEach((c) =>
-			e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c)
-		);
+		if (props) Object.keys(props).forEach((k) => (k === 'style' ? (e.style.cssText = props[k]) : (e[k] = props[k])));
+		(kids || []).forEach((c) => e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c));
 		return e;
 	}
 
@@ -123,9 +118,7 @@
 	}
 
 	function fmtNum(n) {
-		return typeof window.formatNum === 'function'
-			? window.formatNum(n)
-			: Math.round(n).toLocaleString();
+		return typeof window.formatNum === 'function' ? window.formatNum(n) : Math.round(n).toLocaleString();
 	}
 
 	function fmtTime(s) {
@@ -151,17 +144,7 @@
 		} catch (_) {}
 		if (!d || !d.id) {
 			const ua = navigator.userAgent || '';
-			const label = /Mobi|Android/i.test(ua)
-				? 'mobile'
-				: /Firefox/i.test(ua)
-					? 'firefox'
-					: /Edg/i.test(ua)
-						? 'edge'
-						: /Chrome/i.test(ua)
-							? 'chrome'
-							: /Safari/i.test(ua)
-								? 'safari'
-								: 'browser';
+			const label = /Mobi|Android/i.test(ua) ? 'mobile' : /Firefox/i.test(ua) ? 'firefox' : /Edg/i.test(ua) ? 'edge' : /Chrome/i.test(ua) ? 'chrome' : /Safari/i.test(ua) ? 'safari' : 'browser';
 			d = { id: Math.random().toString(36).slice(2, 8), label };
 			origSet.call(LS, DEVICE_KEY, JSON.stringify(d));
 		}
@@ -238,14 +221,8 @@
 					'position:fixed;inset:0;z-index:2147483646;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#0e0e0e;color:#dcdcdc;font-family:monospace;font-size:0.95em;opacity:0.95;',
 			},
 			[
-				h('style', {
-					textContent:
-						'@keyframes syncBootSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}',
-				}),
-				h('div', {
-					style:
-						'width:28px;height:28px;border:2px solid #303030;border-top-color:#dcdcdc;border-radius:50%;animation:syncBootSpin 0.8s linear infinite;',
-				}),
+				h('style', { textContent: '@keyframes syncBootSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}' }),
+				h('div', { style: 'width:28px;height:28px;border:2px solid #303030;border-top-color:#dcdcdc;border-radius:50%;animation:syncBootSpin 0.8s linear infinite;' }),
 				h('div', { textContent: 'syncing your save...' }),
 			]
 		);
@@ -283,12 +260,7 @@
 			const res = await fetch(API + path, {
 				method,
 				headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + getToken() },
-				body:
-					body === undefined || body === null
-						? undefined
-						: typeof body === 'string'
-							? body
-							: JSON.stringify(body),
+				body: body === undefined || body === null ? undefined : typeof body === 'string' ? body : JSON.stringify(body),
 				signal: ctrl.signal,
 				keepalive: !!opts.keepalive,
 			});
@@ -310,9 +282,7 @@
 		if (window.AuthAccount && window.AuthAccount.clearSession) {
 			window.AuthAccount.clearSession();
 		} else {
-			['authToken', 'authUid', 'authUsername', 'authAvatarUrl'].forEach((k) =>
-				origRemove.call(LS, k)
-			);
+			['authToken', 'authUid', 'authUsername', 'authAvatarUrl'].forEach((k) => origRemove.call(LS, k));
 			document.dispatchEvent(new CustomEvent('authchange'));
 		}
 	}
@@ -327,10 +297,7 @@
 
 	function startTimers() {
 		if (!loopTimer) loopTimer = setInterval(() => maybePush('loop'), 30000);
-		if (!pollTimer)
-			pollTimer = setInterval(() => {
-				if (!document.hidden) checkRemote();
-			}, POLL_MS);
+		if (!pollTimer) pollTimer = setInterval(() => { if (!document.hidden) checkRemote(); }, POLL_MS);
 	}
 
 	function scheduleRetry() {
@@ -403,7 +370,7 @@
 	async function fastForward(rev) {
 		if (!ffAllowed(rev)) return false;
 		const r = await api('GET', '');
-		if (r.status === 401) return (authLost(), true);
+		if (r.status === 401) return authLost(), true;
 		if (r.status !== 200 || !r.data.fields) {
 			goOffline();
 			return true;
@@ -414,12 +381,48 @@
 	}
 
 	function cloudInfo(d) {
-		return {
-			rev: d.rev,
-			ts: d.ts,
-			device: d.device,
-			summary: d.summary || { rolls: 0, points: 0, playtime: 0 },
+		return { rev: d.rev, ts: d.ts, device: d.device, summary: d.summary || { rolls: 0, points: 0, playtime: 0 } };
+	}
+
+	async function adoptIfSame() {
+		const r = await api('GET', '');
+		if (r.status === 401) {
+			authLost();
+			return 'auth';
+		}
+		if (r.status !== 200 || !r.data.ok || !r.data.fields) return 'fail';
+		const { fields } = snapshot();
+		if (!sameSave(fields, r.data.fields)) return 'diff';
+		meta = {
+			uid: getUid(),
+			baseRev: r.data.rev,
+			baseHash: hashFields(fields, true),
+			pushedAll: hashFields(fields, false),
+			lastPushAt: Date.now(),
+			pendingReason: '',
 		};
+		saveMeta();
+		st.lastSyncAt = Date.now();
+		return 'same';
+	}
+
+	async function diagnose() {
+		const r = await api('GET', '');
+		if (r.status !== 200 || !r.data.fields) return null;
+		const local = snapshot().fields;
+		const remote = r.data.fields;
+		const out = [];
+		new Set(Object.keys(local).concat(Object.keys(remote))).forEach((k) => {
+			if (!Keys.isSaveKey(k) || Keys.isVolatile(k)) return;
+			if (local[k] !== remote[k]) {
+				out.push({
+					key: k,
+					local: local[k] === undefined ? null : local[k].length,
+					remote: remote[k] === undefined ? null : remote[k].length,
+				});
+			}
+		});
+		return out;
 	}
 
 	async function reconcile(isBoot) {
@@ -434,9 +437,7 @@
 		setStatus('syncing');
 		try {
 			meta = loadMeta();
-			const r = await api('GET', '?summary=1', null, {
-				timeout: isBoot ? BOOT_TIMEOUT_MS : REQ_TIMEOUT_MS,
-			});
+			const r = await api('GET', '?summary=1', null, { timeout: isBoot ? BOOT_TIMEOUT_MS : REQ_TIMEOUT_MS });
 			if (r.status === 401) {
 				st.reconciling = false;
 				hideBootOverlay();
@@ -498,6 +499,14 @@
 				return maybePush('boot');
 			}
 
+			const same = await adoptIfSame();
+			if (same === 'auth') {
+				st.reconciling = false;
+				hideBootOverlay();
+				return;
+			}
+			if (same === 'fail') return goOffline();
+			if (same === 'same') return markReady();
 			const dirty = hashFields(snapshot().fields, true) !== meta.baseHash;
 			if (!dirty && cloud.rev > meta.baseRev && (await fastForward(cloud.rev))) return;
 			st.reconciling = false;
@@ -519,8 +528,7 @@
 		try {
 			const { fields } = snapshot();
 			const reason = reasonOverride || meta.pendingReason || 'auto';
-			if (!Object.keys(fields).length && reason !== 'reset' && reason !== 'import')
-				return { ok: false, empty: true };
+			if (!Object.keys(fields).length && reason !== 'reset' && reason !== 'import') return { ok: false, empty: true };
 			const body = { baseRev: meta.baseRev, device: device(), reason, fields };
 			if (opts.force) body.force = true;
 			const json = JSON.stringify(body);
@@ -565,6 +573,18 @@
 	async function onStale(info) {
 		const cloud = cloudInfo(info);
 		if (info.code === 'regression') return openConflict(cloud);
+		const same = await adoptIfSame();
+		if (same === 'auth') return;
+		if (same === 'fail') {
+			setStatus('offline');
+			scheduleRetry();
+			return;
+		}
+		if (same === 'same') {
+			if (st.status !== 'ok') setStatus('ok');
+			startTimers();
+			return;
+		}
 		const dirty = hashFields(snapshot().fields, true) !== (meta ? meta.baseHash : '');
 		const baseRev = meta ? meta.baseRev : 0;
 		if (!dirty && cloud.rev > baseRev && (await fastForward(cloud.rev))) return;
@@ -588,13 +608,10 @@
 		clearTimeout(pushTimer);
 		const debounce = Math.min(PUSH_DEBOUNCE_MS, Math.max(0, firstDirtyAt + PUSH_MAX_WAIT_MS - now));
 		const gap = PUSH_MIN_MS - (now - (meta.lastPushAt || 0));
-		pushTimer = setTimeout(
-			() => {
-				firstDirtyAt = 0;
-				maybePush('write');
-			},
-			forceWait || Math.max(debounce, gap, 0)
-		);
+		pushTimer = setTimeout(() => {
+			firstDirtyAt = 0;
+			maybePush('write');
+		}, forceWait || Math.max(debounce, gap, 0));
 	}
 
 	async function checkRemote() {
@@ -611,23 +628,13 @@
 	}
 
 	function card(title, s, extra, badge) {
-		return h(
-			'div',
-			{
-				style:
-					'flex:1;min-width:130px;border:1px solid var(--border-color,#303030);border-radius:3px;padding:10px;background:var(--overlay-bg,#0c0c0c);',
-			},
-			[
-				h('div', {
-					style: 'font-size:0.8em;opacity:0.6;margin-bottom:6px;',
-					textContent: title + (badge ? ' (more progress)' : ''),
-				}),
-				h('div', { textContent: 'rolls: ' + fmtNum(s.rolls) }),
-				h('div', { textContent: 'points: ' + fmtNum(s.points) }),
-				h('div', { textContent: 'playtime: ' + fmtTime(s.playtime) }),
-				h('div', { style: 'font-size:0.75em;opacity:0.5;margin-top:6px;', textContent: extra }),
-			]
-		);
+		return h('div', { style: 'flex:1;min-width:130px;border:1px solid var(--border-color,#303030);border-radius:3px;padding:10px;background:var(--overlay-bg,#0c0c0c);' }, [
+			h('div', { style: 'font-size:0.8em;opacity:0.6;margin-bottom:6px;', textContent: title + (badge ? ' (more progress)' : '') }),
+			h('div', { textContent: 'rolls: ' + fmtNum(s.rolls) }),
+			h('div', { textContent: 'points: ' + fmtNum(s.points) }),
+			h('div', { textContent: 'playtime: ' + fmtTime(s.playtime) }),
+			h('div', { style: 'font-size:0.75em;opacity:0.5;margin-top:6px;', textContent: extra }),
+		]);
 	}
 
 	function openConflict(cloud) {
@@ -640,44 +647,20 @@
 		const local = localStats(snapshot().fields);
 		const cl = cloud.summary;
 		const btn = (text, fn, style) => {
-			const b = h('button', {
-				textContent: text,
-				className: 'small',
-				style: 'width:100%;margin-top:8px;' + (style || ''),
-			});
+			const b = h('button', { textContent: text, className: 'small', style: 'width:100%;margin-top:8px;' + (style || '') });
 			b.addEventListener('click', fn);
 			return b;
 		};
 		const box = h('div', { className: 'auth-modal', style: 'max-width:440px;' }, [
 			h('h3', { style: 'margin-top:0', textContent: 'cloud save conflict' }),
-			h('p', {
-				style: 'font-size:0.85em;opacity:0.75;text-align:left;max-width:none;',
-				textContent:
-					'this device and your cloud save have different progress. pick the one to keep. the other one is kept as a restore point so nothing is lost.',
-			}),
+			h('p', { style: 'font-size:0.85em;opacity:0.75;text-align:left;max-width:none;', textContent: 'this device and your cloud save have different progress. pick the one to keep. the other one is kept as a restore point so nothing is lost.' }),
 			h('div', { style: 'display:flex;gap:8px;flex-wrap:wrap;' }, [
-				card(
-					'this device',
-					local,
-					'last synced ' + fmtAgo(meta && meta.lastPushAt),
-					local.rolls > cl.rolls
-				),
-				card(
-					'cloud',
-					cl,
-					'saved ' + fmtAgo(cloud.ts) + (cloud.device ? ' on ' + cloud.device : ''),
-					cl.rolls > local.rolls
-				),
+				card('this device', local, 'last synced ' + fmtAgo(meta && meta.lastPushAt), local.rolls > cl.rolls),
+				card('cloud', cl, 'saved ' + fmtAgo(cloud.ts) + (cloud.device ? ' on ' + cloud.device : ''), cl.rolls > local.rolls),
 			]),
 			btn('keep cloud save', () => resolve('cloud')),
 			btn('keep this device', () => resolve('local')),
-			btn(
-				'decide later',
-				() => {
-					closeModal();
-				},
-				'opacity:0.6;'
-			),
+			btn('decide later', () => { closeModal(); }, 'opacity:0.6;'),
 		]);
 		modal = h('div', { className: 'auth-overlay show', style: 'z-index:2147483645;' }, [box]);
 		document.body.appendChild(modal);
@@ -689,30 +672,16 @@
 		if (choice === 'cloud') {
 			const stashed = await api('POST', '/stash', { fields: snapshot().fields, device: device() });
 			if (stashed.status !== 200 && window.showConfirm) {
-				const go = await window.showConfirm(
-					"could not back up this device's save first. continue and discard it?",
-					'continue?'
-				);
+				const go = await window.showConfirm('could not back up this device\'s save first. continue and discard it?', 'continue?');
 				if (!go) return;
 			}
 			const r = await api('GET', '');
-			if (r.status !== 200 || !r.data.fields)
-				return window.showAlert && window.showAlert('could not reach the server, try again');
+			if (r.status !== 200 || !r.data.fields) return window.showAlert && window.showAlert('could not reach the server, try again');
 			st.conflict = null;
 			applyRemote(r.data.fields, r.data.rev);
 			return reloadAfterApply(r.data.rev);
 		}
-		meta =
-			meta && meta.uid === getUid()
-				? meta
-				: {
-						uid: getUid(),
-						baseRev: 0,
-						baseHash: '',
-						pushedAll: '',
-						lastPushAt: 0,
-						pendingReason: '',
-					};
+		meta = meta && meta.uid === getUid() ? meta : { uid: getUid(), baseRev: 0, baseHash: '', pushedAll: '', lastPushAt: 0, pendingReason: '' };
 		meta.baseRev = cloud.rev;
 		saveMeta();
 		st.conflict = null;
@@ -758,15 +727,8 @@
 	function lockOverlay(taken) {
 		if (!document.body) return;
 		const box = h('div', { style: 'max-width:340px;text-align:center;line-height:1.6;' }, [
-			h('div', {
-				style: 'font-size:1.1em;margin-bottom:8px;',
-				textContent: taken ? 'this tab was taken over' : "auth's rng is open in another tab",
-			}),
-			h('div', {
-				style: 'font-size:0.85em;opacity:0.7;margin-bottom:16px;',
-				textContent:
-					'only one tab can save at a time so your progress never gets overwritten by an older copy.',
-			}),
+			h('div', { style: 'font-size:1.1em;margin-bottom:8px;', textContent: taken ? 'this tab was taken over' : "auth's rng is open in another tab" }),
+			h('div', { style: 'font-size:0.85em;opacity:0.7;margin-bottom:16px;', textContent: 'only one tab can save at a time so your progress never gets overwritten by an older copy.' }),
 		]);
 		const b = h('button', { textContent: taken ? 'reload this tab' : 'use this tab instead' });
 		b.addEventListener('click', async () => {
@@ -774,22 +736,12 @@
 				navigator.locks.request(LOCK_NAME, { steal: true }, () => new Promise(() => {}));
 				await new Promise((r) => setTimeout(r, 400));
 			} else if (!taken) {
-				try {
-					origSet.call(LS, LEASE_KEY, JSON.stringify({ id: tabId, ts: Date.now() }));
-				} catch (_) {}
+				try { origSet.call(LS, LEASE_KEY, JSON.stringify({ id: tabId, ts: Date.now() })); } catch (_) {}
 			}
 			location.reload();
 		});
 		box.appendChild(b);
-		const ov = h(
-			'div',
-			{
-				id: 'syncLockOverlay',
-				style:
-					'position:fixed;inset:0;z-index:2147483647;background:#0e0e0e;color:#dcdcdc;font-family:monospace;display:flex;align-items:center;justify-content:center;',
-			},
-			[box]
-		);
+		const ov = h('div', { id: 'syncLockOverlay', style: 'position:fixed;inset:0;z-index:2147483647;background:#0e0e0e;color:#dcdcdc;font-family:monospace;display:flex;align-items:center;justify-content:center;' }, [box]);
 		document.body.appendChild(ov);
 	}
 
@@ -833,11 +785,7 @@
 
 	function acquireWithLease() {
 		const read = () => {
-			try {
-				return JSON.parse(rawGet(LEASE_KEY) || 'null');
-			} catch (_) {
-				return null;
-			}
+			try { return JSON.parse(rawGet(LEASE_KEY) || 'null'); } catch (_) { return null; }
 		};
 		window.addEventListener('pagehide', () => {
 			const c = read();
@@ -871,9 +819,7 @@
 		if (meta && meta.uid === getUid()) {
 			meta.pendingReason = 'import';
 			saveMeta();
-			try {
-				await flush();
-			} catch (_) {}
+			try { await flush(); } catch (_) {}
 		}
 	}
 
@@ -933,9 +879,7 @@
 		if (document.hidden) maybePush('hide', { keepalive: true, immediate: true });
 		else setTimeout(checkRemote, 500);
 	});
-	window.addEventListener('pagehide', () =>
-		maybePush('pagehide', { keepalive: true, immediate: true })
-	);
+	window.addEventListener('pagehide', () => maybePush('pagehide', { keepalive: true, immediate: true }));
 	window.addEventListener('online', () => {
 		if (st.status === 'offline') reconcile(false);
 	});
@@ -950,6 +894,7 @@
 		restoreFromHistory,
 		listHistory,
 		openConflict: () => openConflict(),
+		diagnose,
 		_state: st,
 	};
 })();
