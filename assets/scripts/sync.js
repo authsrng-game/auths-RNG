@@ -422,6 +422,47 @@
 		};
 	}
 
+	async function adoptIfSame() {
+		const r = await api('GET', '');
+		if (r.status === 401) {
+			authLost();
+			return 'auth';
+		}
+		if (r.status !== 200 || !r.data.ok || !r.data.fields) return 'fail';
+		const { fields } = snapshot();
+		if (!sameSave(fields, r.data.fields)) return 'diff';
+		meta = {
+			uid: getUid(),
+			baseRev: r.data.rev,
+			baseHash: hashFields(fields, true),
+			pushedAll: hashFields(fields, false),
+			lastPushAt: Date.now(),
+			pendingReason: '',
+		};
+		saveMeta();
+		st.lastSyncAt = Date.now();
+		return 'same';
+	}
+
+	async function diagnose() {
+		const r = await api('GET', '');
+		if (r.status !== 200 || !r.data.fields) return null;
+		const local = snapshot().fields;
+		const remote = r.data.fields;
+		const out = [];
+		new Set(Object.keys(local).concat(Object.keys(remote))).forEach((k) => {
+			if (!Keys.isSaveKey(k) || Keys.isVolatile(k)) return;
+			if (local[k] !== remote[k]) {
+				out.push({
+					key: k,
+					local: local[k] === undefined ? null : local[k].length,
+					remote: remote[k] === undefined ? null : remote[k].length,
+				});
+			}
+		});
+		return out;
+	}
+
 	async function reconcile(isBoot) {
 		if (st.reconciling) return;
 		const uid = getUid();
@@ -498,6 +539,14 @@
 				return maybePush('boot');
 			}
 
+			const same = await adoptIfSame();
+			if (same === 'auth') {
+				st.reconciling = false;
+				hideBootOverlay();
+				return;
+			}
+			if (same === 'fail') return goOffline();
+			if (same === 'same') return markReady();
 			const dirty = hashFields(snapshot().fields, true) !== meta.baseHash;
 			if (!dirty && cloud.rev > meta.baseRev && (await fastForward(cloud.rev))) return;
 			st.reconciling = false;
@@ -565,6 +614,18 @@
 	async function onStale(info) {
 		const cloud = cloudInfo(info);
 		if (info.code === 'regression') return openConflict(cloud);
+		const same = await adoptIfSame();
+		if (same === 'auth') return;
+		if (same === 'fail') {
+			setStatus('offline');
+			scheduleRetry();
+			return;
+		}
+		if (same === 'same') {
+			if (st.status !== 'ok') setStatus('ok');
+			startTimers();
+			return;
+		}
 		const dirty = hashFields(snapshot().fields, true) !== (meta ? meta.baseHash : '');
 		const baseRev = meta ? meta.baseRev : 0;
 		if (!dirty && cloud.rev > baseRev && (await fastForward(cloud.rev))) return;
@@ -950,6 +1011,7 @@
 		restoreFromHistory,
 		listHistory,
 		openConflict: () => openConflict(),
+		diagnose,
 		_state: st,
 	};
 })();

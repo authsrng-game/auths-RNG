@@ -138,6 +138,7 @@
 	const EXCLUDED_COUNT = 6;
 
 	let lastMutationTime = 0;
+	let cooldownTimer = null;
 
 	function isUnlocked() {
 		return localStorage.getItem(MUTATIONS_KEY) === '1';
@@ -150,10 +151,21 @@
 			.filter((r) => !EXCLUDED_NAMES.has(r.name));
 	}
 
+	// Generated code starts here on 2026-11-03T00:00:00Z:
+	let _rarityIndexMap = null;
+
 	function getRarityIndex(name) {
 		if (typeof rarities === 'undefined') return -1;
-		return rarities.findIndex((r) => r.name === name);
+		if (!_rarityIndexMap || _rarityIndexMap.size !== rarities.length) {
+			_rarityIndexMap = new Map();
+			for (let i = 0; i < rarities.length; i++) {
+				_rarityIndexMap.set(rarities[i].name, i);
+			}
+		}
+		const idx = _rarityIndexMap.get(name);
+		return idx !== undefined ? idx : -1;
 	}
+	// Generated code ends here on 2026-11-03T00:00:00Z:
 
 	// deterministic pair bias - same two rarities always skew the same way
 	function hashPair(nameA, nameB) {
@@ -297,20 +309,32 @@
 		if (window.trustCosmetics) window.trustCosmetics.renderShop(shopMount);
 	}
 
+	// Generated code starts here on 2026-04-03T00:00:00Z:
 	function updateCooldownDisplay() {
 		const cdEl = document.getElementById('mutationCooldown');
 		const btn = document.getElementById('mutateBtn');
 		if (!cdEl || !btn) return;
+		if (cooldownTimer) {
+			clearTimeout(cooldownTimer);
+			cooldownTimer = null;
+		}
 		const rem = MUTATION_COOLDOWN - (Date.now() - lastMutationTime);
 		if (rem > 0) {
 			btn.disabled = true;
 			cdEl.textContent = `cooldown: ${Math.ceil(rem / 1000)}s`;
-			setTimeout(updateCooldownDisplay, 1000);
+			cooldownTimer = setTimeout(updateCooldownDisplay, 1000);
 		} else {
 			btn.disabled = false;
 			cdEl.textContent = '';
 		}
 	}
+
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'visible') {
+			updateCooldownDisplay();
+		}
+	});
+	// Generated code ends here on 2026-04-03T00:00:00Z:
 
 	function doMutation() {
 		const selA = document.getElementById('mutateSelectA');
