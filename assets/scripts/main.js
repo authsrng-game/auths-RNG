@@ -1068,9 +1068,12 @@ const achievementsList = [
 	},
 ];
 
+// Generated code starts here on 2026-10-14T00:00:00Z:
+// Batch achievement card DOM element insertions into a DocumentFragment to eliminate per-item layout reflows when rendering achievement lists.
 function updateAchievementsUI() {
 	updateLockedAchievements();
 	achievementsContainer.innerHTML = '';
+	const fragment = document.createDocumentFragment();
 	achievementsList.forEach((ach) => {
 		const unlocked = achievementsUnlocked.has(ach.id);
 		const div = document.createElement('div');
@@ -1083,9 +1086,11 @@ function updateAchievementsUI() {
 		subEl.textContent = ach.subtitle;
 		div.appendChild(nameEl);
 		div.appendChild(subEl);
-		achievementsContainer.appendChild(div);
+		fragment.appendChild(div);
 	});
+	achievementsContainer.appendChild(fragment);
 }
+// Generated code ends here on 2026-10-14T00:00:00Z:
 
 function saveAllData() {
 	const arr = Array.from(inventoryData.values()).map(({ rarityObj, count }) => ({
@@ -1748,6 +1753,8 @@ function consumeAllAnomalies() {
 	showAnomalyPopup(`CONSUMED ${count} ANOMALIES! +${(count * 0.5).toFixed(1)}x permanent luck!`);
 }
 
+// Generated code starts here on 2026-10-14T00:00:00Z:
+// Batch sorted inventory DOM element insertions with DocumentFragment to prevent repeated browser style recalculations and layout reflows during inventory renders.
 function renderSortedInventory(mode) {
 	const savedScroll = inventoryList.scrollTop;
 	inventoryList.innerHTML = '';
@@ -1766,9 +1773,12 @@ function renderSortedInventory(mode) {
 		items.sort((a, b) => a.rarityObj.name.localeCompare(b.rarityObj.name));
 	}
 
-	items.forEach((d) => inventoryList.appendChild(d.liElement));
+	const fragment = document.createDocumentFragment();
+	items.forEach((d) => fragment.appendChild(d.liElement));
+	inventoryList.appendChild(fragment);
 	inventoryList.scrollTop = savedScroll;
 }
+// Generated code ends here on 2026-10-14T00:00:00Z:
 
 const savedPoints = localStorage.getItem(POINTS_KEY);
 if (savedPoints !== null) points = parseInt(savedPoints, 10) || 0;
