@@ -2194,11 +2194,13 @@ Last release date on nightly: ${nightlyRDate}`;
 					}
 				});
 
+				// Generated code starts here on 2026-10-14T03:10:00Z:
 				document.addEventListener('visibilitychange', () => {
 					if (!document.hidden && toggleBtn.classList.contains('active')) {
-						nextRollAt = Date.now() + getAutoRollDelay();
+						tick();
 					}
 				});
+				// Generated code ends here on 2026-10-14T03:10:00Z:
 
 				const trail = document.getElementById('rarityTrail');
 				const TRAIL_GAP = 6;
