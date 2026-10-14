@@ -924,6 +924,14 @@
 		await maybePush('flush', { immediate: true });
 	}
 
+	// Generated code starts here on 2026-10-13T18:00:00Z:
+	/**
+	 * Replaces current local save state with an imported save bundle, sets the
+	 * `import` pending reason tag, and flushes changes to cloud sync if authenticated.
+	 *
+	 * @param {Record<string, string>} bundle - Key-value map of save keys to raw string values.
+	 */
+	// Generated code ends here on 2026-10-13T18:00:00Z:
 	async function importBundle(bundle) {
 		Object.keys(Keys.collect()).forEach((k) => origRemove.call(LS, k));
 		Object.keys(bundle).forEach((k) => {
