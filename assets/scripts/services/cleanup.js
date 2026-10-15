@@ -1,5 +1,3 @@
-console.log(performance.now());
-
 // cleanup.js
 // cleanup shit because im too damn lazy to patch stupid memory leaks
 
@@ -255,13 +253,11 @@ console.log(performance.now());
 	function maybeRunMediumAndHeavy() {
 		const now = Date.now();
 		if (now - lastMediumPassAt >= MEDIUM_PASS_INTERVAL_MS) {
-			safeRun('cleanNewRollHighlights', cleanNewRollHighlights);
-			safeRun('fixPageContainerHeight', fixPageContainerHeight);
+			runMediumPass();
 			lastMediumPassAt = now;
 		}
 		if (now - lastHeavyPassAt >= HEAVY_PASS_INTERVAL_MS) {
-			safeRun('trimNotifications', trimNotifications);
-			safeRun('checkLocalStorageSize', checkLocalStorageSize);
+			runHeavyPass();
 			lastHeavyPassAt = now;
 		}
 	}
