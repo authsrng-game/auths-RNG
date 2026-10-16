@@ -525,7 +525,11 @@ test.describe('auths-RNG smoke tests', () => {
 
 		// Simulate background tab where tick returns early
 		await page.evaluate(() => {
-			Object.defineProperty(document, 'hidden', { value: true, writable: true, configurable: true });
+			Object.defineProperty(document, 'hidden', {
+				value: true,
+				writable: true,
+				configurable: true,
+			});
 		});
 
 		await page.waitForTimeout(1500);
@@ -536,7 +540,11 @@ test.describe('auths-RNG smoke tests', () => {
 
 		// Refocus tab
 		await page.evaluate(() => {
-			Object.defineProperty(document, 'hidden', { value: false, writable: true, configurable: true });
+			Object.defineProperty(document, 'hidden', {
+				value: false,
+				writable: true,
+				configurable: true,
+			});
 			document.dispatchEvent(new Event('visibilitychange'));
 		});
 
