@@ -193,6 +193,74 @@ const potionData = {
 	duplicate: { name: 'duplicate', rolls: 10, cost: 5000, emoji: '🎭' },
 };
 
+let buyQty = 1;
+window.setBuyQty = function (q) {
+	buyQty = q;
+	document
+		.querySelectorAll('.buyqty-btn')
+		.forEach((b) => b.classList.toggle('on', b.dataset.qty === String(q)));
+	updateShopUI();
+};
+function bulkUpgrade(key, costFn, max) {
+	const want = buyQty === 'max' ? Infinity : buyQty;
+	let n = 0;
+	while (n < want && (shopUpgrades[key] || 0) < max) {
+		const cost = costFn(shopUpgrades[key] || 0);
+		if (points < cost) break;
+		points -= cost;
+		shopUpgrades[key] = (shopUpgrades[key] || 0) + 1;
+		n++;
+	}
+	if (!n) return;
+	shopLuckMultiplier = 1 + shopUpgrades.luck * 0.1;
+	rollSpeed = Math.max(0.25, 1.0 - shopUpgrades.speed * 0.2);
+	pointDivisor = Math.max(1.0, 3.0 - shopUpgrades.pointMult * 0.2);
+	recalcLuckMultiplier();
+	updatePointsDisplay();
+	updateShopUI();
+	saveAllData();
+}
+
+const UPGRADE_DEFS = {
+	luck: { cost: (l) => Math.floor(25 + l * l * 15), max: 100 },
+	speed: { cost: (l) => Math.floor(50 + l * l * 55), max: 3 },
+	pointMult: { cost: (l) => Math.floor(100 + l * l * 35), max: 10 },
+	magnet: { cost: (l) => 500 + l * 1000, max: 5 },
+	printer: { cost: (l) => 1000 + l * l * 500, max: Infinity },
+	duplicate: { cost: (l) => 800 + l * l * 400, max: 10 },
+};
+
+// total cost of what a click would actually buy right now
+function bulkPreview(key) {
+	const def = UPGRADE_DEFS[key];
+	const want = buyQty === 'max' ? Infinity : buyQty;
+	let lvl = shopUpgrades[key] || 0;
+	let budget = points;
+	let total = 0;
+	let n = 0;
+	while (n < want && lvl < def.max) {
+		const c = def.cost(lvl);
+		if (budget < c) break;
+		budget -= c;
+		total += c;
+		lvl++;
+		n++;
+	}
+	// can't afford any: show the next single cost so the label isn't 0
+	if (n === 0) return { n: 0, total: lvl < def.max ? def.cost(lvl) : 0 };
+	return { n, total };
+}
+
+const _bind = (id, key, costFn, max) =>
+	document.getElementById(id)?.addEventListener('click', () => bulkUpgrade(key, costFn, max));
+
+_bind('buyLuckBtn', 'luck', (l) => Math.floor(25 + l * l * 15), 100);
+_bind('buySpeedBtn', 'speed', (l) => Math.floor(50 + l * l * 55), 3);
+_bind('buyPointBtn', 'pointMult', (l) => Math.floor(100 + l * l * 35), 10);
+_bind('buyMagnetBtn', 'magnet', (l) => 500 + l * 1000, 5);
+_bind('buyPrinterBtn', 'printer', (l) => 1000 + l * l * 500, Infinity);
+_bind('buyDupeBtn', 'duplicate', (l) => 800 + l * l * 400, 10);
+
 // roll sound
 function playRollSound() {
 	const sound = window.rollSoundSetting || 'none';
@@ -339,100 +407,65 @@ window.awardPoints = function (amount) {
 	return true;
 };
 
+const SHOP_ROWS = [
+	{ key: 'luck', level: 'luckLevel', cost: 'luckCost', btn: 'buyLuckBtn', pips: null },
+	{ key: 'speed', level: 'speedLevel', cost: 'speedCost', btn: 'buySpeedBtn', pips: 'speedPips' },
+	{
+		key: 'pointMult',
+		level: 'pointLevel',
+		cost: 'pointCost',
+		btn: 'buyPointBtn',
+		pips: 'pointPips',
+	},
+	{
+		key: 'magnet',
+		level: 'magnetLevel',
+		cost: 'magnetCost',
+		btn: 'buyMagnetBtn',
+		pips: 'magnetPips',
+	},
+	{ key: 'printer', level: 'printerLevel', cost: 'printerCost', btn: 'buyPrinterBtn', pips: null },
+	{ key: 'duplicate', level: 'dupeLevel', cost: 'dupeCost', btn: 'buyDupeBtn', pips: 'dupePips' },
+];
+
 function updateShopUI() {
-	document.getElementById('luckLevel').textContent = shopUpgrades.luck;
-	document.getElementById('speedLevel').textContent = shopUpgrades.speed;
-	document.getElementById('pointLevel').textContent = shopUpgrades.pointMult;
+	for (const row of SHOP_ROWS) {
+		const def = UPGRADE_DEFS[row.key];
+		const lvl = shopUpgrades[row.key] || 0;
+		const maxed = lvl >= def.max;
+		const singleCost = maxed ? 0 : def.cost(lvl);
+		const preview = bulkPreview(row.key);
 
-	const luckCost = Math.floor(25 + shopUpgrades.luck * shopUpgrades.luck * 15);
-	const speedCost = Math.floor(50 + shopUpgrades.speed * shopUpgrades.speed * 55);
-	const pointCost = Math.floor(100 + shopUpgrades.pointMult * shopUpgrades.pointMult * 35);
+		const levelEl = document.getElementById(row.level);
+		if (levelEl) levelEl.textContent = lvl;
 
-	const luckBtn = document.getElementById('buyLuckBtn');
-	const speedBtn = document.getElementById('buySpeedBtn');
-	const pointBtn = document.getElementById('buyPointBtn');
+		const costEl = document.getElementById(row.cost);
+		if (costEl) costEl.textContent = maxed ? 'max' : formatNum(preview.total);
 
-	if (luckBtn) luckBtn.textContent = `buy luck upgrade (${formatNum(luckCost)} pts)`;
-	if (speedBtn) speedBtn.textContent = `buy speed upgrade (${formatNum(speedCost)} pts)`;
-	if (pointBtn) pointBtn.textContent = `buy points upgrade (${formatNum(pointCost)} pts)`;
+		const btn = document.getElementById(row.btn);
+		if (btn) {
+			if (maxed) {
+				btn.textContent = 'maxed';
+			} else {
+				btn.textContent = `upgrade x${preview.n || 1} (${formatNum(preview.total)} pts)`;
+			}
+			// disabled only depends on whether one level is affordable
+			btn.disabled = maxed || points < singleCost;
+		}
 
-	const luckCostEl = document.getElementById('luckCost');
-	const speedCostEl = document.getElementById('speedCost');
-	const pointCostEl = document.getElementById('pointCost');
-	if (luckCostEl) luckCostEl.textContent = formatNum(luckCost);
-	if (speedCostEl) speedCostEl.textContent = formatNum(speedCost);
-	if (pointCostEl) pointCostEl.textContent = formatNum(pointCost);
-
-	if (luckBtn) luckBtn.disabled = points < luckCost || shopUpgrades.luck >= 100;
-	if (speedBtn) speedBtn.disabled = points < speedCost || shopUpgrades.speed >= 3;
-	if (pointBtn) pointBtn.disabled = points < pointCost || shopUpgrades.pointMult >= 10;
-
-	const magnetLevelEl = document.getElementById('magnetLevel');
-	const printerLevelEl = document.getElementById('printerLevel');
-	const dupeLevelEl = document.getElementById('dupeLevel');
-
-	if (magnetLevelEl) magnetLevelEl.textContent = shopUpgrades.magnet || 0;
-	if (printerLevelEl) printerLevelEl.textContent = shopUpgrades.printer || 0;
-	if (dupeLevelEl) dupeLevelEl.textContent = shopUpgrades.duplicate || 0;
-
-	const magnetCost = 500 + (shopUpgrades.magnet || 0) * 1000;
-	const printerCost = 1000 + (shopUpgrades.printer || 0) * (shopUpgrades.printer || 0) * 500;
-	const dupeCost = 800 + (shopUpgrades.duplicate || 0) * (shopUpgrades.duplicate || 0) * 400;
-
-	const magnetCostEl = document.getElementById('magnetCost');
-	const printerCostEl = document.getElementById('printerCost');
-	const dupeCostEl = document.getElementById('dupeCost');
-	if (magnetCostEl) magnetCostEl.textContent = formatNum(magnetCost);
-	if (printerCostEl) printerCostEl.textContent = formatNum(printerCost);
-	if (dupeCostEl) dupeCostEl.textContent = formatNum(dupeCost);
-
-	const magnetBtn = document.getElementById('buyMagnetBtn');
-	const printerBtn = document.getElementById('buyPrinterBtn');
-	const dupeBtn = document.getElementById('buyDupeBtn');
-
-	if (magnetBtn) {
-		magnetBtn.textContent = `upgrade (${formatNum(magnetCost)} pts)`;
-		magnetBtn.disabled = points < magnetCost || (shopUpgrades.magnet || 0) >= 5;
-	}
-	if (printerBtn) {
-		printerBtn.textContent = `upgrade (${formatNum(printerCost)} pts)`;
-		printerBtn.disabled = points < printerCost;
-	}
-	if (dupeBtn) {
-		dupeBtn.textContent = `upgrade (${formatNum(dupeCost)} pts)`;
-		dupeBtn.disabled = points < dupeCost || (shopUpgrades.duplicate || 0) >= 10;
-	}
-	const speedPips = document.getElementById('speedPips');
-	if (speedPips) {
-		speedPips.querySelectorAll('.level-pip').forEach((pip, i) => {
-			pip.classList.toggle('on', i < shopUpgrades.speed);
-		});
-	}
-
-	const magnetPips = document.getElementById('magnetPips');
-	if (magnetPips) {
-		magnetPips.querySelectorAll('.level-pip').forEach((pip, i) => {
-			pip.classList.toggle('on', i < (shopUpgrades.magnet || 0));
-		});
+		if (row.pips) {
+			const pipsEl = document.getElementById(row.pips);
+			if (pipsEl) {
+				pipsEl.querySelectorAll('.level-pip').forEach((pip, i) => {
+					pip.classList.toggle('on', i < lvl);
+				});
+			}
+		}
 	}
 
 	const luckBarFill = document.getElementById('luckBarFill');
 	if (luckBarFill) {
-		luckBarFill.style.width = (shopUpgrades.luck / 100) * 100 + '%';
-	}
-
-	const pointPips = document.getElementById('pointPips');
-	if (pointPips) {
-		pointPips.querySelectorAll('.level-pip').forEach((pip, i) => {
-			pip.classList.toggle('on', i < (shopUpgrades.pointMult || 0));
-		});
-	}
-
-	const dupePips = document.getElementById('dupePips');
-	if (dupePips) {
-		dupePips.querySelectorAll('.level-pip').forEach((pip, i) => {
-			pip.classList.toggle('on', i < (shopUpgrades.duplicate || 0));
-		});
+		luckBarFill.style.width = ((shopUpgrades.luck || 0) / UPGRADE_DEFS.luck.max) * 100 + '%';
 	}
 }
 
@@ -443,53 +476,39 @@ function updatePotionUI() {
 	}
 }
 
-function buyPotion(potionType) {
-	const data = potionData[potionType];
-	if (!data) return;
-
-	if (points >= data.cost) {
-		points -= data.cost;
-		playerPotions[potionType]++;
-		updatePointsDisplay();
-		updatePotionUI();
-		saveAllData();
-		showAnomalyPopup(`bought ${data.emoji} ${data.name}!`);
-	} else {
-		window.showAlert(`need ${formatNum(data.cost)} points!`);
-	}
-}
-
 function usePotion(potionType) {
-	if (!(playerPotions[potionType] > 0)) {
-		window.showAlert(`you don't have any ${potionData[potionType].name} potions!`);
+	const data = potionData[potionType];
+	const owned = playerPotions[potionType] || 0;
+	if (owned <= 0) {
+		window.showAlert(`you don't have any ${data.name} potions!`);
 		return;
 	}
-
-	const data = potionData[potionType];
+	const n = buyQty === 'max' ? owned : Math.min(buyQty, owned);
 
 	if (potionType === 'duplicate') {
-		duplicateRollsLeft = data.rolls;
-		playerPotions[potionType]--;
+		duplicateRollsLeft += data.rolls * n;
+		playerPotions[potionType] -= n;
 		updatePotionUI();
+		updateActivePotionsDisplay();
 		saveAllData();
-		showAnomalyPopup(`${data.emoji} next ${data.rolls} rolls will be x2!`);
+		showAnomalyPopup(`${data.emoji} +${data.rolls * n} duplicate rolls!`);
 		return;
 	}
 
-	const endTime = Date.now() + data.duration;
+	// stacking is additive, so n potions = one entry worth n*(mult-1)
 	activePotions.push({
 		type: potionType,
-		endTime: endTime,
-		multiplier: data.mult,
+		endTime: Date.now() + data.duration,
+		multiplier: 1 + n * (data.mult - 1),
 	});
-
-	playerPotions[potionType]--;
+	playerPotions[potionType] -= n;
 	recalcPotionLuck();
 	updatePotionUI();
 	updateActivePotionsDisplay();
 	saveAllData();
-	showAnomalyPopup(`${data.emoji} ${data.name} activated!`);
+	showAnomalyPopup(`${data.emoji} ${n}x ${data.name} activated!`);
 }
+window.usePotion = usePotion;
 
 function recalcPotionLuck() {
 	potionLuckMultiplier = 1;
@@ -610,6 +629,23 @@ setInterval(() => {
 	recalcPotionLuck(); // handles filter + multiplier reset internally
 	updateActivePotionsDisplay();
 }, 1000);
+
+function buyPotion(type) {
+	const data = potionData[type];
+	if (!data) return;
+	const want = buyQty === 'max' ? Infinity : buyQty;
+	const n = Math.min(want, Math.floor(points / data.cost));
+	if (n < 1) {
+		window.showAlert(`not enough points for ${data.name}!`);
+		return;
+	} //dude
+	points -= data.cost * n;
+	playerPotions[type] = (playerPotions[type] || 0) + n;
+	updatePointsDisplay();
+	updateShopUI();
+	updatePotionUI();
+	saveAllData();
+}
 
 // Make functions global
 window.buyPotion = buyPotion;
@@ -1293,43 +1329,6 @@ function showRollChoice(res, onDone) {
 			showAnomalyPopup(`passed on ${res.name}`);
 		});
 }
-
-document.getElementById('buyLuckBtn').addEventListener('click', () => {
-	const cost = Math.floor(25 + shopUpgrades.luck * shopUpgrades.luck * 15);
-	if (points >= cost && shopUpgrades.luck < 100) {
-		points -= cost;
-		shopUpgrades.luck++;
-		shopLuckMultiplier = 1 + shopUpgrades.luck * 0.1;
-		recalcLuckMultiplier();
-		updatePointsDisplay();
-		updateShopUI();
-		saveAllData();
-	}
-});
-
-document.getElementById('buySpeedBtn').addEventListener('click', () => {
-	const cost = Math.floor(50 + shopUpgrades.speed * shopUpgrades.speed * 55);
-	if (points >= cost && shopUpgrades.speed < 3) {
-		points -= cost;
-		shopUpgrades.speed++;
-		rollSpeed = Math.max(0.25, 1.0 - shopUpgrades.speed * 0.2);
-		updatePointsDisplay();
-		updateShopUI();
-		saveAllData();
-	}
-});
-
-document.getElementById('buyPointBtn').addEventListener('click', () => {
-	const cost = Math.floor(100 + shopUpgrades.pointMult * shopUpgrades.pointMult * 35);
-	if (points >= cost && shopUpgrades.pointMult < 10) {
-		points -= cost;
-		shopUpgrades.pointMult++;
-		pointDivisor = Math.max(1.0, 3.0 - shopUpgrades.pointMult * 0.2);
-		updatePointsDisplay();
-		updateShopUI();
-		saveAllData();
-	}
-});
 
 // Point printer passive generation
 let _lastShopUIPoints = -1;
@@ -2563,50 +2562,6 @@ function generateRunCard() {
 }
 
 window.backgroundMusic = backgroundMusic;
-
-const buyMagnetBtn = document.getElementById('buyMagnetBtn');
-if (buyMagnetBtn) {
-	buyMagnetBtn.addEventListener('click', () => {
-		const cost = 500 + (shopUpgrades.magnet || 0) * 1000;
-		if (points >= cost && (shopUpgrades.magnet || 0) < 5) {
-			points -= cost;
-			shopUpgrades.magnet = (shopUpgrades.magnet || 0) + 1;
-			updatePointsDisplay();
-			updateShopUI();
-			saveAllData();
-		}
-	});
-}
-
-const buyPrinterBtn = document.getElementById('buyPrinterBtn');
-if (buyPrinterBtn) {
-	buyPrinterBtn.addEventListener('click', () => {
-		const level = shopUpgrades.printer || 0;
-		const cost = 1000 + level * level * 500;
-		if (points >= cost) {
-			points -= cost;
-			shopUpgrades.printer = level + 1;
-			updatePointsDisplay();
-			updateShopUI();
-			saveAllData();
-		}
-	});
-}
-
-const buyDupeBtn = document.getElementById('buyDupeBtn');
-if (buyDupeBtn) {
-	buyDupeBtn.addEventListener('click', () => {
-		const level = shopUpgrades.duplicate || 0;
-		const cost = 800 + level * level * 400;
-		if (points >= cost && level < 10) {
-			points -= cost;
-			shopUpgrades.duplicate = level + 1;
-			updatePointsDisplay();
-			updateShopUI();
-			saveAllData();
-		}
-	});
-}
 
 document.addEventListener('DOMContentLoaded', function () {
 	const indexBtn = document.getElementById('indexBtn');

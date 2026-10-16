@@ -5736,3 +5736,23 @@ body.reduce-motion .info-tip-orbit span {
 .info-tip-pos-inline .info-tip-orbit {
 	inset: -5px;
 }
+
+.buyqty {
+	position: sticky;
+	top: 0;
+	z-index: 5;
+	display: flex;
+	gap: 6px;
+	align-items: center;
+	padding: 8px 0;
+	background: var(--bg-color);
+	border-bottom: 1px solid var(--border-color);
+}
+.buyqty-label {
+	opacity: 0.5;
+	font-size: 0.8em;
+	margin-right: 4px;
+}
+.buyqty-btn.on {
+	outline: 1px solid var(--text-color);
+}

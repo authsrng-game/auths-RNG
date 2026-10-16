@@ -605,6 +605,14 @@ Last release date on nightly: ${nightlyRDate}`;
 						<div class="points-chip-label">points</div>
 					</div>
 
+					<div class="buyqty" role="group" aria-label="Buy quantity">
+						<span class="buyqty-label">buy</span>
+						<button class="small buyqty-btn on" data-qty="1" onclick="setBuyQty(1)">x1</button>
+						<button class="small buyqty-btn" data-qty="10" onclick="setBuyQty(10)">x10</button>
+						<button class="small buyqty-btn" data-qty="100" onclick="setBuyQty(100)">x100</button>
+						<button class="small buyqty-btn" data-qty="max" onclick="setBuyQty('max')">max</button>
+					</div>
+
 					<div class="shop-divider"><span class="shop-divider-label">upgrades</span></div>
 
 					<div class="shop-item">
