@@ -2223,11 +2223,15 @@ Last release date on nightly: ${nightlyRDate}`;
 					}
 				});
 
+				// Generated code starts here on 2026-04-02T12:00:00Z:
 				document.addEventListener('visibilitychange', () => {
 					if (!document.hidden && toggleBtn.classList.contains('active')) {
-						nextRollAt = Date.now() + getAutoRollDelay();
+						if (Date.now() >= nextRollAt) {
+							tick();
+						}
 					}
 				});
+				// Generated code ends here on 2026-04-02T12:00:00Z:
 
 				const trail = document.getElementById('rarityTrail');
 				const TRAIL_GAP = 6;

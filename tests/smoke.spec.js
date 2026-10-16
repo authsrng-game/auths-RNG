@@ -1,3 +1,4 @@
+/* global totalRolls */
 const { test, expect } = require('@playwright/test');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
@@ -508,4 +509,45 @@ test.describe('auths-RNG smoke tests', () => {
 		await expect(friendsBtn).toHaveAttribute('aria-pressed', 'false');
 	});
 	// Generated code ends here on 2026-03-31T22:00:00Z:
+
+	// Generated code starts here on 2026-04-02T12:00:00Z:
+	test('auto roll triggers tick on visibilitychange refocus if delay elapsed', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
+		await page.goto(BASE_URL);
+
+		await page.evaluate(() => {
+			const autoBtn = document.getElementById('autoRollBtn');
+			if (autoBtn && !autoBtn.classList.contains('active')) autoBtn.click();
+		});
+
+		// Simulate background tab where tick returns early
+		await page.evaluate(() => {
+			Object.defineProperty(document, 'hidden', { value: true, writable: true, configurable: true });
+		});
+
+		await page.waitForTimeout(1500);
+
+		const rollCountBeforeRefocus = await page.evaluate(() => {
+			return typeof totalRolls !== 'undefined' ? totalRolls : 0;
+		});
+
+		// Refocus tab
+		await page.evaluate(() => {
+			Object.defineProperty(document, 'hidden', { value: false, writable: true, configurable: true });
+			document.dispatchEvent(new Event('visibilitychange'));
+		});
+
+		await page.waitForTimeout(1600);
+
+		const rollCountAfterRefocus = await page.evaluate(() => {
+			return typeof totalRolls !== 'undefined' ? totalRolls : 0;
+		});
+
+		expect(rollCountBeforeRefocus).toBe(0);
+		expect(rollCountAfterRefocus).toBeGreaterThan(0);
+	});
+	// Generated code ends here on 2026-04-02T12:00:00Z:
 });
