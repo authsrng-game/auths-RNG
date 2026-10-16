@@ -265,7 +265,8 @@
 							tl;dr: you can play the whole game without an account, and then your game data lives
 							only in your own browser. creating an account is optional and is what turns on cloud
 							saves, the leaderboard, and social features like friends and messaging. no ads, no
-							analytics, no data selling, nothing sketchy at all.
+							analytics or behavioural tracking, no data selling. the one extra thing is anonymous
+							error reporting (sentry), described below.
 						</div>
 					</div>
 				</div>
@@ -294,6 +295,10 @@
 							<li>
 								linking a discord account, reports, and moderation records are now described
 								explicitly
+							</li>
+							<li>
+								we added error reporting (sentry) so crashes can be found and fixed, and listed it,
+								along with a few other services that were missing, under third-party services
 							</li>
 						</ul>
 					</div>
@@ -379,12 +384,24 @@
 								ip addresses are also used in memory to rate-limit requests. they are not stored
 								with your account.
 							</li>
+							<li>
+								<strong>error reports (sentry)</strong>: when the game throws an error, your browser
+								sends a report with the error message, a stack trace, the page url, your browser and
+								os type, performance timings, and a short trail of recent actions leading up to the
+								error. reports are not linked to your account username. ip addresses are not stored
+								with them.
+							</li>
+							<li>
+								<strong>concurrent player counter</strong>: the game pings our server about once a
+								minute with a random id generated per page load, only to count how many people are
+								playing right now. it is not linked to your account.
+							</li>
 						</ul>
 						<div class="note">
 							we do not use analytics platforms, advertising networks, fingerprinting scripts, or
-							third-party tracking. external services loaded by the game are listed in the
-							<a href="#pp-thirdparty">third-party services</a>
-							section below.
+							behavioural tracking. we do use an error monitoring service (sentry), and the game
+							loads the other external services listed in
+							<a href="#pp-thirdparty">third-party services</a>.
 						</div>
 					</div>
 				</div>
@@ -489,15 +506,21 @@
 						<div class="note">
 							your local game data never leaves your device unless you log in to an account.
 						</div>
+						<div class="note">
+							some data is processed outside canada: error reports go to sentry's eu data region,
+							and cloudflare processes traffic on servers worldwide.
+						</div>
 					</div>
 				</div>
 
 				<div class="section-item" id="pp-share">
 					<div class="section-title">do we share your data?</div>
 					<div class="section-body">
-						<strong>ABSOLUTELY NOT.</strong> we do not sell, rent, trade, or share your data with
-						any third parties, advertising companies, data brokers, or anyone else. the only
-						so-called "sharing" that occurs is:
+						<strong>no.</strong> we do not sell or rent your data, and we do not give it to
+						advertisers or data brokers. the only third parties that handle data are the service
+						providers listed under third-party services (cloudflare for hosting, sentry for error
+						reports), and they are only there to provide that service to us. the only other
+						"sharing" that occurs is:
 						<ul>
 							<li>
 								leaderboard stats are displayed publicly on the leaderboard page and on your public
@@ -741,6 +764,14 @@
 								>
 							</li>
 							<li>
+								<strong>sentry</strong>: error monitoring. receives the error reports described
+								under data collected automatically, and processes them in its eu data region. used
+								only to find and fix bugs, never for advertising.
+								<a href="https://sentry.io/privacy/" target="_blank" rel="noopener noreferrer"
+									>sentry privacy policy</a
+								>
+							</li>
+							<li>
 								<strong>librecounter</strong>: open-source hit counter. records a page view when you
 								visit.
 								<a href="https://librecounter.org/" target="_blank" rel="noopener noreferrer"
@@ -871,7 +902,9 @@
 						delete your profile info, revoke sessions, remove friends, restore or review your
 						restore points, and delete your account entirely, all from account settings. for
 						anything not available in-game, or if you never created an account but believe we hold
-						data about you, contact us at the address below.
+						data about you, contact us at the address below. error reports and the player counter
+						are not tied to an identity, so we usually can't look up or delete "your" reports.
+						contact us if you think one contains your personal information and we'll look into it.
 					</div>
 				</div>
 

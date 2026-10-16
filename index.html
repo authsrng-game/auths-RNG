@@ -2,6 +2,26 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
+		<script>
+			window.sentryOnLoad = function () {
+				var h = location.hostname;
+				Sentry.init({
+					environment:
+						h === 'authsrng.xyz'
+							? 'production'
+							: h.indexOf('nightly.') === 0
+								? 'nightly'
+								: h.indexOf('native.') === 0
+									? 'native'
+									: 'other',
+					allowUrls: [/^https:\/\/([a-z]+\.)?authsrng\.xyz\//],
+				});
+			};
+		</script>
+		<script
+			src="https://js-de.sentry-cdn.com/824f3be61e48938950bd7b09e473c42c.min.js"
+			crossorigin="anonymous"
+		></script>
 		<link rel="stylesheet" href="/assets/scripts/styles/overrides.css" />
 		<meta
 			name="viewport"
