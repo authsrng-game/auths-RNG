@@ -252,6 +252,13 @@ console.log(performance.now());
 	let lastMediumPassAt = 0;
 	let lastHeavyPassAt = 0;
 
+	// Generated code starts here on 2026-10-16T20:35:07Z:
+	/**
+	 * Evaluates and executes scheduled medium (30s) and heavy (120s) maintenance passes during light pass ticks.
+	 * Consolidates pass scheduling checks within the primary light tick loop to avoid managing multiple interval
+	 * timers and reduce background thread wakeups during continuous auto-rolling.
+	 */
+	// Generated code ends here on 2026-10-16T20:35:07Z:
 	function maybeRunMediumAndHeavy() {
 		const now = Date.now();
 		if (now - lastMediumPassAt >= MEDIUM_PASS_INTERVAL_MS) {
