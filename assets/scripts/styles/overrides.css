@@ -5748,11 +5748,13 @@ body.reduce-motion .info-tip-orbit span {
 	background: var(--bg-color);
 	border-bottom: 1px solid var(--border-color);
 }
+
 .buyqty-label {
 	opacity: 0.5;
 	font-size: 0.8em;
 	margin-right: 4px;
 }
+
 .buyqty-btn.on {
 	outline: 1px solid var(--text-color);
 }
