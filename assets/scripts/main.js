@@ -826,57 +826,58 @@ function playCutscene(rarityName, callback) {
 	isCutscenePlaying = true;
 	rollBtn.disabled = true;
 
-	// STOP ALL MUSIC BEFORE CUTSCENE BECAUSE YES OF COURSE
 	const wasBackgroundMusicPlaying = !backgroundMusic.paused;
 	backgroundMusic.pause();
 
 	const overlay = document.getElementById('cutsceneOverlay');
 	const video = document.getElementById('cutsceneVideo');
 
+	let finished = false;
+	const finish = () => {
+		if (finished) return;
+		finished = true;
+		video.onended = null;
+		video.onerror = null;
+		endCutscene(overlay, callback, wasBackgroundMusicPlaying);
+	};
+
+	// attach handlers BEFORE setting src
+	video.onended = finish;
+	video.onerror = () => {
+		console.error('video failed to load'); //this motherfucking god son of a bitch wont stop overfiring, damn the code's disgusting!
+		finish();
+	};
+
 	video.src = videoUrl;
 	overlay.classList.add('active');
 
-	// fade in
 	setTimeout(() => {
+		if (finished) return;
 		video.play().catch((err) => {
 			console.error('Video playback failed:', err);
-			endCutscene(overlay, callback, wasBackgroundMusicPlaying);
+			finish();
 		});
 	}, 100);
-
-	// when video ends
-	video.onended = () => {
-		endCutscene(overlay, callback, wasBackgroundMusicPlaying);
-	};
-
-	// Error handling
-	video.onerror = () => {
-		console.error('video failed to load');
-		endCutscene(overlay, callback, wasBackgroundMusicPlaying);
-	};
 }
 
 function endCutscene(overlay, callback, wasBackgroundMusicPlaying) {
-	// fade out
 	overlay.classList.add('fadeout');
 
 	setTimeout(() => {
 		overlay.classList.remove('active', 'fadeout');
 		const video = document.getElementById('cutsceneVideo');
 		video.pause();
-		video.src = '';
+		// removeAttribute + load() resets the element without firing an error event
+		video.removeAttribute('src');
+		video.load();
 
 		callback();
 
-		// RESUME MUSIC AFTER CUTSCENE (if it was playing before)
 		const isMuted = checkMuteSettings();
-		if (!isMuted) {
-			if (wasBackgroundMusicPlaying) {
-				backgroundMusic.play().catch(() => {});
-			}
+		if (!isMuted && wasBackgroundMusicPlaying) {
+			backgroundMusic.play().catch(() => {});
 		}
 
-		// Re-enable rolling after 5 seconds
 		setTimeout(() => {
 			isCutscenePlaying = false;
 			rollBtn.disabled = false;
