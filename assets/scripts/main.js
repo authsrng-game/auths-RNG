@@ -349,7 +349,11 @@ function triggerConfetti() {
 }
 
 // rolls since last rare
+// Generated code starts here on 2026-11-04T00:00:00Z:
+// Lazily cache DOM element and guard style.display to avoid repeated DOM element lookups and style invalidations on every roll.
 let rollsSinceLastRare = 0;
+let _rollsSinceRareEl = null;
+
 function updateRollsSinceRare(rolledRarity) {
 	const thresh = window.rareThreshold ?? 1000;
 	const denom = Plush.denomOf(rolledRarity);
@@ -358,15 +362,20 @@ function updateRollsSinceRare(rolledRarity) {
 	} else {
 		rollsSinceLastRare++;
 	}
-	const el = document.getElementById('rollsSinceRare');
-	if (!el) return;
+	if (!_rollsSinceRareEl) _rollsSinceRareEl = document.getElementById('rollsSinceRare');
+	if (!_rollsSinceRareEl) return;
 	if (thresh > 0) {
-		el.style.display = 'block';
-		el.textContent = `rolls since last rare: ${rollsSinceLastRare}`;
+		if (_rollsSinceRareEl.style.display !== 'block') {
+			_rollsSinceRareEl.style.display = 'block';
+		}
+		_rollsSinceRareEl.textContent = `rolls since last rare: ${rollsSinceLastRare}`;
 	} else {
-		el.style.display = 'none';
+		if (_rollsSinceRareEl.style.display !== 'none') {
+			_rollsSinceRareEl.style.display = 'none';
+		}
 	}
 }
+// Generated code ends here on 2026-11-04T00:00:00Z:
 
 function calculateRarityPoints(rarity) {
 	const denom = Plush.denomOf(rarity);
@@ -1836,6 +1845,7 @@ window.rarityTimestamps = rarityTimestamps;
 window.doCrystallizeReset = function () {
 	inventoryData.clear();
 	inventoryList.innerHTML = '';
+	_lastCollectedCount = -1;
 	updateCollectedCounter();
 	rarityTimestamps = new Map();
 	window.rarityTimestamps = rarityTimestamps;
@@ -1912,6 +1922,7 @@ async function resetInventory() {
 	notifications = [];
 	inventoryData.clear();
 	inventoryList.innerHTML = '';
+	_lastCollectedCount = -1;
 	achievementsUnlocked.clear();
 	window.hidePageDot?.(3);
 	window.hidePageDot?.(4);
@@ -2319,11 +2330,21 @@ if (ls) {
 	} catch {}
 }
 
+// Generated code starts here on 2026-11-04T00:00:00Z:
+// Lazily cache DOM element and short-circuit when inventory size is unchanged to eliminate document.getElementById lookups, string allocations, and DOM textContent mutations on repeat rolls.
+let _collectedCounterEl = null;
+let _lastCollectedCount = -1;
+
 function updateCollectedCounter() {
+	if (!_collectedCounterEl) _collectedCounterEl = document.getElementById('collectedCounter');
+	if (!_collectedCounterEl) return;
 	const collected = inventoryData.size;
+	if (collected === _lastCollectedCount) return;
+	_lastCollectedCount = collected;
 	const total = rarities.length;
-	document.getElementById('collectedCounter').textContent = `${collected}/${total} collected`;
+	_collectedCounterEl.textContent = `${collected}/${total} collected`;
 }
+// Generated code ends here on 2026-11-04T00:00:00Z:
 
 updateAchievementsUI();
 updateCollectedCounter();
