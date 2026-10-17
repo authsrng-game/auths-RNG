@@ -2275,6 +2275,11 @@ document.addEventListener('visibilitychange', () => {
 		startWellCooldownTimer();
 	}
 	// Generated code ends here on 2026-04-02T12:00:00Z:
+
+	// Generated code starts here on 2026-11-04T00:00:00Z:
+	updateDailyUI();
+	updateWeeklyUI();
+	// Generated code ends here on 2026-11-04T00:00:00Z:
 });
 
 if (sortSelect) {
