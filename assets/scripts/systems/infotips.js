@@ -54,7 +54,7 @@
 			id: 'gauntlets',
 			container: () => document.getElementById('gauntletRollDisplay'),
 			pos: 'right',
-			text: 'collect every rarity in a tier to claim its reward, one time only.',
+			text: 'collect every rarity in a tier to claim its reward. tiers can be re-claimed after cooldown when all required rarities are freshly obtained.',
 		},
 	];
 
