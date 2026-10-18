@@ -386,9 +386,6 @@ const rarities = [
 		chance: 1 / 75000,
 		style: `
     color: #1A2A4A
-    loop {
-      pulse (1.5, 3, 1.5): #2A3A6A
-    }
   `,
 	},
 	{
