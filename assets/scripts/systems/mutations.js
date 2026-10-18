@@ -32,6 +32,7 @@
 				const parsed = JSON.parse(raw);
 				if (Array.isArray(parsed)) {
 					loadHistory();
+					localStorage.removeItem(TRUST_KEY);
 					return 0;
 				}
 			} catch {}
@@ -67,21 +68,24 @@
 
 	function loadHistory() {
 		try {
+			// Generated code starts here on 2026-10-24T00:00:00Z:
+			const legacy = localStorage.getItem('mutationTrust');
+			if (legacy !== null) {
+				try {
+					const parsed = JSON.parse(legacy);
+					if (Array.isArray(parsed)) {
+						if (!localStorage.getItem(MUTATION_HISTORY_KEY)) {
+							saveHistory(parsed);
+						}
+						localStorage.removeItem('mutationTrust');
+					}
+				} catch {}
+			}
+			// Generated code ends here on 2026-10-24T00:00:00Z:
 			const current = localStorage.getItem(MUTATION_HISTORY_KEY);
 			if (current !== null) {
 				return JSON.parse(current);
 			}
-			// Generated code starts here on 2026-10-24T00:00:00Z:
-			const legacy = localStorage.getItem('mutationTrust');
-			if (legacy !== null) {
-				const parsed = JSON.parse(legacy);
-				if (Array.isArray(parsed)) {
-					saveHistory(parsed);
-					localStorage.removeItem('mutationTrust');
-					return parsed;
-				}
-			}
-			// Generated code ends here on 2026-10-24T00:00:00Z:
 			return [];
 		} catch {
 			return [];

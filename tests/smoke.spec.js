@@ -318,6 +318,7 @@ test.describe('auths-RNG smoke tests', () => {
 			{ a: 'Common', b: 'Uncommon', result: 'Rare', good: true, ts: Date.now() },
 		];
 		await page.addInitScript((history) => {
+			if (globalThis.self !== globalThis.top) return;
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('seenReleaseTag', 'v9.7');
 			localStorage.setItem('mutationsUnlocked', '1');
