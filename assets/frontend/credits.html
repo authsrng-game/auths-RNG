@@ -175,6 +175,18 @@
 							.replace(/'/g, '&#39;');
 					}
 					// Generated code ends here on 2026-03-31T00:00:00Z:
+					// Generated code starts here on 2026-11-03T00:00:00Z:
+					function safeUrl(url) {
+						if (!url) return '';
+						try {
+							const parsed = new URL(url, window.location.origin);
+							if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+								return parsed.href;
+							}
+						} catch (_) {}
+						return '';
+					}
+					// Generated code ends here on 2026-11-03T00:00:00Z:
 					try {
 						const res = await fetch(
 							'https://api.github.com/repos/authsrng-game/auths-RNG/contributors?per_page=100'
@@ -185,15 +197,19 @@
 						if (!Array.isArray(users)) return;
 
 						users.forEach((u) => {
+							const validHtmlUrl = safeUrl(u.html_url);
+							const validAvatarUrl = safeUrl(u.avatar_url);
+							if (!validHtmlUrl) return;
+
 							const a = document.createElement('a');
 							a.className = 'contributor';
-							a.href = u.html_url;
+							a.href = validHtmlUrl;
 							a.target = '_blank';
 							// Generated code starts here on 2026-03-31T00:00:00Z:
 							a.rel = 'noopener noreferrer';
 
 							a.innerHTML = `
-      <img src="${esc(u.avatar_url)}">
+      <img src="${esc(validAvatarUrl)}" alt="${esc(u.login)}'s avatar">
       <span class="name">${esc(u.login)}</span>
       <span class="count">${esc(u.contributions)}</span>
     `;
