@@ -460,19 +460,109 @@
 		return Math.round(n).toLocaleString();
 	}
 
+	// Generated code starts here on 2026-11-05T00:00:00Z:
+	// Fast-path renderRunes when container DOM is intact to update stat texts, elemental cards, and block counts in-place without destroying DOM elements on every rune drop.
 	function renderRunes() {
 		const container = document.getElementById('runesContainer');
 		if (!container) return;
 
 		if (!isUnlocked(true)) {
-			container.innerHTML = `
+			const lockedHtml = `
         <div style="text-align:center;opacity:0.4;margin-top:48px;">
           <div style="font-size:2.2em;margin-bottom:14px;">🔷</div>
           <div style="font-size:0.9em;">complete the abyss gauntlet to unlock runes</div>
         </div>`;
+			if (container.innerHTML !== lockedHtml) {
+				container.innerHTML = lockedHtml;
+			}
 			return;
 		}
 
+		const panel = container.querySelector('.runes-panel');
+		const giftBanner = container.querySelector('.rune-gift-banner');
+		const currentGiftState = gift ? `${gift === 'luck' ? '⚡' : '💰'} gift of ${gift} active` : null;
+		const giftBannerText = giftBanner && giftBanner.textContent ? giftBanner.textContent.trim() : null;
+
+		// Fast-path in-place update if structural layout is intact and gift banner state matches
+		if (panel && ((!gift && !giftBanner) || (gift && giftBannerText === currentGiftState))) {
+			const rareEl = panel.querySelector('#runeStatRare');
+			const midRareEl = panel.querySelector('#runeStatMidRare');
+			const commonEl = panel.querySelector('#runeStatCommon');
+			const totalEl = panel.querySelector('#runeStatTotal');
+			const blocksLabel = panel.querySelector('#runeBlocksLabel');
+
+			if (rareEl) {
+				const v = String(runesData.counts.rare || 0);
+				if (rareEl.textContent !== v) rareEl.textContent = v;
+			}
+			if (midRareEl) {
+				const v = String(runesData.counts['mid-rare'] || 0);
+				if (midRareEl.textContent !== v) midRareEl.textContent = v;
+			}
+			if (commonEl) {
+				const v = String(runesData.counts.common || 0);
+				if (commonEl.textContent !== v) commonEl.textContent = v;
+			}
+			if (totalEl) {
+				const v = String(runesData.totalDropped);
+				if (totalEl.textContent !== v) totalEl.textContent = v;
+			}
+
+			ELEMENTS.forEach((el) => {
+				const card = panel.querySelector(`.rune-elemental-card[data-el="${el}"]`);
+				if (card) {
+					const count = runesData.elementals[el] || 0;
+					const hasOne = count > 0;
+					const cls = `rune-elemental-card${hasOne ? ' rune-el-collected' : ''}`;
+					if (card.className !== cls) card.className = cls;
+					const countEl = card.querySelector('.rune-el-count');
+					if (countEl) {
+						const v = String(count);
+						if (countEl.textContent !== v) countEl.textContent = v;
+					}
+				}
+			});
+
+			if (blocksLabel) {
+				const bStr = `blocks - ${formatBlocks(Math.floor(blocks))}`;
+				if (blocksLabel.textContent !== bStr) blocksLabel.textContent = bStr;
+			}
+
+			// Update upgrade items owned state and buy button disabled state if any changed
+			let ownedStateMatches = true;
+			panel.querySelectorAll('.rune-upgrade-item').forEach((item) => {
+				const key = item.dataset ? item.dataset.key : item.getAttribute?.('data-key');
+				if (key) {
+					const isOwned = !!upgrades[key];
+					const currentlyOwnedInDom = item.classList.contains('rune-upgrade-owned');
+					if (isOwned !== currentlyOwnedInDom) {
+						ownedStateMatches = false;
+					}
+				}
+			});
+
+			if (ownedStateMatches) {
+				const costs = {
+					tripleLuck: 9000,
+					moreBlocks: 15000,
+					anomalyMachine: 17000,
+					dopamineAttack: 20000,
+					doubleClover: 50000,
+				};
+				panel.querySelectorAll('.rune-buy-btn').forEach((btn) => {
+					const key = btn.dataset ? btn.dataset.key : btn.getAttribute?.('data-key');
+					if (key && costs[key] !== undefined) {
+						const canAfford = blocks >= costs[key];
+						if (btn.disabled !== !canAfford) {
+							btn.disabled = !canAfford;
+						}
+					}
+				});
+				return;
+			}
+		}
+
+		// Structural rebuild path
 		const allElementsCollected = ELEMENTS.every((el) => (runesData.elementals[el] || 0) > 0);
 		const exchangeRate = getExchangeRate();
 
@@ -531,19 +621,19 @@
         <div class="rune-stat-grid">
           <div class="rune-stat-card">
             <div class="rune-stat-label">rare runes</div>
-            <div class="rune-stat-value">${runesData.counts.rare || 0}</div>
+            <div class="rune-stat-value" id="runeStatRare">${runesData.counts.rare || 0}</div>
           </div>
           <div class="rune-stat-card">
             <div class="rune-stat-label">mid-rare runes</div>
-            <div class="rune-stat-value">${runesData.counts['mid-rare'] || 0}</div>
+            <div class="rune-stat-value" id="runeStatMidRare">${runesData.counts['mid-rare'] || 0}</div>
           </div>
           <div class="rune-stat-card">
             <div class="rune-stat-label">common runes</div>
-            <div class="rune-stat-value">${runesData.counts.common || 0}</div>
+            <div class="rune-stat-value" id="runeStatCommon">${runesData.counts.common || 0}</div>
           </div>
           <div class="rune-stat-card">
             <div class="rune-stat-label">total dropped</div>
-            <div class="rune-stat-value">${runesData.totalDropped}</div>
+            <div class="rune-stat-value" id="runeStatTotal">${runesData.totalDropped}</div>
           </div>
         </div>
 
@@ -552,7 +642,7 @@
           ${ELEMENTS.map((el) => {
 						const count = runesData.elementals[el] || 0;
 						const hasOne = count > 0;
-						return `<div class="rune-elemental-card ${hasOne ? 'rune-el-collected' : ''}">
+						return `<div class="rune-elemental-card ${hasOne ? 'rune-el-collected' : ''}" data-el="${el}">
               <div class="rune-el-emoji">${ELEMENT_EMOJI[el]}</div>
               <div class="rune-el-name">${el}</div>
               <div class="rune-el-count">${count}</div>
@@ -561,7 +651,7 @@
         </div>
         ${allElementsCollected && !gift ? '<div style="font-size:0.8em;opacity:0.6;text-align:center;margin-bottom:16px;">all elements collected - gift already granted</div>' : ''}
 
-        <div class="rune-section-label">blocks - ${formatBlocks(Math.floor(blocks))}</div>
+        <div class="rune-section-label" id="runeBlocksLabel">blocks - ${formatBlocks(Math.floor(blocks))}</div>
         <div class="rune-utm-panel">
           <div style="font-size:0.8em;opacity:0.5;margin-bottom:12px;">UTM - universal transaction machine</div>
           <div class="rune-utm-row">
@@ -587,7 +677,7 @@
           ${upgradeList
 						.map(
 							(u) => `
-            <div class="rune-upgrade-item ${upgrades[u.key] ? 'rune-upgrade-owned' : ''}">
+            <div class="rune-upgrade-item ${upgrades[u.key] ? 'rune-upgrade-owned' : ''}" data-key="${u.key}">
               <div class="rune-upgrade-left">
                 <div class="rune-upgrade-name">${u.emoji} ${u.name}</div>
                 <div class="rune-upgrade-desc">${u.desc}</div>
@@ -626,6 +716,7 @@
 			btn.addEventListener('click', () => buyUpgrade(btn.dataset.key));
 		});
 	}
+	// Generated code ends here on 2026-11-05T00:00:00Z.
 
 	function injectStyles() {
 		if (document.getElementById('runesStyles')) return;
