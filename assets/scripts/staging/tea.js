@@ -5,7 +5,7 @@
  *
  * A devtool that watches everything this game does and is NOT an alternative to
  * normal devtools on chrome or firefox, wahtever the hell you use.
- * 
+ *
  * Add ?teasafe to the URL to disable function wrapping and variable probing.
  */
 
@@ -168,7 +168,7 @@
 	/*
 	 * A hash function copied from the internet and trusted with exactly one job:
 	 * making commit ids look like git. Do not ask it for security.
-	 * 
+	 *
 	 * Yes we are larping Git now. This keyword will NOT age well in 3 years
 	 */
 	function h7(str) {
@@ -545,7 +545,7 @@
 	/*
 	 * Structural diff of two JSON values. It is recursive and it is opinionated about
 	 * what an "id" is. It works anyway, so fuck it!
-	 * 
+	 *
 	 * We should probably just change the unicode arrows and such to normal characters
 	 * like > and < but then I have to escape it in HTML, so it's fucked either way.
 	 */
@@ -1372,7 +1372,7 @@
 	}
 
 	/*
-	 * Records one network request. Paths get their ids replaced with ":id" 
+	 * Records one network request. Paths get their ids replaced with ":id"
 	 */
 	function netRecord(method, rawUrl, status, ms, stack, req, res) {
 		defer(() => {
@@ -1692,8 +1692,8 @@
 
 		/*
 		 * Patching dispatchEvent on EventTarget.prototype means we get to see every
-		 * synthetic event in the app. 
-		 * 
+		 * synthetic event in the app.
+		 *
 		 * It also means we are inside the walls. Hello. Nice mattress where'd you get it from?
 		 */
 		const od = EventTarget.prototype.dispatchEvent;
@@ -1827,7 +1827,7 @@
 		/*
 		 * Tracks every setInterval and remembers who created it. When something
 		 * mysteriously writes to storage every ten seconds, this is the snitch.
-		 * 
+		 *
 		 * This is the teacher's pet of writing to localStorage fairly
 		 */
 		window.setInterval = function (fn, ms) {
@@ -3286,7 +3286,7 @@
 			if (!built) return;
 			const fc = focusSeq == null || focusSeq < 0 ? null : C[focusSeq - base];
 			subEl.textContent =
-			// im gonna get carpal
+				// im gonna get carpal
 				C.length +
 				' commits · ' +
 				LV.length +
