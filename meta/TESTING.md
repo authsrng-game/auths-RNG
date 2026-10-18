@@ -351,7 +351,7 @@ Cheat/mod menu first, and cheat script after:
     }
     // Check game ready
     function init() {
-        if (typeof Beacon === 'undefined' || typeof updatePointsDisplay === 'undefined' || typeof rarities === 'undefined') {
+        if (typeof Plush === 'undefined' || typeof updatePointsDisplay === 'undefined' || typeof rarities === 'undefined') {
             setTimeout(init, 100);
             return;
         }
@@ -903,12 +903,12 @@ Cheat/mod menu first, and cheat script after:
             window.spinnerStyleSetting = selectEl ? selectEl.value : 'slot';
         }
     }
-    // Hook Beacon Rolling System
+    // Hook Plush Rolling System
     function hookRollEngine() {
-        if (typeof Beacon === 'undefined' || !Beacon.roll) return;
-        const originalRoll = Beacon.roll;
+        if (typeof Plush === 'undefined' || !Plush.roll) return;
+        const originalRoll = Plush.roll;
 
-        Beacon.roll = function(rollRarities, luckMult, inventory, upgrades, boostActive) {
+        Plush.roll = function(rollRarities, luckMult, inventory, upgrades, boostActive) {
             // 1. Force Rarity Check
             if (trainerSettings.forceRoll && trainerSettings.forcedRarity) {
                 const forced = rollRarities.find(r => r.name === trainerSettings.forcedRarity);
