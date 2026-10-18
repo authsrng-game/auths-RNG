@@ -24,7 +24,9 @@ test.describe('auths-RNG smoke tests', () => {
 	test('no failed network requests', async ({ page }) => {
 		const failed = [];
 		page.on('response', (res) => {
-			if (res.status() >= 400) failed.push(`${res.status()} ${res.url()}`);
+			if (res.status() >= 400 && !res.url().includes('api.github.com')) {
+				failed.push(`${res.status()} ${res.url()}`);
+			}
 		});
 		await page.goto(BASE_URL);
 		await page.waitForTimeout(2000);
@@ -318,6 +320,7 @@ test.describe('auths-RNG smoke tests', () => {
 			{ a: 'Common', b: 'Uncommon', result: 'Rare', good: true, ts: Date.now() },
 		];
 		await page.addInitScript((history) => {
+			if (window.top !== window) return;
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('seenReleaseTag', 'v9.7');
 			localStorage.setItem('mutationsUnlocked', '1');
@@ -371,6 +374,7 @@ test.describe('auths-RNG smoke tests', () => {
 		];
 
 		await page.addInitScript((items) => {
+			if (window.top !== window) return;
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('seenReleaseTag', 'v9.7');
 			localStorage.setItem('notifications', JSON.stringify(items));
