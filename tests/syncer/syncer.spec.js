@@ -58,9 +58,11 @@ test.describe('Syncer state consistency tests', () => {
 		expect(hasPlushKeyInSync).toBe(true);
 
 		const containsKeyInSource = await page.evaluate(async () => {
-			const res = await globalThis.fetch('/assets/scripts/sync.js');
-			const text = await res.text();
-			return text.includes("'_plush_v3'");
+			const resSync = await globalThis.fetch('assets/scripts/sync.js');
+			const textSync = await resSync.text();
+			const resKeys = await globalThis.fetch('assets/scripts/save-keys.js');
+			const textKeys = await resKeys.text();
+			return textSync.includes("'_plush_v3'") || textKeys.includes("'_plush_v3'");
 		});
 		expect(containsKeyInSource).toBe(true);
 	});
@@ -74,6 +76,7 @@ test.describe('Syncer state consistency tests', () => {
 			{ a: 'Common', b: 'Uncommon', result: 'Rare', good: true, ts: Date.now() },
 		];
 		await page.addInitScript((items) => {
+			if (globalThis.window && globalThis.window.top !== globalThis.window) return;
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('seenReleaseTag', 'v9.7');
 			localStorage.setItem('mutationsUnlocked', '1');
@@ -107,6 +110,7 @@ test.describe('Syncer state consistency tests', () => {
 	}) => {
 		const legacyArray = [{ a: 'Uncommon', b: 'Rare', result: 'Epic', good: true, ts: Date.now() }];
 		await page.addInitScript((items) => {
+			if (globalThis.window && globalThis.window.top !== globalThis.window) return;
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('seenReleaseTag', 'v9.7');
 			localStorage.setItem('mutationsUnlocked', '1');
