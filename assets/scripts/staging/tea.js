@@ -747,6 +747,7 @@
 			/*
 			 * If devtools are open, the browser pauses right here
 			 */
+			// eslint-disable-next-line no-debugger
 			debugger;
 		}
 	}
