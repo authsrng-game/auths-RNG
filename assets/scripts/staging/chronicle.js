@@ -74,8 +74,8 @@ console.log(performance.now());
 		'var:globalLuckMultiplier',
 	];
 
-  // ========== config =====================
-  // Configure only if needed
+	// ========== config =====================
+	// Configure only if needed
 
 	let ready = false;
 	let db = null;
@@ -419,7 +419,7 @@ console.log(performance.now());
 		return hit ? '≥ ' + fmt(hit) : '';
 	}
 
-  // The function name explains it.
+	// The function name explains it.
 	function addCommit(o) {
 		const t = o.ts || Date.now();
 		if (o.sig && o.coalesce) {
