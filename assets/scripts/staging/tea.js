@@ -744,10 +744,6 @@
 					force: true,
 				})
 			);
-			/*
-			 * If devtools are open, the browser pauses right here
-			 */
-			debugger;
 		}
 	}
 
