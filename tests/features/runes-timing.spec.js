@@ -36,4 +36,36 @@ test.describe('Runes timing reconciliation', () => {
 		expect(result.points).toBeGreaterThanOrEqual(2000000);
 		expect(result.anomalies).toBeGreaterThanOrEqual(250);
 	});
+
+	test('reconciles dopamine attack auto-rolls on visibilitychange and respects cap', async ({
+		page,
+	}) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('runesUnlocked', '1');
+			localStorage.setItem('runeUpgrades', JSON.stringify({ dopamineAttack: true }));
+		});
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(() => {
+			let clicks = 0;
+			const btn = document.getElementById('rollBtn');
+			if (btn) {
+				const origClick = btn.click;
+				btn.click = function () {
+					clicks++;
+					return origClick.apply(this, arguments);
+				};
+			}
+
+			// Simulate 6 seconds elapsed background time (18 rolls at 3 rolls/s)
+			window._lastDopamineAttackTick = Date.now() - 6000;
+			document.dispatchEvent(new globalThis.Event('visibilitychange'));
+
+			return clicks;
+		});
+
+		expect(result).toBeGreaterThanOrEqual(17);
+	});
 });
