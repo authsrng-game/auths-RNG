@@ -382,7 +382,7 @@ const rarities = [
   `,
 	},
 	{
-		name: 'just let go already',
+		name: 'HI DUDE',
 		chance: 1 / 75000,
 		style: `
     color: #1A2A4A
