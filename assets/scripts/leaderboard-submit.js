@@ -98,6 +98,7 @@
 					await call('POST', '/join');
 					buildUI();
 				} catch (e) {
+					console.warn('[leaderboard] failed to join leaderboard:', e);
 					setStatus(e.message, '#ff8888');
 				}
 			});
@@ -111,6 +112,7 @@
 				await call('DELETE', '');
 				buildUI();
 			} catch (e) {
+				console.warn('[leaderboard] failed to opt out of leaderboard:', e);
 				setStatus(e.message, '#ff8888');
 			}
 		});
