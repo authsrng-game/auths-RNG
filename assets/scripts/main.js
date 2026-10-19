@@ -1450,6 +1450,61 @@ function getRandomRarity() {
 	return Plush.roll(rarities, globalLuckMultiplier, inventoryData, shopUpgrades, luckBoostActive);
 }
 
+// Generated code starts here on 2026-10-19T03:07:20Z:
+function performBackgroundRoll(count = 1) {
+	if (typeof isCutscenePlaying !== 'undefined' && isCutscenePlaying) return 0;
+	const rollsToExecute = Math.max(0, Math.floor(count));
+	if (rollsToExecute === 0) return 0;
+
+	const delay = typeof getAutoRollDelay === 'function' ? getAutoRollDelay() : 1400;
+	const now = Date.now();
+	let simulatedNow = now - rollsToExecute * delay;
+
+	let lastRolledRarity = null;
+	for (let i = 0; i < rollsToExecute; i++) {
+		simulatedNow += delay;
+
+		if (luckBoostActive && simulatedNow >= luckBoostEndTime) {
+			endLuckBoost();
+		}
+
+		if (totalRolls > 0 && totalRolls % 100 === 0) {
+			startLuckBoost(simulatedNow);
+		}
+
+		totalRolls++;
+		const result = getRandomRarity();
+		const res = result.rarity;
+		lastRolledRarity = res;
+		addToInventory(res);
+		awardAnomalyIfEligible(res);
+		checkAchievements(res);
+		updateRollsSinceRare(res);
+	}
+
+	if (luckBoostActive && Date.now() >= luckBoostEndTime) {
+		endLuckBoost();
+	}
+
+	updateTotalRolls();
+	updateCollectedCounter();
+	updatePointsDisplay();
+	updateShopUI();
+	updateLuckDisplay();
+	debouncedSave();
+
+	if (lastRolledRarity && typeof addTrailItem === 'function') {
+		const pillColor = lastRolledRarity.style
+			? (lastRolledRarity.style.match(/color\s*:\s*(#[0-9a-fA-F]{3,8}|[a-z]+)/)?.[1] ?? null)
+			: null;
+		addTrailItem(lastRolledRarity.name, pillColor);
+	}
+
+	return rollsToExecute;
+}
+window.performBackgroundRoll = performBackgroundRoll;
+// Generated code ends here on 2026-10-19T03:07:20Z:
+
 // Generated code starts here on 2026-10-25T00:00:00Z:
 // Maintain active list of locked achievements to avoid iterating over all 37 achievement items and evaluating Set lookups on every RNG roll.
 let _lockedAchievements = null;
@@ -1958,9 +2013,9 @@ async function resetInventory() {
 	location.reload();
 }
 
-function startLuckBoost() {
+function startLuckBoost(now = Date.now()) {
 	luckBoostActive = true;
-	luckBoostEndTime = Date.now() + 60000;
+	luckBoostEndTime = now + 60000;
 	recalcLuckMultiplier();
 
 	const badge = document.getElementById('luckBoostBadge');

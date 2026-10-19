@@ -2166,6 +2166,37 @@ Last release date on nightly: ${nightlyRDate}`;
 					return Math.max(500, (typeof rollSpeed !== 'undefined' ? rollSpeed : 1) * 1000 + 400);
 				}
 
+				// Generated code starts here on 2026-10-19T03:07:20Z:
+				const MAX_AUTO_ROLL_CATCHUP = 3600;
+
+				function processAutoRolls() {
+					if (!toggleBtn.classList.contains('active')) return;
+					const now = Date.now();
+					const delay = getAutoRollDelay();
+
+					if (nextRollAt === 0) {
+						nextRollAt = now + delay;
+						return;
+					}
+
+					if (now >= nextRollAt) {
+						const elapsedSinceExpected = now - (nextRollAt - delay);
+						const totalMissed = Math.floor(elapsedSinceExpected / delay);
+
+						if (totalMissed > 0) {
+							const catchupCount = Math.min(MAX_AUTO_ROLL_CATCHUP, totalMissed);
+							if (typeof window.performBackgroundRoll === 'function') {
+								window.performBackgroundRoll(catchupCount);
+							}
+							nextRollAt += catchupCount * delay;
+							if (nextRollAt < now) {
+								nextRollAt = now + delay;
+							}
+						}
+					}
+				}
+				// Generated code ends here on 2026-10-19T03:07:20Z:
+
 				function tick() {
 					if (document.hidden) return;
 					if (typeof isCutscenePlaying !== 'undefined' && isCutscenePlaying) return;
@@ -2194,13 +2225,13 @@ Last release date on nightly: ${nightlyRDate}`;
 					}
 				});
 
-				// Generated code starts here on 2026-10-14T03:10:00Z:
+				// Generated code starts here on 2026-10-19T03:07:20Z:
 				document.addEventListener('visibilitychange', () => {
 					if (!document.hidden && toggleBtn.classList.contains('active')) {
-						tick();
+						processAutoRolls();
 					}
 				});
-				// Generated code ends here on 2026-10-14T03:10:00Z:
+				// Generated code ends here on 2026-10-19T03:07:20Z:
 
 				const trail = document.getElementById('rarityTrail');
 				const TRAIL_GAP = 6;
