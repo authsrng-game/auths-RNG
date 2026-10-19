@@ -76,6 +76,9 @@
 		try {
 			me = await call('GET', '/me');
 		} catch (e) {
+			// Generated code starts here on 2026-03-31T12:00:00Z:
+			console.warn('[leaderboard] failed to fetch status:', e);
+			// Generated code ends here on 2026-03-31T12:00:00Z:
 			section.innerHTML =
 				'<small class="helper" style="margin-top:6px;display:block;">leaderboard unavailable right now.</small>';
 			return;
@@ -98,6 +101,9 @@
 					await call('POST', '/join');
 					buildUI();
 				} catch (e) {
+					// Generated code starts here on 2026-03-31T12:00:00Z:
+					console.warn('[leaderboard] failed to join leaderboard:', e);
+					// Generated code ends here on 2026-03-31T12:00:00Z:
 					setStatus(e.message, '#ff8888');
 				}
 			});
@@ -111,6 +117,9 @@
 				await call('DELETE', '');
 				buildUI();
 			} catch (e) {
+				// Generated code starts here on 2026-03-31T12:00:00Z:
+				console.warn('[leaderboard] failed to opt out of leaderboard:', e);
+				// Generated code ends here on 2026-03-31T12:00:00Z:
 				setStatus(e.message, '#ff8888');
 			}
 		});

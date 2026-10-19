@@ -32,6 +32,7 @@
 				const parsed = JSON.parse(raw);
 				if (Array.isArray(parsed)) {
 					loadHistory();
+					localStorage.removeItem(TRUST_KEY);
 					return 0;
 				}
 			} catch {}
