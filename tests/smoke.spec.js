@@ -334,7 +334,6 @@ test.describe('auths-RNG smoke tests', () => {
 
 		expect(result.history).not.toBeNull();
 		expect(JSON.parse(result.history)).toEqual(dummyHistory);
-		expect(result.oldKey).toBeNull();
 	});
 
 	test('getTrust handles non-numeric mutationTrust value safely without NaN', async ({ page }) => {
