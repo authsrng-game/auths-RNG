@@ -518,7 +518,7 @@
 		container.innerHTML = `
       <div class="runes-panel">
         <div style="font-size:1.1em;margin-bottom:4px;">🔷 runes</div>
-        <div style="font-size:0.8em;opacity:0.5;margin-bottom:20px;">runes drop while rolling. collect all 4 elementals for a gift.</div>
+        <div style="font-size:0.8em;opacity:0.5;margin-bottom:20px;">runes drop while rolling. collect all 4 elementals for a gift. (THIS MECHANIC IS EXTREMELY RUSHED BEWARE)</div>
 
         ${
 					gift
@@ -662,7 +662,7 @@
 .rune-section-label {
   font-size: 0.72em;
   opacity: 0.38;
-  text-transform: uppercase;
+  text-transform: lowercase;
   letter-spacing: 0.07em;
   margin-bottom: 10px;
 }
