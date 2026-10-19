@@ -167,18 +167,26 @@ console.log(performance.now());
 	}
 
 	function trimNotifications() {
-		if (typeof notifications === 'undefined' || !Array.isArray(notifications)) return;
+		const notifs = typeof notifications !== 'undefined' && Array.isArray(notifications)
+			? notifications
+			: (window.notifications && Array.isArray(window.notifications) ? window.notifications : null);
+		if (!notifs) return;
 		const now = Date.now();
-		const before = notifications.length;
-		let trimmed = notifications.filter((n) => !(n.read && now - n.ts > NOTIF_STALE_READ_MS));
+		const before = notifs.length;
+		let trimmed = notifs.filter((n) => !(n.read && now - n.ts > NOTIF_STALE_READ_MS));
 		if (trimmed.length > NOTIF_TRIM_MAX) {
 			trimmed = trimmed.slice(trimmed.length - NOTIF_TRIM_MAX);
 		}
 		if (trimmed.length === before) return;
 
-		notifications = trimmed;
+		if (typeof notifications !== 'undefined') {
+			notifications = trimmed;
+		}
+		if (window.notifications) {
+			window.notifications = trimmed;
+		}
 		try {
-			localStorage.setItem('notifications', JSON.stringify(notifications));
+			localStorage.setItem('notifications', JSON.stringify(trimmed));
 		} catch (e) {}
 
 		if (typeof updateNotifBadge === 'function') updateNotifBadge();
