@@ -167,10 +167,12 @@ console.log(performance.now());
 	}
 
 	function trimNotifications() {
-		const notifs = typeof notifications !== 'undefined' && Array.isArray(notifications)
-			? notifications
-			: (window.notifications && Array.isArray(window.notifications) ? window.notifications : null);
-		if (!notifs) return;
+		const getNotifs = typeof window.getNotifications === 'function'
+			? window.getNotifications
+			: () => (typeof notifications !== 'undefined' ? notifications : null);
+		const notifs = getNotifs();
+		if (!notifs || !Array.isArray(notifs)) return;
+
 		const now = Date.now();
 		const before = notifs.length;
 		let trimmed = notifs.filter((n) => !(n.read && now - n.ts > NOTIF_STALE_READ_MS));
@@ -179,12 +181,12 @@ console.log(performance.now());
 		}
 		if (trimmed.length === before) return;
 
-		if (typeof notifications !== 'undefined') {
+		if (typeof window.setNotifications === 'function') {
+			window.setNotifications(trimmed);
+		} else if (typeof notifications !== 'undefined') {
 			notifications = trimmed;
 		}
-		if (window.notifications) {
-			window.notifications = trimmed;
-		}
+
 		try {
 			localStorage.setItem('notifications', JSON.stringify(trimmed));
 		} catch (e) {}

@@ -82,13 +82,14 @@ const NOTIF_KEY = 'notifications';
 const NOTIF_MAX = 200; // cap stored; badge shows 100+ beyond 99
 
 // load immediately so addNotification() works before initNotifCenter() runs
-let notifications = (() => {
+window.notifications = (() => {
 	try {
 		return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
 	} catch (_) {
 		return [];
 	}
 })();
+let notifications = window.notifications;
 let notifPanelOpen = false;
 
 const ACTIVE_POTIONS_KEY = 'activePotions';
@@ -1536,6 +1537,15 @@ function showAnomalyPopup(text) {
 }
 
 // the notification center itself
+window.getNotifications = function () {
+	return notifications;
+};
+
+window.setNotifications = function (arr) {
+	notifications = arr;
+	window.notifications = arr;
+};
+
 function addNotification(text) {
 	notifications.push({
 		id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
