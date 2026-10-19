@@ -25,6 +25,7 @@
 		}
 	});
 
+	// Generated code starts here on 2026-10-24T00:00:00Z:
 	function getTrust() {
 		const raw = localStorage.getItem(TRUST_KEY);
 		if (raw !== null && (raw.trim().startsWith('[') || raw.trim().startsWith('{'))) {
@@ -32,6 +33,7 @@
 				const parsed = JSON.parse(raw);
 				if (Array.isArray(parsed)) {
 					loadHistory();
+					localStorage.removeItem(TRUST_KEY);
 					return 0;
 				}
 			} catch {}
@@ -39,6 +41,7 @@
 		const val = parseInt(raw || '0', 10);
 		return Number.isNaN(val) ? 0 : val;
 	}
+	// Generated code ends here on 2026-10-24T00:00:00Z:
 	function setTrust(v) {
 		localStorage.setItem(TRUST_KEY, String(Math.max(0, v)));
 	}
@@ -67,21 +70,25 @@
 
 	function loadHistory() {
 		try {
+			// Generated code starts here on 2026-10-24T00:00:00Z:
+			const legacy = localStorage.getItem('mutationTrust');
+			if (legacy !== null && (legacy.trim().startsWith('[') || legacy.trim().startsWith('{'))) {
+				try {
+					const parsed = JSON.parse(legacy);
+					if (Array.isArray(parsed)) {
+						if (!localStorage.getItem(MUTATION_HISTORY_KEY)) {
+							saveHistory(parsed);
+						}
+						localStorage.removeItem('mutationTrust');
+					}
+				} catch {}
+			}
+			// Generated code ends here on 2026-10-24T00:00:00Z:
+
 			const current = localStorage.getItem(MUTATION_HISTORY_KEY);
 			if (current !== null) {
 				return JSON.parse(current);
 			}
-			// Generated code starts here on 2026-10-24T00:00:00Z:
-			const legacy = localStorage.getItem('mutationTrust');
-			if (legacy !== null) {
-				const parsed = JSON.parse(legacy);
-				if (Array.isArray(parsed)) {
-					saveHistory(parsed);
-					localStorage.removeItem('mutationTrust');
-					return parsed;
-				}
-			}
-			// Generated code ends here on 2026-10-24T00:00:00Z:
 			return [];
 		} catch {
 			return [];
