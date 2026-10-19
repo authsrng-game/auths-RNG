@@ -1456,11 +1456,22 @@ function performBackgroundRoll(count = 1) {
 	const rollsToExecute = Math.max(0, Math.floor(count));
 	if (rollsToExecute === 0) return 0;
 
+	const delay = typeof getAutoRollDelay === 'function' ? getAutoRollDelay() : 1400;
+	const now = Date.now();
+	let simulatedNow = now - rollsToExecute * delay;
+
 	let lastRolledRarity = null;
 	for (let i = 0; i < rollsToExecute; i++) {
-		if (totalRolls > 0 && totalRolls % 100 === 0) {
-			startLuckBoost();
+		simulatedNow += delay;
+
+		if (luckBoostActive && simulatedNow >= luckBoostEndTime) {
+			endLuckBoost();
 		}
+
+		if (totalRolls > 0 && totalRolls % 100 === 0) {
+			startLuckBoost(simulatedNow);
+		}
+
 		totalRolls++;
 		const result = getRandomRarity();
 		const res = result.rarity;
@@ -1469,6 +1480,10 @@ function performBackgroundRoll(count = 1) {
 		awardAnomalyIfEligible(res);
 		checkAchievements(res);
 		updateRollsSinceRare(res);
+	}
+
+	if (luckBoostActive && Date.now() >= luckBoostEndTime) {
+		endLuckBoost();
 	}
 
 	updateTotalRolls();
@@ -1998,9 +2013,9 @@ async function resetInventory() {
 	location.reload();
 }
 
-function startLuckBoost() {
+function startLuckBoost(now = Date.now()) {
 	luckBoostActive = true;
-	luckBoostEndTime = Date.now() + 60000;
+	luckBoostEndTime = now + 60000;
 	recalcLuckMultiplier();
 
 	const badge = document.getElementById('luckBoostBadge');
