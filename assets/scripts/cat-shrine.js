@@ -133,18 +133,22 @@
 			cell.appendChild(img);
 			const actions = document.createElement('div');
 			actions.className = 'cat-cell-actions';
+			// Generated code starts here on 2026-10-19T00:00:00Z:
 			const equipBtn = document.createElement('button');
 			equipBtn.className = 'small';
 			equipBtn.textContent = equipped === cat.url ? 'unequip' : 'equip';
+			equipBtn.title = equipped === cat.url ? 'Unequip this cat' : 'Pin this cat to your screen';
 			equipBtn.onclick = () => toggleEquip(cat.url);
 			const delBtn = document.createElement('button');
 			delBtn.className = 'small';
 			delBtn.textContent = 'delete';
+			delBtn.title = 'Remove this cat from saved cats';
 			delBtn.onclick = async () => {
 				await deleteCat(cat.id);
 				if (localStorage.getItem(EQUIP_KEY) === cat.url) unequipCat();
 				refreshGrid();
 			};
+			// Generated code ends here on 2026-10-19T00:00:00Z:
 			actions.appendChild(equipBtn);
 			actions.appendChild(delBtn);
 			cell.appendChild(actions);
@@ -196,22 +200,28 @@
 		refreshGrid();
 	}
 
+	// Generated code starts here on 2026-10-19T00:00:00Z:
 	async function summonCat() {
 		const btn = document.getElementById('catShrineSummonBtn');
-		if (btn) btn.disabled = true;
+		if (btn) {
+			btn.disabled = true;
+			btn.textContent = 'summoning...';
+		}
 		try {
 			const url = await fetchNewCat();
 			await addCat(url);
 			await refreshGrid();
 		} catch (e) {
-			// Generated code starts here on 2026-03-31T23:00:00Z:
 			console.warn('[cat-shrine] failed to summon cat:', e ? e.message || e : 'unknown error');
-			// Generated code ends here on 2026-03-31T23:00:00Z:
 			window.showAlert('the shrine failed to summon a cat.. try again?');
 		} finally {
-			if (btn) btn.disabled = false;
+			if (btn) {
+				btn.disabled = false;
+				btn.textContent = 'summon a cat';
+			}
 		}
 	}
+	// Generated code ends here on 2026-10-19T00:00:00Z:
 
 	// Generated code starts here on 2026-10-28T00:00:00Z:
 	/**

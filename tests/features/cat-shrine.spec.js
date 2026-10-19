@@ -24,5 +24,18 @@ test.describe('Cat Shrine unlock polling', () => {
 		expect(result.hasCheckUnlockFunction).toBe(true);
 		expect(result.isUnlocked).toBe(true);
 	});
+
+	test('cat shrine summon button has title tooltip and loading state support', async ({
+		page,
+	}) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
+		await page.goto(BASE_URL);
+
+		const summonBtn = page.locator('#catShrineSummonBtn');
+		await expect(summonBtn).toHaveAttribute('title', 'Summon a random cat');
+	});
 });
 // Generated code ends here on 2026-09-30T12:00:00Z:
