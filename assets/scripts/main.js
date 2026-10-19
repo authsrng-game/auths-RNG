@@ -1881,6 +1881,7 @@ async function resetInventory() {
 	localStorage.removeItem('weekly_streak');
 	localStorage.removeItem(playtimeKey);
 	localStorage.removeItem('userSettings');
+	window.invalidateUserSettingsCache?.();
 	localStorage.removeItem('wishingWell');
 	localStorage.removeItem('gauntletData');
 	localStorage.removeItem('_beacon_v2');
@@ -2029,20 +2030,44 @@ function endLuckBoost() {
 	localStorage.removeItem(LUCK_KEY);
 }
 
+// Generated code starts here on 2026-05-18T00:00:00Z:
+// In-memory cache for userSettings to avoid synchronous Web Storage reads and JSON parsing on hot roll paths.
+let _cachedUserSettings = null;
+
+function getUserSettings() {
+	if (window.savedSettings) return window.savedSettings;
+	if (!_cachedUserSettings) {
+		try {
+			_cachedUserSettings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+		} catch (e) {
+			_cachedUserSettings = {};
+		}
+	}
+	return _cachedUserSettings;
+}
+
+window.invalidateUserSettingsCache = function () {
+	_cachedUserSettings = null;
+};
+
+window.addEventListener('storage', (e) => {
+	if (e.key === 'userSettings' || e.key === null) {
+		_cachedUserSettings = null;
+	}
+});
+
 function checkMuteSettings() {
 	try {
-		const settingsStr = localStorage.getItem('userSettings');
-		if (settingsStr) {
-			const settings = JSON.parse(settingsStr);
-			if (settings.muted) {
-				backgroundMusic.pause();
-				backgroundMusic.volume = 0;
-				return true;
-			}
+		const settings = getUserSettings();
+		if (settings && settings.muted) {
+			backgroundMusic.pause();
+			backgroundMusic.volume = 0;
+			return true;
 		}
 	} catch (e) {}
 	return false;
 }
+// Generated code ends here on 2026-05-18T00:00:00Z:
 
 function spinAndReveal(res) {
 	if (window._spinnerResultAC) {

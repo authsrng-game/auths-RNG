@@ -1624,6 +1624,7 @@
 		savedSettings = current;
 		try {
 			localStorage.setItem('userSettings', JSON.stringify(current));
+			if (window.invalidateUserSettingsCache) window.invalidateUserSettingsCache();
 		} catch (_) {}
 	}
 
@@ -1635,6 +1636,7 @@
 		savedSettings = current;
 		try {
 			localStorage.setItem('userSettings', JSON.stringify(current));
+			if (window.invalidateUserSettingsCache) window.invalidateUserSettingsCache();
 		} catch (_) {}
 		hidePendingBar();
 	}
@@ -2304,6 +2306,7 @@
 		syncUIToSettings(savedSettings);
 		try {
 			localStorage.setItem('userSettings', JSON.stringify(savedSettings));
+			if (window.invalidateUserSettingsCache) window.invalidateUserSettingsCache();
 		} catch (_) {}
 	};
 	window.getCurrentSettings = getCurrentSettings;
