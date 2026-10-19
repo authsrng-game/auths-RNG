@@ -792,6 +792,17 @@ function formatTimeDisplay(seconds) {
 	return [h > 0 ? `${h}h` : '', m > 0 ? `${m}m` : '', `${s}s`].filter(Boolean).join(' ');
 }
 
+// Generated code starts here on 2026-04-02T12:00:00Z:
+/**
+ * Calculates total playtime in seconds by adding active session duration to `storedSeconds`.
+ *
+ * `window.totalSeconds` is exposed via `Object.defineProperty` as a getter-only property
+ * mapping to this function. Direct assignment to `totalSeconds = x` will fail or be ignored.
+ * To update playtime, modify `storedSeconds` or call `flushPlaytime()`.
+ *
+ * @returns {number} Current total playtime in seconds.
+ */
+// Generated code ends here on 2026-04-02T12:00:00Z:
 function getCurrentTotalSeconds() {
 	return storedSeconds + Math.floor((Date.now() - sessionStart) / 1000);
 }
