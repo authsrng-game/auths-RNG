@@ -74,6 +74,7 @@ test.describe('Syncer state consistency tests', () => {
 			{ a: 'Common', b: 'Uncommon', result: 'Rare', good: true, ts: Date.now() },
 		];
 		await page.addInitScript((items) => {
+			if (window.top !== window) return;
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('seenReleaseTag', 'v9.7');
 			localStorage.setItem('mutationsUnlocked', '1');
@@ -107,6 +108,7 @@ test.describe('Syncer state consistency tests', () => {
 	}) => {
 		const legacyArray = [{ a: 'Uncommon', b: 'Rare', result: 'Epic', good: true, ts: Date.now() }];
 		await page.addInitScript((items) => {
+			if (window.top !== window) return;
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('seenReleaseTag', 'v9.7');
 			localStorage.setItem('mutationsUnlocked', '1');

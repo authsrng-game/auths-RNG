@@ -169,16 +169,17 @@ console.log(performance.now());
 	function trimNotifications() {
 		if (typeof notifications === 'undefined' || !Array.isArray(notifications)) return;
 		const now = Date.now();
-		const before = notifications.length;
 		let trimmed = notifications.filter((n) => !(n.read && now - n.ts > NOTIF_STALE_READ_MS));
 		if (trimmed.length > NOTIF_TRIM_MAX) {
 			trimmed = trimmed.slice(trimmed.length - NOTIF_TRIM_MAX);
 		}
-		if (trimmed.length === before) return;
 
 		notifications = trimmed;
+		const json = JSON.stringify(notifications);
 		try {
-			localStorage.setItem('notifications', JSON.stringify(notifications));
+			if (localStorage.getItem('notifications') !== json) {
+				localStorage.setItem('notifications', json);
+			}
 		} catch (e) {}
 
 		if (typeof updateNotifBadge === 'function') updateNotifBadge();
