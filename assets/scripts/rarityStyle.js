@@ -187,17 +187,18 @@ console.log(performance.now());
 	}
 
 	// -- Public API ---------------------------------------------------------
+	// Generated code starts here on 2026-10-31T00:00:00Z:
 	/**
-	 * Apply a rarity style string to a DOM element.
+	 * Applies a rarity style animation string to a target DOM element.
 	 *
-	 * Returns an AbortController. Call  .abort()  to stop the animation and
-	 * clean up (the caller is responsible for resetting el.style if needed).
+	 * Parses the style DSL into command AST objects and executes them asynchronously.
+	 * Returns an AbortController whose `.abort()` method stops execution and cancels
+	 * pending wait intervals or transitions (the caller is responsible for resetting
+	 * `el.style` properties if required).
 	 *
-	 * Usage:
-	 *   const ac = window.RarityStyle.apply(el, rarity.style);
-	 *   // later:
-	 *   ac.abort();
-	 * Yada, yada, yada.
+	 * @param {HTMLElement} el - Target DOM element to animate.
+	 * @param {string} styleStr - Rarity animation DSL command string.
+	 * @returns {AbortController} Controller handle to abort the active animation loop.
 	 */
 	function applyRarityStyle(el, styleStr) {
 		const ac = new AbortController();
@@ -227,11 +228,23 @@ console.log(performance.now());
 	}
 
 	window.RarityStyle = {
-		/** Apply a style string to an element. Returns an AbortController. */
+		/**
+		 * Applies a style animation DSL string to a DOM element.
+		 * @param {HTMLElement} el - Element to animate.
+		 * @param {string} styleStr - Animation DSL string.
+		 * @returns {AbortController} Handle to stop active animation.
+		 */
 		apply: applyRarityStyle,
-		/** Parse only - returns the command AST without running it. */
+		/**
+		 * Parses a rarity style DSL string into an array of command AST objects without executing them.
+		 * Memoizes results in `parseCache` to eliminate redundant regex operations across re-renders.
+		 *
+		 * @param {string} src - Rarity style DSL string.
+		 * @returns {Array<Object>} Array of command AST objects (`color`, `transition`, `pulse`, `wait`, `loop`).
+		 */
 		parse: parseCommands,
 	};
+	// Generated code ends here on 2026-10-31T00:00:00Z:
 
 	// FIXME: add more elements to rarity style so it isnt just fancy text
 })();
