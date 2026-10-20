@@ -34,11 +34,18 @@
 		return s.status;
 	}
 
+// Generated code starts here on 2026-10-19T20:00:00Z:
 	async function renderHistory(box) {
 		box.textContent = 'loading...';
-		const list = await window.Sync.listHistory();
+		let list = null;
+		try {
+			list = await window.Sync.listHistory();
+		} catch (e) {
+			console.warn('[cloud-backup] failed to fetch restore points:', e);
+		}
 		box.textContent = '';
 		if (!list) {
+			console.warn('[cloud-backup] restore points list is null or request failed');
 			box.textContent = 'could not load restore points';
 			return;
 		}
@@ -64,8 +71,16 @@
 					'restore'
 				);
 				if (!ok) return;
-				const out = await window.Sync.restoreFromHistory(e.id);
-				if (!out.ok) window.showAlert(out.error || 'restore failed');
+				try {
+					const out = await window.Sync.restoreFromHistory(e.id);
+					if (!out.ok) {
+						console.warn('[cloud-backup] restore failed:', { id: e.id, error: out.error });
+						window.showAlert(out.error || 'restore failed');
+					}
+				} catch (err) {
+					console.warn('[cloud-backup] restore exception:', { id: e.id, error: err });
+					window.showAlert('restore failed');
+				}
 			});
 			row.appendChild(info);
 			row.appendChild(b);
@@ -96,7 +111,11 @@
 			return b;
 		};
 		mk('sync now', async () => {
-			await window.Sync.syncNow();
+			try {
+				await window.Sync.syncNow();
+			} catch (e) {
+				console.warn('[cloud-backup] manual sync failed:', e);
+			}
 			build();
 		});
 		const hist = document.createElement('div');
@@ -110,12 +129,21 @@
 					'overwrite cloud'
 				);
 				if (!ok) return;
-				const done = await window.Sync.forcePush();
-				window.showAlert(done ? 'cloud save updated' : 'upload failed, try again');
+				try {
+					const done = await window.Sync.forcePush();
+					if (!done) {
+						console.warn('[cloud-backup] overwrite cloud with this device failed');
+					}
+					window.showAlert(done ? 'cloud save updated' : 'upload failed, try again');
+				} catch (e) {
+					console.warn('[cloud-backup] overwrite cloud exception:', e);
+					window.showAlert('upload failed, try again');
+				}
 				build();
 			},
 			'opacity:0.6;'
 		);
+// Generated code ends here on 2026-10-19T20:00:00Z:
 		section.appendChild(row);
 		section.appendChild(hist);
 	}
