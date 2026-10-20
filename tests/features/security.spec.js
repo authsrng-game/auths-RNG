@@ -23,8 +23,8 @@ test.describe('Security tests', () => {
 					body: JSON.stringify([
 						{
 							login: '<script>alert(1)</script>hacker',
-							html_url: 'https://github.com/hacker',
-							avatar_url: 'https://github.com/avatar.png',
+							html_url: 'javascript:alert(1)',
+							avatar_url: 'javascript:alert(2)',
 							contributions: 42,
 						},
 					]),
@@ -37,6 +37,14 @@ test.describe('Security tests', () => {
 		await expect(contribLink).toBeVisible();
 		await expect(contribLink).toHaveAttribute('rel', 'noopener noreferrer');
 		await expect(contribLink.locator('.name')).toHaveText('<script>alert(1)</script>hacker');
+
+		// Ensure javascript: URLs are stripped/sanitized for href and img src
+		const href = await contribLink.getAttribute('href');
+		expect(href).toBeNull();
+
+		const img = contribLink.locator('img');
+		const src = await img.getAttribute('src');
+		expect(src).toBe('');
 	});
 });
 // Generated code ends here on 2026-03-31T00:00:00Z:
