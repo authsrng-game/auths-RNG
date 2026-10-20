@@ -438,6 +438,7 @@ const SHOP_ROWS = [
 ];
 
 function updateShopUI() {
+	document.addEventListener('pointsChanged', updateShopUI);
 	for (const row of SHOP_ROWS) {
 		const def = UPGRADE_DEFS[row.key];
 		const lvl = shopUpgrades[row.key] || 0;
