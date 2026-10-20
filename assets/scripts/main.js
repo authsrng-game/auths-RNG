@@ -438,6 +438,7 @@ const SHOP_ROWS = [
 ];
 
 function updateShopUI() {
+	document.addEventListener('pointsChanged', updateShopUI);
 	for (const row of SHOP_ROWS) {
 		const def = UPGRADE_DEFS[row.key];
 		const lvl = shopUpgrades[row.key] || 0;
@@ -1246,14 +1247,9 @@ function addToInventory(o, skipAutoSell = false) {
 	} else {
 		const li = document.createElement('li');
 		inventoryData.set(o.name, { rarityObj: o, count: 1, liElement: li });
-		const d = inventoryData.get(o.name);
-		updateItem(d);
-		inventoryList.appendChild(li);
+		updateItem(inventoryData.get(o.name));
+		renderSortedInventory(sortSelect ? sortSelect.value : 'rare');
 	}
-
-	const isNearBottom =
-		inventoryList.scrollHeight - inventoryList.scrollTop - inventoryList.clientHeight < 60;
-	if (isNearBottom) inventoryList.scrollTop = inventoryList.scrollHeight;
 
 	updateCollectedCounter();
 
@@ -1367,18 +1363,6 @@ function updatePrinterPoints() {
 			window._lastPrinterTick = now - (elapsedMs % 1000);
 			points += shopUpgrades.printer * cappedSeconds;
 			updatePointsDisplay();
-
-			const luckCost = Math.floor(25 + shopUpgrades.luck * shopUpgrades.luck * 15);
-			const speedCost = Math.floor(50 + shopUpgrades.speed * shopUpgrades.speed * 55);
-			const pointCost = Math.floor(100 + shopUpgrades.pointMult * shopUpgrades.pointMult * 35);
-			const magnetCost = 500 + (shopUpgrades.magnet || 0) * 1000;
-			const printerCost = 1000 + (shopUpgrades.printer || 0) * (shopUpgrades.printer || 0) * 500;
-			const dupeCost = 800 + (shopUpgrades.duplicate || 0) * (shopUpgrades.duplicate || 0) * 400;
-
-			const thresholds = [luckCost, speedCost, pointCost, magnetCost, printerCost, dupeCost];
-			const crossed = thresholds.some((t) => points >= t !== _lastShopUIPoints >= t);
-			if (crossed || _lastShopUIPoints < 0) updateShopUI();
-			_lastShopUIPoints = points;
 		}
 	} else {
 		window._lastPrinterTick = Date.now();

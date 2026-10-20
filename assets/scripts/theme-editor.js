@@ -558,7 +558,8 @@
 			return el(id) ? el(id).value : '';
 		}
 		function intVal(id, def) {
-			return el(id) ? parseInt(el(id).value, 10) || def : def;
+			const n = el(id) ? Number.parseFloat(el(id).value) : NaN;
+			return Number.isFinite(n) ? Math.trunc(n) : def;
 		}
 		function checked(id) {
 			return el(id) ? el(id).checked : false;
@@ -717,6 +718,33 @@
 				},
 			},
 		};
+	}
+
+	function applyPresetToEditor(preset) {
+		const isBuiltIn = BUILT_IN_PRESETS.some((p) => p.name === preset.name);
+		if (!isBuiltIn) {
+			writeEditor(preset);
+			return;
+		}
+		const cur = readEditor();
+		const r = preset.settings.radius;
+		writeEditor({
+			vars: { ...cur.vars, ...preset.vars },
+			settings: {
+				...cur.settings,
+				...preset.settings,
+				radiusIndependent: false,
+				buttonRadius: r,
+				rollBtnRadius: r,
+				bgType: 'color',
+				colorMode: {
+					bgColor: 'solid',
+					panelBg: 'solid',
+					buttonBg: 'solid',
+					achievementBg: 'solid',
+				},
+			},
+		});
 	}
 
 	function writeEditor(preset) {
@@ -1695,7 +1723,7 @@
 			const btn = document.createElement('button');
 			btn.textContent = preset.name;
 			btn.addEventListener('click', () => {
-				writeEditor(preset);
+				applyPresetToEditor(preset);
 				livePreview();
 				resetUndoStack();
 			});
@@ -1793,18 +1821,27 @@
 			document.body.style.overflow = '';
 		}
 
-		closeBtn.addEventListener('click', closeEditor);
-
-		discardBtn.addEventListener('click', () => {
+		function revertEditor() {
 			if (snapshotBeforeOpen) {
 				document.documentElement.setAttribute('style', snapshotBeforeOpen.style);
 				document.body.setAttribute('style', snapshotBeforeOpen.bodyStyle);
+			}
+			let activeData = null;
+			try {
+				activeData = JSON.parse(localStorage.getItem(ACTIVE_KEY) || 'null');
+			} catch (_) {}
+			if (activeData && activeData.editorData) {
+				const d = activeData.editorData;
+				applyCSSVars(d.vars, d.settings.borderWidth, d.settings);
 			}
 			if (window.applySettings && window.savedSettings) {
 				window.applySettings(window.savedSettings);
 			}
 			closeEditor();
-		});
+		}
+
+		closeBtn.addEventListener('click', revertEditor);
+		discardBtn.addEventListener('click', revertEditor);
 
 		if (undoBtn) {
 			undoBtn.addEventListener('click', () => {

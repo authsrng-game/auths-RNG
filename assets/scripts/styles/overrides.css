@@ -2372,8 +2372,7 @@ body.hide-cursor #custom-cursor {
 
 @media (width <= 600px) {
 	body {
-		padding: 24px 16px;
-		font-size: 14px;
+		font-size: 0.9375rem;
 	}
 
 	#rollBtn {
@@ -4829,9 +4828,7 @@ body.blur-panels .starmap-market-item {
 }
 
 body {
-	--font-body: monospace;
-
-	font-family: var(--font-body);
+	font-family: var(--font-body, monospace);
 }
 
 h1,
@@ -5757,4 +5754,57 @@ body.reduce-motion .info-tip-orbit span {
 
 .buyqty-btn.on {
 	outline: 1px solid var(--text-color);
+}
+
+.inventory-heading {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 7px;
+	min-width: 0;
+}
+
+.inventory-title {
+	line-height: 1.5;
+}
+
+.inventory-hint {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+
+	font-size: 0.72rem;
+	line-height: 1.4;
+	letter-spacing: 0.015em;
+
+	color: #929098;
+	opacity: 0.85;
+
+	padding: 4px 8px;
+	border: 1px solid rgba(160, 155, 175, 0.13);
+	background: rgba(160, 155, 175, 0.035);
+	border-radius: 3px;
+
+	transition:
+		color 150ms ease,
+		border-color 150ms ease,
+		background 150ms ease;
+}
+
+.hint-icon {
+	color: #b5a5d8;
+	font-size: 0.9rem;
+}
+
+.inventory-hint:hover {
+	color: #c4c0cb;
+	border-color: rgba(181, 165, 216, 0.25);
+	background: rgba(181, 165, 216, 0.045);
+}
+
+button,
+select,
+input,
+textarea {
+	font-family: inherit;
 }
