@@ -74,7 +74,7 @@ test.describe('Syncer state consistency tests', () => {
 			{ a: 'Common', b: 'Uncommon', result: 'Rare', good: true, ts: Date.now() },
 		];
 		await page.addInitScript((items) => {
-			if (window.self !== window.top) return;
+			if (globalThis.window.self !== globalThis.window.top) return;
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('seenReleaseTag', 'v9.7');
 			localStorage.setItem('mutationsUnlocked', '1');
