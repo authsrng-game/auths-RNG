@@ -5779,19 +5779,15 @@ textarea {
 	display: inline-flex;
 	align-items: center;
 	gap: 7px;
-
 	font-size: 0.72rem;
 	line-height: 1.4;
 	letter-spacing: 0.015em;
-
 	color: #929098;
 	opacity: 0.85;
-
 	padding: 4px 8px;
-	border: 1px solid rgba(160, 155, 175, 0.13);
-	background: rgba(160, 155, 175, 0.035);
+	border: 1px solid rgb(160 155 175 / 13%);
+	background: rgb(160 155 175 / 3.5%);
 	border-radius: 3px;
-
 	transition:
 		color 150ms ease,
 		border-color 150ms ease,
@@ -5805,6 +5801,6 @@ textarea {
 
 .inventory-hint:hover {
 	color: #c4c0cb;
-	border-color: rgba(181, 165, 216, 0.25);
-	background: rgba(181, 165, 216, 0.045);
+	border-color: rgb(181 165 216 / 25%);
+	background: rgb(181 165 216 / 4.5%);
 }
