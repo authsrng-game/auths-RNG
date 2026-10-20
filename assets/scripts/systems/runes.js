@@ -426,23 +426,48 @@
 		anomalyMachineInterval = setInterval(updateRuneAnomalyMachine, 2000);
 	}
 
+	// Generated code starts here on 2026-10-20T00:00:00Z:
+	window._lastDopamineAttackTick = Date.now();
+	function updateDopamineAttack() {
+		if (!upgrades.dopamineAttack) {
+			window._lastDopamineAttackTick = Date.now();
+			return;
+		}
+		const now = Date.now();
+		const elapsedMs = now - (window._lastDopamineAttackTick || now);
+		const rollInterval = 1000 / 3;
+		const elapsedTicks = Math.floor(elapsedMs / rollInterval);
+		if (elapsedTicks > 0) {
+			const cappedTicks = Math.min(1800, elapsedTicks);
+			window._lastDopamineAttackTick = now - (elapsedMs % rollInterval);
+			if (document.hidden || elapsedTicks > 1) {
+				if (typeof window.performBackgroundRoll === 'function') {
+					window.performBackgroundRoll(cappedTicks);
+				}
+			} else {
+				const btn = document.getElementById('rollBtn');
+				if (btn && !btn.disabled && typeof isCutscenePlaying !== 'undefined' && !isCutscenePlaying) {
+					btn.click();
+				}
+			}
+		}
+	}
+	// Generated code ends here on 2026-10-20T00:00:00Z:
+
 	document.addEventListener('visibilitychange', () => {
 		if (document.visibilityState === 'visible') {
 			if (gift === 'wealth') updateRuneWealth();
 			if (upgrades.anomalyMachine) updateRuneAnomalyMachine();
+			if (upgrades.dopamineAttack) updateDopamineAttack();
 		}
 	});
 	// Generated code ends here on 2026-03-31T22:00:00Z:
 
 	function startDopamineAttack() {
 		if (dopamineAttackInterval) clearInterval(dopamineAttackInterval);
+		window._lastDopamineAttackTick = Date.now();
 		const rollEvery = Math.round(1000 / 3);
-		dopamineAttackInterval = setInterval(() => {
-			const btn = document.getElementById('rollBtn');
-			if (btn && !btn.disabled && typeof isCutscenePlaying !== 'undefined' && !isCutscenePlaying) {
-				btn.click();
-			}
-		}, rollEvery);
+		dopamineAttackInterval = setInterval(updateDopamineAttack, rollEvery);
 	}
 
 	function getTripleLuckMultiplier() {
