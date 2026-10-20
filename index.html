@@ -565,7 +565,14 @@ Last release date on nightly: ${nightlyRDate}`;
 
 					<div id="inventorySection" class="lazy">
 						<div class="inventory-header">
-							<span class="inventory-title">.................</span>
+							<div class="inventory-heading">
+								<span class="inventory-title"> the super duper awesome inventory </span>
+								<span class="inventory-hint">
+									<span class="hint-icon">↳</span>
+									double-click an item to sell it!!!!!!!
+								</span>
+							</div>
+
 							<div class="inventory-controls">
 								<!-- Generated code starts here on 2026-09-22T00:00:00Z: -->
 								<label for="sortSelect" class="sort-label">sort</label>
@@ -3299,7 +3306,9 @@ container.addEventListener('click', () => {
 							<option value="default">default (monospace)</option>
 							<option value="serif">serif</option>
 							<option value="mono">monospace</option>
+							<!-- FIXME: redundant monospace option because default is already monospace -->
 							<option value="dyslexic">opendyslexic</option>
+							<option value="custom">custom (uploaded)</option>
 						</select>
 
 						<label style="display: block; margin-bottom: 10px; font-size: 0.85em; opacity: 0.7"

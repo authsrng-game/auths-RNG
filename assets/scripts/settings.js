@@ -1530,9 +1530,12 @@
 				serif: 'serif',
 				mono: 'monospace',
 				dyslexic: 'OpenDyslexic, monospace',
-				default: 'monospace',
 			};
-			document.body.style.fontFamily = fontMap[settings.font] || 'monospace';
+			if (fontMap[settings.font]) {
+				document.body.style.fontFamily = fontMap[settings.font];
+			} else {
+				document.body.style.removeProperty('font-family');
+			}
 		}
 
 		if (settings.textSize) {
@@ -1543,7 +1546,9 @@
 			document.documentElement.style.setProperty('--accent-color', settings.accentColor);
 		}
 
-		if (settings.bgPattern !== undefined) applyBackgroundPattern(settings.bgPattern);
+		if (settings.bgPattern !== undefined && (settings.bgType || 'color') === 'color') {
+			applyBackgroundPattern(settings.bgPattern);
+		}
 		applyGlowBlobs(settings);
 		if (settings.season !== undefined)
 			startSeasonalParticles(settings.season, settings.particleDensity || 'medium');
@@ -1557,7 +1562,6 @@
 		window.rollSoundSetting = settings.rollSound || 'none';
 		window.rareThreshold = settings.rareThreshold ?? 1000;
 		window.autoSellThreshold = settings.autoSellThreshold || 0;
-		window.cutsceneThreshold = settings.cutsceneThreshold || 0;
 
 		const luckBreak = el('luckBreakdown');
 		if (luckBreak) luckBreak.style.display = settings.hideLuckBreakdown ? 'none' : '';
@@ -1577,16 +1581,11 @@
 			rollBtn.style.padding = sizeMap[settings.rollBtnSize || 'normal'];
 		}
 
-		if (settings.bgPattern !== undefined) applyBackgroundPattern(settings.bgPattern);
-		if (settings.season !== undefined)
-			startSeasonalParticles(settings.season, settings.particleDensity || 'medium');
-
 		startDevOverlay(settings);
 
 		if (window.refreshAllDisplays) window.refreshAllDisplays();
 	}
 
-	// -- syncUIToSettings --------------------------------------------------
 	function syncUIToSettings(settings) {
 		if (el('musicSelect')) el('musicSelect').value = settings.music || 'default';
 		if (el('muteMusic')) el('muteMusic').checked = !!settings.muted;
@@ -1594,12 +1593,15 @@
 		if (el('legacyMode')) el('legacyMode').checked = !!settings.legacyMode;
 		if (el('rawNumbers')) el('rawNumbers').checked = !!settings.rawNumbers;
 		if (el('rollSound')) el('rollSound').value = settings.rollSound || 'none';
-		if (el('rareThreshold')) el('rareThreshold').value = settings.rareThreshold || 1000;
+		if (el('rareThreshold')) el('rareThreshold').value = settings.rareThreshold ?? 1000;
 		if (el('autoSellThreshold')) el('autoSellThreshold').value = settings.autoSellThreshold || 0;
 	}
-	// blah!
 
-	// -- getCurrentSettings ------------------------------------------------
+	function readNum(id, def) {
+		const n = Number.parseFloat((el(id) || {}).value);
+		return Number.isFinite(n) && n >= 0 ? Math.trunc(n) : def;
+	}
+
 	function getCurrentSettings() {
 		return {
 			music: (el('musicSelect') || {}).value || 'default',
@@ -1608,11 +1610,10 @@
 			legacyMode: !!(el('legacyMode') || {}).checked,
 			rawNumbers: !!(el('rawNumbers') || {}).checked,
 			rollSound: (el('rollSound') || {}).value || 'none',
-			rareThreshold: parseInt((el('rareThreshold') || {}).value || 1000, 10),
-			autoSellThreshold: parseInt((el('autoSellThreshold') || {}).value || 0, 10),
+			rareThreshold: readNum('rareThreshold', 1000),
+			autoSellThreshold: readNum('autoSellThreshold', 0),
 		};
 	}
-
 	function onChange() {
 		applyVisuals({ ...savedSettings, ...getCurrentSettings() });
 		showPendingBar();
