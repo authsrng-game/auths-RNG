@@ -1625,6 +1625,8 @@
 		try {
 			localStorage.setItem('userSettings', JSON.stringify(current));
 		} catch (_) {}
+		if (typeof window.invalidateUserSettingsCache === 'function')
+			window.invalidateUserSettingsCache();
 	}
 
 	async function saveChanges() {
@@ -1636,6 +1638,8 @@
 		try {
 			localStorage.setItem('userSettings', JSON.stringify(current));
 		} catch (_) {}
+		if (typeof window.invalidateUserSettingsCache === 'function')
+			window.invalidateUserSettingsCache();
 		hidePendingBar();
 	}
 
@@ -2141,6 +2145,8 @@
 					}
 					if (result.bundle.userSettings)
 						localStorage.setItem('userSettings', result.bundle.userSettings);
+					if (typeof window.invalidateUserSettingsCache === 'function')
+						window.invalidateUserSettingsCache();
 					try {
 						const s = JSON.parse(result.bundle.userSettings);
 						applyVisuals(s);
@@ -2305,6 +2311,8 @@
 		try {
 			localStorage.setItem('userSettings', JSON.stringify(savedSettings));
 		} catch (_) {}
+		if (typeof window.invalidateUserSettingsCache === 'function')
+			window.invalidateUserSettingsCache();
 	};
 	window.getCurrentSettings = getCurrentSettings;
 
