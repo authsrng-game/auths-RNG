@@ -3032,6 +3032,18 @@ const throwWellBtn = document.getElementById('throwWellBtn');
 if (throwWellBtn) {
 	throwWellBtn.addEventListener('click', throwIntoWell);
 }
+
+// Generated code starts here on 2026-03-31T23:00:00Z:
+const wellInput = document.getElementById('wellInput');
+if (wellInput) {
+	wellInput.addEventListener('keydown', (e) => {
+		if (e.key === 'Enter') {
+			e.preventDefault();
+			throwIntoWell();
+		}
+	});
+}
+// Generated code ends here on 2026-03-31T23:00:00Z:
 if (isWellOnCooldown()) {
 	// so why is there an error here? send me to hell please
 	startWellCooldownTimer();
