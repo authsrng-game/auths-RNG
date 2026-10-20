@@ -442,7 +442,7 @@
 			window._lastDopamineAttackTick = now - (elapsedMs % rollInterval);
 			if (document.hidden || elapsedTicks > 1) {
 				if (typeof window.performBackgroundRoll === 'function') {
-					window.performBackgroundRoll(cappedTicks);
+					window.performBackgroundRoll(cappedTicks, rollInterval);
 				}
 			} else {
 				const btn = document.getElementById('rollBtn');
