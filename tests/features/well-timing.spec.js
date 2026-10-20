@@ -62,4 +62,37 @@ test.describe('Wishing Well timing reconciliation', () => {
 		expect(status).toContain('ready to accept your offering');
 	});
 	// Generated code ends here on 2026-04-02T12:00:00Z:
+
+	// Generated code starts here on 2026-03-31T23:00:00Z:
+	test('triggers throwIntoWell when pressing Enter in wellInput', async ({ page }) => {
+		await page.goto(BASE_URL);
+		await page.evaluate(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
+		await page.reload();
+
+		await page.evaluate(() => {
+			window.awardPoints(500);
+			localStorage.setItem(
+				'wishingWell',
+				JSON.stringify({
+					lastThrow: 0,
+					totalThrown: 0,
+					totalReceived: 0,
+					timesThrown: 0,
+					successes: 0,
+				})
+			);
+			window.loadWellData();
+		});
+
+		const wellInput = page.locator('#wellInput');
+		await wellInput.fill('50');
+		await wellInput.press('Enter');
+
+		const modal = page.locator('#wellResultModal');
+		await expect(modal).toHaveClass(/show/);
+	});
+	// Generated code ends here on 2026-03-31T23:00:00Z:
 });
