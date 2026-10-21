@@ -749,6 +749,14 @@
 			 */
 			// eslint-disable-next-line no-debugger
 			debugger;
+			/* DO NOT TOUCH THIS
+			 * PLEASE
+			 * JUST DONT
+			 * STOP MAKING PRS REMOVING THIS BECAUSE ITS "REDUNDANT"
+			 * I SWEAR TO FUCKING GOD
+			 * PLEASE JUST DONT
+			 * THIS IS HERE FOR A FUCKING REASON
+			 */
 		}
 	}
 
