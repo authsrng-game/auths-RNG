@@ -6,6 +6,12 @@ Thank you for your interest in contributing to **auth's RNG**! Please follow the
 
 Contributing to auth's RNG is pretty simple! Whether you're fixing a bug, improving the UI, balancing the game, or adding a small feature, contributions are welcome.
 
+auth's RNG is built in casual HTML, CSS, and Javascript. Some Typescript is used but usually only for rarely utilized utility scripts.
+
+Don't know what to fix? Search the repository for "TODO" or "FIXME" comments, or look through the issue tracker!
+
+![xkcd Git Commit](https://imgs.xkcd.com/comics/git_commit.png)
+
 ### 1. Fork the repository
 
 Click the **Fork** button in the top-right of the GitHub repository page to create your own copy of auth's RNG.
