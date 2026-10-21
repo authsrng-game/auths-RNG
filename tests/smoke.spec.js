@@ -73,7 +73,9 @@ test.describe('auths-RNG smoke tests', () => {
 	test('navigation arrows have accessible aria-labels', async ({ page }) => {
 		await page.goto(BASE_URL);
 		await expect(page.locator('#prevPage')).toHaveAttribute('aria-label', 'Previous page');
+		await expect(page.locator('#prevPage')).toHaveAttribute('title', 'Previous page');
 		await expect(page.locator('#nextPage')).toHaveAttribute('aria-label', 'Next page');
+		await expect(page.locator('#nextPage')).toHaveAttribute('title', 'Next page');
 	});
 	// Generated code ends here on 2026-06-18T00:30:00Z:
 
@@ -86,6 +88,7 @@ test.describe('auths-RNG smoke tests', () => {
 
 		const closeBtn = page.locator('#indexClose');
 		await expect(closeBtn).toHaveAttribute('aria-label', 'Close');
+		await expect(closeBtn).toHaveAttribute('title', 'Close');
 	});
 	// Generated code ends here on 2026-06-18T00:35:00Z:
 
