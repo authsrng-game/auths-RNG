@@ -1451,12 +1451,12 @@ function getRandomRarity() {
 }
 
 // Generated code starts here on 2026-10-19T03:07:20Z:
-function performBackgroundRoll(count = 1) {
+function performBackgroundRoll(count = 1, delayOverride = null) {
 	if (typeof isCutscenePlaying !== 'undefined' && isCutscenePlaying) return 0;
 	const rollsToExecute = Math.max(0, Math.floor(count));
 	if (rollsToExecute === 0) return 0;
 
-	const delay = typeof getAutoRollDelay === 'function' ? getAutoRollDelay() : 1400;
+	const delay = delayOverride ?? (typeof getAutoRollDelay === 'function' ? getAutoRollDelay() : 1400);
 	const now = Date.now();
 	let simulatedNow = now - rollsToExecute * delay;
 
