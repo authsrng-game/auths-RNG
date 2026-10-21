@@ -104,24 +104,29 @@ test.describe('Auto-roll timing reconciliation', () => {
 		await page.reload();
 
 		const potionState = await page.evaluate(() => {
-			// Set up active potion that expires in 5 seconds
-			activePotions = [{ type: 'luck2x', endTime: Date.now() + 5000, multiplier: 2 }];
-			recalcPotionLuck(Date.now());
+			// Track globalLuckMultiplier used during each roll in Plush.roll
+			const rollsMults = [];
+			const origRoll = Plush.roll;
+			Plush.roll = function (...args) {
+				rollsMults.push(args[1]);
+				return origRoll.apply(this, args);
+			};
+
+			// Set up active potion and adjust duration so it expires after 5 seconds (5 rolls @ 1000ms delay)
+			playerPotions.luck2x = 1;
+			usePotion('luck2x');
+			const startSimulatedNow = Date.now() - 10 * 1000;
+			activePotions[0].endTime = startSimulatedNow + 5000;
 
 			const luckWithPotion = globalLuckMultiplier;
-
-			// Fast forward Date.now by 10 seconds for the test execution context
-			const realNow = Date.now;
-			const targetNow = realNow() + 10000;
-			Date.now = () => targetNow;
 
 			// Perform 10 background rolls with 1000ms delay each (total 10 seconds simulated time)
 			performBackgroundRoll(10, 1000);
 
-			Date.now = realNow;
+			Plush.roll = origRoll;
 
 			return {
-				potionLuckMult: potionLuckMultiplier,
+				rollsMults,
 				luckWithPotion,
 				luckAfterCatchup: globalLuckMultiplier,
 				activePotionsCount: activePotions.length,
@@ -130,6 +135,14 @@ test.describe('Auto-roll timing reconciliation', () => {
 
 		expect(potionState.luckWithPotion).toBeGreaterThan(potionState.luckAfterCatchup);
 		expect(potionState.activePotionsCount).toBe(0);
+		// First 4 rolls (t=1s..4s) should have potion luck multiplier applied
+		expect(potionState.rollsMults.slice(0, 4).every((m) => m === potionState.luckWithPotion)).toBe(
+			true
+		);
+		// Last 5 rolls (t=6s..10s) should have base luck multiplier after potion expiration
+		expect(
+			potionState.rollsMults.slice(5, 10).every((m) => m === potionState.luckAfterCatchup)
+		).toBe(true);
 	});
 	// Generated code ends here on 2026-10-21T03:20:00Z:
 });
