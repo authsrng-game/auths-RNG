@@ -520,14 +520,31 @@ function usePotion(potionType) {
 }
 window.usePotion = usePotion;
 
-function recalcPotionLuck() {
+function recalcPotionLuck(now = Date.now()) {
 	potionLuckMultiplier = 1;
-	activePotions = activePotions.filter((p) => p.endTime > Date.now());
+	activePotions = activePotions.filter((p) => p.endTime > now);
 	activePotions.forEach((p) => {
 		potionLuckMultiplier += p.multiplier - 1;
 	});
 	recalcLuckMultiplier();
 }
+
+// Generated code starts here on 2026-04-02T12:00:00Z:
+function performBackgroundRoll(simulatedNow = Date.now()) {
+	recalcPotionLuck(simulatedNow);
+	const result = getRandomRarity();
+	const res = result.rarity;
+	if (totalRolls > 0 && totalRolls % 100 === 0) startLuckBoost();
+	totalRolls++;
+	updateTotalRolls();
+	addToInventory(res);
+	awardAnomalyIfEligible(res);
+	checkAchievements(res);
+	updateRollsSinceRare(res);
+	return res;
+}
+window.performBackgroundRoll = performBackgroundRoll;
+// Generated code ends here on 2026-04-02T12:00:00Z:
 
 // Generated code starts here on 2026-11-02T00:00:00Z:
 // Lazily cache DOM elements and update textContent on active potion list items in-place to prevent DOM churn and redundant style setter calls on periodic timer ticks.

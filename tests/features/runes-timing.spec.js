@@ -36,4 +36,33 @@ test.describe('Runes timing reconciliation', () => {
 		expect(result.points).toBeGreaterThanOrEqual(2000000);
 		expect(result.anomalies).toBeGreaterThanOrEqual(250);
 	});
+
+	test('reconciles dopamine attack catch-up rolls on visibilitychange', async ({ page }) => {
+		await page.addInitScript(() => {
+			if (window.self !== window.top) return;
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('runesUnlocked', '1');
+			localStorage.setItem('runeUpgrades', JSON.stringify({ dopamineAttack: true }));
+		});
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(() => {
+			const initialRolls = totalRolls;
+
+			// Fast-forward last dopamine attack tick timestamp into the past (e.g. 30 seconds ago = ~90 rolls)
+			window._lastDopamineAttackTick = Date.now() - 30000;
+
+			// Trigger visibilitychange event to simulate tab refocus
+			document.dispatchEvent(new globalThis.Event('visibilitychange'));
+
+			return {
+				initialRolls,
+				finalRolls: totalRolls,
+				gainedRolls: totalRolls - initialRolls,
+			};
+		});
+
+		expect(result.gainedRolls).toBeGreaterThanOrEqual(80);
+	});
 });
