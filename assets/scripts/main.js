@@ -491,14 +491,16 @@ function usePotion(potionType) {
 	showAnomalyPopup(`${data.emoji} ${data.name} activated!`);
 }
 
-function recalcPotionLuck() {
+// Generated code starts here on 2026-10-21T03:15:00Z:
+function recalcPotionLuck(now = Date.now()) {
 	potionLuckMultiplier = 1;
-	activePotions = activePotions.filter((p) => p.endTime > Date.now());
+	activePotions = activePotions.filter((p) => p.endTime > now);
 	activePotions.forEach((p) => {
 		potionLuckMultiplier += p.multiplier - 1;
 	});
 	recalcLuckMultiplier();
 }
+// Generated code ends here on 2026-10-21T03:15:00Z:
 
 // Generated code starts here on 2026-11-02T00:00:00Z:
 // Lazily cache DOM elements and update textContent on active potion list items in-place to prevent DOM churn and redundant style setter calls on periodic timer ticks.
@@ -1472,6 +1474,11 @@ function performBackgroundRoll(count = 1, delayOverride = null) {
 			startLuckBoost(simulatedNow);
 		}
 
+		if (activePotions.length > 0 && activePotions.some((p) => p.endTime <= simulatedNow)) {
+			recalcPotionLuck(simulatedNow);
+			updateActivePotionsDisplay();
+		}
+
 		totalRolls++;
 		const result = getRandomRarity();
 		const res = result.rarity;
@@ -1484,6 +1491,11 @@ function performBackgroundRoll(count = 1, delayOverride = null) {
 
 	if (luckBoostActive && Date.now() >= luckBoostEndTime) {
 		endLuckBoost();
+	}
+
+	if (activePotions.length > 0) {
+		recalcPotionLuck(Date.now());
+		updateActivePotionsDisplay();
 	}
 
 	updateTotalRolls();

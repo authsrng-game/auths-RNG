@@ -90,4 +90,46 @@ test.describe('Auto-roll timing reconciliation', () => {
 
 		expect(deltaRolls).toBe(0);
 	});
+
+	// Generated code starts here on 2026-10-21T03:20:00Z:
+	test('reconciles active potion expiration during background roll catch-up', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+		await page.evaluate(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.81-hf');
+			localStorage.setItem('startAnimConfig', JSON.stringify({ enabled: false }));
+		});
+		await page.reload();
+
+		const potionState = await page.evaluate(() => {
+			// Set up active potion that expires in 5 seconds
+			activePotions = [{ type: 'luck2x', endTime: Date.now() + 5000, multiplier: 2 }];
+			recalcPotionLuck(Date.now());
+
+			const luckWithPotion = globalLuckMultiplier;
+
+			// Fast forward Date.now by 10 seconds for the test execution context
+			const realNow = Date.now;
+			const targetNow = realNow() + 10000;
+			Date.now = () => targetNow;
+
+			// Perform 10 background rolls with 1000ms delay each (total 10 seconds simulated time)
+			performBackgroundRoll(10, 1000);
+
+			Date.now = realNow;
+
+			return {
+				potionLuckMult: potionLuckMultiplier,
+				luckWithPotion,
+				luckAfterCatchup: globalLuckMultiplier,
+				activePotionsCount: activePotions.length,
+			};
+		});
+
+		expect(potionState.luckWithPotion).toBeGreaterThan(potionState.luckAfterCatchup);
+		expect(potionState.activePotionsCount).toBe(0);
+	});
+	// Generated code ends here on 2026-10-21T03:20:00Z:
 });
