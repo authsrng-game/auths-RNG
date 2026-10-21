@@ -71,6 +71,11 @@
 		return `https://cataas.com/cat/${data.id}`;
 	}
 
+	/**
+	 * Re-renders the saved cats grid and updates the counter display.
+	 * Invokes `goToPage` when active on page index 9 to force recalculating `.page-container`
+	 * scroll height after DOM nodes are added or removed dynamically.
+	 */
 	async function refreshGrid() {
 		const cats = await getAllCats();
 		renderGrid(cats);
