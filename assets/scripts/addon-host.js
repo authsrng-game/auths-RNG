@@ -152,11 +152,18 @@ const AddonManager = {
 window.AddonManager = AddonManager;
 window.ADDON_API_VERSION = 1; // we need something like this so addons dont break on updates
 
+// Generated code starts here on 2026-03-31T12:00:00Z:
 function initAddons() {
-	AddonManager.syncFromIndex().then(() => {
-		document.dispatchEvent(new CustomEvent('addonsReady'));
-	});
+	AddonManager.syncFromIndex()
+		.then(() => {
+			document.dispatchEvent(new CustomEvent('addonsReady'));
+		})
+		.catch((err) => {
+			console.warn('[addon] failed to initialize addons:', err);
+			document.dispatchEvent(new CustomEvent('addonsReady'));
+		});
 }
+// Generated code ends here on 2026-03-31T12:00:00Z:
 
 if (document.readyState === 'loading') {
 	document.addEventListener('DOMContentLoaded', initAddons);
