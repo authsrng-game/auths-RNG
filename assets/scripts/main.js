@@ -1348,7 +1348,6 @@ function showRollChoice(res, onDone) {
 }
 
 // Point printer passive generation
-let _lastShopUIPoints = -1;
 // Generated code starts here on 2026-11-03T12:00:00Z:
 window._lastPrinterTick = Date.now();
 
