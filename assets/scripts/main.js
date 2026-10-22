@@ -302,7 +302,7 @@ function playRollSound() {
 // confetti! yay!
 // TODO: remove confetti all at once because i doubt anyone genuinely uses this feature
 function triggerConfetti() {
-	if (document.body.classList.contains('reduce-motion')) return;
+	if (document.hidden || document.body.classList.contains('reduce-motion')) return;
 	const canvas = document.createElement('canvas');
 	canvas.style.cssText =
 		'position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:99998;';
@@ -522,7 +522,7 @@ window.usePotion = usePotion;
 
 function recalcPotionLuck() {
 	potionLuckMultiplier = 1;
-	activePotions = activePotions.filter((p) => p.endTime > Date.now());
+	if (!isCutscenePlaying) activePotions = activePotions.filter((p) => p.endTime > Date.now());
 	activePotions.forEach((p) => {
 		potionLuckMultiplier += p.multiplier - 1;
 	});
@@ -836,6 +836,27 @@ setInterval(() => {
 }, 1000);
 
 let isCutscenePlaying = false;
+let cutsceneStartedAt = 0;
+
+function showCutsceneCaption(overlay, rarityName) {
+	let cap = overlay.querySelector('.cutscene-caption');
+	if (!cap) {
+		cap = document.createElement('div');
+		cap.className = 'cutscene-caption';
+		const name = document.createElement('div');
+		name.className = 'cutscene-caption-name';
+		const sub = document.createElement('div');
+		sub.className = 'cutscene-caption-sub';
+		const hint = document.createElement('div');
+		hint.className = 'cutscene-caption-hint';
+		hint.textContent = 'click or press esc to skip!';
+		cap.append(name, sub, hint);
+		overlay.appendChild(cap);
+	}
+	const r = rarities.find((x) => x.name === rarityName);
+	cap.children[0].textContent = rarityName;
+	cap.children[1].textContent = r ? `1/${Plush.denomOf(r).toLocaleString()}` : '';
+}
 
 function playCutscene(rarityName, callback) {
 	const videoUrl = cutsceneMap[rarityName];
@@ -845,6 +866,7 @@ function playCutscene(rarityName, callback) {
 	}
 
 	isCutscenePlaying = true;
+	cutsceneStartedAt = Date.now();
 	rollBtn.disabled = true;
 
 	const wasBackgroundMusicPlaying = !backgroundMusic.paused;
@@ -852,22 +874,37 @@ function playCutscene(rarityName, callback) {
 
 	const overlay = document.getElementById('cutsceneOverlay');
 	const video = document.getElementById('cutsceneVideo');
+	showCutsceneCaption(overlay, rarityName);
 
+	const graceUntil = Date.now() + 300;
 	let finished = false;
+
+	const onSkip = () => {
+		if (Date.now() >= graceUntil) finish();
+	};
+	const onKey = (e) => {
+		if (e.key !== 'Escape' && e.key !== ' ' && e.key !== 'Enter') return;
+		e.preventDefault();
+		e.stopImmediatePropagation();
+		if (!e.repeat && Date.now() >= graceUntil) finish();
+	};
 	const finish = () => {
 		if (finished) return;
 		finished = true;
 		video.onended = null;
 		video.onerror = null;
+		overlay.removeEventListener('pointerdown', onSkip);
+		document.removeEventListener('keydown', onKey, true);
 		endCutscene(overlay, callback, wasBackgroundMusicPlaying);
 	};
 
-	// attach handlers BEFORE setting src
 	video.onended = finish;
 	video.onerror = () => {
-		console.error('video failed to load'); //this motherfucking god son of a bitch wont stop overfiring, damn the code's disgusting!
+		console.error('video failed to load');
 		finish();
 	};
+	overlay.addEventListener('pointerdown', onSkip);
+	document.addEventListener('keydown', onKey, true);
 
 	video.src = videoUrl;
 	overlay.classList.add('active');
@@ -888,9 +925,21 @@ function endCutscene(overlay, callback, wasBackgroundMusicPlaying) {
 		overlay.classList.remove('active', 'fadeout');
 		const video = document.getElementById('cutsceneVideo');
 		video.pause();
-		// removeAttribute + load() resets the element without firing an error event
 		video.removeAttribute('src');
 		video.load();
+
+		const pausedFor = Date.now() - cutsceneStartedAt;
+		if (luckBoostActive) {
+			luckBoostEndTime += pausedFor;
+			localStorage.setItem(LUCK_KEY, JSON.stringify({ active: true, endTime: luckBoostEndTime }));
+		}
+		activePotions.forEach((p) => {
+			p.endTime += pausedFor;
+		});
+		isCutscenePlaying = false;
+		recalcPotionLuck();
+		updateActivePotionsDisplay();
+		updateLuckTimer();
 
 		callback();
 
@@ -898,11 +947,6 @@ function endCutscene(overlay, callback, wasBackgroundMusicPlaying) {
 		if (!isMuted && wasBackgroundMusicPlaying) {
 			backgroundMusic.play().catch(() => {});
 		}
-
-		setTimeout(() => {
-			isCutscenePlaying = false;
-			rollBtn.disabled = false;
-		}, 5000);
 	}, 500);
 }
 
@@ -1348,7 +1392,6 @@ function showRollChoice(res, onDone) {
 }
 
 // Point printer passive generation
-let _lastShopUIPoints = -1;
 // Generated code starts here on 2026-11-03T12:00:00Z:
 window._lastPrinterTick = Date.now();
 
@@ -1378,8 +1421,45 @@ document.addEventListener('visibilitychange', () => {
 });
 // Generated code ends here on 2026-11-03T12:00:00Z.
 
-// Generated code starts here on 2026-09-17T00:00:00Z:
-// Fast-path inventory item updates: preserve running RarityStyle animation loops, attach dblclick sell handler once, and manage new-roll highlight timers to eliminate per-roll allocation and DOM thrashing overhead.
+function sellRarity(name, silent) {
+	const data = inventoryData.get(name);
+	if (!data) return 0;
+	const sold = soldOutRarities.get(name);
+	const available = data.count - (sold ? sold.count : 0);
+	if (available <= 0) return 0;
+	const earned = calculateRarityPoints(data.rarityObj) * available;
+	points += earned;
+	soldOutRarities.set(name, { count: data.count });
+	data.liElement.classList.add('sold-out');
+	if (!silent) {
+		updatePointsDisplay();
+		updateShopUI();
+		saveAllData();
+		showAnomalyPopup(`sold ${available}x ${name} for ${formatNum(earned)} pts`);
+	}
+	return earned;
+}
+
+function sellAll() {
+	let total = 0;
+	let kinds = 0;
+	for (const name of inventoryData.keys()) {
+		const earned = sellRarity(name, true);
+		if (earned > 0) {
+			total += earned;
+			kinds++;
+		}
+	}
+	if (!kinds) {
+		showAnomalyPopup('nothing to sell');
+		return;
+	}
+	updatePointsDisplay();
+	updateShopUI();
+	saveAllData();
+	showAnomalyPopup(`sold ${kinds} rarities for ${formatNum(total)} pts`);
+}
+
 function updateItem(d) {
 	const { rarityObj, count, liElement } = d;
 	const denom = Plush.denomOf(rarityObj);
@@ -1400,8 +1480,7 @@ function updateItem(d) {
 		liElement._newRollTimer = null;
 	}, 2000);
 
-	const key = rarityObj.name;
-	const soldData = soldOutRarities.get(key);
+	const soldData = soldOutRarities.get(rarityObj.name);
 	if (soldData && soldData.count >= count) {
 		liElement.classList.add('sold-out');
 	} else {
@@ -1409,51 +1488,12 @@ function updateItem(d) {
 	}
 
 	if (!liElement._sellHandler) {
-		liElement._sellHandler = function sellHandler() {
-			const currentData = inventoryData.get(rarityObj.name);
-			if (!currentData) return;
-
-			const soldData = soldOutRarities.get(key);
-			const alreadySold = soldData ? soldData.count : 0;
-			const availableToSell = currentData.count - alreadySold;
-
-			if (availableToSell <= 0) {
-				window.showAlert('all copies already sold out!');
-				return;
-			}
-
-			const snapAvailable = availableToSell;
-			const pointsEarned = calculateRarityPoints(rarityObj) * snapAvailable;
-
-			showConfirmModal(
-				'sell rarity?',
-				`sell ${snapAvailable}x ${rarityObj.name} for ${formatNum(pointsEarned)} points? (you keep the rarity)`,
-				() => {
-					const freshData = inventoryData.get(rarityObj.name);
-					if (!freshData) return;
-					const freshSold = soldOutRarities.get(key);
-					const freshAlready = freshSold ? freshSold.count : 0;
-					const actualAvailable = freshData.count - freshAlready;
-					if (actualAvailable <= 0) {
-						window.showAlert('nothing left to sell!');
-						return;
-					}
-					const actualEarned = calculateRarityPoints(rarityObj) * actualAvailable;
-					points += actualEarned;
-					soldOutRarities.set(key, { count: freshData.count });
-					updatePointsDisplay();
-					updateShopUI();
-					saveAllData();
-					updateItem(freshData);
-					recalcLuckMultiplier();
-					updateLuckDisplay();
-				}
-			);
+		liElement._sellHandler = () => {
+			if (!sellRarity(rarityObj.name)) showAnomalyPopup('already sold');
 		};
 		liElement.addEventListener('dblclick', liElement._sellHandler);
 	}
 }
-// Generated code ends here on 2026-09-17T00:00:00Z:
 
 function getRandomRarity() {
 	return Plush.roll(rarities, globalLuckMultiplier, inventoryData, shopUpgrades, luckBoostActive);
@@ -1876,6 +1916,7 @@ async function resetInventory() {
 	localStorage.removeItem('weekly_streak');
 	localStorage.removeItem(playtimeKey);
 	localStorage.removeItem('userSettings');
+	window.invalidateUserSettingsCache();
 	localStorage.removeItem('wishingWell');
 	localStorage.removeItem('gauntletData');
 	localStorage.removeItem('_beacon_v2');
@@ -1996,6 +2037,7 @@ function startLuckBoost() {
 }
 
 function updateLuckTimer() {
+	if (isCutscenePlaying) return;
 	const timerEl = document.getElementById('luckTimer');
 	const badge = document.getElementById('luckBoostBadge');
 
@@ -2024,20 +2066,46 @@ function endLuckBoost() {
 	localStorage.removeItem(LUCK_KEY);
 }
 
-function checkMuteSettings() {
+// Generated code starts here on 2026-11-05T00:00:00Z:
+// Cache userSettings in memory or read window.savedSettings to avoid repeated synchronous localStorage reads and JSON parsing on hot roll paths.
+let _cachedUserSettings = null;
+
+function getUserSettings() {
+	if (window.savedSettings) return window.savedSettings;
+	if (_cachedUserSettings !== null) return _cachedUserSettings;
 	try {
 		const settingsStr = localStorage.getItem('userSettings');
 		if (settingsStr) {
-			const settings = JSON.parse(settingsStr);
-			if (settings.muted) {
-				backgroundMusic.pause();
-				backgroundMusic.volume = 0;
-				return true;
-			}
+			_cachedUserSettings = JSON.parse(settingsStr);
+			return _cachedUserSettings;
+		}
+	} catch (e) {}
+	_cachedUserSettings = {};
+	return _cachedUserSettings;
+}
+
+window.invalidateUserSettingsCache = function () {
+	_cachedUserSettings = null;
+};
+
+window.addEventListener('storage', (e) => {
+	if (e.key === 'userSettings' || e.key === null) {
+		window.invalidateUserSettingsCache();
+	}
+});
+
+function checkMuteSettings() {
+	try {
+		const settings = getUserSettings();
+		if (settings && settings.muted) {
+			backgroundMusic.pause();
+			backgroundMusic.volume = 0;
+			return true;
 		}
 	} catch (e) {}
 	return false;
 }
+// Generated code ends here on 2026-11-05T00:00:00Z:
 
 function spinAndReveal(res) {
 	if (window._spinnerResultAC) {
@@ -2047,9 +2115,12 @@ function spinAndReveal(res) {
 	const style = window.spinnerStyleSetting || 'slot';
 	const reduceMotion = document.body.classList.contains('reduce-motion');
 	const effectiveStyle = reduceMotion && style === 'slot' ? 'none' : style;
+	const background = document.hidden;
 
-	playRollSound();
-	if (window.playThemeSound) window.playThemeSound('roll');
+	if (!background) {
+		playRollSound();
+		if (window.playThemeSound) window.playThemeSound('roll');
+	}
 
 	if (totalRolls > 0 && totalRolls % 100 === 0) startLuckBoost();
 
@@ -2058,9 +2129,11 @@ function spinAndReveal(res) {
 		totalRolls++;
 		updateTotalRolls();
 		if (window.recheckDefaultMusicTier) window.recheckDefaultMusicTier();
+		const firstTime = !inventoryData.has(res.name);
 		addToInventory(res);
 		(function (W, R) {
 			var P = [
+					// FIXME: theres no point in obfuscating the gone link javascript even for a quirky little easter egg.
 					'X2dvbmVMaW5r',
 					'bmFtZQ==',
 					'Z29uZQ==',
@@ -2076,21 +2149,21 @@ function spinAndReveal(res) {
 		awardAnomalyIfEligible(res);
 		checkAchievements(res);
 		updateRollsSinceRare(res);
-		maybeFireConfettiAndCutscene(res);
+		maybeFireConfettiAndCutscene(res, firstTime);
 		if (window.setCursorRolling) window.setCursorRolling(false);
 
 		const pillColor = res.style
 			? (res.style.match(/color\s*:\s*(#[0-9a-fA-F]{3,8}|[a-z]+)/)?.[1] ?? null)
 			: null;
 
-		if (typeof addTrailItem === 'function') {
+		if (!background && typeof addTrailItem === 'function') {
 			addTrailItem(res.name, pillColor);
 		}
 
 		const denom = Plush.denomOf(res);
 		const thresh = window.rareThreshold || 1000;
 
-		if (denom >= thresh) {
+		if (!background && denom >= thresh) {
 			if (window.playThemeSound) window.playThemeSound('rare');
 			if (window.rainbowSweepCursor) window.rainbowSweepCursor();
 			if (window.pulseCursorForRarity) {
@@ -2098,6 +2171,11 @@ function spinAndReveal(res) {
 			}
 		}
 	};
+
+	if (background) {
+		finalize();
+		return;
+	}
 
 	if (effectiveStyle === 'none' || effectiveStyle === 'fade') {
 		spinner.innerHTML = '';
@@ -2123,7 +2201,6 @@ function spinAndReveal(res) {
 		return;
 	}
 
-	// slot machine path
 	spinner.innerHTML = '';
 	void spinner.offsetWidth;
 	const items = [];
@@ -2141,8 +2218,6 @@ function spinAndReveal(res) {
 		if (idx === items.length - 1) _resultSpinDiv = d;
 	});
 
-	// measure the actual rendered height instead of guessing - this was
-	// landing the spinner on a random decoy item instead of your real result
 	const h = _resultSpinDiv.offsetHeight,
 		total = items.length,
 		scroll = h * (total - 1);
@@ -2162,15 +2237,22 @@ function spinAndReveal(res) {
 	);
 }
 
-function maybeFireConfettiAndCutscene(res) {
+// Yeah guys, maybe guys! maybe fire the confetti and cutscene!
+function maybeFireConfettiAndCutscene(res, firstTime) {
 	const denom = Plush.denomOf(res);
 	const cutsceneThresh = window.cutsceneThreshold || 0;
 	const confettiThresh = window.confettiThreshold || 0;
+	const mode = window.cutsceneMode || 'first';
+	const hidden = document.hidden;
 
-	if (confettiThresh > 0 && denom >= confettiThresh) triggerConfetti();
+	if (!hidden && confettiThresh > 0 && denom >= confettiThresh) triggerConfetti();
 
-	const hasCutscene = !!cutsceneMap[res.name];
-	const cutsceneAllowed = hasCutscene && (cutsceneThresh === 0 || denom >= cutsceneThresh);
+	const wanted = mode === 'always' || (mode === 'first' && firstTime);
+	const cutsceneAllowed =
+		!hidden &&
+		wanted &&
+		!!cutsceneMap[res.name] &&
+		(cutsceneThresh === 0 || denom >= cutsceneThresh);
 
 	const afterReveal = () => {
 		const isMuted = checkMuteSettings();
@@ -2217,9 +2299,8 @@ function startWellCooldownTimer() {
 const sortSelect = document.getElementById('sortSelect');
 
 let nextRollAllowedAt = 0;
-
-rollBtn.addEventListener('click', () => {
-	if (isCutscenePlaying) return;
+function performRoll() {
+	if (isCutscenePlaying || rollBtn.disabled) return;
 	const now = Date.now();
 	if (now < nextRollAllowedAt) return;
 	nextRollAllowedAt = now + Math.max(250, rollSpeed * 1000);
@@ -2228,9 +2309,11 @@ rollBtn.addEventListener('click', () => {
 	if (window.setCursorRolling) window.setCursorRolling(true);
 
 	try {
-		spinner.style.transition = 'none';
-		void spinner.offsetWidth;
-		spinner.style.transform = 'translateY(0)';
+		if (!document.hidden) {
+			spinner.style.transition = 'none';
+			void spinner.offsetWidth;
+			spinner.style.transform = 'translateY(0)';
+		}
 
 		const result = getRandomRarity();
 		const res = result.rarity;
@@ -2244,8 +2327,7 @@ rollBtn.addEventListener('click', () => {
 			backgroundMusic.play().catch(() => {});
 		}
 
-		_rollClickTimer = setTimeout(() => {
-			_rollClickTimer = null;
+		const run = () => {
 			try {
 				if (window._perfMarkRollStart) window._perfMarkRollStart();
 				spinAndReveal(res);
@@ -2255,18 +2337,30 @@ rollBtn.addEventListener('click', () => {
 				rollBtn.disabled = false;
 				if (window.setCursorRolling) window.setCursorRolling(false);
 			}
-		}, 100);
+		};
+
+		if (document.hidden) {
+			run();
+		} else {
+			_rollClickTimer = setTimeout(() => {
+				_rollClickTimer = null;
+				run();
+			}, 100);
+		}
 	} catch (e) {
 		console.error('roll failed:', e);
 		rollBtn.disabled = false;
 		if (window.setCursorRolling) window.setCursorRolling(false);
 	}
-});
+}
+
+window.performRoll = performRoll;
+rollBtn.addEventListener('click', performRoll);
 
 document.addEventListener('visibilitychange', () => {
 	if (document.hidden) return;
 
-	if (luckBoostActive && Date.now() >= luckBoostEndTime) {
+	if (luckBoostActive && !isCutscenePlaying && Date.now() >= luckBoostEndTime) {
 		endLuckBoost();
 	}
 
@@ -2357,6 +2451,8 @@ if (consumeAllBtn) {
 		consumeAllAnomalies();
 	});
 }
+
+document.getElementById('sellAllBtn')?.addEventListener('click', sellAll);
 
 updateAnomalyUI();
 renderSortedInventory(sortSelect.value);
