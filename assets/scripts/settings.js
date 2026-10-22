@@ -22,6 +22,11 @@
 	let fpsRaf = null;
 	let visibilitySeasonListenerAdded = false;
 
+	let settingsReady;
+	const settingsReadyPromise = new Promise((r) => {
+		settingsReady = r;
+	});
+
 	// Discord-style pending changes
 	let savedSettings = {};
 	let hasPendingChanges = false;
@@ -1558,6 +1563,7 @@
 		window.spinnerStyleSetting = settings.spinnerStyle || 'slot';
 		window.confettiThreshold = settings.confettiThreshold || 0;
 		window.cutsceneThreshold = settings.cutsceneThreshold || 0;
+		window.cutsceneMode = settings.cutsceneMode || 'first';
 		window.rawNumbers = !!settings.rawNumbers;
 		window.rollSoundSetting = settings.rollSound || 'none';
 		window.rareThreshold = settings.rareThreshold ?? 1000;
@@ -1595,6 +1601,8 @@
 		if (el('rollSound')) el('rollSound').value = settings.rollSound || 'none';
 		if (el('rareThreshold')) el('rareThreshold').value = settings.rareThreshold ?? 1000;
 		if (el('autoSellThreshold')) el('autoSellThreshold').value = settings.autoSellThreshold || 0;
+		if (el('cutsceneThreshold')) el('cutsceneThreshold').value = settings.cutsceneThreshold || 0;
+		if (el('cutsceneMode')) el('cutsceneMode').value = settings.cutsceneMode || 'first';
 	}
 
 	function readNum(id, def) {
@@ -1612,6 +1620,8 @@
 			rollSound: (el('rollSound') || {}).value || 'none',
 			rareThreshold: readNum('rareThreshold', 1000),
 			autoSellThreshold: readNum('autoSellThreshold', 0),
+			cutsceneThreshold: readNum('cutsceneThreshold', 0),
+			cutsceneMode: (el('cutsceneMode') || {}).value || 'first',
 		};
 	}
 	function onChange() {
@@ -1632,9 +1642,6 @@
 
 	async function saveChanges() {
 		const current = { ...savedSettings, ...getCurrentSettings() };
-		applyVisuals(current);
-		await applyMusic(current);
-		syncUIToSettings(current);
 		savedSettings = current;
 		try {
 			localStorage.setItem('userSettings', JSON.stringify(current));
@@ -1642,11 +1649,14 @@
 		if (typeof window.invalidateUserSettingsCache === 'function')
 			window.invalidateUserSettingsCache();
 		hidePendingBar();
+		applyVisuals(current);
+		await applyMusic(current);
+		syncUIToSettings(current);
 	}
 
 	// -- Event binding -----------------------------------------------------
 	function bindSettings() {
-		const ids = ['legacyMode', 'rawNumbers', 'devOverlay'];
+		const ids = ['legacyMode', 'rawNumbers', 'devOverlay', 'cutsceneMode'];
 		ids.forEach((id) => {
 			const n = el(id);
 			if (n) n.addEventListener('change', onChange);
@@ -1661,7 +1671,7 @@
 		const rollSoundEl = el('rollSound');
 		if (rollSoundEl) rollSoundEl.addEventListener('change', onChange);
 
-		['rareThreshold', 'autoSellThreshold'].forEach((id) => {
+		['rareThreshold', 'autoSellThreshold', 'cutsceneThreshold'].forEach((id) => {
 			const n = el(id);
 			if (n) n.addEventListener('input', onChange);
 		});
@@ -2293,10 +2303,15 @@
 		console.log('[settings] initialized.');
 	}
 
+	const startInit = () =>
+		init()
+			.catch((e) => console.error('[settings] init failed:', e))
+			.finally(settingsReady);
+
 	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', init);
+		document.addEventListener('DOMContentLoaded', startInit);
 	} else {
-		init();
+		startInit();
 	}
 
 	Object.defineProperty(window, 'savedSettings', {
@@ -2305,15 +2320,16 @@
 
 	// Expose globals
 	window.applySettings = async function (settings) {
+		await settingsReadyPromise;
 		savedSettings = { ...savedSettings, ...settings };
-		applyVisuals(savedSettings);
-		await applyMusic(savedSettings);
-		syncUIToSettings(savedSettings);
 		try {
 			localStorage.setItem('userSettings', JSON.stringify(savedSettings));
 		} catch (_) {}
 		if (typeof window.invalidateUserSettingsCache === 'function')
 			window.invalidateUserSettingsCache();
+		applyVisuals(savedSettings);
+		await applyMusic(savedSettings);
+		syncUIToSettings(savedSettings);
 	};
 	window.getCurrentSettings = getCurrentSettings;
 

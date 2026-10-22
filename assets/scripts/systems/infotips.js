@@ -30,7 +30,7 @@
 			id: 'sell-rarity',
 			container: () => document.querySelector('#inventoryContainer #collectedCounter'),
 			pos: 'inline',
-			text: 'double click or double tap a rarity to sell extras. you keep one copy always!',
+			text: 'double click or double tap a rarity to sell it for points. you always keep the rarity. there is also a sell all button..',
 		},
 		{
 			id: 'wishing-well',
@@ -179,6 +179,7 @@
 	}
 
 	document.addEventListener('click', (e) => {
+		if (!e.isTrusted) return;
 		if (!popoverEl || !popoverEl.classList.contains('show')) return;
 		if (popoverEl.contains(e.target) || e.target.closest('.info-tip')) return;
 		closePopover();
@@ -186,7 +187,13 @@
 	document.addEventListener('keydown', (e) => {
 		if (e.key === 'Escape') closePopover();
 	});
-	window.addEventListener('scroll', closePopover, true);
+	window.addEventListener(
+		'scroll',
+		(e) => {
+			if (e.target === document) closePopover();
+		},
+		true
+	);
 	window.addEventListener('resize', closePopover);
 
 	function init() {
