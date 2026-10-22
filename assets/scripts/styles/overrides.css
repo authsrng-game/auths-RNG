@@ -2670,9 +2670,55 @@ br + .image-column {
 	width: 100%;
 	max-width: 540px;
 	overflow: hidden;
+	overflow: clip;
 	position: relative;
 	margin: 0 auto;
 	min-height: 100vh;
+}
+
+.shop-sticky {
+	position: sticky;
+	top: 0;
+	z-index: 6;
+	width: 100%;
+	margin-top: 24px;
+	background: rgb(var(--panel-bg-rgb, 17, 17, 17), 0.88);
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+}
+
+.shop-sticky #pointsDisplay {
+	margin-top: 0;
+}
+
+.shop-sticky .buyqty {
+	position: static;
+}
+
+.cutscene-caption {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 8%;
+	text-align: center;
+	pointer-events: none;
+	color: #fff;
+	text-shadow: 0 2px 12px #000;
+}
+
+.cutscene-caption-name {
+	font-size: 1.6em;
+}
+
+.cutscene-caption-sub {
+	font-size: 0.95em;
+	opacity: 0.8;
+}
+
+.cutscene-caption-hint {
+	font-size: 0.72em;
+	opacity: 0.45;
+	margin-top: 10px;
 }
 
 .page-dots {
@@ -5756,6 +5802,13 @@ body.reduce-motion .info-tip-orbit span {
 	outline: 1px solid var(--text-color);
 }
 
+button,
+select,
+input,
+textarea {
+	font-family: inherit;
+}
+
 .inventory-heading {
 	display: flex;
 	flex-direction: column;
@@ -5772,19 +5825,15 @@ body.reduce-motion .info-tip-orbit span {
 	display: inline-flex;
 	align-items: center;
 	gap: 7px;
-
 	font-size: 0.72rem;
 	line-height: 1.4;
 	letter-spacing: 0.015em;
-
 	color: #929098;
 	opacity: 0.85;
-
 	padding: 4px 8px;
-	border: 1px solid rgba(160, 155, 175, 0.13);
-	background: rgba(160, 155, 175, 0.035);
+	border: 1px solid rgb(160 155 175 / 13%);
+	background: rgb(160 155 175 / 3.5%);
 	border-radius: 3px;
-
 	transition:
 		color 150ms ease,
 		border-color 150ms ease,
@@ -5798,13 +5847,6 @@ body.reduce-motion .info-tip-orbit span {
 
 .inventory-hint:hover {
 	color: #c4c0cb;
-	border-color: rgba(181, 165, 216, 0.25);
-	background: rgba(181, 165, 216, 0.045);
-}
-
-button,
-select,
-input,
-textarea {
-	font-family: inherit;
+	border-color: rgb(181 165 216 / 25%);
+	background: rgb(181 165 216 / 4.5%);
 }
