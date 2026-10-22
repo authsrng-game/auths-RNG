@@ -370,4 +370,41 @@ test.describe('Syncer state consistency tests', () => {
 		expect((await implausibleAnomaliesRes.json()).error).toBe('implausible progress');
 	});
 	// Generated code ends here on 2026-03-31T00:00:00Z:
+
+	// Generated code starts here on 2026-03-31T12:00:00Z:
+	test('importBundle logs warning with error context when background sync flush fails', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+		const warningLogged = await page.evaluate(async () => {
+			return new Promise((resolve) => {
+				const originalWarn = console.warn;
+				console.warn = (...args) => {
+					originalWarn(...args);
+					if (args[0] && String(args[0]).includes('[sync] import save flush failed:')) {
+						resolve({ matched: true, args: args.map(String) });
+					}
+				};
+
+				// Setup sync metadata and override flush to throw an error
+				localStorage.setItem('authUid', 'user_test_123');
+				localStorage.setItem(
+					'__sync_meta',
+					JSON.stringify({ uid: 'user_test_123', baseRev: 1 })
+				);
+
+				if (globalThis.Sync) {
+					globalThis.Sync.flush = () => Promise.reject(new Error('Network offline or sync failed'));
+					globalThis.Sync.importBundle({ totalRolls: '100' });
+				} else {
+					resolve({ matched: false, reason: 'Sync global not found' });
+				}
+
+				setTimeout(() => resolve({ matched: false, reason: 'timeout' }), 1000);
+			});
+		});
+
+		expect(warningLogged.matched).toBe(true);
+	});
+	// Generated code ends here on 2026-03-31T12:00:00Z:
 });
