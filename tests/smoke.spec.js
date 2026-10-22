@@ -24,7 +24,13 @@ test.describe('auths-RNG smoke tests', () => {
 	test('no failed network requests', async ({ page }) => {
 		const failed = [];
 		page.on('response', (res) => {
-			if (res.status() >= 400 && !res.url().includes('api.github.com')) {
+			if (res.status() >= 400) {
+				try {
+					const parsed = new URL(res.url());
+					if (parsed.hostname === 'api.github.com') return;
+				} catch {
+					/* ignore invalid url */
+				}
 				failed.push(`${res.status()} ${res.url()}`);
 			}
 		});
@@ -145,7 +151,7 @@ test.describe('auths-RNG smoke tests', () => {
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('seenReleaseTag', 'v9.7');
 		});
-		await page.goto(BASE_URL);
+		await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
 
 		const saContainer = page.locator('.sa-container');
 		if (await saContainer.isVisible()) {
@@ -269,7 +275,7 @@ test.describe('auths-RNG smoke tests', () => {
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('seenReleaseTag', 'v9.7');
 		});
-		await page.goto(BASE_URL);
+		await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
 
 		const autoRollBtn = page.locator('#autoRollBtn');
 		await expect(autoRollBtn).toHaveAttribute('aria-label', 'Toggle auto roll');
