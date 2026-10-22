@@ -266,6 +266,7 @@
 			glowSize: 300,
 			glowOpacity: 20,
 			glowSpeed: 20,
+			cutsceneMode: 'first',
 			startAnim: {
 				enabled: true,
 				preset: 'default',
@@ -720,33 +721,6 @@
 		};
 	}
 
-	function applyPresetToEditor(preset) {
-		const isBuiltIn = BUILT_IN_PRESETS.some((p) => p.name === preset.name);
-		if (!isBuiltIn) {
-			writeEditor(preset);
-			return;
-		}
-		const cur = readEditor();
-		const r = preset.settings.radius;
-		writeEditor({
-			vars: { ...cur.vars, ...preset.vars },
-			settings: {
-				...cur.settings,
-				...preset.settings,
-				radiusIndependent: false,
-				buttonRadius: r,
-				rollBtnRadius: r,
-				bgType: 'color',
-				colorMode: {
-					bgColor: 'solid',
-					panelBg: 'solid',
-					buttonBg: 'solid',
-					achievementBg: 'solid',
-				},
-			},
-		});
-	}
-
 	function writeEditor(preset) {
 		const v = preset.vars || {};
 		const s = preset.settings || {};
@@ -987,6 +961,33 @@
 
 		syncRadiusIndependentUI();
 		updateContrastBadges();
+	}
+
+	function applyPresetToEditor(preset) {
+		const isBuiltIn = BUILT_IN_PRESETS.some((p) => p.name === preset.name);
+		if (!isBuiltIn) {
+			writeEditor(preset);
+			return;
+		}
+		const cur = readEditor();
+		const r = preset.settings.radius;
+		writeEditor({
+			vars: { ...cur.vars, ...preset.vars },
+			settings: {
+				...cur.settings,
+				...preset.settings,
+				radiusIndependent: false,
+				buttonRadius: r,
+				rollBtnRadius: r,
+				bgType: 'color',
+				colorMode: {
+					bgColor: 'solid',
+					panelBg: 'solid',
+					buttonBg: 'solid',
+					achievementBg: 'solid',
+				},
+			},
+		});
 	}
 
 	function resolveColorVar(key, vars, settings) {
@@ -1295,24 +1296,18 @@
 			glowSpeed: s.glowSpeed,
 		};
 	}
-
 	function applyAndSave(editorData, presetName) {
 		const v = editorData.vars;
 		const s = editorData.settings;
 
-		applyCSSVars(v, s.borderWidth, s);
-
-		const patch = buildSettingsPatch(editorData);
-		if (window.applySettings) {
-			window.applySettings(patch);
-		}
-
+		const json = JSON.stringify({ name: presetName || 'custom', editorData });
+		let saved = false;
 		try {
-			localStorage.setItem(
-				ACTIVE_KEY,
-				JSON.stringify({ name: presetName || 'custom', editorData })
-			);
-		} catch (_) {}
+			localStorage.setItem(ACTIVE_KEY, json);
+			saved = localStorage.getItem(ACTIVE_KEY) === json;
+		} catch (e) {
+			console.error('[theme] failed to save theme:', e);
+		}
 
 		if (editorData.settings.startAnim) {
 			try {
@@ -1320,10 +1315,19 @@
 			} catch (_) {}
 		}
 
+		applyCSSVars(v, s.borderWidth, s);
+
+		const patch = buildSettingsPatch(editorData);
+		if (window.applySettings) {
+			window.applySettings(patch).catch((e) => console.error('[theme] applySettings failed:', e));
+		}
+
 		const label = el('activeThemeName');
 		if (label) label.textContent = 'current: ' + (presetName || 'custom');
 		const edLabel = el('themeEditorActiveLabel');
 		if (edLabel) edLabel.textContent = presetName || 'custom';
+
+		return saved;
 	}
 
 	function syncStartAnimUI() {
@@ -1730,7 +1734,7 @@
 
 			if (!isBuiltIn) {
 				const del = document.createElement('button');
-				del.textContent = '✕';
+				del.textContent = 'x';
 				del.title = 'delete preset';
 				del.addEventListener('click', (e) => {
 					e.stopPropagation();
@@ -1860,8 +1864,13 @@
 
 		applyBtn.addEventListener('click', () => {
 			const d = readEditor();
-			applyAndSave(d, null);
+			const ok = applyAndSave(d, null);
 			closeEditor();
+			if (!ok) {
+				window.showAlert(
+					'theme applied but could not be saved. storage may be full, or another tab owns saving! uh oh...'
+				);
+			}
 		});
 
 		savePresetBtn.addEventListener('click', async () => {
