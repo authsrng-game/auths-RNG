@@ -2211,14 +2211,17 @@ Last release date on nightly: ${nightlyRDate}`;
 					if (totalMissed > 0) {
 						const catchupCount = Math.min(MAX_AUTO_ROLL_CATCHUP, totalMissed);
 						const rollBtn = document.getElementById('rollBtn');
+						const startRolls = typeof totalRolls !== 'undefined' ? totalRolls : 0;
 
 						if (rollBtn && !rollBtn.disabled) {
 							rollBtn.click();
-							if (catchupCount > 1 && typeof window.performBackgroundRoll === 'function') {
-								window.performBackgroundRoll(catchupCount - 1);
-							}
-						} else if (typeof window.performBackgroundRoll === 'function') {
-							window.performBackgroundRoll(catchupCount);
+						}
+
+						const rolled = (typeof totalRolls !== 'undefined' ? totalRolls : 0) - startRolls;
+						const remainingToCatchup = catchupCount - rolled;
+
+						if (remainingToCatchup > 0 && typeof window.performBackgroundRoll === 'function') {
+							window.performBackgroundRoll(remainingToCatchup);
 						}
 
 						nextRollAt += catchupCount * delay;

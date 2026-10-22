@@ -122,6 +122,6 @@ test.describe('Auto-roll timing reconciliation', () => {
 			return totalRolls - startRolls;
 		});
 
-		expect(deltaRolls).toBe(4);
+		expect(deltaRolls).toBe(5);
 	});
 });
