@@ -345,7 +345,6 @@
 		showAnomalyPopup?.(pick(forced ? TIMEOUT_LINES : DEPART_LINES));
 		renderDealer();
 	}
-	window.dealerLeaveTable = leaveTable;
 	// Generated code ends here on 2026-11-02T00:00:00Z:
 
 	const DEALER_FIGURE = `
