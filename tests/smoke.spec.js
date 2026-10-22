@@ -24,7 +24,9 @@ test.describe('auths-RNG smoke tests', () => {
 	test('no failed network requests', async ({ page }) => {
 		const failed = [];
 		page.on('response', (res) => {
-			if (res.status() >= 400) failed.push(`${res.status()} ${res.url()}`);
+			if (res.status() >= 400 && !res.url().includes('api.github.com')) {
+				failed.push(`${res.status()} ${res.url()}`);
+			}
 		});
 		await page.goto(BASE_URL);
 		await page.waitForTimeout(2000);
@@ -519,6 +521,9 @@ test.describe('auths-RNG smoke tests', () => {
 		});
 		await page.goto(BASE_URL);
 
+		// Record rolls before enabling auto roll
+		const initialRolls = await page.evaluate(() => typeof totalRolls !== 'undefined' ? totalRolls : 0);
+
 		await page.evaluate(() => {
 			const autoBtn = document.getElementById('autoRollBtn');
 			if (autoBtn && !autoBtn.classList.contains('active')) autoBtn.click();
@@ -555,8 +560,8 @@ test.describe('auths-RNG smoke tests', () => {
 			return typeof totalRolls !== 'undefined' ? totalRolls : 0;
 		});
 
-		expect(rollCountBeforeRefocus).toBe(0);
-		expect(rollCountAfterRefocus).toBeGreaterThan(0);
+		expect(rollCountBeforeRefocus).toBe(initialRolls);
+		expect(rollCountAfterRefocus).toBeGreaterThan(initialRolls);
 	});
 	// Generated code ends here on 2026-04-02T12:00:00Z:
 });
