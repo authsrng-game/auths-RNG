@@ -135,14 +135,19 @@ test.describe('Auto-roll timing reconciliation', () => {
 
 		expect(potionState.luckWithPotion).toBeGreaterThan(potionState.luckAfterCatchup);
 		expect(potionState.activePotionsCount).toBe(0);
-		// First 4 rolls (t=1s..4s) should have potion luck multiplier applied
-		expect(potionState.rollsMults.slice(0, 4).every((m) => m === potionState.luckWithPotion)).toBe(
-			true
-		);
-		// Last 5 rolls (t=6s..10s) should have base luck multiplier after potion expiration
-		expect(
-			potionState.rollsMults.slice(5, 10).every((m) => m === potionState.luckAfterCatchup)
-		).toBe(true);
+		expect(potionState.rollsMults).toHaveLength(10);
+		expect(potionState.rollsMults).toEqual([
+			potionState.luckWithPotion,
+			potionState.luckWithPotion,
+			potionState.luckWithPotion,
+			potionState.luckWithPotion,
+			potionState.luckAfterCatchup,
+			potionState.luckAfterCatchup,
+			potionState.luckAfterCatchup,
+			potionState.luckAfterCatchup,
+			potionState.luckAfterCatchup,
+			potionState.luckAfterCatchup,
+		]);
 	});
 	// Generated code ends here on 2026-10-21T03:20:00Z:
 });
