@@ -90,4 +90,38 @@ test.describe('Auto-roll timing reconciliation', () => {
 
 		expect(deltaRolls).toBe(0);
 	});
+
+	test('catches up multiple missed rolls during throttled tick loop when auto-roll is active', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+		await page.evaluate(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.81-hf');
+			localStorage.setItem('startAnimConfig', JSON.stringify({ enabled: false }));
+		});
+		await page.reload();
+
+		const deltaRolls = await page.evaluate(async () => {
+			const autoBtn = document.getElementById('autoRollBtn');
+			if (autoBtn && !autoBtn.classList.contains('active')) {
+				autoBtn.click();
+			}
+
+			const startRolls = typeof totalRolls !== 'undefined' ? totalRolls : 0;
+			const speed = typeof rollSpeed !== 'undefined' ? rollSpeed : 1;
+			const delay = Math.max(500, speed * 1000 + 400);
+
+			const oldNow = Date.now;
+			const shiftedTime = oldNow() + delay * 5;
+			Date.now = () => shiftedTime;
+
+			await new Promise((resolve) => setTimeout(resolve, 350));
+
+			Date.now = oldNow;
+			return totalRolls - startRolls;
+		});
+
+		expect(deltaRolls).toBe(4);
+	});
 });

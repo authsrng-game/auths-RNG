@@ -2197,15 +2197,37 @@ Last release date on nightly: ${nightlyRDate}`;
 				}
 				// Generated code ends here on 2026-10-19T03:07:20Z:
 
+				// Generated code starts here on 2026-04-12T00:00:00Z:
 				function tick() {
 					if (document.hidden) return;
 					if (typeof isCutscenePlaying !== 'undefined' && isCutscenePlaying) return;
-					if (Date.now() < nextRollAt) return;
+					const now = Date.now();
+					if (now < nextRollAt) return;
 
-					const rollBtn = document.getElementById('rollBtn');
-					if (rollBtn && !rollBtn.disabled) rollBtn.click();
-					nextRollAt = Date.now() + getAutoRollDelay();
+					const delay = getAutoRollDelay();
+					const elapsedSinceExpected = now - (nextRollAt - delay);
+					const totalMissed = Math.floor(elapsedSinceExpected / delay);
+
+					if (totalMissed > 0) {
+						const catchupCount = Math.min(MAX_AUTO_ROLL_CATCHUP, totalMissed);
+						const rollBtn = document.getElementById('rollBtn');
+
+						if (rollBtn && !rollBtn.disabled) {
+							rollBtn.click();
+							if (catchupCount > 1 && typeof window.performBackgroundRoll === 'function') {
+								window.performBackgroundRoll(catchupCount - 1);
+							}
+						} else if (typeof window.performBackgroundRoll === 'function') {
+							window.performBackgroundRoll(catchupCount);
+						}
+
+						nextRollAt += catchupCount * delay;
+						if (nextRollAt < now) {
+							nextRollAt = now + delay;
+						}
+					}
 				}
+				// Generated code ends here on 2026-04-12T00:00:00Z:
 
 				toggleBtn.addEventListener('click', () => {
 					toggleBtn.classList.toggle('active');
