@@ -375,7 +375,19 @@ test.describe('Syncer state consistency tests', () => {
 	test('importBundle logs warning with error context when background sync flush fails', async ({
 		page,
 	}) => {
+		await page.addInitScript(() => {
+			if (globalThis.window.self !== globalThis.window.top) return;
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('authUid', 'user_test_123');
+			localStorage.setItem('authToken', 'token_test_123');
+			localStorage.setItem(
+				'__sync_meta',
+				JSON.stringify({ uid: 'user_test_123', baseRev: 1 })
+			);
+		});
 		await page.goto(BASE_URL);
+
 		const warningLogged = await page.evaluate(async () => {
 			return new Promise((resolve) => {
 				const originalWarn = console.warn;
@@ -386,21 +398,26 @@ test.describe('Syncer state consistency tests', () => {
 					}
 				};
 
-				// Setup sync metadata and override flush to throw an error
-				localStorage.setItem('authUid', 'user_test_123');
-				localStorage.setItem(
-					'__sync_meta',
-					JSON.stringify({ uid: 'user_test_123', baseRev: 1 })
-				);
+				if (globalThis.SaveKeys) {
+					globalThis.SaveKeys.isVolatile = () => {
+						throw new Error('Volatile check error');
+					};
+				}
 
 				if (globalThis.Sync) {
-					globalThis.Sync.flush = () => Promise.reject(new Error('Network offline or sync failed'));
+					globalThis.Sync._state.status = 'ok';
 					globalThis.Sync.importBundle({ totalRolls: '100' });
 				} else {
 					resolve({ matched: false, reason: 'Sync global not found' });
 				}
 
-				setTimeout(() => resolve({ matched: false, reason: 'timeout' }), 1000);
+				setTimeout(() => {
+					resolve({
+						matched: false,
+						reason: 'timeout',
+						meta: globalThis.Sync ? globalThis.Sync.status() : null,
+					});
+				}, 1000);
 			});
 		});
 
