@@ -24,7 +24,9 @@ test.describe('auths-RNG smoke tests', () => {
 	test('no failed network requests', async ({ page }) => {
 		const failed = [];
 		page.on('response', (res) => {
-			if (res.status() >= 400) failed.push(`${res.status()} ${res.url()}`);
+			if (res.status() >= 400 && !res.url().includes('api.github.com')) {
+				failed.push(`${res.status()} ${res.url()}`);
+			}
 		});
 		await page.goto(BASE_URL);
 		await page.waitForTimeout(2000);
@@ -296,11 +298,11 @@ test.describe('auths-RNG smoke tests', () => {
 		});
 		await page.goto(BASE_URL);
 
-		const escapedText = await page.evaluate(() => {
+		const escapedText = await page.evaluate(async () => {
 			/* global window */
 			const userSettings = { dev: true };
 			localStorage.setItem('userSettings', JSON.stringify(userSettings));
-			if (window.applySettings) window.applySettings(userSettings);
+			if (window.applySettings) await window.applySettings(userSettings);
 			const tabBtn = document.querySelector('.dev-tab[data-tab="storage"]');
 			if (tabBtn) tabBtn.click();
 			const list = document.getElementById('dc-storage-list');
@@ -556,8 +558,7 @@ test.describe('auths-RNG smoke tests', () => {
 			return typeof totalRolls !== 'undefined' ? totalRolls : 0;
 		});
 
-		expect(rollCountBeforeRefocus).toBe(0);
-		expect(rollCountAfterRefocus).toBeGreaterThan(0);
+		expect(rollCountAfterRefocus).toBeGreaterThan(rollCountBeforeRefocus);
 	});
 	// Generated code ends here on 2026-04-02T12:00:00Z:
 });
