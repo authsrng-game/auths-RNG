@@ -406,7 +406,7 @@ Last release date on nightly: ${nightlyRDate}`;
 		<!-- BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~  BITES AT YOU~ -->
 
 		<div class="site-header lazy">
-			<div class="header-chip">update 9.9-beta (public-domain)</div>
+			<div class="header-chip">update 9.9</div>
 			<h1>welcome to auth's RNG!</h1>
 			<style>
 				.header-chip {
@@ -572,6 +572,7 @@ Last release date on nightly: ${nightlyRDate}`;
 									double-click an item to sell it!!!!!!!
 								</span>
 							</div>
+
 							<div class="inventory-controls">
 								<!-- Generated code starts here on 2026-09-22T00:00:00Z: -->
 								<label for="sortSelect" class="sort-label">sort</label>
@@ -614,17 +615,21 @@ Last release date on nightly: ${nightlyRDate}`;
 				<div class="page" id="page-2">
 					<h2 style="margin-top: 0">shop</h2>
 
-					<div id="pointsDisplay">
-						<div class="points-amount"><span id="pointsValue">0</span></div>
-						<div class="points-chip-label">points</div>
-					</div>
+					<div class="shop-sticky">
+						<div id="pointsDisplay">
+							<div class="points-amount"><span id="pointsValue">0</span></div>
+							<div class="points-chip-label">points</div>
+						</div>
 
-					<div class="buyqty" role="group" aria-label="Buy quantity">
-						<span class="buyqty-label">buy</span>
-						<button class="small buyqty-btn on" data-qty="1" onclick="setBuyQty(1)">x1</button>
-						<button class="small buyqty-btn" data-qty="10" onclick="setBuyQty(10)">x10</button>
-						<button class="small buyqty-btn" data-qty="100" onclick="setBuyQty(100)">x100</button>
-						<button class="small buyqty-btn" data-qty="max" onclick="setBuyQty('max')">max</button>
+						<div class="buyqty" role="group" aria-label="Buy quantity">
+							<span class="buyqty-label">buy</span>
+							<button class="small buyqty-btn on" data-qty="1" onclick="setBuyQty(1)">x1</button>
+							<button class="small buyqty-btn" data-qty="10" onclick="setBuyQty(10)">x10</button>
+							<button class="small buyqty-btn" data-qty="100" onclick="setBuyQty(100)">x100</button>
+							<button class="small buyqty-btn" data-qty="max" onclick="setBuyQty('max')">
+								max
+							</button>
+						</div>
 					</div>
 
 					<div class="shop-divider"><span class="shop-divider-label">upgrades</span></div>
@@ -1230,6 +1235,35 @@ Last release date on nightly: ${nightlyRDate}`;
 									value="0"
 									class="setting-input"
 									aria-label="Auto sell threshold"
+								/>
+							</div>
+
+							<div class="setting-row setting-row--stacked">
+								<div class="setting-info">
+									<label for="cutsceneMode" class="setting-name">cutscenes</label>
+									<span class="setting-desc">when to play the full-screen cutscenes</span>
+								</div>
+								<select id="cutsceneMode" class="setting-select" aria-label="Cutscene mode">
+									<option value="first">first time per rarity</option>
+									<option value="always">every time</option>
+									<option value="off">never</option>
+								</select>
+							</div>
+
+							<div class="setting-row setting-row--stacked">
+								<div class="setting-info">
+									<label for="cutsceneThreshold" class="setting-name">cutscene threshold</label>
+									<span class="setting-desc"
+										>only play cutscenes for rarities 1/X and rarer - 0 = all</span
+									>
+								</div>
+								<input
+									type="number"
+									id="cutsceneThreshold"
+									min="0"
+									value="0"
+									class="setting-input"
+									aria-label="Cutscene threshold"
 								/>
 							</div>
 							<!-- Generated code ends here on 2026-03-31T15:00:00Z: -->
@@ -2200,20 +2234,44 @@ Last release date on nightly: ${nightlyRDate}`;
 		<script>
 			(function () {
 				const toggleBtn = document.getElementById('autoRollBtn');
-				let autoRollTickInterval = null;
+				let stopTicker = null;
 				let nextRollAt = 0;
+
+				function createTicker(fn, ms) {
+					let stop = () => {};
+					const fallback = () => {
+						const id = setInterval(fn, ms);
+						stop = () => clearInterval(id);
+					};
+					try {
+						const url = URL.createObjectURL(
+							new Blob([`setInterval(() => postMessage(0), ${ms});`], { type: 'text/javascript' })
+						);
+						const worker = new Worker(url);
+						worker.onmessage = fn;
+						worker.onerror = () => {
+							worker.terminate();
+							fallback();
+						};
+						stop = () => {
+							worker.terminate();
+							URL.revokeObjectURL(url);
+						};
+					} catch (e) {
+						fallback();
+					}
+					return () => stop();
+				}
 
 				function getAutoRollDelay() {
 					return Math.max(500, (typeof rollSpeed !== 'undefined' ? rollSpeed : 1) * 1000 + 400);
 				}
 
 				function tick() {
-					if (document.hidden) return;
 					if (typeof isCutscenePlaying !== 'undefined' && isCutscenePlaying) return;
 					if (Date.now() < nextRollAt) return;
-
 					const rollBtn = document.getElementById('rollBtn');
-					if (rollBtn && !rollBtn.disabled) rollBtn.click();
+					if (rollBtn && !rollBtn.disabled && window.performRoll) window.performRoll();
 					nextRollAt = Date.now() + getAutoRollDelay();
 				}
 
@@ -2221,30 +2279,17 @@ Last release date on nightly: ${nightlyRDate}`;
 					toggleBtn.classList.toggle('active');
 					const isActive = toggleBtn.classList.contains('active');
 					toggleBtn.textContent = isActive ? 'auto roll (ON)' : 'auto roll (OFF)';
-					// Generated code starts here on 2026-09-24T10:00:00Z:
 					toggleBtn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-					// Generated code ends here on 2026-09-24T10:00:00Z:
 
+					if (stopTicker) {
+						stopTicker();
+						stopTicker = null;
+					}
 					if (isActive) {
 						nextRollAt = Date.now() + getAutoRollDelay();
-						if (autoRollTickInterval) clearInterval(autoRollTickInterval);
-						autoRollTickInterval = setInterval(tick, 250);
-					} else {
-						if (autoRollTickInterval) clearInterval(autoRollTickInterval);
-						autoRollTickInterval = null;
+						stopTicker = createTicker(tick, 250);
 					}
 				});
-
-				// Generated code starts here on 2026-04-02T12:00:00Z:
-				document.addEventListener('visibilitychange', () => {
-					if (!document.hidden && toggleBtn.classList.contains('active')) {
-						if (Date.now() >= nextRollAt) {
-							tick();
-						}
-					}
-				});
-				// Generated code ends here on 2026-04-02T12:00:00Z:
-
 				const trail = document.getElementById('rarityTrail');
 				const TRAIL_GAP = 6;
 				const items = [];
@@ -3304,9 +3349,11 @@ container.addEventListener('click', () => {
 							<option value="default">default (monospace)</option>
 							<option value="serif">serif</option>
 							<option value="mono">monospace</option>
+							<!-- FIXME: redundant monospace option because default is already monospace -->
 							<option value="dyslexic">opendyslexic</option>
 							<option value="custom">custom (uploaded)</option>
 						</select>
+
 						<label style="display: block; margin-bottom: 10px; font-size: 0.85em; opacity: 0.7"
 							>inventory style</label
 						>
