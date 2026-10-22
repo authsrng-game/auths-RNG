@@ -2289,6 +2289,8 @@ Last release date on nightly: ${nightlyRDate}`;
 				}
 
 				const cursor = document.getElementById('custom-cursor');
+				if (!cursor) return;
+				// .plus may be absent (e.g. modified markup); animate it only when present
 				const plus = cursor.querySelector('.plus');
 
 				let rotatePositive = true;
@@ -2304,17 +2306,17 @@ Last release date on nightly: ${nightlyRDate}`;
 					cursor.style.transform = 'translate(-50%, -50%) scale(1.3)';
 					cursor.classList.add('glow');
 
-					if (rotatePositive) {
-						plus.style.transform = 'translate(-50%, -50%) rotate(15deg)';
-					} else {
-						plus.style.transform = 'translate(-50%, -50%) rotate(-15deg)';
+					if (plus) {
+						plus.style.transform = rotatePositive
+							? 'translate(-50%, -50%) rotate(15deg)'
+							: 'translate(-50%, -50%) rotate(-15deg)';
 					}
 					rotatePositive = !rotatePositive;
 
 					setTimeout(() => {
 						cursor.style.transform = 'translate(-50%, -50%) scale(1)';
 						cursor.classList.remove('glow');
-						plus.style.transform = 'translate(-50%, -50%) rotate(0deg)';
+						if (plus) plus.style.transform = 'translate(-50%, -50%) rotate(0deg)';
 					}, 148);
 				}
 
