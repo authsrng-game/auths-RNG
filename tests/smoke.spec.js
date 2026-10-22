@@ -525,7 +525,9 @@ test.describe('auths-RNG smoke tests', () => {
 		await page.goto(BASE_URL);
 
 		// Record rolls before enabling auto roll
-		const initialRolls = await page.evaluate(() => typeof totalRolls !== 'undefined' ? totalRolls : 0);
+		const initialRolls = await page.evaluate(() =>
+			typeof totalRolls !== 'undefined' ? totalRolls : 0
+		);
 
 		await page.evaluate(() => {
 			const autoBtn = document.getElementById('autoRollBtn');
