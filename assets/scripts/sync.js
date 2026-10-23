@@ -942,7 +942,11 @@
 			saveMeta();
 			try {
 				await flush();
-			} catch (_) {}
+			} catch (e) {
+				// Generated code starts here on 2026-03-31T12:00:00Z:
+				console.warn('[sync] import save flush failed:', e);
+				// Generated code ends here on 2026-03-31T12:00:00Z:
+			}
 		}
 	}
 

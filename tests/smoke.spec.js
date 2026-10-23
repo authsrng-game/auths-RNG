@@ -304,7 +304,9 @@ test.describe('auths-RNG smoke tests', () => {
 
 		const escapedText = await page.evaluate(async () => {
 			/* global window */
-			if (window.applySettings) await window.applySettings({ dev: true });
+			const userSettings = { dev: true };
+			localStorage.setItem('userSettings', JSON.stringify(userSettings));
+			if (window.applySettings) await window.applySettings(userSettings);
 			const tabBtn = document.querySelector('.dev-tab[data-tab="storage"]');
 			if (tabBtn) tabBtn.click();
 			const list = document.getElementById('dc-storage-list');
@@ -524,16 +526,6 @@ test.describe('auths-RNG smoke tests', () => {
 		});
 		await page.goto(BASE_URL);
 
-		// Record rolls before enabling auto roll
-		const initialRolls = await page.evaluate(() =>
-			typeof totalRolls !== 'undefined' ? totalRolls : 0
-		);
-
-		await page.evaluate(() => {
-			const autoBtn = document.getElementById('autoRollBtn');
-			if (autoBtn && !autoBtn.classList.contains('active')) autoBtn.click();
-		});
-
 		// Simulate background tab where tick returns early
 		await page.evaluate(() => {
 			Object.defineProperty(document, 'hidden', {
@@ -541,6 +533,11 @@ test.describe('auths-RNG smoke tests', () => {
 				writable: true,
 				configurable: true,
 			});
+		});
+
+		await page.evaluate(() => {
+			const autoBtn = document.getElementById('autoRollBtn');
+			if (autoBtn && !autoBtn.classList.contains('active')) autoBtn.click();
 		});
 
 		await page.waitForTimeout(1500);
