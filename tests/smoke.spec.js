@@ -542,9 +542,10 @@ test.describe('auths-RNG smoke tests', () => {
 
 		await page.waitForTimeout(1500);
 
-		const rollCountBeforeRefocus = await page.evaluate(() => {
+		const initialRolls = await page.evaluate(() => {
 			return typeof totalRolls !== 'undefined' ? totalRolls : 0;
 		});
+		const rollCountBeforeRefocus = initialRolls;
 
 		// Refocus tab
 		await page.evaluate(() => {
