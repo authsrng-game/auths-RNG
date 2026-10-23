@@ -544,10 +544,10 @@
 		}
 
 		// -- Tabs --------------------------------------------------------------
-		document.querySelectorAll('.dev-tab').forEach((btn) => {
+		document.querySelectorAll('.dev-tabs .dev-tab').forEach((btn) => {
 			btn.addEventListener('click', () => {
-				document.querySelectorAll('.dev-tab').forEach((b) => b.classList.remove('active'));
-				document.querySelectorAll('.dev-tab-content').forEach((c) => (c.style.display = 'none'));
+				document.querySelectorAll('.dev-tabs .dev-tab').forEach((b) => b.classList.remove('active'));
+				document.querySelectorAll('.dev-tabs .dev-tab-content').forEach((c) => (c.style.display = 'none'));
 				btn.classList.add('active');
 				document.getElementById('dct-' + btn.dataset.tab).style.display = 'block';
 				if (btn.dataset.tab === 'storage') renderStorage();
