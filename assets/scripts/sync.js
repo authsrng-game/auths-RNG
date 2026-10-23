@@ -72,6 +72,15 @@
 		return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
 	}
 
+	// Generated code starts here on 2026-04-03T00:00:00Z:
+	/**
+	 * Computes a deterministic cyrb53 hash over sorted save state fields.
+	 *
+	 * @param {Record<string, string>} fields - Key-value map of save state keys to raw string values.
+	 * @param {boolean} meaningfulOnly - When true, volatile keys (`totalPlaytime`, `activePotions`, etc.)
+	 *   are excluded to prevent high-frequency background ticks from triggering cloud push traffic.
+	 * @returns {string} Base-36 hash string representing the serialized save state snapshot.
+	 */
 	function hashFields(fields, meaningfulOnly) {
 		let acc = '';
 		Object.keys(fields)
@@ -82,6 +91,7 @@
 			});
 		return cyrb53(acc);
 	}
+	// Generated code ends here on 2026-04-03T00:00:00Z:
 
 	function snapshot() {
 		const all = Keys.collect();
