@@ -2025,6 +2025,7 @@ async function resetInventory() {
 	location.reload();
 }
 
+// Generated code starts here on 2026-10-23T03:08:00Z:
 function startLuckBoost(now = Date.now()) {
 	luckBoostActive = true;
 	luckBoostEndTime = now + 60000;
@@ -2032,7 +2033,7 @@ function startLuckBoost(now = Date.now()) {
 
 	const badge = document.getElementById('luckBoostBadge');
 	if (badge) badge.style.display = 'block';
-	updateLuckTimer();
+	updateLuckTimer(now);
 
 	localStorage.setItem(
 		LUCK_KEY,
@@ -2046,11 +2047,11 @@ function startLuckBoost(now = Date.now()) {
 	luckInterval = setInterval(updateLuckTimer, 200);
 }
 
-function updateLuckTimer() {
+function updateLuckTimer(now = Date.now()) {
 	const timerEl = document.getElementById('luckTimer');
 	const badge = document.getElementById('luckBoostBadge');
 
-	const msLeft = luckBoostEndTime - Date.now();
+	const msLeft = luckBoostEndTime - now;
 
 	if (msLeft <= 0) {
 		endLuckBoost();
@@ -2061,6 +2062,7 @@ function updateLuckTimer() {
 	if (timerEl) timerEl.textContent = secondsLeft;
 	if (badge) badge.textContent = `4x luck active > ${secondsLeft}s left`;
 }
+// Generated code ends here on 2026-10-23T03:08:00Z:
 
 function endLuckBoost() {
 	luckBoostActive = false;

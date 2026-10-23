@@ -150,4 +150,43 @@ test.describe('Auto-roll timing reconciliation', () => {
 		]);
 	});
 	// Generated code ends here on 2026-10-21T03:20:00Z:
+
+	// Generated code starts here on 2026-10-23T03:08:00Z:
+	test('preserves 100-roll milestone luck boost during background roll catch-up', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+		await page.evaluate(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.81-hf');
+			localStorage.setItem('startAnimConfig', JSON.stringify({ enabled: false }));
+		});
+		await page.reload();
+
+		const boostState = await page.evaluate(() => {
+			const boostActivePerRoll = [];
+			const origRoll = Plush.roll;
+			Plush.roll = function (...args) {
+				boostActivePerRoll.push(args[4]);
+				return origRoll.apply(this, args);
+			};
+
+			totalRolls = 98;
+			endLuckBoost();
+
+			// execute 5 background rolls starting 10s in the past (totalRolls hits 100 at roll 2)
+			performBackgroundRoll(5, 1000);
+
+			Plush.roll = origRoll;
+
+			return {
+				boostActivePerRoll,
+				totalRolls,
+			};
+		});
+
+		expect(boostState.totalRolls).toBe(103);
+		expect(boostState.boostActivePerRoll).toEqual([false, false, true, true, true]);
+	});
+	// Generated code ends here on 2026-10-23T03:08:00Z:
 });
