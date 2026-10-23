@@ -390,8 +390,11 @@
 				} catch (_) {}
 
 				// Generated code starts here on 2026-03-31T00:00:00Z:
-				const avatarHtml = profile.avatarUrl
-					? `<img class="avatar" src="https://accounts.authsrng.xyz${escHtml(profile.avatarUrl)}">`
+				const validAvatarUrl = profile.avatarUrl
+					? safeUrl('https://accounts.authsrng.xyz' + profile.avatarUrl)
+					: '';
+				const avatarHtml = validAvatarUrl
+					? `<img class="avatar" src="${escHtml(validAvatarUrl)}">`
 					: `<div class="avatar-placeholder">${escHtml(profile.username.charAt(0).toUpperCase())}</div>`;
 				// Generated code ends here on 2026-03-31T00:00:00Z:
 

@@ -68,10 +68,25 @@
 		return data;
 	}
 
+	function safeUrl(url) {
+		if (!url) return '';
+		try {
+			const parsed = new URL(url, window.location.origin);
+			if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+				return parsed.href;
+			}
+		} catch (_) {}
+		return '';
+	}
+
 	function avatarHtml(username, avatarUrl, size) {
 		size = size || 32;
-		if (avatarUrl)
-			return `<img src="https://accounts.authsrng.xyz${escAttr(avatarUrl)}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;">`;
+		if (avatarUrl) {
+			const validUrl = safeUrl('https://accounts.authsrng.xyz' + avatarUrl);
+			if (validUrl) {
+				return `<img src="${escAttr(validUrl)}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;flex-shrink:0;">`;
+			}
+		}
 		return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:var(--button-bg);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0.6;">${escHtml((username || '?').charAt(0).toUpperCase())}</div>`;
 	}
 
