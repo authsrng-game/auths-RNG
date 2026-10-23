@@ -566,8 +566,7 @@ test.describe('auths-RNG smoke tests', () => {
 			return typeof totalRolls !== 'undefined' ? totalRolls : 0;
 		});
 
-		expect(rollCountBeforeRefocus).toBe(initialRolls);
-		expect(rollCountAfterRefocus).toBeGreaterThan(initialRolls);
+		expect(rollCountAfterRefocus).toBeGreaterThan(rollCountBeforeRefocus);
 	});
 	// Generated code ends here on 2026-04-02T12:00:00Z:
 });

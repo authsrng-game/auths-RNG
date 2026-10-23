@@ -427,23 +427,73 @@
 	}
 
 	document.addEventListener('visibilitychange', () => {
-		if (document.visibilityState === 'visible') {
+		if (!document.hidden) {
 			if (gift === 'wealth') updateRuneWealth();
 			if (upgrades.anomalyMachine) updateRuneAnomalyMachine();
+			if (upgrades.dopamineAttack) updateDopamineAttack();
 		}
 	});
 	// Generated code ends here on 2026-03-31T22:00:00Z:
 
+	// Generated code starts here on 2026-10-23T16:20:00Z:
+	const MAX_DOPAMINE_CATCHUP_ROLLS = 1800;
+	window._lastDopamineAttackTick = Date.now();
+
+	function updateDopamineAttack() {
+		if (!upgrades.dopamineAttack) {
+			window._lastDopamineAttackTick = Date.now();
+			return;
+		}
+		const now = Date.now();
+		const last = window._lastDopamineAttackTick || now;
+		const elapsedMs = now - last;
+		const rollInterval = Math.round(1000 / 3);
+		const elapsedRolls = Math.floor(elapsedMs / rollInterval);
+
+		if (elapsedRolls > 0) {
+			let cappedRolls = elapsedRolls;
+			if (cappedRolls > MAX_DOPAMINE_CATCHUP_ROLLS) {
+				console.debug(
+					`[runes] dopamine attack catch-up capped at ${MAX_DOPAMINE_CATCHUP_ROLLS} rolls`
+				);
+				cappedRolls = MAX_DOPAMINE_CATCHUP_ROLLS;
+			}
+			window._lastDopamineAttackTick = now - (elapsedMs % rollInterval);
+
+			for (let i = 0; i < cappedRolls; i++) {
+				const btn = document.getElementById('rollBtn');
+				if (!btn || btn.disabled || (typeof isCutscenePlaying !== 'undefined' && isCutscenePlaying)) {
+					break;
+				}
+
+				if (typeof window._resetNextRollAllowedAt === 'function') {
+					window._resetNextRollAllowedAt();
+				}
+
+				const isCatchUp = i < cappedRolls - 1;
+				if (isCatchUp && !document.hidden) {
+					const origHidden = document.hidden;
+					try {
+						Object.defineProperty(document, 'hidden', { value: true, configurable: true });
+						btn.click();
+					} finally {
+						Object.defineProperty(document, 'hidden', { value: origHidden, configurable: true });
+					}
+				} else {
+					btn.click();
+				}
+			}
+		}
+	}
+
 	function startDopamineAttack() {
 		if (dopamineAttackInterval) clearInterval(dopamineAttackInterval);
+		if (!upgrades.dopamineAttack) return;
+		window._lastDopamineAttackTick = Date.now();
 		const rollEvery = Math.round(1000 / 3);
-		dopamineAttackInterval = setInterval(() => {
-			const btn = document.getElementById('rollBtn');
-			if (btn && !btn.disabled && typeof isCutscenePlaying !== 'undefined' && !isCutscenePlaying) {
-				btn.click();
-			}
-		}, rollEvery);
+		dopamineAttackInterval = setInterval(updateDopamineAttack, rollEvery);
 	}
+	// Generated code ends here on 2026-10-23T16:20:00Z:
 
 	function getTripleLuckMultiplier() {
 		return upgrades.tripleLuck ? 3 : 1;

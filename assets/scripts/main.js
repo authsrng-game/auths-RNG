@@ -2312,6 +2312,13 @@ function startWellCooldownTimer() {
 const sortSelect = document.getElementById('sortSelect');
 
 let nextRollAllowedAt = 0;
+
+// Generated code starts here on 2026-10-23T16:20:00Z:
+window._resetNextRollAllowedAt = function () {
+	nextRollAllowedAt = 0;
+};
+// Generated code ends here on 2026-10-23T16:20:00Z:
+
 function performRoll() {
 	if (isCutscenePlaying || rollBtn.disabled) return;
 	const now = Date.now();
