@@ -462,7 +462,11 @@
 
 			for (let i = 0; i < cappedRolls; i++) {
 				const btn = document.getElementById('rollBtn');
-				if (!btn || btn.disabled || (typeof isCutscenePlaying !== 'undefined' && isCutscenePlaying)) {
+				if (
+					!btn ||
+					btn.disabled ||
+					(typeof isCutscenePlaying !== 'undefined' && isCutscenePlaying)
+				) {
 					break;
 				}
 
