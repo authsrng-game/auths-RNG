@@ -381,10 +381,7 @@ test.describe('Syncer state consistency tests', () => {
 			localStorage.setItem('seenReleaseTag', 'v9.7');
 			localStorage.setItem('authUid', 'user_test_123');
 			localStorage.setItem('authToken', 'token_test_123');
-			localStorage.setItem(
-				'__sync_meta',
-				JSON.stringify({ uid: 'user_test_123', baseRev: 1 })
-			);
+			localStorage.setItem('__sync_meta', JSON.stringify({ uid: 'user_test_123', baseRev: 1 }));
 		});
 		await page.goto(BASE_URL);
 
