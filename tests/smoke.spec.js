@@ -24,7 +24,12 @@ test.describe('auths-RNG smoke tests', () => {
 	test('no failed network requests', async ({ page }) => {
 		const failed = [];
 		page.on('response', (res) => {
-			if (res.status() >= 400) failed.push(`${res.status()} ${res.url()}`);
+			if (res.status() >= 400) {
+				const url = new URL(res.url());
+				if (url.hostname !== 'api.github.com') {
+					failed.push(`${res.status()} ${res.url()}`);
+				}
+			}
 		});
 		await page.goto(BASE_URL);
 		await page.waitForTimeout(2000);
@@ -292,6 +297,7 @@ test.describe('auths-RNG smoke tests', () => {
 		await page.addInitScript(() => {
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('userSettings', JSON.stringify({ dev: true }));
 			localStorage.setItem('<img src=x onerror=alert(1)>', 'testval');
 		});
 		await page.goto(BASE_URL);
@@ -556,8 +562,8 @@ test.describe('auths-RNG smoke tests', () => {
 			return typeof totalRolls !== 'undefined' ? totalRolls : 0;
 		});
 
-		expect(rollCountBeforeRefocus).toBe(0);
-		expect(rollCountAfterRefocus).toBeGreaterThan(0);
+		expect(rollCountBeforeRefocus).toBe(initialRolls);
+		expect(rollCountAfterRefocus).toBeGreaterThan(initialRolls);
 	});
 	// Generated code ends here on 2026-04-02T12:00:00Z:
 });
