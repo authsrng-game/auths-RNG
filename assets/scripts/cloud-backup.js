@@ -73,6 +73,67 @@
 		});
 	}
 
+	// Generated code starts here on 2026-10-29T12:00:00Z:
+	// Internal cloud backup API endpoint (same backend origin as sync.js)
+	const BACKUP_API = 'https://backup.authsrng.xyz/api/backup';
+
+	function getAuthToken() {
+		return window.AuthAccount ? window.AuthAccount.getToken() : localStorage.getItem('authToken');
+	}
+
+	async function manualBackup() {
+		try {
+			const token = getAuthToken();
+			const res = await fetch(BACKUP_API, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					...(token ? { Authorization: 'Bearer ' + token } : {}),
+				},
+				body: JSON.stringify({ timestamp: Date.now() }),
+			});
+			const data = await res.json().catch(() => ({}));
+			if (!res.ok) {
+				console.warn('[cloud-backup] backup rejected:', data.error || 'unknown error');
+			}
+		} catch (err) {
+			console.warn('[cloud-backup] backup rejected:', err.message || err);
+		}
+	}
+
+	async function manualRestore() {
+		try {
+			const token = getAuthToken();
+			const res = await fetch(BACKUP_API, {
+				method: 'GET',
+				headers: { ...(token ? { Authorization: 'Bearer ' + token } : {}) },
+			});
+			const data = await res.json().catch(() => ({}));
+			if (!res.ok) {
+				console.warn('[cloud-backup] restore rejected:', data.error || 'unknown error');
+			}
+		} catch (err) {
+			console.warn('[cloud-backup] restore rejected:', err.message || err);
+		}
+	}
+
+	async function manualDelete() {
+		try {
+			const token = getAuthToken();
+			const res = await fetch(BACKUP_API, {
+				method: 'DELETE',
+				headers: { ...(token ? { Authorization: 'Bearer ' + token } : {}) },
+			});
+			const data = await res.json().catch(() => ({}));
+			if (!res.ok) {
+				console.warn('[cloud-backup] delete rejected:', data.error || 'unknown error');
+			}
+		} catch (err) {
+			console.warn('[cloud-backup] delete rejected:', err.message || err);
+		}
+	}
+	// Generated code ends here on 2026-10-29T12:00:00Z:
+
 	function build() {
 		const section = el('cloudBackupSection');
 		if (!section) return;
@@ -86,10 +147,11 @@
 
 		const row = document.createElement('div');
 		row.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;';
-		const mk = (text, fn, style) => {
+		const mk = (text, fn, style, id) => {
 			const b = document.createElement('button');
 			b.className = 'small';
 			b.textContent = text;
+			if (id) b.id = id;
 			if (style) b.style.cssText = style;
 			b.addEventListener('click', fn);
 			row.appendChild(b);
@@ -99,6 +161,9 @@
 			await window.Sync.syncNow();
 			build();
 		});
+		mk('backup now', manualBackup, null, 'cloudBackupNowBtn');
+		mk('restore backup', manualRestore, null, 'cloudRestoreBtn');
+		mk('delete backup', manualDelete, 'opacity:0.6;', 'cloudDeleteBtn');
 		const hist = document.createElement('div');
 		hist.style.cssText = 'max-height:260px;overflow-y:auto;margin-top:6px;';
 		mk('restore points', () => renderHistory(hist));
