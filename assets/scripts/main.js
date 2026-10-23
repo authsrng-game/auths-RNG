@@ -1460,45 +1460,6 @@ function sellAll() {
 	showAnomalyPopup(`sold ${kinds} rarities for ${formatNum(total)} pts`);
 }
 
-function sellRarity(name, silent) {
-	const data = inventoryData.get(name);
-	if (!data) return 0;
-	const sold = soldOutRarities.get(name);
-	const available = data.count - (sold ? sold.count : 0);
-	if (available <= 0) return 0;
-	const earned = calculateRarityPoints(data.rarityObj) * available;
-	points += earned;
-	soldOutRarities.set(name, { count: data.count });
-	data.liElement.classList.add('sold-out');
-	if (!silent) {
-		updatePointsDisplay();
-		updateShopUI();
-		saveAllData();
-		showAnomalyPopup(`sold ${available}x ${name} for ${formatNum(earned)} pts`);
-	}
-	return earned;
-}
-
-function sellAll() {
-	let total = 0;
-	let kinds = 0;
-	for (const name of inventoryData.keys()) {
-		const earned = sellRarity(name, true);
-		if (earned > 0) {
-			total += earned;
-			kinds++;
-		}
-	}
-	if (!kinds) {
-		showAnomalyPopup('nothing to sell');
-		return;
-	}
-	updatePointsDisplay();
-	updateShopUI();
-	saveAllData();
-	showAnomalyPopup(`sold ${kinds} rarities for ${formatNum(total)} pts`);
-}
-
 function updateItem(d) {
 	const { rarityObj, count, liElement } = d;
 	const denom = Plush.denomOf(rarityObj);
@@ -2338,6 +2299,13 @@ function startWellCooldownTimer() {
 const sortSelect = document.getElementById('sortSelect');
 
 let nextRollAllowedAt = 0;
+
+// Generated code starts here on 2026-10-23T16:20:00Z:
+window._resetNextRollAllowedAt = function () {
+	nextRollAllowedAt = 0;
+};
+// Generated code ends here on 2026-10-23T16:20:00Z:
+
 function performRoll() {
 	if (isCutscenePlaying || rollBtn.disabled) return;
 	const now = Date.now();
