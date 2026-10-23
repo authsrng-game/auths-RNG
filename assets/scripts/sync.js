@@ -8,6 +8,13 @@
 	const origGet = Storage.prototype.getItem;
 	const Keys = window.SaveKeys;
 
+	// Without SaveKeys the patched setItem/removeItem below would throw on every
+	// localStorage write and break unrelated page setup, so disable sync instead.
+	if (!Keys || typeof Keys.isSaveKey !== 'function') {
+		console.warn('[sync] SaveKeys unavailable (save-keys.js failed to load); cloud sync disabled');
+		return;
+	}
+
 	const META_KEY = '__sync_meta';
 	const DEVICE_KEY = '__sync_device';
 	const LOCK_NAME = 'authsrng-game-writer';
