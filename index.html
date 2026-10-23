@@ -2456,14 +2456,22 @@ Last release date on nightly: ${nightlyRDate}`;
 				let currentPage = 0;
 				const totalPages = 12;
 				const lockedPages = new Set();
+				// Expose before anything below can throw (e.g. a failing localStorage write),
+				// so hidePageDot/unlockPageDot always have a set to work with.
+				window.lockedPages = lockedPages;
+				window._currentPage = 0;
 
-				let visitCount = parseInt(localStorage.getItem('pageVisitCount') || '0');
-				if (visitCount < 6) {
-					setTimeout(() => {
-						swipeIndicator.classList.add('show');
-						setTimeout(() => swipeIndicator.classList.remove('show'), 10000);
-					}, 1000);
-					localStorage.setItem('pageVisitCount', (visitCount + 1).toString());
+				try {
+					let visitCount = parseInt(localStorage.getItem('pageVisitCount') || '0');
+					if (visitCount < 6) {
+						setTimeout(() => {
+							swipeIndicator.classList.add('show');
+							setTimeout(() => swipeIndicator.classList.remove('show'), 10000);
+						}, 1000);
+						localStorage.setItem('pageVisitCount', (visitCount + 1).toString());
+					}
+				} catch (err) {
+					console.warn('[pages] could not update pageVisitCount', err);
 				}
 
 				function getPageLeft(pageIndex) {
@@ -2522,6 +2530,8 @@ Last release date on nightly: ${nightlyRDate}`;
 
 					localStorage.setItem('currentPage', currentPage.toString());
 				}
+
+				window.goToPage = goToPage;
 
 				prevBtn.addEventListener('click', () => goToPage(currentPage - 1));
 				nextBtn.addEventListener('click', () => goToPage(currentPage + 1));
@@ -2582,10 +2592,6 @@ Last release date on nightly: ${nightlyRDate}`;
 					if (e.key === 'ArrowLeft') goToPage(currentPage - 1);
 					if (e.key === 'ArrowRight') goToPage(currentPage + 1);
 				});
-
-				window.lockedPages = lockedPages;
-				window.goToPage = goToPage;
-				window._currentPage = 0;
 			})();
 		</script>
 
@@ -4246,6 +4252,7 @@ container.addEventListener('click', () => {
 					page.style.visibility = 'hidden';
 					page.style.padding = '0';
 				}
+				if (!window.lockedPages) window.lockedPages = new Set();
 				window.lockedPages.add(pageIndex);
 			}
 
@@ -4260,7 +4267,7 @@ container.addEventListener('click', () => {
 					page.style.visibility = '';
 					page.style.padding = '';
 				}
-				window.lockedPages.delete(pageIndex);
+				if (window.lockedPages) window.lockedPages.delete(pageIndex);
 				dot.classList.remove('dot-hidden');
 				dot.classList.add('dot-unlocking');
 				dot.addEventListener('animationend', () => dot.classList.remove('dot-unlocking'), {

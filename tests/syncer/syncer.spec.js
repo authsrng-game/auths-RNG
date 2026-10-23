@@ -369,4 +369,26 @@ test.describe('Syncer state consistency tests', () => {
 		expect((await implausibleAnomaliesRes.json()).error).toBe('implausible progress');
 	});
 	// Generated code ends here on 2026-03-31T00:00:00Z:
+
+	test('page navigation survives save-keys.js failing to load', async ({ page }) => {
+		const errors = [];
+		page.on('pageerror', (err) => errors.push(err.message));
+		await page.route('**/assets/scripts/save-keys.js', (route) => route.abort());
+		await page.goto(BASE_URL);
+		await page.waitForLoadState('load');
+
+		const state = await page.evaluate(() => ({
+			hasLockedPages: globalThis.lockedPages instanceof Set,
+			hasGoToPage: typeof globalThis.goToPage === 'function',
+			setItemWorks: (() => {
+				globalThis.localStorage.setItem('pageVisitCount', '1');
+				return globalThis.localStorage.getItem('pageVisitCount') === '1';
+			})(),
+		}));
+
+		expect(state.hasLockedPages).toBe(true);
+		expect(state.hasGoToPage).toBe(true);
+		expect(state.setItemWorks).toBe(true);
+		expect(errors.filter((m) => /isSaveKey|reading 'add'/.test(m))).toEqual([]);
+	});
 });
