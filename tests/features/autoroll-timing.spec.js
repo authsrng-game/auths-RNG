@@ -90,4 +90,64 @@ test.describe('Auto-roll timing reconciliation', () => {
 
 		expect(deltaRolls).toBe(0);
 	});
+
+	// Generated code starts here on 2026-10-21T03:20:00Z:
+	test('reconciles active potion expiration during background roll catch-up', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+		await page.evaluate(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.81-hf');
+			localStorage.setItem('startAnimConfig', JSON.stringify({ enabled: false }));
+		});
+		await page.reload();
+
+		const potionState = await page.evaluate(() => {
+			// Track globalLuckMultiplier used during each roll in Plush.roll
+			const rollsMults = [];
+			const origRoll = Plush.roll;
+			Plush.roll = function (...args) {
+				rollsMults.push(args[1]);
+				return origRoll.apply(this, args);
+			};
+
+			// Set up active potion and adjust duration so it expires after 5 seconds (5 rolls @ 1000ms delay)
+			playerPotions.luck2x = 1;
+			usePotion('luck2x');
+			const startSimulatedNow = Date.now() - 10 * 1000;
+			activePotions[0].endTime = startSimulatedNow + 5000;
+
+			const luckWithPotion = globalLuckMultiplier;
+
+			// Perform 10 background rolls with 1000ms delay each (total 10 seconds simulated time)
+			performBackgroundRoll(10, 1000);
+
+			Plush.roll = origRoll;
+
+			return {
+				rollsMults,
+				luckWithPotion,
+				luckAfterCatchup: globalLuckMultiplier,
+				activePotionsCount: activePotions.length,
+			};
+		});
+
+		expect(potionState.luckWithPotion).toBeGreaterThan(potionState.luckAfterCatchup);
+		expect(potionState.activePotionsCount).toBe(0);
+		expect(potionState.rollsMults).toHaveLength(10);
+		expect(potionState.rollsMults).toEqual([
+			potionState.luckWithPotion,
+			potionState.luckWithPotion,
+			potionState.luckWithPotion,
+			potionState.luckWithPotion,
+			potionState.luckAfterCatchup,
+			potionState.luckAfterCatchup,
+			potionState.luckAfterCatchup,
+			potionState.luckAfterCatchup,
+			potionState.luckAfterCatchup,
+			potionState.luckAfterCatchup,
+		]);
+	});
+	// Generated code ends here on 2026-10-21T03:20:00Z:
 });
