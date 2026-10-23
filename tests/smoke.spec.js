@@ -526,6 +526,10 @@ test.describe('auths-RNG smoke tests', () => {
 		});
 		await page.goto(BASE_URL);
 
+		const initialRolls = await page.evaluate(() => {
+			return typeof totalRolls !== 'undefined' ? totalRolls : 0;
+		});
+
 		// Simulate background tab where tick returns early
 		await page.evaluate(() => {
 			Object.defineProperty(document, 'hidden', {

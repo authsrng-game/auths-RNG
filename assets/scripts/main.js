@@ -1460,45 +1460,6 @@ function sellAll() {
 	showAnomalyPopup(`sold ${kinds} rarities for ${formatNum(total)} pts`);
 }
 
-function sellRarity(name, silent) {
-	const data = inventoryData.get(name);
-	if (!data) return 0;
-	const sold = soldOutRarities.get(name);
-	const available = data.count - (sold ? sold.count : 0);
-	if (available <= 0) return 0;
-	const earned = calculateRarityPoints(data.rarityObj) * available;
-	points += earned;
-	soldOutRarities.set(name, { count: data.count });
-	data.liElement.classList.add('sold-out');
-	if (!silent) {
-		updatePointsDisplay();
-		updateShopUI();
-		saveAllData();
-		showAnomalyPopup(`sold ${available}x ${name} for ${formatNum(earned)} pts`);
-	}
-	return earned;
-}
-
-function sellAll() {
-	let total = 0;
-	let kinds = 0;
-	for (const name of inventoryData.keys()) {
-		const earned = sellRarity(name, true);
-		if (earned > 0) {
-			total += earned;
-			kinds++;
-		}
-	}
-	if (!kinds) {
-		showAnomalyPopup('nothing to sell');
-		return;
-	}
-	updatePointsDisplay();
-	updateShopUI();
-	saveAllData();
-	showAnomalyPopup(`sold ${kinds} rarities for ${formatNum(total)} pts`);
-}
-
 function updateItem(d) {
 	const { rarityObj, count, liElement } = d;
 	const denom = Plush.denomOf(rarityObj);
@@ -2054,13 +2015,21 @@ async function resetInventory() {
 	location.reload();
 }
 
+// Generated code starts here on 2026-11-06T00:00:00Z:
+// Lazily cache DOM element references and guard scalar state updates in the 200ms luck boost timer loop
+// to eliminate redundant DOM lookups and avoid unnecessary text node assignments when secondsLeft is unchanged.
+let _luckTimerEl = null;
+let _luckBoostBadgeEl = null;
+let _lastLuckSecondsLeft = -1;
+
 function startLuckBoost() {
 	luckBoostActive = true;
 	luckBoostEndTime = Date.now() + 60000;
+	_lastLuckSecondsLeft = -1;
 	recalcLuckMultiplier();
 
-	const badge = document.getElementById('luckBoostBadge');
-	if (badge) badge.style.display = 'block';
+	_luckBoostBadgeEl = _luckBoostBadgeEl || document.getElementById('luckBoostBadge');
+	if (_luckBoostBadgeEl) _luckBoostBadgeEl.style.display = 'block';
 	updateLuckTimer();
 
 	localStorage.setItem(
@@ -2077,8 +2046,8 @@ function startLuckBoost() {
 
 function updateLuckTimer() {
 	if (isCutscenePlaying) return;
-	const timerEl = document.getElementById('luckTimer');
-	const badge = document.getElementById('luckBoostBadge');
+	_luckTimerEl = _luckTimerEl || document.getElementById('luckTimer');
+	_luckBoostBadgeEl = _luckBoostBadgeEl || document.getElementById('luckBoostBadge');
 
 	const msLeft = luckBoostEndTime - Date.now();
 
@@ -2088,22 +2057,27 @@ function updateLuckTimer() {
 	}
 
 	const secondsLeft = Math.ceil(msLeft / 1000);
-	if (timerEl) timerEl.textContent = secondsLeft;
-	if (badge) badge.textContent = `4x luck active > ${secondsLeft}s left`;
+	if (secondsLeft === _lastLuckSecondsLeft) return;
+	_lastLuckSecondsLeft = secondsLeft;
+
+	if (_luckTimerEl) _luckTimerEl.textContent = secondsLeft;
+	if (_luckBoostBadgeEl) _luckBoostBadgeEl.textContent = `4x luck active > ${secondsLeft}s left`;
 }
 
 function endLuckBoost() {
 	luckBoostActive = false;
 	luckBoostEndTime = 0;
+	_lastLuckSecondsLeft = -1;
 	recalcLuckMultiplier();
 
-	const badge = document.getElementById('luckBoostBadge');
-	if (badge) badge.style.display = 'none';
+	_luckBoostBadgeEl = _luckBoostBadgeEl || document.getElementById('luckBoostBadge');
+	if (_luckBoostBadgeEl) _luckBoostBadgeEl.style.display = 'none';
 
 	if (luckInterval) clearInterval(luckInterval);
 
 	localStorage.removeItem(LUCK_KEY);
 }
+// Generated code ends here on 2026-11-06T00:00:00Z:
 
 // Generated code starts here on 2026-11-05T00:00:00Z:
 // Cache userSettings in memory or read window.savedSettings to avoid repeated synchronous localStorage reads and JSON parsing on hot roll paths.
