@@ -11,6 +11,16 @@ test.describe('Security tests', () => {
 		await expect(consentLink).toHaveAttribute('rel', 'noopener noreferrer');
 	});
 
+	test('ALTCHA attribution links on index.html have rel="noopener noreferrer"', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const altchaLinks = page.locator('.altcha-attribution a[target="_blank"]');
+		const count = await altchaLinks.count();
+		expect(count).toBeGreaterThan(0);
+		for (let i = 0; i < count; i++) {
+			await expect(altchaLinks.nth(i)).toHaveAttribute('rel', 'noopener noreferrer');
+		}
+	});
+
 	test('credits page contributor links have rel="noopener noreferrer" and sanitize input', async ({
 		page,
 	}) => {
