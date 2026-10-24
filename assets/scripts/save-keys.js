@@ -109,10 +109,24 @@
 		return out;
 	}
 
+	// Generated code starts here on 2026-03-31T23:30:00Z:
+	/**
+	 * Checks whether a given `localStorage` key is classified as volatile.
+	 * Volatile keys (such as `totalPlaytime` or `activePotions`) change continuously during ticks
+	 * and are excluded from debounced sync hash comparisons to prevent redundant cloud pushes.
+	 *
+	 * @param {string} k - The `localStorage` key name to check.
+	 * @returns {boolean} True if the key is registered in the `VOLATILE` set.
+	 */
+	function isVolatile(k) {
+		return VOLATILE.has(k);
+	}
+	// Generated code ends here on 2026-03-31T23:30:00Z:
+
 	window.SaveKeys = {
 		list: LIST,
 		isSaveKey,
-		isVolatile: (k) => VOLATILE.has(k),
+		isVolatile,
 		collect,
 	};
 })();
