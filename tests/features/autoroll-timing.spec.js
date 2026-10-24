@@ -189,4 +189,59 @@ test.describe('Auto-roll timing reconciliation', () => {
 		expect(boostState.boostActivePerRoll).toEqual([false, false, true, true, true]);
 	});
 	// Generated code ends here on 2026-10-23T03:08:00Z:
+
+	// Generated code starts here on 2026-10-24T03:23:03Z:
+	test('processes auto-rolls during hidden tab tick intervals and pagehide', async ({ page }) => {
+		await page.goto(BASE_URL);
+		await page.evaluate(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.81-hf');
+			localStorage.setItem('startAnimConfig', JSON.stringify({ enabled: false }));
+		});
+		await page.reload();
+
+		const result = await page.evaluate(() => {
+			const autoBtn = document.getElementById('autoRollBtn');
+			if (autoBtn && !autoBtn.classList.contains('active')) {
+				autoBtn.click();
+			}
+
+			const startRolls = typeof totalRolls !== 'undefined' ? totalRolls : 0;
+			const speed = typeof rollSpeed !== 'undefined' ? rollSpeed : 1;
+			const delay = Math.max(500, speed * 1000 + 400);
+
+			// Simulate hidden tab state
+			Object.defineProperty(document, 'hidden', {
+				value: true,
+				configurable: true,
+			});
+
+			const oldNow = Date.now;
+			Date.now = () => oldNow() + delay * 3;
+
+			// Trigger visibilitychange to hidden (should process 3 rolls)
+			document.dispatchEvent(new globalThis.Event('visibilitychange'));
+			const rollsAfterHide = totalRolls - startRolls;
+
+			// Advance time by another 2 delays and dispatch pagehide
+			Date.now = () => oldNow() + delay * 5;
+			window.dispatchEvent(new globalThis.Event('pagehide'));
+			const rollsAfterPagehide = totalRolls - startRolls;
+
+			Date.now = oldNow;
+			Object.defineProperty(document, 'hidden', {
+				value: false,
+				configurable: true,
+			});
+
+			return {
+				rollsAfterHide,
+				rollsAfterPagehide,
+			};
+		});
+
+		expect(result.rollsAfterHide).toBe(3);
+		expect(result.rollsAfterPagehide).toBe(5);
+	});
+	// Generated code ends here on 2026-10-24T03:23:03Z:
 });
