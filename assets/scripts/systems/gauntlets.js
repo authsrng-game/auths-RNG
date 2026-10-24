@@ -596,7 +596,9 @@ console.log(performance.now());
 		if (rollEl) rollEl.textContent = 'your rolls: ' + rolls.toLocaleString();
 
 		// Structural state includes rolls, inventory count, global rotation index, claim/cooldown status, and serialized gauntlet claim timestamps.
-		const cdStatus = TIERS.map((t) => (canClaim(t, d) ? 'ready' : getCdStr(t, d) ? 'cd' : 'no')).join(',');
+		const cdStatus = TIERS.map((t) =>
+			canClaim(t, d) ? 'ready' : getCdStr(t, d) ? 'cd' : 'no'
+		).join(',');
 		const stateKey = `${rolls}:${invSize}:${rotIdx()}:${cdStatus}:${JSON.stringify(d)}`;
 
 		if (stateKey === _lastRenderStateKey && container.children.length > 0) {
