@@ -126,7 +126,9 @@
 	window.SaveKeys = {
 		list: LIST,
 		isSaveKey,
+		// Generated code starts here on 2026-03-31T23:30:00Z:
 		isVolatile,
+		// Generated code ends here on 2026-03-31T23:30:00Z:
 		collect,
 	};
 })();
