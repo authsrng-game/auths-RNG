@@ -13,3 +13,11 @@
 **Learning:** Any timer or boost activation helper called within background simulation loops must evaluate duration and timer updates against the simulated timestamp (`simulatedNow` / `now`) rather than unparameterized `Date.now()`.
 
 **Prevention:** Always accept an optional timestamp parameter `now = Date.now()` in timer calculation functions (`updateLuckTimer(now)`) and pass `now` through from initiation helpers (`startLuckBoost(now)`).
+
+## 2026-10-24 - Auto-Roll Background Progression and Unload Reconciliation
+
+**Gap:** Auto-roll background execution stalled when the tab was hidden because `tick()` returned early without running `processAutoRolls()`, and `visibilitychange` only triggered catch-up rolls when revealing the tab (`!document.hidden`). Consequently, periodic background saves, cloud sync pushes, and `pagehide` unloads that occurred while hidden persisted un-updated auto-roll counts.
+
+**Learning:** Hidden tab interval ticks must invoke background simulation logic (`processAutoRolls()`), and transition events (`visibilitychange` and `pagehide`) must reconcile elapsed progress before state persistence or tab unload occurs.
+
+**Prevention:** Ensure timer tick handlers process background catch-up rolls when `document.hidden` is true, and register `visibilitychange` and `pagehide` listeners to process pending progress prior to autosave or cloud sync.
