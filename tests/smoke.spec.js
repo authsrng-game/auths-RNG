@@ -526,7 +526,7 @@ test.describe('auths-RNG smoke tests', () => {
 		});
 		await page.goto(BASE_URL);
 
-		const initialRolls = await page.evaluate(() => {
+		await page.evaluate(() => {
 			return typeof totalRolls !== 'undefined' ? totalRolls : 0;
 		});
 

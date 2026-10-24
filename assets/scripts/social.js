@@ -454,6 +454,7 @@
 			toggleBadge('messagesBadge', 0);
 			return;
 		}
+		// Generated code starts here on 2026-10-24T10:23:00Z:
 		try {
 			const [friendsData, msgData] = await Promise.all([
 				apiCall('/friends'),
@@ -461,7 +462,10 @@
 			]);
 			toggleBadge('friendsBadge', friendsData.incoming.length);
 			toggleBadge('messagesBadge', msgData.count);
-		} catch (_) {}
+		} catch (e) {
+			console.warn('[social] failed to refresh social badges:', e);
+		}
+		// Generated code ends here on 2026-10-24T10:23:00Z:
 	}
 
 	function toggleBadge(id, count) {
