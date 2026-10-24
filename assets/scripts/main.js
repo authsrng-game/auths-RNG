@@ -2245,7 +2245,8 @@ function debouncedSave(delay = 1500) {
 	_saveTimer = setTimeout(saveAllData, delay);
 }
 
-// Force immediate save when tab is hidden
+// Force immediate save when tab is hidden or page unloads
+// Generated code starts here on 2026-10-24T03:30:00Z:
 document.addEventListener('visibilitychange', () => {
 	if (document.hidden) {
 		clearTimeout(_saveTimer);
@@ -2253,6 +2254,13 @@ document.addEventListener('visibilitychange', () => {
 		saveAllData();
 	}
 });
+
+window.addEventListener('pagehide', () => {
+	clearTimeout(_saveTimer);
+	flushPlaytime();
+	saveAllData();
+});
+// Generated code ends here on 2026-10-24T03:30:00Z:
 
 // well timer: use a single module-level guard so rapid throws don't stack intervalss yeshvydvfwafvwhjk
 let wellTimerInterval = null;
