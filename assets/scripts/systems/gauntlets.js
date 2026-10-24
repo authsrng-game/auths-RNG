@@ -580,15 +580,48 @@ console.log(performance.now());
 	};
 
 	// -- render -----------------------------------------------------------
+	// Generated code starts here on 2026-11-07T00:00:00Z:
+	// Cache structural state key and fast-path timer text updates to avoid tearing down and rebuilding ~150 DOM nodes every 4 seconds.
+	let _lastRenderStateKey = null;
+
 	function renderGauntlets() {
+		if (document.hidden) return;
 		const container = document.getElementById('gauntletContainer');
 		if (!container) return;
 		const d = loadData();
 		const rolls = typeof totalRolls !== 'undefined' ? totalRolls : 0;
+		const invSize = typeof inventoryData !== 'undefined' ? inventoryData.size : 0;
 
 		const rollEl = document.getElementById('gauntletRollDisplay');
 		if (rollEl) rollEl.textContent = 'your rolls: ' + rolls.toLocaleString();
 
+		// Structural state includes rolls, inventory count, global rotation index, claim/cooldown status, and serialized gauntlet claim timestamps.
+		const cdStatus = TIERS.map((t) => (canClaim(t, d) ? 'ready' : getCdStr(t, d) ? 'cd' : 'no')).join(',');
+		const stateKey = `${rolls}:${invSize}:${rotIdx()}:${cdStatus}:${JSON.stringify(d)}`;
+
+		if (stateKey === _lastRenderStateKey && container.children.length > 0) {
+			// Fast-path: update rotation and cooldown timer text nodes in-place without DOM teardown
+			const rotEl = container.querySelector('.gauntlet-rotation-text');
+			if (rotEl) {
+				const next = (rotIdx() + 1) * 2 * 24 * 60 * 60 * 1000;
+				rotEl.textContent = 'rotates in ' + formatWellTime(next - Date.now());
+			}
+
+			const cdEls = container.querySelectorAll('.gauntlet-tier');
+			cdEls.forEach((tierEl) => {
+				const tierId = tierEl.dataset.tier;
+				const tier = TIERS.find((t) => t.id === tierId);
+				if (!tier) return;
+				const cdStr = getCdStr(tier, d);
+				const cdNode = tierEl.querySelector('.gauntlet-cd-text');
+				if (cdNode && cdStr) {
+					cdNode.textContent = cdStr;
+				}
+			});
+			return;
+		}
+
+		_lastRenderStateKey = stateKey;
 		container.innerHTML = '';
 
 		TIERS.forEach((tier) => {
