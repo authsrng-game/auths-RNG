@@ -21,3 +21,11 @@
 **Learning:** Hidden tab interval ticks must invoke background simulation logic (`processAutoRolls()`), and transition events (`visibilitychange` and `pagehide`) must reconcile elapsed progress before state persistence or tab unload occurs.
 
 **Prevention:** Ensure timer tick handlers process background catch-up rolls when `document.hidden` is true, and register `visibilitychange` and `pagehide` listeners to process pending progress prior to autosave or cloud sync.
+
+## 2026-10-25 - Expedition Recovery Cooldown Calculation After Background Completion
+
+**Gap:** Expedition recovery cooldown was set relative to `Date.now()` at resolution time (`Date.now() + len.durationMs * 0.5`) instead of completion time (`exp.startTime + exp.duration + len.durationMs * 0.5`), forcing players to wait through a full recovery cooldown starting from when they refocused the tab regardless of how long ago the expedition completed.
+
+**Learning:** Timers or cooldowns triggered upon resolving a completed background state must evaluate their target completion timestamps relative to the actual state completion time (`exp.startTime + exp.duration`) rather than unparameterized `Date.now()`.
+
+**Prevention:** Ensure transition and resolution handlers set post-completion timer targets derived from the completion timestamp rather than real-time invocation timestamps.
