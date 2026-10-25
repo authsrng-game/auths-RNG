@@ -41,7 +41,9 @@ test.describe('Security tests', () => {
 
 	test('auth modal links opening in new tab have rel="noopener noreferrer"', async ({ page }) => {
 		await page.goto(BASE_URL);
-		const targetBlankLinks = page.locator('.altcha-attribution a[target="_blank"], .auth-legal-note a[target="_blank"]');
+		const targetBlankLinks = page.locator(
+			'.altcha-attribution a[target="_blank"], .auth-legal-note a[target="_blank"]'
+		);
 		const count = await targetBlankLinks.count();
 		expect(count).toBeGreaterThan(0);
 		for (let i = 0; i < count; i++) {
