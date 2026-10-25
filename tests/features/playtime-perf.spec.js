@@ -6,7 +6,9 @@ const { test, expect } = require('@playwright/test');
 const BASE_URL = 'http://localhost:8080/';
 
 test.describe('Playtime Display Performance & Storage Flushing', () => {
-	test('updatePlaytimeDisplay updates display efficiently and saveAllData flushes playtime', async ({ page }) => {
+	test('updatePlaytimeDisplay updates display efficiently and saveAllData flushes playtime', async ({
+		page,
+	}) => {
 		await page.addInitScript(() => {
 			if (window.self !== window.top) return;
 			localStorage.setItem('seenLegalConsent', '1');
