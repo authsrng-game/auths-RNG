@@ -2271,13 +2271,46 @@ Last release date on nightly: ${nightlyRDate}`;
 					return Math.max(500, (typeof rollSpeed !== 'undefined' ? rollSpeed : 1) * 1000 + 400);
 				}
 
+				// Generated code starts here on 2026-10-25T16:18:20Z:
+				// Cap catchup rolls per tick to avoid locking up main thread after tab sleep or background throttling.
+				const MAX_AUTO_ROLL_CATCHUP_PER_TICK = 10;
+				// Cap overall catchup to 1800 rolls (~15m at fastest speed) to match existing system bounds.
+				const MAX_AUTO_ROLL_TOTAL_CATCHUP = 1800;
+
 				function tick() {
 					if (typeof isCutscenePlaying !== 'undefined' && isCutscenePlaying) return;
-					if (Date.now() < nextRollAt) return;
-					const rollBtn = document.getElementById('rollBtn');
-					if (rollBtn && !rollBtn.disabled && window.performRoll) window.performRoll();
-					nextRollAt = Date.now() + getAutoRollDelay();
+					const now = Date.now();
+					if (now < nextRollAt) return;
+
+					const delay = getAutoRollDelay();
+					let rollsProcessed = 0;
+
+					// Clamp extreme background gaps (> 1800 rolls) to prevent runaway execution while making capping observable.
+					if (now - nextRollAt > delay * MAX_AUTO_ROLL_TOTAL_CATCHUP) {
+						console.debug('[auto-roll] background gap exceeded bound; catchup capped at ' + MAX_AUTO_ROLL_TOTAL_CATCHUP + ' rolls');
+						nextRollAt = now - delay * MAX_AUTO_ROLL_TOTAL_CATCHUP;
+					}
+
+					while (Date.now() >= nextRollAt && rollsProcessed < MAX_AUTO_ROLL_CATCHUP_PER_TICK) {
+						const rollBtn = document.getElementById('rollBtn');
+						if (!rollBtn || rollBtn.disabled || !window.performRoll) break;
+
+						if (typeof window._resetNextRollAllowedAt === 'function') {
+							window._resetNextRollAllowedAt();
+						}
+						window.performRoll();
+
+						nextRollAt += delay;
+						rollsProcessed++;
+					}
 				}
+
+				document.addEventListener('visibilitychange', () => {
+					if (document.visibilityState === 'visible' && toggleBtn && toggleBtn.classList.contains('active')) {
+						tick();
+					}
+				});
+				// Generated code ends here on 2026-10-25T16:18:20Z:
 
 				toggleBtn.addEventListener('click', () => {
 					toggleBtn.classList.toggle('active');

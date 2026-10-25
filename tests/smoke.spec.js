@@ -565,4 +565,33 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(rollCountAfterRefocus).toBeGreaterThan(rollCountBeforeRefocus);
 	});
 	// Generated code ends here on 2026-04-02T12:00:00Z:
+
+	// Generated code starts here on 2026-10-25T16:18:20Z:
+	test('auto roll performs catchup rolls when elapsed time exceeds delay', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
+		await page.goto(BASE_URL);
+
+		await page.evaluate(() => {
+			const autoBtn = document.getElementById('autoRollBtn');
+			if (autoBtn && !autoBtn.classList.contains('active')) autoBtn.click();
+		});
+
+		const initialRolls = await page.evaluate(() => (typeof totalRolls !== 'undefined' ? totalRolls : 0));
+
+		// Simulate tab being hidden and elapsed time passing before tab refocus
+		await page.evaluate(() => {
+			Object.defineProperty(document, 'hidden', { value: true, writable: true, configurable: true });
+			const realNow = Date.now;
+			Date.now = () => realNow() + 5000;
+			document.dispatchEvent(new Event('visibilitychange'));
+		});
+
+		const postCatchupRolls = await page.evaluate(() => (typeof totalRolls !== 'undefined' ? totalRolls : 0));
+
+		expect(postCatchupRolls - initialRolls).toBeGreaterThanOrEqual(3);
+	});
+	// Generated code ends here on 2026-10-25T16:18:20Z:
 });
