@@ -85,5 +85,32 @@ test.describe('Inventory & Achievements DOM Batching Performance', () => {
 		expect(result.rollsSinceRareText).toContain('rolls since last rare:');
 		expect(result.duration).toBeLessThan(50); // 1,000 iterations should complete in <50ms
 	});
+
+	// Generated code starts here on 2026-11-10T00:00:00Z:
+	test('renderSortedInventory displays empty state and inventory buttons have tooltips', async ({
+		page,
+	}) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('startAnimConfig', JSON.stringify({ enabled: false }));
+			localStorage.removeItem('rarityInventory');
+		});
+
+		await page.goto(BASE_URL);
+
+		const emptyState = page.locator('#inventoryList .empty-inventory');
+		await expect(emptyState).toBeVisible();
+		await expect(emptyState).toHaveText(
+			'your inventory is empty... click roll to start collecting!'
+		);
+
+		const sellAllBtn = page.locator('#sellAllBtn');
+		await expect(sellAllBtn).toHaveAttribute('title', 'sell all unlocked rarities for points');
+
+		const indexBtn = page.locator('#indexBtn');
+		await expect(indexBtn).toHaveAttribute('title', 'view all collected and locked rarities');
+	});
+	// Generated code ends here on 2026-11-10T00:00:00Z:
 });
 // Generated code ends here on 2026-10-14T00:00:00Z:

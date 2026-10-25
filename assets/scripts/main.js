@@ -1797,13 +1797,23 @@ function consumeAllAnomalies() {
 	showAnomalyPopup(`CONSUMED ${count} ANOMALIES! +${(count * 0.5).toFixed(1)}x permanent luck!`);
 }
 
-// Generated code starts here on 2026-10-14T00:00:00Z:
+// Generated code starts here on 2026-11-10T00:00:00Z:
 // Batch sorted inventory DOM element insertions with DocumentFragment to prevent repeated browser style recalculations and layout reflows during inventory renders.
 function renderSortedInventory(mode) {
 	const savedScroll = inventoryList.scrollTop;
 	inventoryList.innerHTML = '';
 
 	let items = Array.from(inventoryData.values());
+
+	if (items.length === 0) {
+		const emptyEl = document.createElement('li');
+		emptyEl.className = 'empty-inventory';
+		emptyEl.style.cssText =
+			'padding: 24px 10px; text-align: center; opacity: 0.45; font-size: 0.85em; list-style: none; pointer-events: none;';
+		emptyEl.textContent = 'your inventory is empty... click roll to start collecting!';
+		inventoryList.appendChild(emptyEl);
+		return;
+	}
 
 	if (mode === 'rare') {
 		items.sort((a, b) => a.rarityObj.chance - b.rarityObj.chance);
@@ -1822,7 +1832,7 @@ function renderSortedInventory(mode) {
 	inventoryList.appendChild(fragment);
 	inventoryList.scrollTop = savedScroll;
 }
-// Generated code ends here on 2026-10-14T00:00:00Z:
+// Generated code ends here on 2026-11-10T00:00:00Z:
 
 const savedPoints = localStorage.getItem(POINTS_KEY);
 if (savedPoints !== null) points = parseInt(savedPoints, 10) || 0;
@@ -1879,9 +1889,9 @@ window.rarityTimestamps = rarityTimestamps;
 // Called by starmap.js after crystallizing - clears inventory, keeps everything else
 window.doCrystallizeReset = function () {
 	inventoryData.clear();
-	inventoryList.innerHTML = '';
 	_lastCollectedCount = -1;
 	updateCollectedCounter();
+	renderSortedInventory(sortSelect ? sortSelect.value : 'rare');
 	rarityTimestamps = new Map();
 	window.rarityTimestamps = rarityTimestamps;
 	localStorage.setItem(RARITY_TIMESTAMPS_KEY, JSON.stringify([]));
@@ -1957,8 +1967,8 @@ async function resetInventory() {
 	window.rarityTimestamps = rarityTimestamps;
 	notifications = [];
 	inventoryData.clear();
-	inventoryList.innerHTML = '';
 	_lastCollectedCount = -1;
+	renderSortedInventory(sortSelect ? sortSelect.value : 'rare');
 	achievementsUnlocked.clear();
 	window.hidePageDot?.(3);
 	window.hidePageDot?.(4);
