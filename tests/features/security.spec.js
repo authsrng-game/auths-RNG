@@ -38,5 +38,15 @@ test.describe('Security tests', () => {
 		await expect(contribLink).toHaveAttribute('rel', 'noopener noreferrer');
 		await expect(contribLink.locator('.name')).toHaveText('<script>alert(1)</script>hacker');
 	});
+
+	test('auth modal links opening in new tab have rel="noopener noreferrer"', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const targetBlankLinks = page.locator('.altcha-attribution a[target="_blank"], .auth-legal-note a[target="_blank"]');
+		const count = await targetBlankLinks.count();
+		expect(count).toBeGreaterThan(0);
+		for (let i = 0; i < count; i++) {
+			await expect(targetBlankLinks.nth(i)).toHaveAttribute('rel', 'noopener noreferrer');
+		}
+	});
 });
 // Generated code ends here on 2026-03-31T00:00:00Z:
