@@ -54,5 +54,39 @@ test.describe('Expeditions system lifecycle logic', () => {
 		expect(res.finalRolls).toBeGreaterThan(res.initialRolls);
 		expect(res.cooldown).toBeGreaterThan(Date.now());
 	});
+
+	// Generated code starts here on 2026-10-25T03:25:00Z:
+	test('accounts for elapsed background time when calculating recovery cooldown', async ({ page }) => {
+		const res = await page.evaluate(() => {
+			// Expedition started 10 minutes ago (600,000ms), 5 minute duration (300,000ms), 2.5 min cooldown (150,000ms).
+			// Completed at t = -300,000ms. Cooldown completed at t = -150,000ms relative to Date.now().
+			const now = Date.now();
+			localStorage.setItem(
+				'expeditionData',
+				JSON.stringify({
+					active: {
+						lengthId: 'short',
+						startTime: now - 600000,
+						duration: 300000,
+						riskMode: false,
+						lockedLuck: 1,
+					},
+					cooldownUntil: 0,
+				})
+			);
+			globalThis.reloadExpeditionsCache?.();
+			renderExpeditions();
+			const d = JSON.parse(localStorage.getItem('expeditionData') || '{}');
+			return {
+				active: d.active,
+				cooldown: d.cooldownUntil,
+				expectedMaxCooldown: now - 150000 + 1000,
+			};
+		});
+		expect(res.active).toBeNull();
+		expect(res.cooldown).toBeLessThanOrEqual(res.expectedMaxCooldown);
+		expect(res.cooldown).toBeLessThan(Date.now());
+	});
+	// Generated code ends here on 2026-10-25T03:25:00Z:
 });
 // Generated code ends here on 2026-03-31T00:00:00Z:

@@ -123,8 +123,11 @@
 		if (best) checkAchievements(best);
 		saveAllData();
 
+		// Generated code starts here on 2026-10-25T03:25:00Z:
+		const completedAt = exp.startTime + exp.duration;
 		d.active = null;
-		d.cooldownUntil = Date.now() + len.durationMs * 0.5;
+		d.cooldownUntil = completedAt + len.durationMs * 0.5;
+		// Generated code ends here on 2026-10-25T03:25:00Z:
 		saveData(d);
 
 		showExpeditionSummary(numRolls, best, anomalyGain, len);
