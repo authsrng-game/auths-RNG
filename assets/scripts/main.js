@@ -821,19 +821,32 @@ function flushPlaytime() {
 	localStorage.setItem(playtimeKey, storedSeconds);
 }
 
+// Generated code starts here on 2026-11-08T00:00:00Z:
+// Lazily cache DOM element reference, guard scalar state updates, skip background tab renders,
+// and remove flushPlaytime from the 1s interval to avoid 3,600 synchronous localStorage.setItem calls/hr.
+let _playtimeDisplayEl = null;
+let _lastPlaytimeSecs = -1;
+
 function updatePlaytimeDisplay() {
-	const display = document.getElementById('playtimeDisplay');
-	if (display) {
-		display.textContent = 'total playtime: ' + formatTimeDisplay(getCurrentTotalSeconds());
+	if (document.hidden) return;
+	const secs = getCurrentTotalSeconds();
+	if (secs === _lastPlaytimeSecs) return;
+	_lastPlaytimeSecs = secs;
+
+	if (!_playtimeDisplayEl) {
+		_playtimeDisplayEl = document.getElementById('playtimeDisplay');
+	}
+	if (_playtimeDisplayEl) {
+		_playtimeDisplayEl.textContent = 'total playtime: ' + formatTimeDisplay(secs);
 	}
 }
 
 updatePlaytimeDisplay();
 
 setInterval(() => {
-	flushPlaytime();
 	updatePlaytimeDisplay();
 }, 1000);
+// Generated code ends here on 2026-11-08T00:00:00Z:
 
 let isCutscenePlaying = false;
 let cutsceneStartedAt = 0;
@@ -1195,6 +1208,7 @@ function updateAchievementsUI() {
 // Generated code ends here on 2026-10-14T00:00:00Z:
 
 function saveAllData() {
+	flushPlaytime();
 	const arr = Array.from(inventoryData.values()).map(({ rarityObj, count }) => ({
 		name: rarityObj.name,
 		chance: rarityObj.chance,
@@ -2297,13 +2311,18 @@ function debouncedSave(delay = 1500) {
 	_saveTimer = setTimeout(saveAllData, delay);
 }
 
-// Force immediate save when tab is hidden
+// Force immediate save when tab is hidden or closing
 document.addEventListener('visibilitychange', () => {
 	if (document.hidden) {
 		clearTimeout(_saveTimer);
 		flushPlaytime();
 		saveAllData();
 	}
+});
+
+window.addEventListener('beforeunload', () => {
+	flushPlaytime();
+	saveAllData();
 });
 
 // well timer: use a single module-level guard so rapid throws don't stack intervalss yeshvydvfwafvwhjk
@@ -2389,6 +2408,8 @@ rollBtn.addEventListener('click', performRoll);
 
 document.addEventListener('visibilitychange', () => {
 	if (document.hidden) return;
+
+	updatePlaytimeDisplay();
 
 	if (luckBoostActive && !isCutscenePlaying && Date.now() >= luckBoostEndTime) {
 		endLuckBoost();

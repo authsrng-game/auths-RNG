@@ -461,7 +461,11 @@
 			]);
 			toggleBadge('friendsBadge', friendsData.incoming.length);
 			toggleBadge('messagesBadge', msgData.count);
-		} catch (_) {}
+		} catch (e) {
+			// Generated code starts here on 2026-10-26T12:00:00Z:
+			console.warn('[social] failed to refresh badges:', e);
+			// Generated code ends here on 2026-10-26T12:00:00Z:
+		}
 	}
 
 	function toggleBadge(id, count) {
