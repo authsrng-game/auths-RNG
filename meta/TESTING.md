@@ -13,6 +13,7 @@ To run automated checks locally before submitting a PR:
 - **Run all lints:** `pnpm lint` (executes `pnpm exec eslint .` and `pnpm exec stylelint "**/*.css"`)
 - **Lint JavaScript:** `pnpm exec eslint .`
 - **Lint CSS:** `pnpm exec stylelint "**/*.css"`
+- **Type check TypeScript:** `pnpm exec tsc --noEmit` (checks TypeScript types without emitting build artifacts)
 - **Run Playwright test suite:** Ensure Chromium is installed (`pnpm exec playwright install chromium --with-deps`), serve the repo locally (`python3 -m http.server 8080`), and execute `pnpm test` (or `pnpm exec playwright test --project=chromium`).
 
 ## Quick start
