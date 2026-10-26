@@ -272,7 +272,18 @@
 		});
 	}
 
-	// Called by gauntlets.js applyReward or the crystallize buttonnnnnnnnnnnnnnnnnnnn
+	// Generated code starts here on 2026-11-15T00:00:00Z:
+	/**
+	 * Freezes current inventory items into a permanent Starmap constellation.
+	 *
+	 * - Preconditions: Requires at least 100 total rolls (`totalRolls >= 100`) and at least 1 collected rarity (`inventoryData.size > 0`).
+	 * - Side Effects: Accrues pending void shards, creates a constellation entry in `starmapData` (granting continuous void shard income),
+	 *   increments permanent luck stacks (`permanentLuckStacks` by +1, providing +0.25x permanent luck), and recalculates luck multipliers.
+	 * - Note: This function creates and persists the constellation; clearing inventory items is performed separately by `doCrystallizeReset()`.
+	 *
+	 * @returns {Object|null} The created constellation object, or `null` if preconditions are not met.
+	 */
+	// Generated code ends here on 2026-11-15T00:00:00Z:
 	window.crystallize = function () {
 		if (inventoryData.size === 0) {
 			window.showAlert?.('nothing to crystallize! collect some rarities first.');
