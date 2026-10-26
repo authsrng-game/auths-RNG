@@ -29,7 +29,6 @@
 
 	// Discord-style pending changes
 	let savedSettings = {};
-	let hasPendingChanges = false;
 
 	// Music guard::::: THE fix for the tidal wave bug. This was the reason why my ears genuinely ached after when I discovered the bug. Phenomenal. fuck
 	// We only ever start/change audio when the key actually changes.
@@ -279,7 +278,6 @@
 		const bar = el('settingsPendingBar');
 		if (bar) {
 			bar.classList.add('show');
-			hasPendingChanges = true;
 		}
 	}
 
@@ -287,7 +285,6 @@
 		const bar = el('settingsPendingBar');
 		if (bar) {
 			bar.classList.remove('show');
-			hasPendingChanges = false;
 		}
 	}
 
@@ -498,7 +495,6 @@
 
 		let cmdHistory = [],
 			histIdx = -1;
-		let consoleOpen = false;
 
 		const dcFlags = {
 			godmode: false,
@@ -903,14 +899,12 @@
 		}
 
 		function openConsole() {
-			consoleOpen = true;
 			inputRow.style.display = 'flex';
 			hintEl.textContent = 'type a command · :help for list · :off to close';
 			inp.focus();
 		}
 
 		function closeConsole() {
-			consoleOpen = false;
 			inputRow.style.display = 'none';
 			hintEl.textContent = 'type : to open console · :help for commands';
 			inp.value = '';
