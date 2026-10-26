@@ -20,7 +20,9 @@ test('Theme Editor undo history and custom script import safety', async ({ page 
 
 	expect(await page.evaluate(() => !document.getElementById('te-undo').disabled)).toBe(true);
 	await page.evaluate(() => document.getElementById('te-undo').click());
-	expect(await page.evaluate(() => document.getElementById('te-bgColor').value)).not.toBe('#123456');
+	expect(await page.evaluate(() => document.getElementById('te-bgColor').value)).not.toBe(
+		'#123456'
+	);
 
 	const themeData = JSON.stringify({
 		name: 'custom-anim',
