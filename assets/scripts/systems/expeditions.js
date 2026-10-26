@@ -27,7 +27,8 @@
 				{ active: null, cooldownUntil: 0 },
 				JSON.parse(localStorage.getItem(EXPED_KEY) || '{}')
 			);
-		} catch {
+		} catch (e) {
+			console.warn('[expeditions] failed to parse expedition state:', e);
 			_cachedExpedData = { active: null, cooldownUntil: 0 };
 		}
 		return _cachedExpedData;

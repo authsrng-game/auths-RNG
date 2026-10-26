@@ -112,7 +112,8 @@
 				{ cooldownUntil: 0, session: null, metWelcome: false, log: [] },
 				d
 			);
-		} catch {
+		} catch (e) {
+			console.warn('[dealer] failed to parse dealer state:', e);
 			_cachedDealerData = { cooldownUntil: 0, session: null, metWelcome: false, log: [] };
 		}
 		return _cachedDealerData;
