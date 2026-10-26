@@ -460,12 +460,15 @@ function buyPotion(potionType) {
 }
 
 function usePotion(potionType) {
-	if (!(playerPotions[potionType] > 0)) {
-		window.showAlert(`you don't have any ${potionData[potionType].name} potions!`);
+	const data = potionData[potionType];
+	if (!data) {
+		window.showAlert(`Unknown potion type: ${potionType}`);
 		return;
 	}
-
-	const data = potionData[potionType];
+	if (!(playerPotions[potionType] > 0)) {
+		window.showAlert(`you don't have any ${data.name} potions!`);
+		return;
+	}
 
 	if (potionType === 'duplicate') {
 		duplicateRollsLeft = data.rolls;
