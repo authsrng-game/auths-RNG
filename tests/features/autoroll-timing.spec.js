@@ -4,9 +4,7 @@ const { test, expect } = require('@playwright/test');
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
 
 test.describe('Auto Roll background timing reconciliation', () => {
-	test('catches up auto-rolls on visibilitychange when tab was backgrounded', async ({
-		page,
-	}) => {
+	test('catches up auto-rolls on visibilitychange when tab was backgrounded', async ({ page }) => {
 		await page.addInitScript(() => {
 			if (window.self !== window.top) return;
 			localStorage.setItem('seenLegalConsent', '1');
