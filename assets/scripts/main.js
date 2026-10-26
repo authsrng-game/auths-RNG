@@ -520,7 +520,10 @@ function usePotion(potionType) {
 }
 window.usePotion = usePotion;
 
+// Generated code starts here on 2026-11-15T00:00:00Z:
+// Fast-path recalcPotionLuck when no active potions exist and multiplier is 1 to avoid array filter allocations and unnecessary recalcLuckMultiplier calls every second.
 function recalcPotionLuck() {
+	if (activePotions.length === 0 && potionLuckMultiplier === 1) return;
 	potionLuckMultiplier = 1;
 	if (!isCutscenePlaying) activePotions = activePotions.filter((p) => p.endTime > Date.now());
 	activePotions.forEach((p) => {
@@ -528,6 +531,7 @@ function recalcPotionLuck() {
 	});
 	recalcLuckMultiplier();
 }
+// Generated code ends here on 2026-11-15T00:00:00Z:
 
 // Generated code starts here on 2026-11-02T00:00:00Z:
 // Lazily cache DOM elements and update textContent on active potion list items in-place to prevent DOM churn and redundant style setter calls on periodic timer ticks.
@@ -730,12 +734,20 @@ function recalcLuckMultiplier() {
 	updateLuckDisplay();
 }
 
-function updateLuckDisplay() {
-	const luckEl = document.getElementById('luckMultiplier');
-	const breakdownEl = document.getElementById('luckBreakdown');
-	if (!luckEl || !breakdownEl) return;
+// Generated code starts here on 2026-11-15T00:00:00Z:
+// Lazily cache DOM element references and guard text node updates to prevent redundant DOM queries and style/layout invalidations on repeat luck updates.
+let _luckEl = null;
+let _breakdownEl = null;
 
-	luckEl.textContent = `luck multiplier: ${formatMult(globalLuckMultiplier)}x`;
+function updateLuckDisplay() {
+	if (!_luckEl) _luckEl = document.getElementById('luckMultiplier');
+	if (!_breakdownEl) _breakdownEl = document.getElementById('luckBreakdown');
+	if (!_luckEl || !_breakdownEl) return;
+
+	const luckText = `luck multiplier: ${formatMult(globalLuckMultiplier)}x`;
+	if (_luckEl.textContent !== luckText) {
+		_luckEl.textContent = luckText;
+	}
 
 	const parts = [];
 	if (anomaliesUsed > 0) {
@@ -749,8 +761,6 @@ function updateLuckDisplay() {
 	if (duplicateRollsLeft > 0) parts.push(`duplicate: ${duplicateRollsLeft} rolls left`);
 
 	// starmap bonus
-	// Generated code starts here on 2026-09-22T00:00:00Z:
-	// Use cached getStarmapConstellationsCount to avoid reading localStorage and parsing JSON in updateLuckDisplay.
 	const starmapMult =
 		typeof window.getStarmapLuckBonus === 'function' ? window.getStarmapLuckBonus() : 1;
 	if (starmapMult > 1) {
@@ -760,10 +770,13 @@ function updateLuckDisplay() {
 				: JSON.parse(localStorage.getItem('starmapData') || '{}').constellations?.length || 0;
 		parts.push(`starmap: +${formatMult(starmapMult - 1)}x (${constCount} constellations)`);
 	}
-	// Generated code ends here on 2026-09-22T00:00:00Z:
 
-	breakdownEl.textContent = parts.length ? parts.join(' • ') : 'base luck (no modifiers active)';
+	const breakdownText = parts.length ? parts.join(' • ') : 'base luck (no modifiers active)';
+	if (_breakdownEl.textContent !== breakdownText) {
+		_breakdownEl.textContent = breakdownText;
+	}
 }
+// Generated code ends here on 2026-11-15T00:00:00Z:
 
 let luckBoostActive = false;
 let luckBoostEndTime = 0;
