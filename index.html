@@ -2303,17 +2303,58 @@ Last release date on nightly: ${nightlyRDate}`;
 					return () => stop();
 				}
 
+				// Generated code starts here on 2026-10-26T16:28:17Z:
+				const MAX_AUTO_ROLL_CATCHUP_PER_TICK = 10;
+				const MAX_AUTO_ROLL_TOTAL_CATCHUP = 1800;
+
 				function getAutoRollDelay() {
 					return Math.max(500, (typeof rollSpeed !== 'undefined' ? rollSpeed : 1) * 1000 + 400);
 				}
 
 				function tick() {
 					if (typeof isCutscenePlaying !== 'undefined' && isCutscenePlaying) return;
-					if (Date.now() < nextRollAt) return;
-					const rollBtn = document.getElementById('rollBtn');
-					if (rollBtn && !rollBtn.disabled && window.performRoll) window.performRoll();
-					nextRollAt = Date.now() + getAutoRollDelay();
+					const now = Date.now();
+
+					const delay = getAutoRollDelay();
+
+					// Guard against clock going backwards or nextRollAt stuck far in the future
+					if (nextRollAt > now + delay * 2) {
+						nextRollAt = now;
+					}
+
+					if (now < nextRollAt) return;
+
+					const elapsedGap = now - nextRollAt;
+					const totalPendingRolls = 1 + Math.floor(elapsedGap / delay);
+
+					if (totalPendingRolls > MAX_AUTO_ROLL_TOTAL_CATCHUP) {
+						console.debug(
+							`[autoroll] background gap capped at ${MAX_AUTO_ROLL_TOTAL_CATCHUP} rolls`
+						);
+						nextRollAt = now - MAX_AUTO_ROLL_TOTAL_CATCHUP * delay;
+					}
+
+					let rollsThisTick = 0;
+					while (Date.now() >= nextRollAt && rollsThisTick < MAX_AUTO_ROLL_CATCHUP_PER_TICK) {
+						if (typeof isCutscenePlaying !== 'undefined' && isCutscenePlaying) break;
+						const rollBtn = document.getElementById('rollBtn');
+						if (!rollBtn || rollBtn.disabled || !window.performRoll) break;
+
+						if (typeof window._resetNextRollAllowedAt === 'function') {
+							window._resetNextRollAllowedAt();
+						}
+						window.performRoll();
+						rollsThisTick++;
+						nextRollAt += delay;
+					}
 				}
+
+				document.addEventListener('visibilitychange', () => {
+					if (!document.hidden && toggleBtn.classList.contains('active')) {
+						tick();
+					}
+				});
+				// Generated code ends here on 2026-10-26T16:28:17Z:
 
 				toggleBtn.addEventListener('click', () => {
 					toggleBtn.classList.toggle('active');
