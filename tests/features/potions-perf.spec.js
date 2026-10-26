@@ -73,5 +73,35 @@ test.describe('Active Potions Display Performance & State Caching', () => {
 			window.usePotion = null; // restore / test helper
 		});
 	});
+
+	test('recalcPotionLuck short-circuits when no active potions are present', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+			localStorage.setItem('startAnimConfig', JSON.stringify({ enabled: false }));
+		});
+
+		await page.goto(BASE_URL);
+
+		// Verify initial state: no active potions and short-circuit condition holds
+		const result = await page.evaluate(() => {
+			let recalcCalled = false;
+			const origRecalc = window.recalcLuckMultiplier;
+			window.recalcLuckMultiplier = () => {
+				recalcCalled = true;
+				if (origRecalc) origRecalc();
+			};
+
+			// Calling recalcPotionLuck when activePotions is empty and multiplier is 1 should short-circuit
+			window.recalcPotionLuck();
+			const wasShortCircuited = !recalcCalled;
+
+			// Restore original function
+			window.recalcLuckMultiplier = origRecalc;
+			return { wasShortCircuited };
+		});
+
+		expect(result.wasShortCircuited).toBe(true);
+	});
 });
 // Generated code ends here on 2026-11-02T00:00:00Z:
