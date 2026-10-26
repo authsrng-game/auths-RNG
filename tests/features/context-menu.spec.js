@@ -1,21 +1,23 @@
 /* eslint-disable no-undef */
-// Generated code starts here on 2026-06-18T00:00:00Z:
+// Generated code starts here on 2026-03-31T00:00:00Z:
 const { test, expect } = require('@playwright/test');
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
 
 test.describe('Context menu FAQ link', () => {
-	test('open faq menu item triggers window.open with correct FAQ path', async ({ page }) => {
+	test('open faq menu item triggers window.open with correct FAQ path and window features', async ({
+		page,
+	}) => {
 		await page.addInitScript(() => {
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('seenReleaseTag', 'v9.7');
 		});
 		await page.goto(BASE_URL);
 
-		const openedUrl = await page.evaluate(async () => {
-			let urlOpened = null;
-			window.open = (url) => {
-				urlOpened = url;
+		const openArgs = await page.evaluate(async () => {
+			let recordedArgs = null;
+			window.open = (...args) => {
+				recordedArgs = args;
 			};
 
 			const event = new MouseEvent('contextmenu', {
@@ -31,10 +33,10 @@ test.describe('Context menu FAQ link', () => {
 			if (faqItem) {
 				faqItem.click();
 			}
-			return urlOpened;
+			return recordedArgs;
 		});
 
-		expect(openedUrl).toBe('/assets/frontend/FAQ.html');
+		expect(openArgs).toEqual(['/assets/frontend/FAQ.html', '_blank', 'noopener,noreferrer']);
 	});
 });
-// Generated code ends here on 2026-06-18T00:00:00Z:
+// Generated code ends here on 2026-03-31T00:00:00Z:
