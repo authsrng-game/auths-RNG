@@ -54,5 +54,48 @@ test.describe('Dealer System Performance & State Caching', () => {
 		const statsEl = page.locator('#dealerContainer .dealer-session-stats');
 		await expect(statsEl).toContainText('his attention: tier 3');
 	});
+
+	// Generated code starts here on 2026-11-03T14:00:00Z:
+	test('accounts for elapsed background time when calculating encounter cooldown on session timeout', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+
+		const res = await page.evaluate(() => {
+			localStorage.setItem('dealerUnlocked', '1');
+			const now = Date.now();
+			// Session started 1 hour ago (3,600,000ms), 5 min duration (300,000ms), 3 hour encounter cooldown (10,800,000ms).
+			// Session expired 55 minutes ago (3,300,000ms relative to Date.now()).
+			// Remaining cooldown should be ~2 hours 5 minutes (approx 7,500,000ms from now).
+			const sessionData = {
+				cooldownUntil: 0,
+				session: {
+					deck: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+					discard: [],
+					tier: 0,
+					handsPlayed: 0,
+					correctReads: 0,
+					active: null,
+					startedAt: now - 3600000,
+				},
+				metWelcome: true,
+				log: [],
+			};
+			localStorage.setItem('dealerData', JSON.stringify(sessionData));
+			if (window.reloadDealerCache) window.reloadDealerCache();
+			if (window.renderDealer) window.renderDealer();
+			const d = JSON.parse(localStorage.getItem('dealerData') || '{}');
+			return {
+				session: d.session,
+				cooldownUntil: d.cooldownUntil,
+				expectedMaxCooldown: now - 3600000 + 300000 + 10800000 + 1000,
+			};
+		});
+
+		expect(res.session).toBeNull();
+		expect(res.cooldownUntil).toBeLessThanOrEqual(res.expectedMaxCooldown);
+		expect(res.cooldownUntil).toBeGreaterThan(0);
+	});
+	// Generated code ends here on 2026-11-03T14:00:00Z:
 });
 // Generated code ends here on 2026-10-26T00:00:00Z:
