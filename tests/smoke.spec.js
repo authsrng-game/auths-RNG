@@ -180,6 +180,26 @@ test.describe('auths-RNG smoke tests', () => {
 	});
 	// Generated code ends here on 2026-09-16T12:00:00Z:
 
+	// Generated code starts here on 2026-10-27T00:00:00Z:
+	test('pressing escape in rarity index modal clears search input before closing modal', async ({ page }) => {
+		await page.goto(BASE_URL);
+		await page.evaluate(() => document.getElementById('indexBtn')?.click());
+		const indexModal = page.locator('#indexModal');
+		await expect(indexModal).toHaveClass(/show/);
+
+		const searchInput = page.locator('#indexSearch');
+		await searchInput.fill('Common');
+		await expect(searchInput).toHaveValue('Common');
+
+		await page.keyboard.press('Escape');
+		await expect(searchInput).toHaveValue('');
+		await expect(indexModal).toHaveClass(/show/);
+
+		await page.keyboard.press('Escape');
+		await expect(indexModal).not.toHaveClass(/show/);
+	});
+	// Generated code ends here on 2026-10-27T00:00:00Z:
+
 	// Generated code starts here on 2026-06-18T01:30:00Z:
 	test('account button is a button element with an accessible aria-label', async ({ page }) => {
 		await page.goto(BASE_URL);
