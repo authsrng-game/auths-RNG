@@ -120,9 +120,21 @@
 	}
 	// Generated code ends here on 2026-10-27T00:00:00Z:
 
+	// Generated code starts here on 2026-11-20T00:00:00Z:
+	// Early-return when document.hidden is true to avoid redundant DOM queries and layout geometry checks (offsetWidth/offsetHeight) in background tabs, and reconcile immediately on visibilitychange.
 	function scanAll() {
+		if (document.hidden) return;
 		TOOLTIPS.forEach(tryPlace);
 	}
+
+	window.scanAll = scanAll;
+
+	document.addEventListener('visibilitychange', () => {
+		if (!document.hidden) {
+			scanAll();
+		}
+	});
+	// Generated code ends here on 2026-11-20T00:00:00Z:
 
 	let popoverEl = null;
 
