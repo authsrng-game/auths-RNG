@@ -27,8 +27,24 @@
 		return data;
 	}
 
+	/**
+	 * Calculates the number of unread system notifications in memory.
+	 *
+	 * @returns {number} Count of system notification objects where `read === false`.
+	 */
 	window.getSystemUnread = () => messages.filter((m) => !m.read).length;
 
+	/**
+	 * Renders system notification elements into `#notifList`.
+	 *
+	 * Trims pre-existing notification items, hides `#notifEmpty` when messages exist,
+	 * sorts messages descending by timestamp (`ts`), and escapes HTML fields (`from`, `subject`,
+	 * `body`, `id`) with `escHtml` to protect against XSS vulnerabilities.
+	 *
+	 * Attaches single-use click handlers to unread elements to notify the backend API
+	 * (`POST /system-messages/:id/read`), mark local message state as read, remove the `unread`
+	 * CSS class, and trigger notification badge UI updates.
+	 */
 	window.renderSystemMessages = function () {
 		const list = document.getElementById('notifList');
 		const empty = document.getElementById('notifEmpty');
