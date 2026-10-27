@@ -147,7 +147,10 @@
 				},
 				parsed
 			);
-		} catch {
+		} catch (e) {
+			// Generated code starts here on 2026-03-31T23:30:00Z:
+			console.warn('[starmap] failed to parse starmap state:', e);
+			// Generated code ends here on 2026-03-31T23:30:00Z:
 			_cachedData = {
 				constellations: [],
 				voidShards: 0,
