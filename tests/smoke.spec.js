@@ -181,7 +181,9 @@ test.describe('auths-RNG smoke tests', () => {
 	// Generated code ends here on 2026-09-16T12:00:00Z:
 
 	// Generated code starts here on 2026-10-27T00:00:00Z:
-	test('pressing escape in rarity index modal clears search input before closing modal', async ({ page }) => {
+	test('pressing escape in rarity index modal clears search input before closing modal', async ({
+		page,
+	}) => {
 		await page.goto(BASE_URL);
 		await page.evaluate(() => document.getElementById('indexBtn')?.click());
 		const indexModal = page.locator('#indexModal');
