@@ -2875,11 +2875,18 @@ document.addEventListener('DOMContentLoaded', function () {
 	});
 
 	// Close on Escape key
+	// Generated code starts here on 2026-10-27T00:00:00Z:
 	document.addEventListener('keydown', (e) => {
 		if (e.key === 'Escape' && indexModal.classList.contains('show')) {
-			closeIndex();
+			if (indexSearch && indexSearch.value.trim() !== '') {
+				indexSearch.value = '';
+				updateIndexDisplay('');
+			} else {
+				closeIndex();
+			}
 		}
 	});
+	// Generated code ends here on 2026-10-27T00:00:00Z:
 });
 
 document.addEventListener('keydown', (e) => {
