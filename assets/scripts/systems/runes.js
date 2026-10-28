@@ -454,13 +454,16 @@
 	}
 	// Generated code ends here on 2026-10-20T00:00:00Z:
 
-	document.addEventListener('visibilitychange', () => {
-		if (document.visibilityState === 'visible') {
-			if (gift === 'wealth') updateRuneWealth();
-			if (upgrades.anomalyMachine) updateRuneAnomalyMachine();
-			if (upgrades.dopamineAttack) updateDopamineAttack();
-		}
-	});
+	// Generated code starts here on 2026-10-28T03:04:04Z:
+	function reconcileRunePassiveProgress() {
+		if (gift === 'wealth') updateRuneWealth();
+		if (upgrades.anomalyMachine) updateRuneAnomalyMachine();
+		if (upgrades.dopamineAttack) updateDopamineAttack();
+	}
+
+	document.addEventListener('visibilitychange', reconcileRunePassiveProgress);
+	window.addEventListener('pagehide', reconcileRunePassiveProgress);
+	// Generated code ends here on 2026-10-28T03:04:04Z:
 	// Generated code ends here on 2026-03-31T22:00:00Z:
 
 	function startDopamineAttack() {

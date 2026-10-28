@@ -66,4 +66,40 @@ test.describe('Point Printer timing reconciliation', () => {
 		// Next tick should add only 1 additional tick (5 points), not another 3600 seconds
 		expect(result.pointsNextTick).toBe(18005);
 	});
+
+	// Generated code starts here on 2026-10-28T03:04:04Z:
+	test('reconciles printer points on pagehide and hidden visibilitychange', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(() => {
+			shopUpgrades.printer = 5;
+			points = 0;
+			updatePointsDisplay();
+			updateShopUI();
+
+			_lastPrinterTick = Date.now() - 10000;
+
+			// Trigger pagehide event
+			window.dispatchEvent(new globalThis.Event('pagehide'));
+			const pagehidePoints = points;
+
+			_lastPrinterTick = Date.now() - 10000;
+
+			// Trigger visibilitychange to hidden
+			Object.defineProperty(document, 'hidden', { value: true, configurable: true });
+			Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+			document.dispatchEvent(new globalThis.Event('visibilitychange'));
+			const hiddenPoints = points;
+
+			return { pagehidePoints, hiddenPoints };
+		});
+
+		expect(result.pagehidePoints).toBeGreaterThanOrEqual(50);
+		expect(result.hiddenPoints).toBeGreaterThanOrEqual(100);
+	});
+	// Generated code ends here on 2026-10-28T03:04:04Z:
 });

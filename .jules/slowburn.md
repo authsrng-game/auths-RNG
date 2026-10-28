@@ -29,3 +29,11 @@
 **Learning:** Timers or cooldowns triggered upon resolving a completed background state must evaluate their target completion timestamps relative to the actual state completion time (`exp.startTime + exp.duration`) rather than unparameterized `Date.now()`.
 
 **Prevention:** Ensure transition and resolution handlers set post-completion timer targets derived from the completion timestamp rather than real-time invocation timestamps.
+
+## 2026-10-28 - Passive Generation Reconciliation on Tab Backgrounding and Pagehide
+
+**Gap:** Point printer and Rune passive generators (Gift of Wealth, Anomaly Machine, Dopamine Attack) only reconciled elapsed progress when `document.visibilityState === 'visible'`. When a tab was backgrounded (`document.hidden = true`) or unloaded (`pagehide`), `saveAllData()` persisted stale scalar values to `localStorage`, permanently discarding accrued progress on unload.
+
+**Learning:** Event listeners for `visibilitychange` (both visible and hidden transitions) and `pagehide` must reconcile in-memory passive generator progress before `saveAllData()` writes state to `localStorage`.
+
+**Prevention:** Always invoke passive progress reconciliation functions during `visibilitychange` and `pagehide` event handlers prior to executing state persistence calls.

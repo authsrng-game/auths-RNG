@@ -1368,9 +1368,7 @@ function updatePrinterPoints() {
 setInterval(updatePrinterPoints, 1000);
 
 document.addEventListener('visibilitychange', () => {
-	if (document.visibilityState === 'visible') {
-		updatePrinterPoints();
-	}
+	updatePrinterPoints();
 });
 // Generated code ends here on 2026-11-03T12:00:00Z.
 
@@ -2259,6 +2257,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 window.addEventListener('pagehide', () => {
+	updatePrinterPoints();
 	clearTimeout(_saveTimer);
 	flushPlaytime();
 	saveAllData();
