@@ -6,6 +6,27 @@ const { test, expect } = require('@playwright/test');
 const BASE_URL = 'http://localhost:8080/';
 
 test.describe('gauntlets system completion logic', () => {
+	test('logs warning when gauntletData in localStorage contains invalid JSON', async ({
+		page,
+	}) => {
+		const consoleWarnings = [];
+		page.on('console', (msg) => {
+			if (msg.type() === 'warning') consoleWarnings.push(msg.text());
+		});
+
+		await page.goto(BASE_URL);
+
+		await page.evaluate(() => {
+			localStorage.setItem('gauntletData', '{invalid_json');
+			renderGauntlets();
+		});
+
+		const gauntletWarn = consoleWarnings.find((msg) =>
+			msg.includes('[gauntlets] failed to parse gauntlet state:')
+		);
+		expect(gauntletWarn).toBeTruthy();
+	});
+
 	test('easy tier completion respects rarity presence and acquisition timestamps', async ({
 		page,
 	}) => {
