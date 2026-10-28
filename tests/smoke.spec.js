@@ -79,6 +79,9 @@ test.describe('auths-RNG smoke tests', () => {
 		await page.goto(BASE_URL);
 		await expect(page.locator('#prevPage')).toHaveAttribute('aria-label', 'Previous page');
 		await expect(page.locator('#nextPage')).toHaveAttribute('aria-label', 'Next page');
+		await expect(page.locator('#prevPage')).toHaveAttribute('title', 'Previous page (A)');
+		await expect(page.locator('#nextPage')).toHaveAttribute('title', 'Next page (D)');
+		await expect(page.locator('#rollBtn')).toHaveAttribute('title', 'Roll for a rarity (Space)');
 	});
 	// Generated code ends here on 2026-06-18T00:30:00Z:
 
