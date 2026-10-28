@@ -19,6 +19,7 @@
 	// Generated code starts here on 2026-09-22T00:00:00Z:
 	// In-memory cache for expedition state to eliminate redundant synchronous localStorage reads and JSON parses during UI render loops.
 	let _cachedExpedData = null;
+	let _lastExpedStateKey = null;
 
 	function loadData(force = false) {
 		if (_cachedExpedData && !force) return _cachedExpedData;
@@ -36,11 +37,13 @@
 
 	function saveData(d) {
 		_cachedExpedData = d;
+		_lastExpedStateKey = null;
 		localStorage.setItem(EXPED_KEY, JSON.stringify(d));
 	}
 
 	window.reloadExpeditionsCache = function () {
 		_cachedExpedData = null;
+		_lastExpedStateKey = null;
 		return loadData(true);
 	};
 	// Generated code ends here on 2026-09-22T00:00:00Z:
@@ -152,6 +155,7 @@
 	}
 
 	function renderExpeditions() {
+		if (document.hidden) return;
 		const container = document.getElementById('expeditionsContainer');
 		if (!container) return;
 
@@ -173,6 +177,32 @@
 			return;
 		}
 
+		const onCooldown = Date.now() < d.cooldownUntil;
+		const stateKey = `${rolls}:${onCooldown}:${d.active ? d.active.lengthId + ':' + d.active.riskMode : 'none'}`;
+
+		if (stateKey === _lastExpedStateKey && container.children.length > 0) {
+			if (d.active) {
+				const remaining = d.active.startTime + d.active.duration - Date.now();
+				const pct = Math.min(100, 100 - (remaining / d.active.duration) * 100);
+				const timerEl = container.querySelector('.expedition-active-timer');
+				const barEl = container.querySelector('.gauntlet-bar');
+				if (timerEl && barEl) {
+					timerEl.textContent = 'returns in ' + fmtTime(Math.max(0, remaining));
+					barEl.style.width = pct + '%';
+					return;
+				}
+			} else if (onCooldown) {
+				const cdEl = container.querySelector('.expedition-cooldown-box');
+				if (cdEl) {
+					cdEl.textContent = `expeditions recovering... available in ${fmtTime(d.cooldownUntil - Date.now())}`;
+					return;
+				}
+			} else {
+				return;
+			}
+		}
+
+		_lastExpedStateKey = stateKey;
 		container.innerHTML = '';
 
 		if (d.active) {
@@ -190,14 +220,12 @@
 			return;
 		}
 
-		if (Date.now() < d.cooldownUntil) {
+		if (onCooldown) {
 			const cd = document.createElement('div');
 			cd.className = 'expedition-cooldown-box';
 			cd.textContent = `expeditions recovering... available in ${fmtTime(d.cooldownUntil - Date.now())}`;
 			container.appendChild(cd);
 		}
-
-		const onCooldown = Date.now() < d.cooldownUntil;
 
 		LENGTHS.forEach((len) => {
 			const locked = rolls < len.unlockRolls;

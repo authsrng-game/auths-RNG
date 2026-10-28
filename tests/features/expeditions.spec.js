@@ -1,6 +1,6 @@
 // Generated code starts here on 2026-03-31T00:00:00Z:
 const { test, expect } = require('@playwright/test');
-/* global renderExpeditions, startExpedition, totalRolls */
+/* global document, renderExpeditions, startExpedition, totalRolls */
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080/';
 
@@ -53,6 +53,43 @@ test.describe('Expeditions system lifecycle logic', () => {
 		expect(res.active).toBeNull();
 		expect(res.finalRolls).toBeGreaterThan(res.initialRolls);
 		expect(res.cooldown).toBeGreaterThan(Date.now());
+	});
+
+	test('fast-paths active timer updates in-place and respects tab visibility', async ({ page }) => {
+		await page.evaluate(() => {
+			startExpedition('short', false);
+		});
+
+		const container = page.locator('#expeditionsContainer');
+		await expect(container).toBeVisible();
+
+		const timerEl = page.locator('#expeditionsContainer .expedition-active-timer');
+		await expect(timerEl).toContainText('returns in');
+
+		// Verify in-place fast-path update on subsequent renderExpeditions call
+		const result = await page.evaluate(() => {
+			const firstChild = document.querySelector('#expeditionsContainer .expedition-active-box');
+			renderExpeditions();
+			const secondChild = document.querySelector('#expeditionsContainer .expedition-active-box');
+			return { sameElement: firstChild === secondChild };
+		});
+
+		expect(result.sameElement).toBe(true);
+
+		// Verify background tab visibility guard skips execution
+		const skippedInBg = await page.evaluate(() => {
+			const container = document.getElementById('expeditionsContainer');
+			const prevText = container.innerHTML;
+			Object.defineProperty(document, 'hidden', { value: true, configurable: true });
+			try {
+				renderExpeditions();
+			} finally {
+				Object.defineProperty(document, 'hidden', { value: false, configurable: true });
+			}
+			return container.innerHTML === prevText;
+		});
+
+		expect(skippedInBg).toBe(true);
 	});
 });
 // Generated code ends here on 2026-03-31T00:00:00Z:
