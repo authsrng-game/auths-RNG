@@ -1063,10 +1063,14 @@ You will probably know what it does when you install it in.
    'antimatter','oh-my-god','market-crash','phenomenon','ok-bro','summer'
   ].forEach(id => achievementsUnlocked.add(id));
 
+  localStorage.setItem('expeditionsUnlocked', '1');
+  localStorage.setItem('dealerUnlocked', '1');
   localStorage.setItem('mutationsUnlocked', '1');
   localStorage.setItem('starmapUnlocked', '1');
   window.unlockPageDot?.(3);
   window.unlockPageDot?.(4);
+  window.unlockPageDot?.(5);
+  window.unlockPageDot?.(6);
 
   localStorage.setItem('daily_lastClaim', '2000-01-01');
   localStorage.setItem('weekly_lastClaim', '0');
@@ -1089,7 +1093,7 @@ You will probably know what it does when you install it in.
     totalDropped: 999
   }));
   localStorage.setItem('runeBlocks', '999999');
-  window.unlockPageDot?.(5);
+  window.unlockPageDot?.(7);
   window.renderRunes?.();
 
   saveAllData();
@@ -1105,6 +1109,8 @@ You will probably know what it does when you install it in.
   renderSortedInventory(document.getElementById('sortSelect')?.value || 'rare');
   window.refreshAllDisplays?.();
   window.renderGauntlets?.();
+  window.renderExpeditions?.();
+  window.renderDealer?.();
   window.renderStarmap?.();
   window.renderMutations?.();
 
@@ -1123,6 +1129,8 @@ You will probably know what it does when you install it in.
 | all shop upgrades | maxed |
 | all potions | 99 of each |
 | all achievements | unlocked |
+| expeditions page | unlocked |
+| dealer page | unlocked |
 | mutations page | unlocked |
 | starmap page | unlocked |
 | void shards | 999,999 |
