@@ -975,11 +975,23 @@
 			return { ok: true };
 		}
 		if (r.status === 409) await onStale({ ...r.data, code: 'conflict' });
+		console.warn('[sync] restore from history failed:', {
+			id,
+			baseRev: meta.baseRev,
+			status: r.status,
+			error: r.error || r.data.error || 'unknown error',
+		});
 		return { ok: false, error: r.data.error || 'restore failed' };
 	}
 
 	async function listHistory() {
 		const r = await api('GET', '/history');
+		if (r.status !== 200) {
+			console.warn('[sync] failed to list restore history:', {
+				status: r.status,
+				error: r.error || r.data.error || 'unknown error',
+			});
+		}
 		return r.status === 200 ? r.data.entries : null;
 	}
 

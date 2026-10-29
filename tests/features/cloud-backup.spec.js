@@ -1,7 +1,7 @@
 // Generated code starts here on 2026-03-31T22:30:00Z:
 const { test, expect } = require('@playwright/test');
 
-/* global window, document */
+/* global window */
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
 
@@ -16,77 +16,49 @@ test.describe('cloud backup observability', () => {
 			}
 		});
 
-		await page.goto(BASE_URL);
-
-		// Mock user login session
-		await page.evaluate(() => {
+		await page.addInitScript(() => {
 			localStorage.setItem('authToken', 'test-token');
 			localStorage.setItem('authUsername', 'testuser');
 			localStorage.setItem('authUid', 'u123');
-			localStorage.setItem('cloudBackupEnabled', 'true');
-			if (window.AuthAccount) {
-				document.dispatchEvent(new CustomEvent('authchange'));
-			}
+			localStorage.setItem('__sync_meta', JSON.stringify({ uid: 'u123', baseRev: 1 }));
 		});
 
-		// Mock API failure for POST /api/backup (manual backup rejection)
-		await page.route('https://backup.authsrng.xyz/api/backup', async (route) => {
-			const req = route.request();
-			if (req.method() === 'POST') {
-				await route.fulfill({
-					status: 400,
-					contentType: 'application/json',
-					body: JSON.stringify({ error: 'invalid payload format' }),
-				});
-			} else if (req.method() === 'GET') {
-				await route.fulfill({
-					status: 500,
-					contentType: 'application/json',
-					body: JSON.stringify({ error: 'server crash' }),
-				});
-			} else if (req.method() === 'DELETE') {
-				await route.fulfill({
-					status: 403,
-					contentType: 'application/json',
-					body: JSON.stringify({ error: 'access denied' }),
-				});
-			} else {
-				await route.continue();
-			}
+		await page.goto(BASE_URL);
+
+		// Mock API failures for GET /api/save/history and POST /api/save/restore
+		await page.route('https://backup.authsrng.xyz/api/save/history', async (route) => {
+			await route.fulfill({
+				status: 500,
+				contentType: 'application/json',
+				body: JSON.stringify({ error: 'server crash' }),
+			});
 		});
 
-		// Auto-accept confirm dialogs for restore and delete
-		page.on('dialog', (dialog) => dialog.accept());
+		await page.route('https://backup.authsrng.xyz/api/save/restore', async (route) => {
+			await route.fulfill({
+				status: 400,
+				contentType: 'application/json',
+				body: JSON.stringify({ error: 'invalid restore id' }),
+			});
+		});
 
-		// Trigger manual backup, restore, and delete in page context
+		// Trigger Sync listHistory and restoreFromHistory in page context
 		await page.evaluate(async () => {
-			const btnBackup = document.getElementById('cloudBackupNowBtn');
-			if (btnBackup) btnBackup.click();
-			// Give backup fetch time to complete
-			await new Promise((resolve) => setTimeout(resolve, 100));
-
-			const btnRestore = document.getElementById('cloudRestoreBtn');
-			if (btnRestore) btnRestore.click();
-			await new Promise((resolve) => setTimeout(resolve, 100));
-
-			const btnDelete = document.getElementById('cloudDeleteBtn');
-			if (btnDelete) btnDelete.click();
-			await new Promise((resolve) => setTimeout(resolve, 100));
+			if (window.Sync) {
+				await window.Sync.listHistory();
+				await window.Sync.restoreFromHistory('res_123');
+			}
 		});
 
-		// Verify console warnings were logged with [cloud-backup] prefix
-		const backupWarn = warnLogs.find((m) => m.includes('[cloud-backup] backup rejected:'));
-		const restoreWarn = warnLogs.find((m) => m.includes('[cloud-backup] restore rejected:'));
-		const deleteWarn = warnLogs.find((m) => m.includes('[cloud-backup] delete rejected:'));
+		// Verify console warnings were logged with [sync] prefix
+		const listWarn = warnLogs.find((m) => m.includes('[sync] failed to list restore history:'));
+		const restoreWarn = warnLogs.find((m) => m.includes('[sync] restore from history failed:'));
 
-		expect(backupWarn).toBeTruthy();
-		expect(backupWarn).toContain('invalid payload format');
+		expect(listWarn).toBeTruthy();
+		expect(listWarn).toContain('server crash');
 
 		expect(restoreWarn).toBeTruthy();
-		expect(restoreWarn).toContain('server crash');
-
-		expect(deleteWarn).toBeTruthy();
-		expect(deleteWarn).toContain('access denied');
+		expect(restoreWarn).toContain('invalid restore id');
 	});
 });
 // Generated code ends here on 2026-03-31T22:30:00Z:
