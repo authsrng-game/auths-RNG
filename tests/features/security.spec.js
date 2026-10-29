@@ -50,5 +50,11 @@ test.describe('Security tests', () => {
 			await expect(targetBlankLinks.nth(i)).toHaveAttribute('rel', 'noopener noreferrer');
 		}
 	});
+
+	test('irc widget link opening in new tab has rel="noopener noreferrer"', async ({ page }) => {
+		await page.goto(BASE_URL);
+		const ircLink = page.locator('#irc-widget a[target="_blank"]');
+		await expect(ircLink).toHaveAttribute('rel', 'noopener noreferrer');
+	});
 });
 // Generated code ends here on 2026-03-31T00:00:00Z:
