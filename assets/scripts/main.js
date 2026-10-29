@@ -382,10 +382,21 @@ function calculateRarityPoints(rarity) {
 	return Math.ceil(denom / pointDivisor);
 }
 
+// Generated code starts here on 2026-11-21T00:00:00Z:
+// Lazily cache DOM element and guard text assignments when formatted points value is unchanged to avoid redundant DOM mutations on high-frequency point updates.
+let _pointsValueEl = null;
+let _lastPointsFormatted = null;
+
 function updatePointsDisplay() {
-	document.getElementById('pointsValue').textContent = formatNum(points);
+	if (!_pointsValueEl) _pointsValueEl = document.getElementById('pointsValue');
+	const formatted = formatNum(points);
+	if (_pointsValueEl && _lastPointsFormatted !== formatted) {
+		_pointsValueEl.textContent = formatted;
+		_lastPointsFormatted = formatted;
+	}
 	document.dispatchEvent(new CustomEvent('pointsChanged', { detail: { points } }));
 }
+// Generated code ends here on 2026-11-21T00:00:00Z:
 
 window.getPoints = function () {
 	return points;
@@ -437,47 +448,73 @@ const SHOP_ROWS = [
 	{ key: 'duplicate', level: 'dupeLevel', cost: 'dupeCost', btn: 'buyDupeBtn', pips: 'dupePips' },
 ];
 
+// Generated code starts here on 2026-11-21T00:00:00Z:
+// Lazily cache shop row DOM elements, guard property/style setters with scalar state checks, and move pointsChanged listener to module scope to avoid event listener leaks and DOM reflows.
+let _luckBarFillEl = null;
+
 function updateShopUI() {
-	document.addEventListener('pointsChanged', updateShopUI);
 	for (const row of SHOP_ROWS) {
+		if (!row._levelEl) row._levelEl = document.getElementById(row.level);
+		if (!row._costEl) row._costEl = document.getElementById(row.cost);
+		if (!row._btnEl) row._btnEl = document.getElementById(row.btn);
+		if (row.pips && !row._pipsEl) {
+			row._pipsEl = document.getElementById(row.pips);
+			if (row._pipsEl) row._pipEls = row._pipsEl.querySelectorAll('.level-pip');
+		}
+
 		const def = UPGRADE_DEFS[row.key];
 		const lvl = shopUpgrades[row.key] || 0;
 		const maxed = lvl >= def.max;
 		const singleCost = maxed ? 0 : def.cost(lvl);
 		const preview = bulkPreview(row.key);
 
-		const levelEl = document.getElementById(row.level);
-		if (levelEl) levelEl.textContent = lvl;
-
-		const costEl = document.getElementById(row.cost);
-		if (costEl) costEl.textContent = maxed ? 'max' : formatNum(preview.total);
-
-		const btn = document.getElementById(row.btn);
-		if (btn) {
-			if (maxed) {
-				btn.textContent = 'maxed';
-			} else {
-				btn.textContent = `upgrade x${preview.n || 1} (${formatNum(preview.total)} pts)`;
-			}
-			// disabled only depends on whether one level is affordable
-			btn.disabled = maxed || points < singleCost;
+		if (row._levelEl && row._lastLvl !== lvl) {
+			row._levelEl.textContent = lvl;
 		}
 
-		if (row.pips) {
-			const pipsEl = document.getElementById(row.pips);
-			if (pipsEl) {
-				pipsEl.querySelectorAll('.level-pip').forEach((pip, i) => {
-					pip.classList.toggle('on', i < lvl);
-				});
+		const costText = maxed ? 'max' : formatNum(preview.total);
+		if (row._costEl && row._lastCostText !== costText) {
+			row._costEl.textContent = costText;
+			row._lastCostText = costText;
+		}
+
+		const btnText = maxed
+			? 'maxed'
+			: `upgrade x${preview.n || 1} (${formatNum(preview.total)} pts)`;
+		const isDisabled = maxed || points < singleCost;
+
+		if (row._btnEl) {
+			if (row._lastBtnText !== btnText) {
+				row._btnEl.textContent = btnText;
+				row._lastBtnText = btnText;
+			}
+			if (row._lastDisabled !== isDisabled) {
+				row._btnEl.disabled = isDisabled;
+				row._lastDisabled = isDisabled;
 			}
 		}
+
+		if (row._pipEls && row._lastLvl !== lvl) {
+			row._pipEls.forEach((pip, i) => {
+				pip.classList.toggle('on', i < lvl);
+			});
+		}
+
+		row._lastLvl = lvl;
 	}
 
-	const luckBarFill = document.getElementById('luckBarFill');
-	if (luckBarFill) {
-		luckBarFill.style.width = ((shopUpgrades.luck || 0) / UPGRADE_DEFS.luck.max) * 100 + '%';
+	if (!_luckBarFillEl) _luckBarFillEl = document.getElementById('luckBarFill');
+	if (_luckBarFillEl) {
+		const luckLvl = shopUpgrades.luck || 0;
+		if (_luckBarFillEl._lastLuckLvl !== luckLvl) {
+			_luckBarFillEl.style.width = (luckLvl / UPGRADE_DEFS.luck.max) * 100 + '%';
+			_luckBarFillEl._lastLuckLvl = luckLvl;
+		}
 	}
 }
+
+document.addEventListener('pointsChanged', updateShopUI);
+// Generated code ends here on 2026-11-21T00:00:00Z:
 
 function updatePotionUI() {
 	for (const [key, count] of Object.entries(playerPotions)) {
