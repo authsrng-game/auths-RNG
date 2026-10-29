@@ -530,6 +530,7 @@ function recalcPotionLuck() {
 		potionLuckMultiplier += p.multiplier - 1;
 	});
 	recalcLuckMultiplier();
+	updateActivePotionsDisplay();
 }
 // Generated code ends here on 2026-11-15T00:00:00Z:
 
@@ -1522,9 +1523,17 @@ function updateItem(d) {
 	}
 }
 
+// Generated code starts here on 2026-10-29T16:38:33Z:
 function getRandomRarity() {
+	if (luckBoostActive && Date.now() >= luckBoostEndTime) {
+		endLuckBoost();
+	}
+	if (activePotions.length > 0 && activePotions.some((p) => p.endTime <= Date.now())) {
+		recalcPotionLuck();
+	}
 	return Plush.roll(rarities, globalLuckMultiplier, inventoryData, shopUpgrades, luckBoostActive);
 }
+// Generated code ends here on 2026-10-29T16:38:33Z:
 
 // Generated code starts here on 2026-10-25T00:00:00Z:
 // Maintain active list of locked achievements to avoid iterating over all 37 achievement items and evaluating Set lookups on every RNG roll.
