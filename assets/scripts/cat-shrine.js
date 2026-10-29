@@ -203,7 +203,11 @@
 
 	async function summonCat() {
 		const btn = document.getElementById('catShrineSummonBtn');
-		if (btn) btn.disabled = true;
+		const origText = btn ? btn.textContent : '';
+		if (btn) {
+			btn.disabled = true;
+			btn.textContent = 'summoning…';
+		}
 		try {
 			const url = await fetchNewCat();
 			await addCat(url);
@@ -214,7 +218,10 @@
 			// Generated code ends here on 2026-03-31T23:00:00Z:
 			window.showAlert('the shrine failed to summon a cat.. try again?');
 		} finally {
-			if (btn) btn.disabled = false;
+			if (btn) {
+				btn.disabled = false;
+				btn.textContent = origText || 'summon a cat';
+			}
 		}
 	}
 
