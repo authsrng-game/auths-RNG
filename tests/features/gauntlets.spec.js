@@ -6,9 +6,7 @@ const { test, expect } = require('@playwright/test');
 const BASE_URL = 'http://localhost:8080/';
 
 test.describe('gauntlets system completion logic', () => {
-	test('logs warning when gauntletData in localStorage contains invalid JSON', async ({
-		page,
-	}) => {
+	test('logs warning when gauntletData in localStorage contains invalid JSON', async ({ page }) => {
 		const consoleWarnings = [];
 		page.on('console', (msg) => {
 			if (msg.type() === 'warning') consoleWarnings.push(msg.text());
