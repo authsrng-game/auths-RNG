@@ -375,7 +375,8 @@ console.log(performance.now());
 	function loadData() {
 		try {
 			return JSON.parse(localStorage.getItem(GAUNTLET_KEY) || '{}');
-		} catch {
+		} catch (e) {
+			console.warn('[gauntlets] failed to parse gauntlet state:', e);
 			return {};
 		}
 	}
