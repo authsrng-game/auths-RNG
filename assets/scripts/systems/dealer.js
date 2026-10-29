@@ -339,9 +339,15 @@
 	 * @param {boolean} [forced=false] - True if session ended due to time expiration rather than user exit.
 	 */
 	function leaveTable(data, forced = false) {
+		// Generated code starts here on 2026-11-03T00:00:00Z:
+		const baseTime =
+			forced && data.session?.startedAt
+				? data.session.startedAt + SESSION_DURATION
+				: Date.now();
 		data.session = null;
-		data.cooldownUntil = Date.now() + ENCOUNTER_COOLDOWN;
+		data.cooldownUntil = baseTime + ENCOUNTER_COOLDOWN;
 		saveData(data);
+		// Generated code ends here on 2026-11-03T00:00:00Z:
 		showAnomalyPopup?.(pick(forced ? TIMEOUT_LINES : DEPART_LINES));
 		renderDealer();
 	}
