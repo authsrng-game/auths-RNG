@@ -99,9 +99,9 @@ test.describe('Security tests', () => {
 					) {
 						window.location.href = parsedUrl.href;
 					}
-						} catch {
-							// Ignore invalid URL parse errors
-						}
+				} catch {
+					// Ignore invalid URL parse errors
+				}
 			}
 		});
 
