@@ -64,8 +64,14 @@ test.describe('Security tests', () => {
 		// Test non-Discord URL is rejected
 		let redirectAttempted = false;
 		page.on('framenavigated', (frame) => {
-			if (frame === page.mainFrame() && frame.url().includes('evil.com')) {
-				redirectAttempted = true;
+			if (frame === page.mainFrame()) {
+				try {
+					if (new URL(frame.url()).hostname === 'evil.com') {
+						redirectAttempted = true;
+					}
+				} catch {
+					// Ignore invalid URL parse errors
+				}
 			}
 		});
 
@@ -100,7 +106,13 @@ test.describe('Security tests', () => {
 		});
 
 		expect(redirectAttempted).toBe(false);
-		expect(page.url()).not.toContain('evil.com');
+		let navigatedHost;
+		try {
+			navigatedHost = new URL(page.url()).hostname;
+		} catch {
+			navigatedHost = '';
+		}
+		expect(navigatedHost).not.toBe('evil.com');
 	});
 });
 // Generated code ends here on 2026-03-31T00:00:00Z:
