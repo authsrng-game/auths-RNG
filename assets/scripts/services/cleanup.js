@@ -6,8 +6,6 @@ console.log(performance.now());
 (function () {
 	'use strict';
 
-	const $ = (id) => document.getElementById(id);
-
 	/**
 	 * Maintenance schedules and thresholds.
 	 * Cleanup is divided into 3 tiers to minimize main-thread jank during fast auto-rolling:
@@ -50,8 +48,8 @@ console.log(performance.now());
 	}
 
 	function cleanSpinner() {
-		const spinner = $('spinner');
-		const rollBtn = $('rollBtn');
+		const spinner = document.getElementById('spinner');
+		const rollBtn = document.getElementById('rollBtn');
 		if (!spinner || !rollBtn) return;
 		if (rollBtn.disabled) return;
 		if (spinner.children.length > STALE_SPINNER_CHILD_THRESHOLD) {
@@ -132,7 +130,7 @@ console.log(performance.now());
 	}
 
 	function checkLuckBoostOverlay() {
-		const overlay = $('luckBoostOverlay');
+		const overlay = document.getElementById('luckBoostOverlay');
 		if (!overlay || overlay.style.display !== 'flex') return;
 
 		const active = typeof luckBoostActive !== 'undefined' ? luckBoostActive : null;
@@ -149,14 +147,14 @@ console.log(performance.now());
 			return;
 		}
 
-		const timerEl = $('luckTimer');
+		const timerEl = document.getElementById('luckTimer');
 		if (timerEl && (timerEl.textContent === '0' || timerEl.textContent === '')) {
 			overlay.style.display = 'none';
 		}
 	}
 
 	function pruneRarityTrail() {
-		const trail = $('rarityTrail');
+		const trail = document.getElementById('rarityTrail');
 		if (!trail) return;
 		const pills = trail.querySelectorAll('.trail-pill');
 		const excess = pills.length - TRAIL_PILL_MAX;
@@ -327,9 +325,9 @@ console.log(performance.now());
 				(window._cleanupLsKB || '?') +
 				'KB' +
 				' | spinner children: ' +
-				($('spinner')?.children.length ?? '?') +
+				(document.getElementById('spinner')?.children.length ?? '?') +
 				' | trail pills: ' +
-				($('rarityTrail')?.querySelectorAll('.trail-pill').length ?? '?') +
+				(document.getElementById('rarityTrail')?.querySelectorAll('.trail-pill').length ?? '?') +
 				' | new-roll els: 0 (just cleared)'
 		);
 	};
