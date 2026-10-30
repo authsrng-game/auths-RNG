@@ -975,14 +975,19 @@
 			return { ok: true };
 		}
 		if (r.status === 409) await onStale({ ...r.data, code: 'conflict' });
-		console.warn('[sync] restore from history failed:', r.data.error || 'restore failed', { id, status: r.status });
+		console.warn('[sync] restore from history failed:', r.data.error || 'restore failed', {
+			id,
+			status: r.status,
+		});
 		return { ok: false, error: r.data.error || 'restore failed' };
 	}
 
 	async function listHistory() {
 		const r = await api('GET', '/history');
 		if (r.status !== 200) {
-			console.warn('[sync] failed to list restore history:', r.data?.error || 'request failed', { status: r.status });
+			console.warn('[sync] failed to list restore history:', r.data?.error || 'request failed', {
+				status: r.status,
+			});
 		}
 		return r.status === 200 ? r.data.entries : null;
 	}
