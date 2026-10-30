@@ -1031,8 +1031,20 @@ console.log(performance.now());
 				try {
 					const res = await apiCall('/discord/authorize');
 					// Generated code starts here on 2026-09-18T10:00:00Z:
-					if (res && typeof res.url === 'string' && /^https?:\/\//i.test(res.url)) {
-						window.location.href = res.url;
+					if (res && typeof res.url === 'string') {
+						try {
+							const parsedUrl = new URL(res.url);
+							const host = parsedUrl.hostname.toLowerCase();
+							if (
+								parsedUrl.protocol === 'https:' &&
+								(host === 'discord.com' ||
+									host === 'discordapp.com' ||
+									host.endsWith('.discord.com') ||
+									host.endsWith('.discordapp.com'))
+							) {
+								window.location.href = parsedUrl.href;
+							}
+						} catch (_) {}
 					}
 					// Generated code ends here on 2026-09-18T10:00:00Z:
 				} catch (e) {
