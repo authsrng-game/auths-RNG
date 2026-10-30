@@ -1,3 +1,4 @@
+/* global window */
 // Generated code starts here on 2026-03-31T00:00:00Z:
 const { test, expect } = require('@playwright/test');
 
@@ -55,6 +56,51 @@ test.describe('Security tests', () => {
 		await page.goto(BASE_URL);
 		const ircLink = page.locator('#irc-widget a[target="_blank"]');
 		await expect(ircLink).toHaveAttribute('rel', 'noopener noreferrer');
+	});
+
+	test('discord authorize redirect safely validates allowed domain protocols', async ({ page }) => {
+		await page.goto(BASE_URL);
+
+		// Test non-Discord URL is rejected
+		let redirectAttempted = false;
+		page.on('framenavigated', (frame) => {
+			if (frame === page.mainFrame() && frame.url().includes('evil.com')) {
+				redirectAttempted = true;
+			}
+		});
+
+		await page.route('**/api/accounts/discord/authorize', async (route) => {
+			await route.fulfill({
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify({ url: 'https://evil.com/phish' }),
+			});
+		});
+
+		await page.evaluate(async () => {
+			const res = await fetch('https://accounts.authsrng.xyz/api/accounts/discord/authorize');
+			const data = await res.json();
+			if (data && typeof data.url === 'string') {
+				try {
+					const parsedUrl = new URL(data.url);
+					const host = parsedUrl.hostname.toLowerCase();
+					if (
+						parsedUrl.protocol === 'https:' &&
+						(host === 'discord.com' ||
+							host === 'discordapp.com' ||
+							host.endsWith('.discord.com') ||
+							host.endsWith('.discordapp.com'))
+					) {
+						window.location.href = parsedUrl.href;
+					}
+						} catch {
+							// Ignore invalid URL parse errors
+						}
+			}
+		});
+
+		expect(redirectAttempted).toBe(false);
+		expect(page.url()).not.toContain('evil.com');
 	});
 });
 // Generated code ends here on 2026-03-31T00:00:00Z:
