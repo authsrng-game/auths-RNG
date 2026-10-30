@@ -590,4 +590,45 @@ test.describe('auths-RNG smoke tests', () => {
 		expect(rollCountAfterRefocus).toBeGreaterThan(rollCountBeforeRefocus);
 	});
 	// Generated code ends here on 2026-04-02T12:00:00Z:
+
+	// Generated code starts here on 2026-03-31T20:30:00Z:
+	test('daily and weekly reward buttons have accessible tooltips and aria-labels in available and claimed states', async ({
+		page,
+	}) => {
+		await page.goto(BASE_URL);
+
+		await page.evaluate(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('startAnimConfig', JSON.stringify({ enabled: false }));
+			localStorage.removeItem('daily_lastClaim');
+			localStorage.removeItem('weekly_lastClaim');
+		});
+
+		await page.reload();
+
+		const dailyBtn = page.locator('#dailyBtn');
+		const weeklyBtn = page.locator('#weeklyBtn');
+
+		await expect(dailyBtn).toBeEnabled();
+		await expect(dailyBtn).toHaveAttribute('aria-label', 'Claim daily reward');
+		await expect(dailyBtn).toHaveAttribute('title', 'Claim daily reward');
+
+		await expect(weeklyBtn).toBeEnabled();
+		await expect(weeklyBtn).toHaveAttribute('aria-label', 'Claim weekly reward');
+		await expect(weeklyBtn).toHaveAttribute('title', 'Claim weekly reward');
+
+		// Click daily button and check claimed disabled state attributes
+		await page.evaluate(() => {
+			const btn = document.getElementById('dailyBtn');
+			if (btn) btn.click();
+		});
+
+		await expect(dailyBtn).toBeDisabled();
+		await expect(dailyBtn).toHaveAttribute('aria-label', 'Daily reward already claimed for today');
+		await expect(dailyBtn).toHaveAttribute(
+			'title',
+			'Daily reward already claimed for today. Check back tomorrow!'
+		);
+	});
+	// Generated code ends here on 2026-03-31T20:30:00Z:
 });

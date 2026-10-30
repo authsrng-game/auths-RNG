@@ -2574,13 +2574,19 @@ function updateWeeklyUI() {
 	const now = Date.now();
 	const oneWeek = 7 * 24 * 60 * 60 * 1000;
 
+	// Generated code starts here on 2026-03-31T20:30:00Z:
 	if (!lastClaim || now - Number(lastClaim) >= oneWeek) {
 		weeklyBtn.disabled = false;
+		weeklyBtn.title = 'Claim weekly reward';
+		weeklyBtn.setAttribute('aria-label', 'Claim weekly reward');
 		weeklyStatus.textContent = `weekly reward available · streak: ${streak}`;
 	} else {
 		weeklyBtn.disabled = true;
+		weeklyBtn.title = 'Weekly reward already claimed. Check back later!';
+		weeklyBtn.setAttribute('aria-label', 'Weekly reward already claimed');
 		weeklyStatus.textContent = `weekly claimed · streak: ${streak}`;
 	}
+	// Generated code ends here on 2026-03-31T20:30:00Z:
 }
 
 weeklyBtn.addEventListener('click', async () => {
@@ -2632,13 +2638,19 @@ function updateDailyUI() {
 	const { lastClaim, streak } = loadDailyData();
 	const today = getToday();
 
+	// Generated code starts here on 2026-03-31T20:30:00Z:
 	if (lastClaim === today) {
 		dailyBtn.disabled = true;
+		dailyBtn.title = 'Daily reward already claimed for today. Check back tomorrow!';
+		dailyBtn.setAttribute('aria-label', 'Daily reward already claimed for today');
 		dailyStatus.textContent = `daily claimed · streak: ${streak}`;
 	} else {
 		dailyBtn.disabled = false;
+		dailyBtn.title = 'Claim daily reward';
+		dailyBtn.setAttribute('aria-label', 'Claim daily reward');
 		dailyStatus.textContent = `daily available · current streak: ${streak}`;
 	}
+	// Generated code ends here on 2026-03-31T20:30:00Z:
 }
 
 dailyBtn.addEventListener('click', async () => {
