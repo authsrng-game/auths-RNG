@@ -295,7 +295,8 @@
 			if (typeof points !== 'undefined' && typeof updatePointsDisplay === 'function') {
 				points += 200000 * cappedSeconds;
 				updatePointsDisplay();
-				if (typeof saveAllData === 'function') saveAllData();
+				// Note: Decoupled saveAllData() from 1s interval ticks to eliminate synchronous Web Storage I/O.
+				// State persistence is handled by 10s autosave, visibilitychange, and beforeunload.
 			}
 		}
 	}
@@ -415,7 +416,8 @@
 			if (typeof anomalies !== 'undefined') {
 				anomalies += 50 * cappedTicks;
 				if (typeof updateAnomalyUI === 'function') updateAnomalyUI();
-				if (typeof saveAllData === 'function') saveAllData();
+				// Note: Decoupled saveAllData() from 2s interval ticks to eliminate synchronous Web Storage I/O.
+				// State persistence is handled by 10s autosave, visibilitychange, and beforeunload.
 			}
 		}
 	}
