@@ -1093,6 +1093,9 @@ function updateAchievementsUI() {
 }
 
 function saveAllData() {
+	if (typeof updatePrinterPoints === 'function') {
+		updatePrinterPoints();
+	}
 	const arr = Array.from(inventoryData.values()).map(({ rarityObj, count }) => ({
 		name: rarityObj.name,
 		chance: rarityObj.chance,
@@ -2261,6 +2264,9 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('pagehide', () => {
 	clearTimeout(_saveTimer);
 	flushPlaytime();
+	if (typeof updatePrinterPoints === 'function') {
+		updatePrinterPoints();
+	}
 	saveAllData();
 });
 // Generated code ends here on 2026-10-24T03:30:00Z:

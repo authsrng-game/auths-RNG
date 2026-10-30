@@ -29,3 +29,11 @@
 **Learning:** Timers or cooldowns triggered upon resolving a completed background state must evaluate their target completion timestamps relative to the actual state completion time (`exp.startTime + exp.duration`) rather than unparameterized `Date.now()`.
 
 **Prevention:** Ensure transition and resolution handlers set post-completion timer targets derived from the completion timestamp rather than real-time invocation timestamps.
+
+## 2026-10-30 - Point Printer Passive Generation Un-reconciled During Save and Tab Unload
+
+**Gap:** Point printer passive points accumulated during hidden background intervals were not calculated or reconciled before `saveAllData()` persisted `shopPoints` to `localStorage` or before `pagehide` tab unloads, causing un-reconciled background points to be lost if the tab closed or saved while hidden.
+
+**Learning:** Any passive accumulation system that uses delta time calculations (`Date.now() - lastTick`) must be explicitly reconciled prior to state persistence (`saveAllData()`) and unload events (`pagehide`).
+
+**Prevention:** Always invoke progress reconciliation functions (`updatePrinterPoints()`) prior to saving game state or handling page unload.

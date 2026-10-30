@@ -66,4 +66,40 @@ test.describe('Point Printer timing reconciliation', () => {
 		// Next tick should add only 1 additional tick (5 points), not another 3600 seconds
 		expect(result.pointsNextTick).toBe(18005);
 	});
+
+	test('reconciles passive point generation during saveAllData and pagehide', async ({ page }) => {
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('seenReleaseTag', 'v9.7');
+		});
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(() => {
+			shopUpgrades.printer = 10;
+			points = 100;
+			updatePointsDisplay();
+			updateShopUI();
+
+			// Fast-forward _lastPrinterTick into the past (5 seconds ago)
+			_lastPrinterTick = Date.now() - 5000;
+
+			// Trigger saveAllData explicitly
+			saveAllData();
+			const savedPointsFromSaveAll = parseInt(localStorage.getItem('shopPoints') || '0', 10);
+
+			// Fast-forward _lastPrinterTick into the past again (3 seconds ago)
+			_lastPrinterTick = Date.now() - 3000;
+
+			// Trigger pagehide event
+			window.dispatchEvent(new globalThis.Event('pagehide'));
+			const savedPointsFromPagehide = parseInt(localStorage.getItem('shopPoints') || '0', 10);
+
+			return { savedPointsFromSaveAll, savedPointsFromPagehide };
+		});
+
+		// 100 + (10 points/sec * 5s) = 150
+		expect(result.savedPointsFromSaveAll).toBe(150);
+		// 150 + (10 points/sec * 3s) = 180
+		expect(result.savedPointsFromPagehide).toBe(180);
+	});
 });
