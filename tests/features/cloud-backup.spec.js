@@ -88,5 +88,51 @@ test.describe('cloud backup observability', () => {
 		expect(deleteWarn).toBeTruthy();
 		expect(deleteWarn).toContain('access denied');
 	});
+
+	test('sync history restore and list emit warning logs on non-200 responses', async ({ page }) => {
+		const warnLogs = [];
+		page.on('console', (msg) => {
+			if (msg.type() === 'warning') {
+				warnLogs.push(msg.text());
+			}
+		});
+
+		await page.goto(BASE_URL);
+
+		await page.route('https://backup.authsrng.xyz/api/save/history', async (route) => {
+			await route.fulfill({
+				status: 500,
+				contentType: 'application/json',
+				body: JSON.stringify({ error: 'history error' }),
+			});
+		});
+
+		await page.route('https://backup.authsrng.xyz/api/save/restore', async (route) => {
+			await route.fulfill({
+				status: 400,
+				contentType: 'application/json',
+				body: JSON.stringify({ error: 'invalid restore id' }),
+			});
+		});
+
+		await page.evaluate(async () => {
+			localStorage.setItem('authToken', 'test-token');
+			localStorage.setItem('authUid', 'u123');
+			localStorage.setItem('__sync_meta', JSON.stringify({ uid: 'u123', baseRev: 1 }));
+			if (window.Sync) {
+				await window.Sync.listHistory();
+				await window.Sync.restoreFromHistory('invalid-id');
+			}
+		});
+
+		const listWarn = warnLogs.find((m) => m.includes('[sync] failed to list restore history:'));
+		const restoreWarn = warnLogs.find((m) => m.includes('[sync] restore from history failed:'));
+
+		expect(listWarn).toBeTruthy();
+		expect(listWarn).toContain('history error');
+
+		expect(restoreWarn).toBeTruthy();
+		expect(restoreWarn).toContain('invalid restore id');
+	});
 });
 // Generated code ends here on 2026-03-31T22:30:00Z:
