@@ -1,7 +1,12 @@
 the staging folder is for experimental code and
 files that are likely not to make it in the main
-codebase.
+codebase or need improvements before making it to
+the real codebase.
+
+this is a great spot for your first contributions
 
 however, in the slight off-chance these features
 actually work and arent a steaming pile of trash,
 they most likely will be in the main game!
+
+features may be held here for a very long time
