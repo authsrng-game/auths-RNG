@@ -966,6 +966,18 @@
 		saveMeta();
 	}
 
+	// Generated code starts here on 2026-04-03T12:00:00Z:
+	/**
+	 * Restores a historic save state entry by ID from the cloud sync backup service.
+	 *
+	 * Requires an initialized sync session (`meta` exists) so that `baseRev` can be passed to the backend
+	 * to prevent overwriting concurrent cloud updates. Upon successful restoration, the page is reloaded
+	 * via `reloadAfterApply` to re-initialize in-memory game state cleanly from the newly written `localStorage` fields.
+	 *
+	 * @param {string} id - Unique historic restore point identifier.
+	 * @returns {Promise<{ok: boolean, error?: string}>} Object indicating restoration outcome or error description.
+	 */
+	// Generated code ends here on 2026-04-03T12:00:00Z:
 	async function restoreFromHistory(id) {
 		if (!meta) return { ok: false, error: 'not synced yet' };
 		const r = await api('POST', '/restore', { id, baseRev: meta.baseRev });
@@ -978,6 +990,16 @@
 		return { ok: false, error: r.data.error || 'restore failed' };
 	}
 
+	// Generated code starts here on 2026-04-03T12:00:00Z:
+	/**
+	 * Fetches available historic cloud save restore points for the authenticated user.
+	 *
+	 * Queries the backup service for automatic, pre-overwrite, and peak progress restore snapshots.
+	 * Returns `null` if the user is unauthenticated or if network/server errors occur.
+	 *
+	 * @returns {Promise<Array<Object>|null>} List of restore point metadata objects, or `null` on failure.
+	 */
+	// Generated code ends here on 2026-04-03T12:00:00Z:
 	async function listHistory() {
 		const r = await api('GET', '/history');
 		return r.status === 200 ? r.data.entries : null;
