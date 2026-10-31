@@ -1051,7 +1051,7 @@ console.log(performance.now());
 					dashStatus(e.message, '#f66');
 				}
 			});
-			}
+		}
 		appendGalaxyConnection(pane);
 	}
 
@@ -1090,7 +1090,10 @@ console.log(performance.now());
 		const unlinkBtn = el('galaxyUnlinkBtn');
 		if (unlinkBtn) {
 			unlinkBtn.addEventListener('click', async () => {
-				if (!confirm('disconnect your galaxy account? you will no longer be able to log in with it.')) return;
+				if (
+					!confirm('disconnect your galaxy account? you will no longer be able to log in with it.')
+				)
+					return;
 				try {
 					await apiCall('/galaxy/unlink', { method: 'POST' });
 					dashState.data.galaxyLinkedAt = null;
@@ -1453,9 +1456,10 @@ console.log(performance.now());
 		localStorage.setItem('accountsMigrationDone_v1', 'true');
 	}
 
-		function startGalaxyLogin() {
+	function startGalaxyLogin() {
 		window.location.href =
-			'https://accounts.authsrng.xyz/api/accounts/galaxy/login?origin=' + encodeURIComponent(location.origin);
+			'https://accounts.authsrng.xyz/api/accounts/galaxy/login?origin=' +
+			encodeURIComponent(location.origin);
 	}
 
 	async function handleGalaxyReturn() {
