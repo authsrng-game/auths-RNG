@@ -1051,6 +1051,55 @@ console.log(performance.now());
 					dashStatus(e.message, '#f66');
 				}
 			});
+			}
+		appendGalaxyConnection(pane);
+	}
+
+	function appendGalaxyConnection(pane) {
+		const data = dashState.data;
+		const wrap = document.createElement('div');
+		wrap.style.marginTop = '18px';
+		wrap.innerHTML = data.galaxyLinkedAt
+			? `<div class="dash-security-item">
+					<div>
+						<div class="dash-security-title">galaxy</div>
+						<div class="dash-security-desc">connected as ${escHtml(data.galaxyUsername || 'unknown')}</div>
+					</div>
+					<button id="galaxyUnlinkBtn" class="small" style="opacity:0.6;color:#f66;">disconnect</button>
+				</div>
+				<p style="font-size:0.8em;opacity:0.6;margin-top:12px;">you can log in with galaxy from the login screen.</p>`
+			: `<p style="font-size:0.85em;opacity:0.75;">link your galaxy.click account to log in with it.</p>
+				<button id="galaxyConnectBtn" class="small" style="width:100%;">connect galaxy</button>`;
+		pane.appendChild(wrap);
+
+		const connectBtn = el('galaxyConnectBtn');
+		if (connectBtn) {
+			connectBtn.addEventListener('click', async () => {
+				try {
+					const res = await apiCall('/galaxy/authorize');
+					const parsed = new URL(res.url);
+					if (parsed.protocol === 'https:' && parsed.hostname === 'galaxy.click') {
+						window.location.href = parsed.href;
+					}
+				} catch (e) {
+					dashStatus(e.message, '#f66');
+				}
+			});
+		}
+
+		const unlinkBtn = el('galaxyUnlinkBtn');
+		if (unlinkBtn) {
+			unlinkBtn.addEventListener('click', async () => {
+				if (!confirm('disconnect your galaxy account? you will no longer be able to log in with it.')) return;
+				try {
+					await apiCall('/galaxy/unlink', { method: 'POST' });
+					dashState.data.galaxyLinkedAt = null;
+					dashState.data.galaxyUsername = null;
+					renderTabConnections();
+				} catch (e) {
+					dashStatus(e.message, '#f66');
+				}
+			});
 		}
 	}
 
@@ -1352,6 +1401,14 @@ console.log(performance.now());
 		el('authTabForgot').addEventListener('click', () => switchAuthTab('forgot'));
 
 		el('loginSubmit').addEventListener('click', handleLogin);
+		const galaxyBtn = document.createElement('button');
+		galaxyBtn.type = 'button';
+		galaxyBtn.id = 'galaxyLoginBtn';
+		galaxyBtn.className = 'small';
+		galaxyBtn.style.cssText = 'width:100%;margin-top:8px;';
+		galaxyBtn.textContent = 'log in with galaxy';
+		galaxyBtn.addEventListener('click', startGalaxyLogin);
+		el('loginSubmit').after(galaxyBtn);
 		el('signupSubmit').addEventListener('click', handleSignup);
 		el('forgotSubmit').addEventListener('click', handleForgot);
 
@@ -1394,6 +1451,44 @@ console.log(performance.now());
 	function runMigration() {
 		localStorage.removeItem('cloudBackupUid');
 		localStorage.setItem('accountsMigrationDone_v1', 'true');
+	}
+
+		function startGalaxyLogin() {
+		window.location.href =
+			'https://accounts.authsrng.xyz/api/accounts/galaxy/login?origin=' + encodeURIComponent(location.origin);
+	}
+
+	async function handleGalaxyReturn() {
+		const hash = new URLSearchParams(location.hash.slice(1));
+		const query = new URLSearchParams(location.search);
+		const token = hash.get('galaxyToken');
+		const error = query.get('galaxyError');
+		const linked = query.get('galaxyLinked');
+		if (!token && !error && !linked) return;
+
+		query.delete('galaxyError');
+		query.delete('galaxyLinked');
+		const qs = query.toString();
+		history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
+
+		if (error) {
+			window.showAlert('galaxy: ' + error);
+			return;
+		}
+		if (linked) {
+			openAccountInfo('connections');
+			return;
+		}
+
+		localStorage.setItem(TOKEN_KEY, token);
+		try {
+			const me = await apiCall('/me');
+			setSession(token, me.uid, me.username, me.avatarUrl);
+			showSyncLoading();
+		} catch (e) {
+			clearSession();
+			window.showAlert('galaxy login failed: ' + e.message);
+		}
 	}
 
 	function init() {
