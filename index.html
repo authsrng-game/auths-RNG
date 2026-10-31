@@ -23,10 +23,7 @@
 			crossorigin="anonymous"
 		></script>
 		<link rel="stylesheet" href="/assets/scripts/styles/overrides.css" />
-		<meta
-			name="viewport"
-			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-		/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta http-equiv="X-UA-Compatible" content="IE=Edge" />
 		<!-- a relic of the past...............-->
 		<title>auth's RNG</title>
@@ -2570,19 +2567,26 @@ Last release date on nightly: ${nightlyRDate}`;
 			const lazyObserver = new IntersectionObserver(
 				(entries) => {
 					entries.forEach((entry) => {
-						if (entry.isIntersecting) {
-							entry.target.classList.add('visible');
-						} else {
-							entry.target.classList.remove('visible');
-						}
+						if (!entry.isIntersecting) return;
+						entry.target.classList.add('visible');
+						lazyObserver.unobserve(entry.target);
 					});
 				},
-				{
-					root: null,
-					rootMargin: '120px',
-					threshold: 0.4,
-				}
+				{ root: null, rootMargin: '120px', threshold: 0.1 }
 			);
+
+			function observeLazyElements() {
+				document.querySelectorAll('.lazy:not([data-observed])').forEach((el) => {
+					el.dataset.observed = 'true';
+					lazyObserver.observe(el);
+				});
+			}
+
+			observeLazyElements();
+			new MutationObserver(observeLazyElements).observe(document.body, {
+				childList: true,
+				subtree: true,
+			});
 
 			document.querySelectorAll('.lazy').forEach((el) => {
 				lazyObserver.observe(el);
@@ -2637,6 +2641,11 @@ Last release date on nightly: ${nightlyRDate}`;
 					return offset;
 				}
 
+				function syncPageHeight() {
+					const active = document.getElementById(`page-${currentPage + 1}`);
+					if (active) container.style.height = active.scrollHeight + 'px';
+				}
+
 				function goToPage(index) {
 					if (index < 0 || index >= totalPages) return;
 					if (lockedPages.has(index)) {
@@ -2645,6 +2654,7 @@ Last release date on nightly: ${nightlyRDate}`;
 						return;
 					}
 
+					const changed = index !== currentPage;
 					const prevOffset = getPageLeft(currentPage);
 					const newOffset = getPageLeft(index);
 					const pageWidth = container.offsetWidth;
@@ -2664,19 +2674,17 @@ Last release date on nightly: ${nightlyRDate}`;
 						);
 					}
 
-					const activePage = document.getElementById(`page-${currentPage + 1}`);
-					if (activePage) container.style.height = activePage.scrollHeight + 'px';
+					syncPageHeight();
+					if (changed) window.scrollTo(0, 0);
 
 					dots.forEach((dot, i) => {
 						const isActive = i === currentPage;
 						dot.classList.toggle('active', isActive);
-						// Generated code starts here on 2026-10-25T00:00:00Z:
 						if (isActive) {
 							dot.setAttribute('aria-current', 'page');
 						} else {
 							dot.removeAttribute('aria-current');
 						}
-						// Generated code ends here on 2026-10-25T00:00:00Z:
 					});
 
 					prevBtn.disabled = currentPage === 0;
@@ -2748,6 +2756,17 @@ Last release date on nightly: ${nightlyRDate}`;
 				window.lockedPages = lockedPages;
 				window.goToPage = goToPage;
 				window._currentPage = 0;
+
+				const pageObserver = new ResizeObserver(syncPageHeight);
+				document.querySelectorAll('.page').forEach((p) => pageObserver.observe(p));
+				window.addEventListener('resize', () => goToPage(currentPage));
+
+				dots.forEach((dot, i) => {
+					const heading = document.querySelector(`#page-${i + 1} > h2`);
+					const name = heading ? heading.textContent.trim() : 'roll';
+					dot.title = name;
+					dot.setAttribute('aria-label', name);
+				});
 			})();
 		</script>
 

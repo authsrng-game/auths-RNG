@@ -299,55 +299,6 @@ function playRollSound() {
 	} catch (e) {}
 }
 
-// confetti! yay!
-// TODO: remove confetti all at once because i doubt anyone genuinely uses this feature
-function triggerConfetti() {
-	if (document.hidden || document.body.classList.contains('reduce-motion')) return;
-	const canvas = document.createElement('canvas');
-	canvas.style.cssText =
-		'position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:99998;';
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
-	document.body.appendChild(canvas);
-	const ctx = canvas.getContext('2d');
-	const colors = ['#ff6666', '#66ff66', '#6666ff', '#ffff66', '#ff66ff', '#66ffff', '#ffaa66'];
-	const pieces = Array.from({ length: 120 }, () => ({
-		x: Math.random() * canvas.width,
-		y: -10,
-		w: 8 + Math.random() * 8,
-		h: 4 + Math.random() * 4,
-		color: colors[Math.floor(Math.random() * colors.length)],
-		rot: Math.random() * Math.PI * 2,
-		rotSpeed: (Math.random() - 0.5) * 0.15,
-		vx: (Math.random() - 0.5) * 5,
-		vy: 2 + Math.random() * 4,
-		alpha: 1,
-	}));
-	function draw() {
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		let alive = false;
-		pieces.forEach((p) => {
-			p.x += p.vx;
-			p.y += p.vy;
-			p.rot += p.rotSpeed;
-			if (p.y > canvas.height * 0.7) p.alpha -= 0.025;
-			if (p.alpha > 0) {
-				alive = true;
-				ctx.save();
-				ctx.globalAlpha = Math.max(0, p.alpha);
-				ctx.translate(p.x, p.y);
-				ctx.rotate(p.rot);
-				ctx.fillStyle = p.color;
-				ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
-				ctx.restore();
-			}
-		});
-		if (alive) requestAnimationFrame(draw);
-		else canvas.remove();
-	}
-	draw();
-}
-
 // rolls since last rare
 // Generated code starts here on 2026-11-04T00:00:00Z:
 // Lazily cache DOM element and guard style.display to avoid repeated DOM element lookups and style invalidations on every roll.
@@ -903,28 +854,36 @@ function playCutscene(rarityName, callback) {
 	const video = document.getElementById('cutsceneVideo');
 	showCutsceneCaption(overlay, rarityName);
 
-	const graceUntil = Date.now() + 300;
+	let armedAt = Date.now() + 3000;
+	let lastInput = Date.now();
 	let finished = false;
 
 	const onSkip = () => {
-		if (Date.now() >= graceUntil) finish();
+		const now = Date.now();
+		const idle = now - lastInput;
+		lastInput = now;
+		if (now >= armedAt && idle > 500) finish();
 	};
 	const onKey = (e) => {
-		if (e.key !== 'Escape' && e.key !== ' ' && e.key !== 'Enter') return;
+		if (e.key !== 'Escape') return;
 		e.preventDefault();
 		e.stopImmediatePropagation();
-		if (!e.repeat && Date.now() >= graceUntil) finish();
+		if (!e.repeat && Date.now() >= armedAt) finish();
 	};
 	const finish = () => {
 		if (finished) return;
 		finished = true;
 		video.onended = null;
 		video.onerror = null;
+		video.onplaying = null;
 		overlay.removeEventListener('pointerdown', onSkip);
 		document.removeEventListener('keydown', onKey, true);
 		endCutscene(overlay, callback, wasBackgroundMusicPlaying);
 	};
 
+	video.onplaying = () => {
+		armedAt = Math.min(armedAt, Date.now() + 700);
+	};
 	video.onended = finish;
 	video.onerror = () => {
 		console.error('video failed to load');
@@ -2200,7 +2159,7 @@ function spinAndReveal(res) {
 		awardAnomalyIfEligible(res);
 		checkAchievements(res);
 		updateRollsSinceRare(res);
-		maybeFireConfettiAndCutscene(res, firstTime);
+		maybeFireCutscene(res, firstTime);
 		if (window.setCursorRolling) window.setCursorRolling(false);
 
 		const pillColor = res.style
@@ -2288,15 +2247,12 @@ function spinAndReveal(res) {
 	);
 }
 
-// Yeah guys, maybe guys! maybe fire the confetti and cutscene!
-function maybeFireConfettiAndCutscene(res, firstTime) {
+// Yeah guys, maybe guys! maybe fire the cutscene!
+function maybeFireCutscene(res, firstTime) {
 	const denom = Plush.denomOf(res);
 	const cutsceneThresh = window.cutsceneThreshold || 0;
-	const confettiThresh = window.confettiThreshold || 0;
 	const mode = window.cutsceneMode || 'first';
 	const hidden = document.hidden;
-
-	if (!hidden && confettiThresh > 0 && denom >= confettiThresh) triggerConfetti();
 
 	const wanted = mode === 'always' || (mode === 'first' && firstTime);
 	const cutsceneAllowed =
@@ -2318,7 +2274,6 @@ function maybeFireConfettiAndCutscene(res, firstTime) {
 		afterReveal();
 	}
 }
-
 let _saveTimer = null;
 function debouncedSave(delay = 1500) {
 	clearTimeout(_saveTimer);
