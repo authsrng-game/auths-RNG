@@ -2190,21 +2190,13 @@ function spinAndReveal(res) {
 		if (window.recheckDefaultMusicTier) window.recheckDefaultMusicTier();
 		const firstTime = !inventoryData.has(res.name);
 		addToInventory(res);
-		(function (W, R) {
-			var P = [
-					// FIXME: theres no point in obfuscating the gone link javascript even for a quirky little easter egg.
-					'X2dvbmVMaW5r',
-					'bmFtZQ==',
-					'Z29uZQ==',
-					'X3Nob3dHb25lTGluaw==',
-					'X2hpZGVHb25lTGluaw==',
-				],
-				D = (i) => atob(P[i]);
-
-			R[D(1)] === D(2)
-				? ((W[D(0)] = !0), W[D(3)] && W[D(3)]())
-				: W[D(0)] && ((W[D(0)] = !1), W[D(4)] && W[D(4)]());
-		})(window, res);
+		if (res.name === 'gone') {
+			window._goneLink = true;
+			if (window._showGoneLink) window._showGoneLink();
+		} else if (window._goneLink) {
+			window._goneLink = false;
+			if (window._hideGoneLink) window._hideGoneLink();
+		}
 		awardAnomalyIfEligible(res);
 		checkAchievements(res);
 		updateRollsSinceRare(res);
