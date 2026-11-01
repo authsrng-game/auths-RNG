@@ -29,3 +29,11 @@
 **Learning:** Timers or cooldowns triggered upon resolving a completed background state must evaluate their target completion timestamps relative to the actual state completion time (`exp.startTime + exp.duration`) rather than unparameterized `Date.now()`.
 
 **Prevention:** Ensure transition and resolution handlers set post-completion timer targets derived from the completion timestamp rather than real-time invocation timestamps.
+
+## 2026-11-01 - Dealer Encounter Cooldown Calculation After Background Session Timeout
+
+**Gap:** Dealer encounter cooldown was set relative to `Date.now()` when a session expired (`Date.now() + ENCOUNTER_COOLDOWN`) instead of session completion time (`s.startedAt + SESSION_DURATION`), forcing players to wait through a full 3-hour cooldown starting from when they refocused the tab regardless of how much time elapsed while hidden.
+
+**Learning:** When a time-limited interaction session times out in the background, encounter cooldown targets must be anchored to the actual session expiration timestamp (`s.startedAt + SESSION_DURATION`) so elapsed background time is credited against the cooldown.
+
+**Prevention:** Base post-session cooldown deadlines on session completion timestamps rather than unparameterized `Date.now()` during forced timeout transitions.
