@@ -1463,17 +1463,17 @@ console.log(performance.now());
 	}
 
 	async function handleGalaxyReturn() {
-		const hash = new URLSearchParams(location.hash.slice(1));
 		const query = new URLSearchParams(location.search);
-		const token = hash.get('galaxyToken');
+		const code = query.get('galaxyCode');
 		const error = query.get('galaxyError');
 		const linked = query.get('galaxyLinked');
-		if (!token && !error && !linked) return;
+		if (!code && !error && !linked) return;
 
+		query.delete('galaxyCode');
 		query.delete('galaxyError');
 		query.delete('galaxyLinked');
 		const qs = query.toString();
-		history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
+		history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
 
 		if (error) {
 			window.showAlert('galaxy: ' + error);
@@ -1484,13 +1484,11 @@ console.log(performance.now());
 			return;
 		}
 
-		localStorage.setItem(TOKEN_KEY, token);
 		try {
-			const me = await apiCall('/me');
-			setSession(token, me.uid, me.username, me.avatarUrl);
+			const data = await apiCall('/galaxy/exchange', { method: 'POST', body: { code } });
+			setSession(data.token, data.uid, data.username, data.avatarUrl);
 			showSyncLoading();
 		} catch (e) {
-			clearSession();
 			window.showAlert('galaxy login failed: ' + e.message);
 		}
 	}
