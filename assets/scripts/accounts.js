@@ -1497,6 +1497,7 @@ console.log(performance.now());
 		bindAuthUI();
 		updateAccountBtn();
 		runMigration();
+		handleGalaxyReturn();
 	}
 
 	document.addEventListener('authchange', updateAccountBtn);
