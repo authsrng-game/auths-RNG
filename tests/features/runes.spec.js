@@ -2,6 +2,8 @@
 /* global window */
 const { test, expect } = require('@playwright/test');
 
+const BASE_URL = process.env.BASE_URL || 'http://localhost:8080/';
+
 test.describe('Runes Universal Transaction Machine (UTM) exchange logic', () => {
 	test('converts runes to blocks and blocks to runes with exchange rates and limits', async ({
 		page,
@@ -76,14 +78,10 @@ test.describe('Runes Universal Transaction Machine (UTM) exchange logic', () => 
 		await page.addInitScript(() => {
 			localStorage.setItem('seenLegalConsent', '1');
 			localStorage.setItem('startAnimConfig', JSON.stringify({ enabled: false }));
-		});
-		await page.goto('http://localhost:8080/');
-
-		await page.evaluate(() => {
 			localStorage.setItem('runesData', '{invalid_runes_json');
 			localStorage.setItem('runeUpgrades', '{invalid_upgrades_json');
-			window.reloadRunesData();
 		});
+		await page.goto(BASE_URL);
 
 		const runesWarn = consoleWarnings.find((msg) =>
 			msg.includes('[runes] failed to parse runes state:')

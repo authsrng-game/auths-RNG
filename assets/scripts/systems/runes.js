@@ -838,9 +838,6 @@
 
 	window.tryDropRune = tryDropRune;
 	window.renderRunes = renderRunes;
-	// Generated code starts here on 2026-11-02T10:30:40Z:
-	window.reloadRunesData = loadData;
-	// Generated code ends here on 2026-11-02T10:30:40Z:
 
 	if (document.readyState === 'loading') {
 		document.addEventListener('DOMContentLoaded', init);
