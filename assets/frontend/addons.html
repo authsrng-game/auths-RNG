@@ -593,6 +593,18 @@
 					if (e.target === modalOverlay) modalOverlay.classList.remove('show');
 				});
 
+				// Generated code starts here on 2026-11-02T00:25:00Z:
+				document.addEventListener('keydown', (e) => {
+					if (e.key === 'Escape') {
+						if (permOverlay.classList.contains('show')) {
+							closePermModal();
+						} else if (modalOverlay.classList.contains('show')) {
+							modalOverlay.classList.remove('show');
+						}
+					}
+				});
+				// Generated code ends here on 2026-11-02T00:25:00Z:
+
 				function render() {
 					const q = searchInput.value.trim().toLowerCase();
 					const sort = sortSelect.value;
