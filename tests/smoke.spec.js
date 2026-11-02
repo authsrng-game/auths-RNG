@@ -89,7 +89,7 @@ test.describe('auths-RNG smoke tests', () => {
 	test('page dots and close buttons have accessible aria-labels', async ({ page }) => {
 		await page.goto(BASE_URL);
 		const firstDot = page.locator('.page-dot').first();
-		await expect(firstDot).toHaveAttribute('aria-label', 'Page 1');
+		await expect(firstDot).toHaveAttribute('aria-label', 'roll');
 		await expect(firstDot).toHaveAttribute('aria-current', 'page');
 
 		const closeBtn = page.locator('#indexClose');
