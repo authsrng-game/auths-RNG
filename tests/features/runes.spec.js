@@ -2,6 +2,8 @@
 /* global window */
 const { test, expect } = require('@playwright/test');
 
+const BASE_URL = process.env.BASE_URL || 'http://localhost:8080/';
+
 test.describe('Runes Universal Transaction Machine (UTM) exchange logic', () => {
 	test('converts runes to blocks and blocks to runes with exchange rates and limits', async ({
 		page,
@@ -63,5 +65,33 @@ test.describe('Runes Universal Transaction Machine (UTM) exchange logic', () => 
 		await page.click('#runeToBlockBtn');
 		expect(await page.evaluate(() => localStorage.getItem('runeBlocks'))).toBe('32');
 	});
+
+	// Generated code starts here on 2026-11-02T10:30:40Z:
+	test('logs warnings when runesData or runeUpgrades in localStorage contains invalid JSON', async ({
+		page,
+	}) => {
+		const consoleWarnings = [];
+		page.on('console', (msg) => {
+			if (msg.type() === 'warning') consoleWarnings.push(msg.text());
+		});
+
+		await page.addInitScript(() => {
+			localStorage.setItem('seenLegalConsent', '1');
+			localStorage.setItem('startAnimConfig', JSON.stringify({ enabled: false }));
+			localStorage.setItem('runesData', '{invalid_runes_json');
+			localStorage.setItem('runeUpgrades', '{invalid_upgrades_json');
+		});
+		await page.goto(BASE_URL);
+
+		const runesWarn = consoleWarnings.find((msg) =>
+			msg.includes('[runes] failed to parse runes state:')
+		);
+		const upgradesWarn = consoleWarnings.find((msg) =>
+			msg.includes('[runes] failed to parse upgrades state:')
+		);
+		expect(runesWarn).toBeTruthy();
+		expect(upgradesWarn).toBeTruthy();
+	});
+	// Generated code ends here on 2026-11-02T10:30:40Z:
 });
 // Generated code ends here on 2026-03-31T00:00:00Z:

@@ -44,6 +44,7 @@
 	}
 	// Generated code ends here on 2026-09-22T00:00:00Z:
 
+	// Generated code starts here on 2026-11-02T10:30:40Z:
 	function loadData() {
 		_unlockedCache = localStorage.getItem(RUNES_KEY) === '1';
 		try {
@@ -53,7 +54,9 @@
 				elementals: d.elementals || {},
 				totalDropped: d.totalDropped || 0,
 			};
-		} catch (_) {}
+		} catch (e) {
+			console.warn('[runes] failed to parse runes state:', e);
+		}
 		blocks = parseFloat(localStorage.getItem(BLOCKS_KEY) || '0');
 		gift = localStorage.getItem(GIFT_KEY) || null;
 		try {
@@ -68,8 +71,11 @@
 				},
 				u
 			);
-		} catch (_) {}
+		} catch (e) {
+			console.warn('[runes] failed to parse upgrades state:', e);
+		}
 	}
+	// Generated code ends here on 2026-11-02T10:30:40Z:
 
 	function saveData() {
 		localStorage.setItem(RUNES_DATA_KEY, JSON.stringify(runesData));
