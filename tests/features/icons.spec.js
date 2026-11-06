@@ -3,7 +3,9 @@
 const { test, expect } = require('@playwright/test');
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8080';
 
-test('applyIconSettings resolves packs, custom overrides, and updates DOM and events', async ({ page }) => {
+test('applyIconSettings resolves packs, custom overrides, and updates DOM and events', async ({
+	page,
+}) => {
 	await page.goto(BASE_URL);
 
 	expect(await page.evaluate(() => window.getIcon('notifBell'))).toBe('🔔');
@@ -11,7 +13,13 @@ test('applyIconSettings resolves packs, custom overrides, and updates DOM and ev
 
 	const updated = await page.evaluate(() => {
 		let receivedDetail = null;
-		document.addEventListener('authsrng:iconsUpdated', (e) => { receivedDetail = e.detail; }, { once: true });
+		document.addEventListener(
+			'authsrng:iconsUpdated',
+			(e) => {
+				receivedDetail = e.detail;
+			},
+			{ once: true }
+		);
 
 		window.applyIconSettings({ iconPack: 'retro', iconOverrides: { wellVisual: '🛸' } });
 
@@ -23,7 +31,14 @@ test('applyIconSettings resolves packs, custom overrides, and updates DOM and ev
 		window.applyIconSettings({ iconPack: 'nonexistent' });
 		const fallbackSpring = window.getIcon('seasonSpring');
 
-		return { retroBell, overriddenWell, fallbackSpring, detailSeason: receivedDetail?.seasonWinter, domWell, domBellPrefix };
+		return {
+			retroBell,
+			overriddenWell,
+			fallbackSpring,
+			detailSeason: receivedDetail?.seasonWinter,
+			domWell,
+			domBellPrefix,
+		};
 	});
 
 	expect(updated.retroBell).toBe('📯');
