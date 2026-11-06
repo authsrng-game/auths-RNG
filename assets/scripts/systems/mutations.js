@@ -92,7 +92,7 @@
 				return JSON.parse(current);
 			}
 			return [];
-		// Generated code starts here on 2026-11-06T10:14:48Z:
+			// Generated code starts here on 2026-11-06T10:14:48Z:
 		} catch (e) {
 			console.warn('[mutations] failed to parse mutation history:', e);
 			return [];
