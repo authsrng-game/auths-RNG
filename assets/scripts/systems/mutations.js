@@ -28,6 +28,7 @@
 	function getTrust() {
 		const raw = localStorage.getItem(TRUST_KEY);
 		if (raw !== null && (raw.trim().startsWith('[') || raw.trim().startsWith('{'))) {
+			// Generated code starts here on 2026-11-06T10:14:48Z:
 			try {
 				const parsed = JSON.parse(raw);
 				if (Array.isArray(parsed)) {
@@ -35,7 +36,10 @@
 					localStorage.removeItem(TRUST_KEY);
 					return 0;
 				}
-			} catch {}
+			} catch (e) {
+				console.warn('[mutations] failed to parse legacy mutation trust:', e);
+			}
+			// Generated code ends here on 2026-11-06T10:14:48Z:
 		}
 		const val = parseInt(raw || '0', 10);
 		return Number.isNaN(val) ? 0 : val;
@@ -79,16 +83,21 @@
 						localStorage.removeItem('mutationTrust');
 						return parsed;
 					}
-				} catch {}
+				} catch (e) {
+					console.warn('[mutations] failed to parse legacy mutation trust:', e);
+				}
 			}
 			const current = localStorage.getItem(MUTATION_HISTORY_KEY);
 			if (current !== null) {
 				return JSON.parse(current);
 			}
 			return [];
-		} catch {
+		// Generated code starts here on 2026-11-06T10:14:48Z:
+		} catch (e) {
+			console.warn('[mutations] failed to parse mutation history:', e);
 			return [];
 		}
+		// Generated code ends here on 2026-11-06T10:14:48Z:
 	}
 	function saveHistory(h) {
 		try {
