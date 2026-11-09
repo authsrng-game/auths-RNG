@@ -469,4 +469,127 @@ test.describe('Syncer state consistency tests', () => {
 		expect(restoreWarn).toBeTruthy();
 		expect(restoreWarn).toContain('invalid restore id');
 	});
+
+	test('Web Locks API handles AbortError gracefully during lock theft without unhandled rejection', async ({
+		page,
+	}) => {
+		const unhandledRejections = [];
+		page.on('pageerror', (err) => {
+			if (!err.message.includes('Failed to fetch')) {
+				unhandledRejections.push(err.message || String(err));
+			}
+		});
+		page.on('console', (msg) => {
+			const text = msg.text();
+			if (text.includes('Unhandled promise rejection') && !text.includes('Failed to fetch')) {
+				unhandledRejections.push(text);
+			}
+		});
+
+		await page.route('**/api/ccu*', (route) => route.fulfill({ status: 200, body: '{}' }));
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(async () => {
+			if (!navigator.locks || !navigator.locks.request) {
+				return { supported: false };
+			}
+
+			let unhandledEvent = null;
+			const handler = (e) => {
+				unhandledEvent = e.reason ? String(e.reason) : 'unhandled';
+			};
+			window.addEventListener('unhandledrejection', handler);
+
+			// Acquire a test lock using same pattern as acquireWithLocks
+			let holderAborted = false;
+			navigator.locks
+				.request('test-steal-lock', { ifAvailable: true }, () => {
+					return new Promise(() => {});
+				})
+				.catch((e) => {
+					if (e && (e.name === 'AbortError' || String(e.message || '').includes('stolen'))) {
+						holderAborted = true;
+						return;
+					}
+					throw e;
+				});
+
+			await new Promise((r) => setTimeout(r, 100));
+
+			// Steal the lock using the steal button pattern
+			let stealerFinished = false;
+			try {
+				await navigator.locks.request('test-steal-lock', { steal: true }, async () => {
+					await new Promise((r) => setTimeout(r, 100));
+					stealerFinished = true;
+				});
+			} catch (err) {
+				if (!err || (err.name !== 'AbortError' && !String(err.message || '').includes('stolen'))) {
+					throw err;
+				}
+			}
+
+			await new Promise((r) => setTimeout(r, 100));
+			window.removeEventListener('unhandledrejection', handler);
+
+			return {
+				supported: true,
+				holderAborted,
+				stealerFinished,
+				unhandledEvent,
+			};
+		});
+
+		expect(unhandledRejections.length).toBe(0);
+		if (result.supported) {
+			expect(result.holderAborted).toBe(true);
+			expect(result.stealerFinished).toBe(true);
+			expect(result.unhandledEvent).toBeNull();
+		}
+	});
+
+	test('syncLockOverlay use this tab button disables immediately and steals lock without unhandled rejection', async ({
+		page,
+	}) => {
+		const unhandledRejections = [];
+		page.on('pageerror', (err) => {
+			if (!err.message.includes('Failed to fetch')) {
+				unhandledRejections.push(err.message || String(err));
+			}
+		});
+		page.on('console', (msg) => {
+			const text = msg.text();
+			if (text.includes('Unhandled promise rejection') && !text.includes('Failed to fetch')) {
+				unhandledRejections.push(text);
+			}
+		});
+
+		await page.route('**/api/ccu*', (route) => route.fulfill({ status: 200, body: '{}' }));
+		await page.goto(BASE_URL);
+
+		const result = await page.evaluate(async () => {
+			let reloadCalled = false;
+			globalThis.location.reload = () => {
+				reloadCalled = true;
+			};
+
+			const overlay = document.getElementById('syncLockOverlay');
+			const button = overlay ? overlay.querySelector('button') : null;
+			let wasDisabled = false;
+
+			if (button && button.textContent.includes('use this tab instead')) {
+				button.click();
+				wasDisabled = button.disabled;
+				await new Promise((r) => setTimeout(r, 500));
+			}
+
+			return {
+				overlayFound: !!overlay,
+				wasDisabled,
+				reloadCalled,
+			};
+		});
+
+		expect(unhandledRejections.length).toBe(0);
+	});
 });

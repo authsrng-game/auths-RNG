@@ -828,6 +828,8 @@
 
 	function lockOverlay(taken) {
 		if (!document.body) return;
+		const existing = document.getElementById('syncLockOverlay');
+		if (existing) existing.remove();
 		const box = h('div', { style: 'max-width:340px;text-align:center;line-height:1.6;' }, [
 			h('div', {
 				style: 'font-size:1.1em;margin-bottom:8px;',
@@ -841,9 +843,20 @@
 		]);
 		const b = h('button', { textContent: taken ? 'reload this tab' : 'use this tab instead' });
 		b.addEventListener('click', async () => {
-			if (!taken && navigator.locks) {
-				navigator.locks.request(LOCK_NAME, { steal: true }, () => new Promise(() => {}));
-				await new Promise((r) => setTimeout(r, 400));
+			b.disabled = true;
+			if (!taken && navigator.locks && navigator.locks.request) {
+				try {
+					await navigator.locks.request(LOCK_NAME, { steal: true }, async () => {
+						await new Promise((r) => setTimeout(r, 400));
+					});
+				} catch (err) {
+					if (
+						!err ||
+						(err.name !== 'AbortError' && !String(err.message || '').includes('stolen'))
+					) {
+						console.warn('[sync] lock steal error:', err);
+					}
+				}
 			} else if (!taken) {
 				try {
 					origSet.call(LS, LEASE_KEY, JSON.stringify({ id: tabId, ts: Date.now() }));
@@ -898,7 +911,11 @@
 				return new Promise(() => {});
 			})
 			.catch((e) => {
-				if (!decided && e && e.name === 'AbortError') onLockLost(true);
+				if (e && (e.name === 'AbortError' || String(e.message || '').includes('stolen'))) {
+					onLockLost(true);
+					return;
+				}
+				console.warn('[sync] lock acquire error:', e);
 			});
 	}
 
