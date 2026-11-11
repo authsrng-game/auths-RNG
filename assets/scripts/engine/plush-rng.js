@@ -76,14 +76,18 @@
 		}
 		intBelow(n) {
 			const bn = BigInt(n);
-			const range = 1n << 128n;
+			if (bn <= 1n) return 0n;
+			// enough words to cover n plus 64 spare bits, so rejection is rare
+			const words = BigInt(Math.ceil((bn.toString(2).length + 64) / 64));
+			const range = 1n << (words * 64n);
 			const limit = (range / bn) * bn;
 			let r;
 			do {
-				const hi = this._gen.next();
-				const lo = this._gen.next();
-				r = (hi << 64n) | lo;
-				this._callCount += 2;
+				r = 0n;
+				for (let k = 0n; k < words; k++) {
+					r = (r << 64n) | this._gen.next();
+					this._callCount++;
+				}
 			} while (r >= limit);
 			this._maybeDrift();
 			return r % bn;

@@ -1,5 +1,9 @@
 (function (root) {
 	const SCALE = 1000000000n;
+	const FULL = 1n << 256n; // fixed-point "probability 1"
+	// 1n << 256n = no cap (what the issue proposes). Try FULL / 2n to stop the single
+	// rarest-reachable item from dropping every roll at extreme luck.
+	const P_CAP = FULL;
 	const MULT_PRECISION = 1000000n;
 	const NOTICEABLE_DENOM = 100n;
 	const SCALE_REDUCED = SCALE / MULT_PRECISION;
@@ -85,53 +89,81 @@
 			this._pendingFortuneMult = this.fortune.spend();
 			return this._pendingFortuneMult;
 		}
-
 		_buildWeightTable(rarities, luckMultiplier, inventoryData, shopUpgrades, luckBoostActive) {
-			const weights = new Array(rarities.length);
-			let totalWeight = 0n;
+			const weights = new Array(rarities.length).fill(0n);
 			const streakMult = this.streak.getLuckMultiplier();
 			const momentumMult = this.momentum.getMultiplier();
 			const fortuneMult = this._pendingFortuneMult || 1.0;
 
-			// Generated code starts here on 2026-09-12T15:30:00Z:
-			// Precalculate constant base multipliers outside loop to eliminate 2,000+ per-item floating point multiplications per roll.
 			const baseNonNoticeableMult = streakMult * momentumMult;
 			const baseNoticeableMult =
 				baseNonNoticeableMult * (luckBoostActive ? 4.0 : 1.0) * luckMultiplier * fortuneMult;
 			const hasMagnet = shopUpgrades.magnet > 0;
 			const magnetFactor = hasMagnet ? 1 + shopUpgrades.magnet * 0.1 : 1.0;
 
-			for (let i = 0; i < rarities.length; i++) {
+			const order = this._order(rarities);
+
+			// cascade: rarest first, each hits with min(1, mult / denom)
+			let survive = FULL; // probability nothing rarer has hit yet
+			for (let k = 0; k < order.notice.length && survive > 0n; k++) {
+				const i = order.notice[k];
 				const r = rarities[i];
 				const meta = getRarityMeta(r);
-				const denom = meta.denom;
-				const noticeable = meta.noticeable;
 
-				let mult;
-				if (noticeable) {
-					mult = baseNoticeableMult;
+				let p;
+				if (this.pity.isHardPity(r)) {
+					p = FULL; // hard pity is a guarantee
+				} else {
+					let mult = baseNoticeableMult;
 					if (hasMagnet && !inventoryData.has(r.name)) mult *= magnetFactor;
 					mult *= this.pity.getMultiplier(r);
-					mult *= this.streak.getDryRunMultiplier(r.name, r.chance, denom);
+					mult *= this.streak.getDryRunMultiplier(r.name, r.chance, meta.denom);
 					mult *= this.resistance.getMultiplier(r);
-				} else {
-					mult = baseNonNoticeableMult;
+
+					if (!Number.isFinite(mult)) {
+						p = P_CAP;
+					} else {
+						const multBig = BigInt(Math.max(0, Math.round(mult * Number(MULT_PRECISION))));
+						p = (multBig * FULL) / (meta.denom * MULT_PRECISION);
+						if (p > P_CAP) p = P_CAP;
+					}
 				}
 
-				let w;
-				if (mult === 1.0) {
-					w = SCALE / denom;
-				} else {
-					const multBig = BigInt(Math.max(0, Math.round(mult * Number(MULT_PRECISION))));
-					w = (SCALE_REDUCED * multBig) / denom;
-				}
-				if (w < meta.minW) w = meta.minW;
-
+				const w = (p * survive) / FULL;
 				weights[i] = w;
-				totalWeight += w;
+				survive -= w;
 			}
-			// Generated code ends here on 2026-09-12T15:30:00Z:
 
+			// leftover probability goes to the common rarities, split like the old weights
+			if (survive > 0n && order.common.length) {
+				const cw = new Array(order.common.length);
+				let commonTotal = 0n;
+				for (let k = 0; k < order.common.length; k++) {
+					const meta = getRarityMeta(rarities[order.common[k]]);
+					let w;
+					if (baseNonNoticeableMult === 1.0) {
+						w = SCALE / meta.denom;
+					} else {
+						const multBig = BigInt(
+							Math.max(0, Math.round(baseNonNoticeableMult * Number(MULT_PRECISION)))
+						);
+						w = (SCALE_REDUCED * multBig) / meta.denom;
+					}
+					if (w < meta.minW) w = meta.minW;
+					cw[k] = w;
+					commonTotal += w;
+				}
+				if (commonTotal > 0n) {
+					for (let k = 0; k < order.common.length; k++) {
+						weights[order.common[k]] = (survive * cw[k]) / commonTotal;
+					}
+				} else {
+					weights[order.common[order.common.length - 1]] = survive;
+				}
+			}
+
+			let totalWeight = 0n;
+			for (let i = 0; i < weights.length; i++) totalWeight += weights[i];
 			return { weights: weights, totalWeight: totalWeight };
 		}
 
@@ -226,6 +258,23 @@
 
 		denomOfString(rarity) {
 			return denomBig(rarity).toString();
+		}
+
+		_order(rarities) {
+			const c = this._orderCache;
+			if (c && c.src === rarities && c.len === rarities.length) return c;
+			const notice = [];
+			const common = [];
+			for (let i = 0; i < rarities.length; i++) {
+				(getRarityMeta(rarities[i]).noticeable ? notice : common).push(i);
+			}
+			notice.sort((a, b) => {
+				const da = getRarityMeta(rarities[a]).denom;
+				const db = getRarityMeta(rarities[b]).denom;
+				return da > db ? -1 : da < db ? 1 : 0;
+			});
+			this._orderCache = { src: rarities, len: rarities.length, notice, common };
+			return this._orderCache;
 		}
 	}
 

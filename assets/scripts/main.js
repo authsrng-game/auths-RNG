@@ -1185,6 +1185,7 @@ function saveAllData() {
 	const arr = Array.from(inventoryData.values()).map(({ rarityObj, count }) => ({
 		name: rarityObj.name,
 		chance: rarityObj.chance,
+		denom: Plush.denomOfString(rarityObj),
 		count,
 	}));
 	localStorage.setItem(STORAGE_KEY, JSON.stringify(arr.concat(window._orphanInventory || [])));
@@ -1830,7 +1831,7 @@ function renderSortedInventory(mode) {
 // Generated code ends here on 2026-11-10T00:00:00Z:
 
 const savedPoints = localStorage.getItem(POINTS_KEY);
-if (savedPoints !== null) points = parseInt(savedPoints, 10) || 0;
+if (savedPoints !== null) points = Number(savedPoints) || 0;
 
 const savedUpgrades = localStorage.getItem(SHOP_UPGRADES_KEY);
 if (savedUpgrades) {
