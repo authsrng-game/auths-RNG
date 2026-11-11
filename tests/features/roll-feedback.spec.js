@@ -48,7 +48,9 @@ test.describe('Roll button rage-click mitigation and visual feedback', () => {
 		await expect(rollBtn).toBeVisible();
 		await expect(rollBtn).toBeEnabled();
 
-		const initialRolls = await page.evaluate(() => (typeof totalRolls !== 'undefined' ? totalRolls : 0));
+		const initialRolls = await page.evaluate(() =>
+			typeof totalRolls !== 'undefined' ? totalRolls : 0
+		);
 
 		// Rapid clicks (rage click simulation)
 		await page.evaluate(() => {
@@ -67,7 +69,9 @@ test.describe('Roll button rage-click mitigation and visual feedback', () => {
 		// Wait for completion
 		await expect(rollBtn).toBeEnabled({ timeout: 5000 });
 
-		const finalRolls = await page.evaluate(() => (typeof totalRolls !== 'undefined' ? totalRolls : 0));
+		const finalRolls = await page.evaluate(() =>
+			typeof totalRolls !== 'undefined' ? totalRolls : 0
+		);
 		expect(finalRolls).toBe(initialRolls + 1);
 	});
 
