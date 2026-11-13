@@ -296,5 +296,4 @@ console.log(performance.now());
 		parse: parseCommands,
 	};
 	// Generated code ends here on 2026-10-31T00:00:00Z:
-
 })();
