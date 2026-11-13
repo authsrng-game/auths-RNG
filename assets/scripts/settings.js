@@ -1400,8 +1400,12 @@
 	let _musicApplyToken = 0;
 
 	async function applyMusic(settings) {
-		const musicKey = settings.muted ? '__muted__' : settings.music || 'default';
-		const tier = musicKey === 'default' ? getDefaultTierTrack() : null;
+		window.muteAll = !!settings.muteAll;
+
+		const tier = getDefaultTierTrack();
+
+		const silent = !!(settings.muted || settings.muteAll);
+		const musicKey = silent ? '__muted__' : settings.music || 'default';
 		const newKey = musicKey === 'default' ? `default:${tier.file}` : musicKey;
 
 		if (newKey === _activeMusicKey) return;
@@ -1569,6 +1573,11 @@
 		window.rareThreshold = settings.rareThreshold ?? 1000;
 		window.autoSellThreshold = settings.autoSellThreshold || 0;
 
+		window.muteAll = !!settings.muteAll;
+		window.luckCap = settings.luckCap || 0;
+		if (window.setBuffsPaused) window.setBuffsPaused(!!settings.pauseBuffs);
+		if (window.applyStarmapLuck) window.applyStarmapLuck();
+
 		const luckBreak = el('luckBreakdown');
 		if (luckBreak) luckBreak.style.display = settings.hideLuckBreakdown ? 'none' : '';
 
@@ -1592,9 +1601,32 @@
 		if (window.refreshAllDisplays) window.refreshAllDisplays();
 	}
 
+	function updateCutsceneRow() {
+		const modeEl = el('cutsceneMode');
+		const thresholdEl = el('cutsceneThreshold');
+		if (!modeEl || !thresholdEl) return;
+		const mode = modeEl.value;
+		const threshold = readNum('cutsceneThreshold', 0);
+		const row = thresholdEl.closest('.setting-row');
+		if (row) row.style.opacity = mode === 'off' ? '0.35' : '';
+		thresholdEl.disabled = mode === 'off';
+		const summary = el('cutsceneSummary');
+		if (!summary) return;
+		if (mode === 'off') {
+			summary.textContent = 'cutscenes are off';
+			return;
+		}
+		const when = mode === 'first' ? 'the first time you roll a rarity' : 'every time';
+		const which =
+			threshold > 0 ? `1/${threshold.toLocaleString()} and rarer` : 'every rarity that has one';
+		summary.textContent = `plays ${when}, for ${which}`;
+	}
+
 	function syncUIToSettings(settings) {
 		if (el('musicSelect')) el('musicSelect').value = settings.music || 'default';
 		if (el('muteMusic')) el('muteMusic').checked = !!settings.muted;
+		if (el('muteAll')) el('muteAll').checked = !!settings.muteAll;
+		if (el('pauseBuffs')) el('pauseBuffs').checked = !!settings.pauseBuffs;
 		if (el('devOverlay')) el('devOverlay').checked = !!settings.dev;
 		if (el('legacyMode')) el('legacyMode').checked = !!settings.legacyMode;
 		if (el('rawNumbers')) el('rawNumbers').checked = !!settings.rawNumbers;
@@ -1603,6 +1635,8 @@
 		if (el('autoSellThreshold')) el('autoSellThreshold').value = settings.autoSellThreshold || 0;
 		if (el('cutsceneThreshold')) el('cutsceneThreshold').value = settings.cutsceneThreshold || 0;
 		if (el('cutsceneMode')) el('cutsceneMode').value = settings.cutsceneMode || 'first';
+		if (el('luckCap')) el('luckCap').value = settings.luckCap || 0;
+		updateCutsceneRow();
 	}
 
 	function readNum(id, def) {
@@ -1614,6 +1648,8 @@
 		return {
 			music: (el('musicSelect') || {}).value || 'default',
 			muted: !!(el('muteMusic') || {}).checked,
+			muteAll: !!(el('muteAll') || {}).checked,
+			pauseBuffs: !!(el('pauseBuffs') || {}).checked,
 			dev: !!(el('devOverlay') || {}).checked,
 			legacyMode: !!(el('legacyMode') || {}).checked,
 			rawNumbers: !!(el('rawNumbers') || {}).checked,
@@ -1622,10 +1658,12 @@
 			autoSellThreshold: readNum('autoSellThreshold', 0),
 			cutsceneThreshold: readNum('cutsceneThreshold', 0),
 			cutsceneMode: (el('cutsceneMode') || {}).value || 'first',
+			luckCap: readNum('luckCap', 0),
 		};
 	}
 	function onChange() {
 		applyVisuals({ ...savedSettings, ...getCurrentSettings() });
+		updateCutsceneRow();
 		showPendingBar();
 	}
 
@@ -1638,6 +1676,17 @@
 		} catch (_) {}
 		if (typeof window.invalidateUserSettingsCache === 'function')
 			window.invalidateUserSettingsCache();
+	}
+
+	async function onPauseChange() {
+		const current = { ...savedSettings, ...getCurrentSettings() };
+		savedSettings = current;
+		try {
+			localStorage.setItem('userSettings', JSON.stringify(current));
+		} catch (_) {}
+		if (typeof window.invalidateUserSettingsCache === 'function')
+			window.invalidateUserSettingsCache();
+		if (window.setBuffsPaused) window.setBuffsPaused(!!current.pauseBuffs);
 	}
 
 	async function saveChanges() {
@@ -1656,22 +1705,23 @@
 
 	// -- Event binding -----------------------------------------------------
 	function bindSettings() {
-		const ids = ['legacyMode', 'rawNumbers', 'devOverlay', 'cutsceneMode'];
-		ids.forEach((id) => {
+		['legacyMode', 'rawNumbers', 'devOverlay', 'cutsceneMode'].forEach((id) => {
 			const n = el(id);
 			if (n) n.addEventListener('change', onChange);
 		});
 
-		const muteMusicEl = el('muteMusic');
-		if (muteMusicEl) muteMusicEl.addEventListener('change', onMusicChange);
+		['muteMusic', 'muteAll', 'musicSelect'].forEach((id) => {
+			const n = el(id);
+			if (n) n.addEventListener('change', onMusicChange);
+		});
 
-		const musicSelectEl = el('musicSelect');
-		if (musicSelectEl) musicSelectEl.addEventListener('change', onMusicChange);
+		const pauseEl = el('pauseBuffs');
+		if (pauseEl) pauseEl.addEventListener('change', onPauseChange);
 
 		const rollSoundEl = el('rollSound');
 		if (rollSoundEl) rollSoundEl.addEventListener('change', onChange);
 
-		['rareThreshold', 'autoSellThreshold', 'cutsceneThreshold'].forEach((id) => {
+		['rareThreshold', 'autoSellThreshold', 'cutsceneThreshold', 'luckCap'].forEach((id) => {
 			const n = el(id);
 			if (n) n.addEventListener('input', onChange);
 		});
@@ -2293,6 +2343,9 @@
 			autoSellThreshold: 0,
 			cutsceneThreshold: 0,
 			rawNumbers: false,
+			muteAll: false,
+			pauseBuffs: false,
+			luckCap: 0,
 		};
 
 		savedSettings = { ...defaults, ...loaded };
@@ -2337,6 +2390,7 @@
 
 	async function playThemeSound(slot) {
 		try {
+			if (window.muteAll) return;
 			let entry = soundAudioCache[slot];
 			if (entry === undefined) {
 				const record = await getCustomSound(slot);

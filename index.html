@@ -1145,6 +1145,19 @@ Last release date on nightly: ${nightlyRDate}`;
 								</label>
 							</div>
 
+							<div class="setting-row">
+								<div class="setting-info">
+									<span class="setting-name">mute everything</span>
+									<span class="setting-desc"
+										>music, sound effects, custom sounds and cutscene audio</span
+									>
+								</div>
+								<label class="pill-toggle">
+									<input type="checkbox" id="muteAll" />
+									<span class="pill-track"></span>
+								</label>
+							</div>
+
 							<!-- Generated code starts here on 2026-03-31T15:00:00Z: -->
 							<div class="setting-row setting-row--stacked">
 								<label for="musicSelect" class="setting-name">background music</label>
@@ -1287,12 +1300,45 @@ Last release date on nightly: ${nightlyRDate}`;
 								</select>
 							</div>
 
+							<div class="setting-row">
+								<div class="setting-info">
+									<span class="setting-name">pause all buffs</span>
+									<span class="setting-desc"
+										>freezes potion and boost timers and turns their effects off until you
+										unpause</span
+									>
+								</div>
+								<label class="pill-toggle">
+									<input type="checkbox" id="pauseBuffs" />
+									<span class="pill-track"></span>
+								</label>
+							</div>
+
+							<div class="setting-row setting-row--stacked">
+								<div class="setting-info">
+									<label for="luckCap" class="setting-name">luck cap</label>
+									<span class="setting-desc"
+										>never go above this luck multiplier so more common rarities stay reachable · 0
+										= no cap</span
+									>
+								</div>
+								<input
+									type="number"
+									id="luckCap"
+									min="0"
+									value="0"
+									class="setting-input"
+									aria-label="Luck cap"
+								/>
+							</div>
+
 							<div class="setting-row setting-row--stacked">
 								<div class="setting-info">
 									<label for="cutsceneThreshold" class="setting-name">cutscene threshold</label>
 									<span class="setting-desc"
-										>only play cutscenes for rarities 1/X and rarer - 0 = all</span
+										>only play cutscenes for rarities 1/X and rarer · 0 = no limit</span
 									>
+									<span class="setting-desc" id="cutsceneSummary"></span>
 								</div>
 								<input
 									type="number"
@@ -1968,16 +2014,22 @@ Last release date on nightly: ${nightlyRDate}`;
 						<a href="https://altcha.org" target="_blank" rel="noopener noreferrer">altcha</a>
 					</p>
 					<button id="signupSubmit" class="small" style="width: 100%">sign up</button>
-					<p class="auth-legal-note">
-						by making an account, you agree to the
-						<a href="/boring/legal.html" target="_blank" rel="noopener noreferrer"
-							>privacy policy and terms of service</a
-						>
-						and have read the
-						<a href="/boring/community.html" target="_blank" rel="noopener noreferrer"
-							>community code of conduct</a
-						>!
-					</p>
+					<label
+						class="auth-legal-note"
+						style="display: flex; gap: 8px; align-items: flex-start; text-align: left; opacity: 0.8"
+					>
+						<input type="checkbox" id="signupAgree" style="margin-top: 3px" />
+						<span>
+							i agree to the
+							<a href="/boring/legal.html" target="_blank" rel="noopener noreferrer"
+								>privacy policy and terms of service</a
+							>
+							and have read the
+							<a href="/boring/community.html" target="_blank" rel="noopener noreferrer"
+								>community code of conduct</a
+							>
+						</span>
+					</label>
 					<p class="auth-legal-note" style="opacity: 0.6">
 						⚠ accounts are in beta!! expect bugs, and back up your save data via settings just in
 						case..
@@ -2582,28 +2634,6 @@ Last release date on nightly: ${nightlyRDate}`;
 
 			observeLazyElements();
 			new MutationObserver(observeLazyElements).observe(document.body, {
-				childList: true,
-				subtree: true,
-			});
-
-			document.querySelectorAll('.lazy').forEach((el) => {
-				lazyObserver.observe(el);
-			});
-
-			function observeLazyElements() {
-				document.querySelectorAll('.lazy').forEach((el) => {
-					if (!el.dataset.observed) {
-						lazyObserver.observe(el);
-						el.dataset.observed = 'true';
-					}
-				});
-			}
-
-			const mutationObserver = new MutationObserver(() => {
-				observeLazyElements();
-			});
-
-			mutationObserver.observe(document.body, {
 				childList: true,
 				subtree: true,
 			});

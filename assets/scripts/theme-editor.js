@@ -130,7 +130,7 @@
 				achievementBg: '#1f1500',
 				achievementBorder: '#7a5500',
 			},
-			settings: { radius: 0, borderWidth: 1, textSize: 15, font: 'mono' },
+			settings: { radius: 0, borderWidth: 1, textSize: 15, font: 'default' },
 		},
 		{
 			name: 'ice',
@@ -754,7 +754,7 @@
 			el('te-textSize').value = s.textSize ?? 16;
 			el('te-textSizeVal').textContent = s.textSize ?? 16;
 		}
-		if (el('te-font')) el('te-font').value = s.font || 'default';
+		if (el('te-font')) el('te-font').value = !s.font || s.font === 'mono' ? 'default' : s.font;
 		if (el('te-inventoryStyle')) el('te-inventoryStyle').value = s.inventoryStyle || 'compact';
 		if (el('te-spinnerStyle')) el('te-spinnerStyle').value = s.spinnerStyle || 'slot';
 		if (el('te-rollBtnSize')) el('te-rollBtnSize').value = s.rollBtnSize || 'normal';

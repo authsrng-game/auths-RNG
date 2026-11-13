@@ -109,6 +109,9 @@ let playerPotions = {
 };
 
 let activePotions = [];
+let buffsPaused = false;
+let pauseStartedAt = 0;
+let luckWasCapped = false;
 let potionLuckMultiplier = 1;
 let duplicateRollsLeft = 0;
 
@@ -263,6 +266,7 @@ _bind('buyDupeBtn', 'duplicate', (l) => 800 + l * l * 400, 10);
 
 // roll sound
 function playRollSound() {
+	if (window.muteAll) return;
 	const sound = window.rollSoundSetting || 'none';
 	if (sound === 'none') return;
 	try {
@@ -459,7 +463,7 @@ function usePotion(potionType) {
 	// stacking is additive, so n potions = one entry worth n*(mult-1)
 	activePotions.push({
 		type: potionType,
-		endTime: Date.now() + data.duration,
+		endTime: buffNow() + data.duration,
 		multiplier: 1 + n * (data.mult - 1),
 	});
 	playerPotions[potionType] -= n;
@@ -471,21 +475,53 @@ function usePotion(potionType) {
 }
 window.usePotion = usePotion;
 
-// Generated code starts here on 2026-11-15T00:00:00Z:
-// Fast-path recalcPotionLuck when no active potions exist and multiplier is 1 to avoid array filter allocations and unnecessary recalcLuckMultiplier calls every second.
 function recalcPotionLuck() {
 	if (activePotions.length === 0 && potionLuckMultiplier === 1) return;
 	potionLuckMultiplier = 1;
-	if (!isCutscenePlaying) activePotions = activePotions.filter((p) => p.endTime > Date.now());
-	activePotions.forEach((p) => {
-		potionLuckMultiplier += p.multiplier - 1;
-	});
+	if (!buffsPaused) {
+		if (!isCutscenePlaying) activePotions = activePotions.filter((p) => p.endTime > Date.now());
+		activePotions.forEach((p) => {
+			potionLuckMultiplier += p.multiplier - 1;
+		});
+	}
 	recalcLuckMultiplier();
 	updateActivePotionsDisplay();
 }
-// Generated code ends here on 2026-11-15T00:00:00Z:
 
-// Generated code starts here on 2026-11-02T00:00:00Z:
+function buffNow() {
+	return buffsPaused ? pauseStartedAt : Date.now();
+}
+
+function potionTimerText(p) {
+	const left = Math.ceil((p.endTime - buffNow()) / 1000);
+	return buffsPaused ? `${left}s (paused)` : `${left}s remaining`;
+}
+
+function setBuffsPaused(paused) {
+	paused = !!paused;
+	if (paused === buffsPaused) return;
+	if (paused) {
+		pauseStartedAt = Date.now();
+		buffsPaused = true;
+	} else {
+		const gap = Date.now() - pauseStartedAt;
+		buffsPaused = false;
+		activePotions.forEach((p) => {
+			p.endTime += gap;
+		});
+		if (luckBoostActive) {
+			luckBoostEndTime += gap;
+			localStorage.setItem(LUCK_KEY, JSON.stringify({ active: true, endTime: luckBoostEndTime }));
+		}
+	}
+	recalcPotionLuck();
+	recalcLuckMultiplier();
+	updateActivePotionsDisplay();
+	updateLuckTimer();
+	saveAllData();
+}
+window.setBuffsPaused = setBuffsPaused;
+
 // Lazily cache DOM elements and update textContent on active potion list items in-place to prevent DOM churn and redundant style setter calls on periodic timer ticks.
 let _activePotionsDisplayEl = null;
 let _activePotionsListEl = null;
@@ -511,16 +547,14 @@ function updateActivePotionsDisplay() {
 	const totalItems = activePotions.length + (duplicateRollsLeft > 0 ? 1 : 0);
 	const children = _activePotionsListEl.children;
 
-	// In-place update if element count matches
 	if (children.length === totalItems) {
 		for (let i = 0; i < activePotions.length; i++) {
 			const p = activePotions[i];
 			const data = potionData[p.type];
-			const timeLeft = Math.ceil((p.endTime - Date.now()) / 1000);
 			const emoji = data?.emoji || '🏆';
 			const mult = p.multiplier ?? data?.mult ?? 1;
 			const nameStr = `${emoji} ${mult}x luck`;
-			const timerStr = `${timeLeft}s remaining`;
+			const timerStr = potionTimerText(p);
 
 			const div = children[i];
 			const nameEl = div.children[0];
@@ -543,13 +577,11 @@ function updateActivePotionsDisplay() {
 		return;
 	}
 
-	// Structural change: rebuild list using DocumentFragment
 	_activePotionsListEl.innerHTML = '';
 	const fragment = document.createDocumentFragment();
 
 	activePotions.forEach((p) => {
 		const data = potionData[p.type];
-		const timeLeft = Math.ceil((p.endTime - Date.now()) / 1000);
 		const emoji = data?.emoji || '🏆';
 		const mult = p.multiplier ?? data?.mult ?? 1;
 
@@ -562,7 +594,7 @@ function updateActivePotionsDisplay() {
 
 		const timerDiv = document.createElement('div');
 		timerDiv.className = 'active-potion-timer';
-		timerDiv.textContent = `${timeLeft}s remaining`;
+		timerDiv.textContent = potionTimerText(p);
 
 		div.appendChild(nameDiv);
 		div.appendChild(timerDiv);
@@ -588,8 +620,6 @@ function updateActivePotionsDisplay() {
 
 	_activePotionsListEl.appendChild(fragment);
 }
-// Generated code ends here on 2026-11-02T00:00:00Z:
-
 // Update potion timers
 setInterval(() => {
 	recalcPotionLuck(); // handles filter + multiplier reset internally
@@ -681,8 +711,11 @@ function recalcLuckMultiplier() {
 			: 1;
 	globalLuckMultiplier =
 		shopLuckMultiplier * anomalyMult * starmapMult * runeTripMult * runeGiftMult * runeCloverMult;
-	if (luckBoostActive) globalLuckMultiplier *= 4;
+	if (luckBoostActive && !buffsPaused) globalLuckMultiplier *= 4;
 	globalLuckMultiplier *= potionLuckMultiplier;
+	const cap = window.luckCap || 0;
+	luckWasCapped = cap > 0 && globalLuckMultiplier > cap;
+	if (luckWasCapped) globalLuckMultiplier = cap;
 	updateLuckDisplay();
 }
 
@@ -711,6 +744,8 @@ function updateLuckDisplay() {
 	if (luckBoostActive) parts.push(`boost: 4.0x (active)`);
 	if (potionLuckMultiplier > 1) parts.push(`potions: ${formatMult(potionLuckMultiplier)}x`);
 	if (duplicateRollsLeft > 0) parts.push(`duplicate: ${duplicateRollsLeft} rolls left`);
+	if (buffsPaused) parts.push('buffs paused');
+	if (luckWasCapped) parts.push(`capped at ${formatMult(globalLuckMultiplier)}x`);
 
 	// starmap bonus
 	const starmapMult =
@@ -892,6 +927,7 @@ function playCutscene(rarityName, callback) {
 	overlay.addEventListener('pointerdown', onSkip);
 	document.addEventListener('keydown', onKey, true);
 
+	video.muted = !!window.muteAll;
 	video.src = videoUrl;
 	overlay.classList.add('active');
 
@@ -1303,8 +1339,7 @@ function addToInventory(o, skipAutoSell = false) {
 			showAnomalyPopup('duplicate proc!');
 		}
 	}
-
-	if (duplicateRollsLeft > 0) {
+	if (duplicateRollsLeft > 0 && !buffsPaused) {
 		const d2 = inventoryData.get(o.name);
 		if (d2) {
 			d2.count++;
@@ -2030,7 +2065,7 @@ let _lastLuckSecondsLeft = -1;
 
 function startLuckBoost() {
 	luckBoostActive = true;
-	luckBoostEndTime = Date.now() + 60000;
+	luckBoostEndTime = buffNow() + 60000;
 	_lastLuckSecondsLeft = -1;
 	recalcLuckMultiplier();
 
@@ -2051,7 +2086,7 @@ function startLuckBoost() {
 }
 
 function updateLuckTimer() {
-	if (isCutscenePlaying) return;
+	if (isCutscenePlaying || buffsPaused) return;
 	_luckTimerEl = _luckTimerEl || document.getElementById('luckTimer');
 	_luckBoostBadgeEl = _luckBoostBadgeEl || document.getElementById('luckBoostBadge');
 
@@ -2116,7 +2151,7 @@ window.addEventListener('storage', (e) => {
 function checkMuteSettings() {
 	try {
 		const settings = getUserSettings();
-		if (settings && settings.muted) {
+		if (settings && (settings.muted || settings.muteAll)) {
 			backgroundMusic.pause();
 			backgroundMusic.volume = 0;
 			return true;
@@ -2380,8 +2415,8 @@ document.addEventListener('visibilitychange', () => {
 	if (document.hidden) return;
 
 	updatePlaytimeDisplay();
-
-	if (luckBoostActive && !isCutscenePlaying && Date.now() >= luckBoostEndTime) {
+	if (luckBoostActive && !buffsPaused && !isCutscenePlaying && Date.now() >= luckBoostEndTime) {
+		// if BLARHABJSJAJSHDSJSHASJHAJSHJAHSJHJA then yippee! hooray!
 		endLuckBoost();
 	}
 
