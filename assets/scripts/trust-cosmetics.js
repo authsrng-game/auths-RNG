@@ -133,6 +133,9 @@
 			return {};
 		}
 	}
+	function isAutoMutateOn() {
+		return getOwned().includes('upgrade_automutate') && !getActive().automutatePaused;
+	}
 	function saveOwned(o) {
 		localStorage.setItem(TRUST_OWNED_KEY, JSON.stringify(o));
 	}
@@ -189,7 +192,7 @@
 
 	// Generated code starts here on 2026-03-31T00:00:00Z:
 	function processAutoMutate() {
-		if (!getOwned().includes('upgrade_automutate')) return;
+		if (!isAutoMutateOn()) return;
 		const now = Date.now();
 		const lastTick = window._lastAutoMutateTick || now;
 		const elapsedMs = now - lastTick;
@@ -204,9 +207,7 @@
 				if (!ms || typeof ms.getInventoryRarities !== 'function') break;
 				const inv = ms.getInventoryRarities();
 				if (!inv || inv.length < 2) break;
-				const shuffle = [...inv].sort(
-					() => (typeof Beacon !== 'undefined' ? Beacon.float() : Math.random()) - 0.5
-				);
+				const shuffle = [...inv].sort(() => Plush.float() - 0.5);
 				const a = shuffle[0];
 				const b = shuffle[1];
 				if (a.name === b.name) continue;
@@ -232,7 +233,7 @@
 			clearInterval(autoMutateInterval);
 			autoMutateInterval = null;
 		}
-		if (!getOwned().includes('upgrade_automutate')) return;
+		if (!isAutoMutateOn()) return;
 		window._lastAutoMutateTick = Date.now();
 		autoMutateInterval = setInterval(processAutoMutate, 20000);
 	}
@@ -462,15 +463,16 @@
 
 		for (const upg of UPGRADES) {
 			const isOwned = owned.includes(upg.id);
+			const paused = !!active.automutatePaused;
 			const canAfford = trust >= upg.cost;
 			html += `
-      <div class="trust-shop-item${isOwned ? ' trust-item-active' : ''}">
+      <div class="trust-shop-item${isOwned && !paused ? ' trust-item-active' : ''}">
         <div class="trust-item-name">${upg.name}</div>
         <div class="trust-item-desc">${upg.desc}</div>
-        <div class="trust-item-cost">${isOwned ? 'owned' : upg.cost + ' trust'}</div>
+        <div class="trust-item-cost">${isOwned ? (paused ? 'owned, off' : 'owned, on') : upg.cost + ' trust'}</div>
         ${
 					isOwned
-						? '<div class="trust-item-btn" style="font-size:.75em;opacity:.4;margin-top:6px;">running</div>'
+						? `<button class="small trust-item-btn" data-action="toggleautomutate">${paused ? 'turn on' : 'turn off'}</button>`
 						: `<button class="small trust-item-btn" data-action="buyupgrade" data-id="${upg.id}"${canAfford ? '' : ' disabled'}>buy</button>`
 				}
       </div>`;
@@ -525,6 +527,13 @@
 				startAutoMutate();
 				const balEl = document.getElementById('mutationTrustAmt');
 				if (balEl) balEl.textContent = getTrust();
+				renderShop(container);
+			} else if (action === 'toggleautomutate') {
+				const a = getActive();
+				if (a.automutatePaused) delete a.automutatePaused;
+				else a.automutatePaused = true;
+				saveActive(a);
+				startAutoMutate();
 				renderShop(container);
 			} else if (action === 'equip') {
 				equip(btn.dataset.id);

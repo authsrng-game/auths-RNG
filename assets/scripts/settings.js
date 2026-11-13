@@ -549,12 +549,17 @@
 		}
 
 		// -- Tabs --------------------------------------------------------------
-		document.querySelectorAll('.dev-tab').forEach((btn) => {
+		document.querySelectorAll('#devOverlayPanel .dev-tab').forEach((btn) => {
 			btn.addEventListener('click', () => {
-				document.querySelectorAll('.dev-tab').forEach((b) => b.classList.remove('active'));
-				document.querySelectorAll('.dev-tab-content').forEach((c) => (c.style.display = 'none'));
+				document
+					.querySelectorAll('#devOverlayPanel .dev-tab')
+					.forEach((b) => b.classList.remove('active'));
+				document
+					.querySelectorAll('#devOverlayPanel .dev-tab-content')
+					.forEach((c) => (c.style.display = 'none'));
 				btn.classList.add('active');
-				document.getElementById('dct-' + btn.dataset.tab).style.display = 'block';
+				const content = document.getElementById('dct-' + btn.dataset.tab);
+				if (content) content.style.display = 'block';
 				if (btn.dataset.tab === 'storage') renderStorage();
 				if (btn.dataset.tab === 'perf') {
 					startPerfTab();

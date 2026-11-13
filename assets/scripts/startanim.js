@@ -1,6 +1,6 @@
 console.log(performance.now());
 
-window.addEventListener('DOMContentLoaded', () => {
+(() => {
 	const ANIM_KEY = 'startAnimConfig';
 
 	let _bg = '#0e0e0e';
@@ -536,4 +536,4 @@ window.addEventListener('DOMContentLoaded', () => {
 			}, 200);
 		}
 	};
-});
+})();

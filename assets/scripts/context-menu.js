@@ -98,10 +98,6 @@
 	}
 
 	function flashMsg(msg) {
-		if (typeof window.showAlert === 'function') {
-			window.showAlert(msg);
-			return;
-		}
 		const t = document.createElement('div');
 		t.textContent = msg;
 		t.style.cssText = `
@@ -359,12 +355,15 @@
 			'roll',
 			'shop',
 			'gauntlets',
+			'expeditions',
+			'the dealer',
 			'mutations',
 			'starmap',
 			'runes',
 			'wishing well',
 			'settings',
-			'links',
+			'links and widgets',
+			'cat shrine',
 		];
 
 		const now = new Date();
@@ -392,18 +391,13 @@
 		menu.appendChild(makeHeader('navigate'));
 
 		pageNames.forEach((name, i) => {
-			const locked = window.lockedPages && window.lockedPages.has(i);
+			if (document.body.classList.contains('legacy-mode')) return;
+			if (window.lockedPages && window.lockedPages.has(i)) return;
 			const isCurrent = i === currentPageIdx;
 			menu.appendChild(
-				makeItem(
-					isCurrent ? '▶' : '·',
-					name,
-					locked ? 'locked' : isCurrent ? 'here' : '',
-					() => {
-						if (typeof window.goToPage === 'function') window.goToPage(i);
-					},
-					{ disabled: locked }
-				)
+				makeItem(isCurrent ? '▶' : '·', name, isCurrent ? 'here' : '', () => {
+					if (typeof window.goToPage === 'function') window.goToPage(i);
+				})
 			);
 		});
 
@@ -424,6 +418,14 @@
 				const btn = document.getElementById('dailyBtn');
 				if (btn && !btn.disabled) btn.click();
 				else flashMsg('daily already claimed!');
+			})
+		);
+
+		menu.appendChild(
+			makeItem('🗓️', 'claim weekly', '', () => {
+				const btn = document.getElementById('weeklyBtn');
+				if (btn && !btn.disabled) btn.click();
+				else flashMsg('weekly already claimed!');
 			})
 		);
 
@@ -574,8 +576,8 @@
 	});
 
 	document.addEventListener('contextmenu', (e) => {
-		const tag = e.target.tagName;
-		if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) return;
+		if (e.shiftKey) return;
+		if (e.target.closest('input, textarea, a, img, video, audio, [contenteditable="true"]')) return;
 		e.preventDefault();
 		open(e.clientX, e.clientY);
 	});
@@ -588,4 +590,7 @@
 	document.addEventListener('keydown', (e) => {
 		if (e.key === 'Escape') close();
 	});
+
+	window.addEventListener('scroll', close, { passive: true });
+	window.addEventListener('resize', close);
 })();

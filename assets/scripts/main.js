@@ -881,6 +881,7 @@ function playCutscene(rarityName, callback) {
 	isCutscenePlaying = true;
 	cutsceneStartedAt = Date.now();
 	rollBtn.disabled = true;
+	rollQueued = false;
 
 	const wasBackgroundMusicPlaying = !backgroundMusic.paused;
 	backgroundMusic.pause();
@@ -2301,6 +2302,7 @@ function maybeFireCutscene(res, firstTime) {
 		const isMuted = checkMuteSettings();
 		if (!isMuted) backgroundMusic.play().catch(() => {});
 		rollBtn.disabled = false;
+		drainRollQueue();
 		debouncedSave();
 	};
 
@@ -2352,6 +2354,27 @@ window._resetNextRollAllowedAt = function () {
 	nextRollAllowedAt = 0;
 };
 // Generated code ends here on 2026-10-23T16:20:00Z:
+
+let rollQueued = false;
+
+function queueRoll() {
+	if (isCutscenePlaying) return;
+	rollQueued = true;
+}
+
+function drainRollQueue() {
+	if (!rollQueued) return;
+	rollQueued = false;
+	setTimeout(performRoll, 0);
+}
+
+document.addEventListener('pointerdown', (e) => {
+	if (!rollBtn.disabled || e.button !== 0) return;
+	const r = rollBtn.getBoundingClientRect();
+	if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+		queueRoll();
+	}
+});
 
 function performRoll() {
 	if (isCutscenePlaying || rollBtn.disabled) return;
@@ -2577,7 +2600,6 @@ weeklyBtn.addEventListener('click', async () => {
 	const now = Date.now();
 	const oneWeek = 7 * 24 * 60 * 60 * 1000;
 
-	// Guard: shouldn't be reachable if UI is correct, but be safe
 	if (lastClaim && now - Number(lastClaim) < oneWeek) return;
 
 	let newStreak;
@@ -2585,13 +2607,23 @@ weeklyBtn.addEventListener('click', async () => {
 		newStreak = 1;
 	} else {
 		const diffWeeks = Math.floor((now - Number(lastClaim)) / oneWeek);
-		// streak continues only if exactly 1 week passed; 2+ weeks resets
 		newStreak = diffWeeks === 1 ? streak + 1 : 1;
 	}
 
+	const reward = 3000 + 500 * Math.min(newStreak, 10);
+	points += reward;
+	playerPotions.luck4x = (playerPotions.luck4x || 0) + 1;
+
 	saveWeeklyData(now.toString(), newStreak);
+	updatePointsDisplay();
+	updateShopUI();
+	updatePotionUI();
 	updateWeeklyUI();
-	await window.showAlert(`weekly claimed!\nstreak: ${newStreak}`, 'weekly reward');
+	saveAllData();
+	await window.showAlert(
+		`weekly claimed!\nstreak: ${newStreak}\n+${formatNum(reward)} points and a 4x luck potion`,
+		'weekly reward'
+	);
 });
 
 const dailyBtn = document.getElementById('dailyBtn');
@@ -2639,6 +2671,8 @@ function updateDailyUI() {
 dailyBtn.addEventListener('click', async () => {
 	const today = getToday();
 	const { lastClaim, streak } = loadDailyData();
+	if (lastClaim === today) return;
+
 	let newStreak = streak;
 	if (!lastClaim) {
 		newStreak = 1;
@@ -2652,9 +2686,19 @@ dailyBtn.addEventListener('click', async () => {
 			newStreak = 1;
 		}
 	}
+
+	const reward = 100 + 50 * Math.min(newStreak, 30);
+	points += reward;
+
 	saveDailyData(today, newStreak);
+	updatePointsDisplay();
+	updateShopUI();
 	updateDailyUI();
-	await window.showAlert(`daily claimed!\nstreak: ${newStreak}`, 'daily reward');
+	saveAllData();
+	await window.showAlert(
+		`daily claimed!\nstreak: ${newStreak}\n+${formatNum(reward)} points`,
+		'daily reward'
+	);
 });
 
 updateDailyUI();
@@ -2909,9 +2953,8 @@ document.addEventListener('keydown', (e) => {
 	if (key === ' ' || key === '+') {
 		e.preventDefault();
 		const rollBtn = document.getElementById('rollBtn');
-		if (rollBtn && !rollBtn.disabled) {
-			rollBtn.click();
-		}
+		if (rollBtn && !rollBtn.disabled) rollBtn.click();
+		else queueRoll();
 	}
 
 	// A = Previous page, D = Next page
@@ -2932,6 +2975,7 @@ document.addEventListener('keydown', (e) => {
 	}
 
 	// fucking W to click even when theres a button on your mouse dedicated to fucking doing that
+	// WHO THE FUCK IS GONNA USE THIS GENUINELY?!
 	if (key === 'w') {
 		e.preventDefault();
 		const elementUnderCursor = document.elementFromPoint(

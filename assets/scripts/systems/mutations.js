@@ -9,21 +9,13 @@
 
 	const TRUST_KEY = 'mutationTrust';
 
-	document.addEventListener('click', (e) => {
-		const dot = e.target.closest('.page-dot[data-page="3"]');
-		const next = e.target.closest('#nextPage');
-		const prev = e.target.closest('#prevPage');
-		if (dot) {
-			setTimeout(renderMutations, 50);
-			return;
-		}
-		if (next || prev) {
-			setTimeout(() => {
-				if (document.querySelector('.page-dot[data-page="3"]')?.classList.contains('active'))
-					renderMutations();
-			}, 80);
-		}
-	});
+	const mutationsDot = document.querySelector('.page-dot[data-page="5"]');
+	if (mutationsDot) {
+		new MutationObserver(() => {
+			if (mutationsDot.classList.contains('active')) renderMutations();
+		}).observe(mutationsDot, { attributes: true, attributeFilter: ['class'] });
+		if (mutationsDot.classList.contains('active')) renderMutations();
+	}
 
 	function getTrust() {
 		const raw = localStorage.getItem(TRUST_KEY);
@@ -188,7 +180,7 @@
 	}
 
 	function rng() {
-		return typeof Beacon !== 'undefined' ? Beacon.float() : Math.random();
+		return typeof Plush !== 'undefined' ? Plush.float() : Math.random();
 	}
 
 	function mutate(nameA, nameB) {
@@ -262,7 +254,7 @@
 
 		const options = invRarities
 			.map((r) => {
-				const d = Math.round(1 / r.chance);
+				const d = Plush.denomOf(r);
 				return `<option value="${escHtml(r.name)}">${escHtml(r.name)} (1/${d.toLocaleString()})</option>`;
 			})
 			.join('');
@@ -391,7 +383,7 @@
 			onDone();
 		}
 
-		const denom = Math.round(1 / result.chance);
+		const denom = Plush.denomOf(result);
 		const sign = trustDelta >= 0 ? '+' : '';
 		const resultEl = document.getElementById('mutationResult');
 		if (resultEl) {

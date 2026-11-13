@@ -1320,11 +1320,11 @@ console.log(performance.now());
 			setAuthStatus(e.message, '#f66');
 		}
 	}
-
 	async function handleSignup() {
 		const username = el('signupUsername').value.trim();
 		const password = el('signupPassword').value;
 		const confirmPw = el('signupPasswordConfirm').value;
+		const agree = el('signupAgree');
 
 		if (!/^[a-zA-Z0-9_-]{3,20}$/.test(username)) {
 			setAuthStatus('username must be 3-20 chars, letters/numbers/underscore/hyphen only', '#f66');
@@ -1336,6 +1336,10 @@ console.log(performance.now());
 		}
 		if (password !== confirmPw) {
 			setAuthStatus('passwords do not match', '#f66');
+			return;
+		}
+		if (agree && !agree.checked) {
+			setAuthStatus('you need to agree to the privacy policy and terms first!', '#f66');
 			return;
 		}
 		const altcha = getAltchaValue('signupAltcha');

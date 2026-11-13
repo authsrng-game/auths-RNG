@@ -6,6 +6,11 @@
 // wait: 1.5                 -- pause 1.5 seconds before next command
 // loop { ... }              -- repeat everything inside forever
 // -- this is a comment      -- ignored by parser
+// glow: #HEX 8              -- text glow, size in px (default 8). glow: off clears it
+// bg: #HEX	                 -- background color. bg: off clears it
+// outline: #HEX	           -- 1px inner border. outline: off clears it
+// scale: 1.1	               -- scales the element. scale: 1 resets
+// weight: bold	             -- bold or normal
 
 console.log(performance.now());
 
@@ -29,6 +34,14 @@ console.log(performance.now());
 		'i'
 	);
 	const WAIT_REGEX = /^wait:\s*(\d*\.?\d+)\s*$/i;
+	const GLOW_REGEX = new RegExp(`^glow:\\s*(${HEX})(?:\\s+(\\d+(?:\\.\\d+)?))?\\s*$`, 'i');
+	const GLOW_OFF_REGEX = /^glow:\s*off\s*$/i;
+	const BG_REGEX = new RegExp(`^bg:\\s*(${HEX})\\s*$`, 'i');
+	const BG_OFF_REGEX = /^bg:\s*off\s*$/i;
+	const OUTLINE_REGEX = new RegExp(`^outline:\\s*(${HEX})\\s*$`, 'i');
+	const OUTLINE_OFF_REGEX = /^outline:\s*off\s*$/i;
+	const SCALE_REGEX = /^scale:\s*(\d*\.?\d+)\s*$/i;
+	const WEIGHT_REGEX = /^weight:\s*(normal|bold)\s*$/i;
 
 	// AST cache for parsed rarity style strings to avoid redundant parsing in inventory lists and animation loops.
 	const parseCache = new Map();
@@ -114,6 +127,24 @@ console.log(performance.now());
 		m = line.match(WAIT_REGEX);
 		if (m) return { type: 'wait', seconds: +m[1] };
 
+		m = line.match(GLOW_REGEX);
+		if (m) return { type: 'glow', hex: m[1], px: m[2] ? +m[2] : 8 };
+		if (GLOW_OFF_REGEX.test(line)) return { type: 'glow', hex: null, px: 0 };
+
+		m = line.match(BG_REGEX);
+		if (m) return { type: 'bg', hex: m[1] };
+		if (BG_OFF_REGEX.test(line)) return { type: 'bg', hex: null };
+
+		m = line.match(OUTLINE_REGEX);
+		if (m) return { type: 'outline', hex: m[1] };
+		if (OUTLINE_OFF_REGEX.test(line)) return { type: 'outline', hex: null };
+
+		m = line.match(SCALE_REGEX);
+		if (m) return { type: 'scale', value: +m[1] };
+
+		m = line.match(WEIGHT_REGEX);
+		if (m) return { type: 'weight', value: m[1].toLowerCase() };
+
 		return null; // unknown line - silently skip
 	}
 	// AI-generated code ends here on 2026-06-18T01:00:00Z.
@@ -174,6 +205,26 @@ console.log(performance.now());
 				if (!signal.aborted) el.style.transition = '';
 				break;
 			}
+
+			case 'glow':
+				el.style.textShadow = cmd.hex ? `0 0 ${cmd.px}px ${cmd.hex}` : '';
+				break;
+
+			case 'bg':
+				el.style.backgroundColor = cmd.hex || '';
+				break;
+
+			case 'outline':
+				el.style.boxShadow = cmd.hex ? `inset 0 0 0 1px ${cmd.hex}` : '';
+				break;
+
+			case 'scale':
+				el.style.transform = cmd.value === 1 ? '' : `scale(${cmd.value})`;
+				break;
+
+			case 'weight':
+				el.style.fontWeight = cmd.value;
+				break;
 
 			// -- infinite loop --------------------------------------------------
 			case 'loop':
@@ -246,5 +297,4 @@ console.log(performance.now());
 	};
 	// Generated code ends here on 2026-10-31T00:00:00Z:
 
-	// FIXME: add more elements to rarity style so it isnt just fancy text
 })();

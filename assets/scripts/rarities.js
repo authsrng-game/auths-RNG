@@ -6,6 +6,11 @@
 // wait: 1.5                 -- pause 1.5 seconds before next command
 // loop { ... }              -- repeat everything inside forever
 // -- this is a comment      -- ignored by parser
+// glow: #HEX 8              -- text glow, size in px (default 8). glow: off clears it
+// bg: #HEX	                 -- background color. bg: off clears it
+// outline: #HEX	           -- 1px inner border. outline: off clears it
+// scale: 1.1	               -- scales the element. scale: 1 resets
+// weight: bold	             -- bold or normal
 
 console.log(performance.now());
 
