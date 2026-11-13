@@ -6,7 +6,7 @@ Thank you for your interest in contributing to **auth's RNG**! Please follow the
 
 Contributing to auth's RNG is pretty simple! Whether you're fixing a bug, improving the UI, balancing the game, or adding a small feature, contributions are welcome.
 
-auth's RNG is built in casual HTML, CSS, and Javascript. Some Typescript is used but usually only for rarely utilized utility scripts.
+auth's RNG is built in casual HTML, CSS, and Javascript. Some Typescript is used but usually only for rarely utilized utility scripts, and it's slowly (albeit slowly) used spread across the repository.
 
 Don't know what to fix? Search the repository for "TODO" or "FIXME" comments, or look through the issue tracker!
 
