@@ -59,6 +59,7 @@
 		'notifications',
 		'themeEditorPresets',
 		'themeEditorActive',
+		'userSettings',
 		'startAnimConfig',
 		'_plush_v3',
 		'infoTipsRead',
