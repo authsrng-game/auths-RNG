@@ -51,17 +51,17 @@
 		'"i didnt know the pain he had put onto you."',
 		'"i didnt know you developed severe mental issues from all the shit youve endured."',
 		'"well... before. now i do. but i shouldve had taken that into account, and let you be."',
-    '"but i still decided to stay here."',
+		'"but i still decided to stay here."',
 		'"i knew i shouldnt have been blunt with you."',
 		'"i knew i shouldnt have taken your stuff."',
 		'"but im not the one keeping the stuff.."',
 		'"i can fix this. i know hes still out there, walking freely. i can kill him, if youd like...?"',
-    '"i could be your very own.. yknow, personal therapist for the rest of your life, i dont need pay!"',
-    '"i could do anything youd like, ill cut ties with the organization if i need to!"',
+		'"i could be your very own.. yknow, personal therapist for the rest of your life, i dont need pay!"',
+		'"i could do anything youd like, ill cut ties with the organization if i need to!"',
 		'"you just need to put the gun down!"',
 		'"please...?"',
-    'he looks at you with the largest puppy eyes ever, but he soon realizes its not gonna work.',
-    '*sigh*',
+		'he looks at you with the largest puppy eyes ever, but he soon realizes its not gonna work.',
+		'*sigh*',
 		'"clover. listen to me."',
 		'"if you shoot that gun, very bad irreversible things will happen."',
 		'"i know ive taken tons of your stuff, but they made me do it, it wasnt my choice."',
@@ -86,7 +86,7 @@
 	const DEAD_LINES = [
 		'the chair is empty. the table keeps something for you anyway.',
 		'nobody sits across from you. something still slides over the felt, what is it?',
-    'theres nobody.',
+		'theres nobody.',
 	];
 
 	const FRAMES = [
