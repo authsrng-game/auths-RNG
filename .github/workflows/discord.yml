@@ -11,7 +11,7 @@ on:
   fork:
   watch:
     types: [started]
-    
+
 jobs:
   discord:
     runs-on: ubuntu-latest
