@@ -446,7 +446,8 @@
 		container.innerHTML = '';
 
 		if (data.dead) {
-			updateDealerScene(0, false);
+			const scene = document.getElementById('dealerScene');
+			if (scene) scene.style.display = 'none';
 			window.DealerGun?.renderDead(container);
 			window.DealerGun?.decorate();
 			return;
