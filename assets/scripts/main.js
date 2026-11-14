@@ -1193,6 +1193,108 @@ const achievementsList = [
 	},
 ];
 
+// keyed by achievement id. any combo of points / anomalies / potions
+const ACHIEVEMENT_REWARDS = {
+	outsideTime: { points: 2000 },
+	devoted: { points: 10000, potions: { luck10x: 1 } },
+	'genuinely-insane': { points: 50000, potions: { luck50x: 1 } },
+	'just-one-more-roll': { points: 150000, potions: { luck100x: 1 } },
+	'holy-hell': { points: 500000, potions: { luck300x: 1 }, anomalies: 1 },
+	dude: { points: 2000000, potions: { luck800x: 1 }, anomalies: 2 },
+	jackpot: { points: 5000, potions: { luck4x: 1 } },
+	'oh-my-god': { points: 100000, anomalies: 1 },
+	'market-crash': { points: 300000, potions: { luck250x: 1 }, anomalies: 2 },
+	phenomenon: { points: 1000000, potions: { luck1500x: 1 }, anomalies: 3 },
+	'ok-bro': { points: 5000000, potions: { luck3000x: 1 }, anomalies: 5 },
+	lunar: { points: 100000 },
+	summer: { points: 1000000000, anomalies: 50000 },
+};
+
+function describeReward(r) {
+	if (!r) return '';
+	const parts = [];
+	if (r.points) parts.push(`+${formatNum(r.points)} pts`);
+	if (r.anomalies) parts.push(`+${r.anomalies} anomal${r.anomalies > 1 ? 'ies' : 'y'}`);
+	for (const [k, n] of Object.entries(r.potions || {})) {
+		parts.push(`${n}x ${potionData[k]?.name || k} potion`);
+	}
+	return parts.join(', ');
+}
+
+function grantAchievementReward(r) {
+	if (!r) return;
+	if (r.points) points += r.points;
+	if (r.anomalies) anomalies += r.anomalies;
+	for (const [k, n] of Object.entries(r.potions || {})) {
+		playerPotions[k] = (playerPotions[k] || 0) + n;
+	}
+	updatePointsDisplay();
+	updateShopUI();
+	updatePotionUI();
+	updateAnomalyUI();
+}
+
+const _achToastQueue = [];
+let _achToastBusy = false;
+
+function showAchievementToast(ach, reward) {
+	if (_achToastQueue.length >= 5) return; // don't spam after autoroll catchup
+	_achToastQueue.push({ ach, reward });
+	if (!_achToastBusy) _drainAchToasts();
+}
+
+function _drainAchToasts() {
+	const next = _achToastQueue.shift();
+	if (!next) {
+		_achToastBusy = false;
+		return;
+	}
+	_achToastBusy = true;
+
+	const el = document.createElement('div');
+	el.className = 'ach-toast';
+	el.setAttribute('role', 'status');
+
+	const label = document.createElement('div');
+	label.className = 'ach-toast-label';
+	label.textContent = 'achievement unlocked';
+	const name = document.createElement('div');
+	name.className = 'ach-toast-name';
+	name.textContent = next.ach.name;
+	const sub = document.createElement('div');
+	sub.className = 'ach-toast-sub';
+	sub.textContent = next.ach.subtitle;
+	el.append(label, name, sub);
+
+	const rewardText = describeReward(next.reward);
+	if (rewardText) {
+		const rw = document.createElement('div');
+		rw.className = 'ach-toast-reward';
+		rw.textContent = rewardText;
+		el.appendChild(rw);
+	}
+
+	document.body.appendChild(el);
+	requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+
+	const hold = rewardText ? 4200 : 3000;
+	setTimeout(() => {
+		el.classList.remove('show');
+		setTimeout(() => {
+			el.remove();
+			_drainAchToasts();
+		}, 400);
+	}, hold);
+}
+
+function onAchievementUnlocked(ach) {
+	const reward = ACHIEVEMENT_REWARDS[ach.id];
+	grantAchievementReward(reward);
+	const rt = describeReward(reward);
+	addNotification(`achievement: ${ach.name}${rt ? ' (' + rt + ')' : ''}`);
+	if (!document.hidden) showAchievementToast(ach, reward);
+}
+
 // Generated code starts here on 2026-10-14T00:00:00Z:
 // Batch achievement card DOM element insertions into a DocumentFragment to eliminate per-item layout reflows when rendering achievement lists.
 function updateAchievementsUI() {
@@ -1211,6 +1313,14 @@ function updateAchievementsUI() {
 		subEl.textContent = ach.subtitle;
 		div.appendChild(nameEl);
 		div.appendChild(subEl);
+		const rt = describeReward(ACHIEVEMENT_REWARDS[ach.id]);
+		if (rt) {
+			const rwEl = document.createElement('div');
+			rwEl.className = 'achievement-subtitle';
+			rwEl.style.color = 'var(--points-color, #ffb86b)';
+			rwEl.textContent = `reward: ${rt}`;
+			div.appendChild(rwEl);
+		}
 		fragment.appendChild(div);
 	});
 	achievementsContainer.appendChild(fragment);
@@ -1549,6 +1659,7 @@ function checkAchievements(currentRarity) {
 			achievementsUnlocked.add(ach.id);
 			_lockedAchievements.splice(i, 1);
 			newlyUnlocked = true;
+			onAchievementUnlocked(ach);
 		}
 	}
 	if (newlyUnlocked) {
