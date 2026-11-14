@@ -1,6 +1,7 @@
 name: discord notify
 
 on:
+  push:
   pull_request:
     types: [opened, reopened, closed]
   issues:
@@ -10,7 +11,7 @@ on:
   fork:
   watch:
     types: [started]
-
+    
 jobs:
   discord:
     runs-on: ubuntu-latest
