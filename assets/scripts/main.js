@@ -1207,7 +1207,7 @@ const ACHIEVEMENT_REWARDS = {
 	phenomenon: { points: 1000000, potions: { luck1500x: 1 }, anomalies: 3 },
 	'ok-bro': { points: 5000000, potions: { luck3000x: 1 }, anomalies: 5 },
 	lunar: { points: 100000 },
-	summer: { points: 1000000000, anomalies: 50000 },
+	summer: { points: 1000000000000, anomalies: 50000000 },
 };
 
 function describeReward(r) {
