@@ -1577,6 +1577,7 @@
 		window.rollSoundSetting = settings.rollSound || 'none';
 		window.rareThreshold = settings.rareThreshold ?? 1000;
 		window.autoSellThreshold = settings.autoSellThreshold || 0;
+		if (window.NavSystem) window.NavSystem.apply(settings.navStyle, settings.navConfig);
 
 		window.muteAll = !!settings.muteAll;
 		window.luckCap = settings.luckCap || 0;

@@ -1104,6 +1104,37 @@ Last release date on nightly: ${nightlyRDate}`;
 								</label>
 							</div>
 
+							<div class="setting-row setting-row--stacked">
+								<div class="setting-info">
+									<label for="navStyleSelect" class="setting-name">navigation style</label>
+									<span class="setting-desc"
+										>how you move between pages. ctrl+k opens a page search in any style!</span
+									>
+								</div>
+								<select id="navStyleSelect" class="setting-select" aria-label="Navigation style">
+									<option value="dots">dots (default)</option>
+									<option value="tabs">tab bar</option>
+									<option value="dock">icon dock</option>
+									<option value="sidebar">sidebar</option>
+									<option value="palette">page search only</option>
+									<option value="custom">custom</option>
+								</select>
+							</div>
+
+							<div class="setting-row">
+								<div class="setting-info">
+									<span class="setting-name">navigator builder</span>
+									<span class="setting-desc">design your own navigation, drag it anywhere!</span>
+								</div>
+								<button
+									id="openNavBuilderBtn"
+									class="setting-btn"
+									aria-label="Open navigator builder"
+								>
+									open <i>›</i>
+								</button>
+							</div>
+
 							<div class="setting-row">
 								<div class="setting-info">
 									<span class="setting-name">raw numbers</span>
@@ -1897,6 +1928,7 @@ Last release date on nightly: ${nightlyRDate}`;
 
 		<script src="assets/scripts/icons.js" defer></script>
 		<script src="assets/scripts/settings.js" defer></script>
+		<script src="assets/scripts/nav-system.js" defer></script>
 		<script src="assets/scripts/services/revisory/revisory-settings.js" defer></script>
 		<script src="assets/scripts/services/revisory/revisory-dashboard.js" defer></script>
 		<script src="assets/scripts/jukebox.js" defer></script>
@@ -2775,6 +2807,7 @@ Last release date on nightly: ${nightlyRDate}`;
 				);
 
 				function handleSwipe() {
+					if (document.body.classList.contains('nav-no-swipe')) return;
 					const swipeThreshold = 80;
 					const diffX = touchStartX - touchEndX;
 					const diffY = touchStartY - touchEndY;
