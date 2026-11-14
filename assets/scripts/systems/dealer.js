@@ -1,6 +1,5 @@
 (function () {
 	'use strict';
-	// TODO: make it so you shoot the dealer with a pistol
 	console.log(performance.now());
 
 	const DEALER_KEY = 'dealerData';
@@ -109,12 +108,19 @@
 		try {
 			const d = JSON.parse(localStorage.getItem(DEALER_KEY) || '{}');
 			_cachedDealerData = Object.assign(
-				{ cooldownUntil: 0, session: null, metWelcome: false, log: [] },
+				{ cooldownUntil: 0, session: null, metWelcome: false, log: [], wins: 0, dead: false },
 				d
 			);
 		} catch (e) {
 			console.warn('[dealer] failed to parse dealer state:', e);
-			_cachedDealerData = { cooldownUntil: 0, session: null, metWelcome: false, log: [] };
+			_cachedDealerData = {
+				cooldownUntil: 0,
+				session: null,
+				metWelcome: false,
+				log: [],
+				wins: 0,
+				dead: false,
+			};
 		}
 		return _cachedDealerData;
 	}
@@ -251,6 +257,7 @@
 		} else if (outcome === 'win') {
 			resultText = pick(WIN_LINES);
 			reward = applyWin(hand.stake);
+			data.wins = (data.wins || 0) + 1;
 		} else {
 			resultText = pick(LOSE_LINES);
 			reward = applyLoss(hand.stake);
@@ -383,6 +390,9 @@
            /___/ \\______/ \\___\\
 `;
 
+	window.dealerStore = { load: loadData, save: saveData };
+	window.dealerFigureText = DEALER_FIGURE;
+
 	let _dealerParallaxBound = false;
 
 	function initDealerParallax() {
@@ -435,6 +445,14 @@
 		const data = loadData();
 		container.innerHTML = '';
 
+		if (data.dead) {
+			updateDealerScene(0, false);
+			window.DealerGun?.renderDead(container);
+			window.DealerGun?.decorate();
+			return;
+		}
+		queueMicrotask(() => window.DealerGun?.decorate());
+
 		if (!data.session) {
 			if (Date.now() < data.cooldownUntil) {
 				updateDealerScene(0, false);
@@ -448,7 +466,7 @@
 			const sitBox = document.createElement('div');
 			sitBox.className = 'dealer-cooldown-box';
 			sitBox.innerHTML = `
-      <p style="font-style:italic;opacity:0.7;">${pick(ARRIVAL_LINES)}</p>
+      <p style="font-style:italic;opacity:0.7;">${window.DealerGun?.hint(data.wins || 0) || pick(ARRIVAL_LINES)}</p>
       <button class="small" id="dealerSitBtn">sit down</button>
     `;
 			container.appendChild(sitBox);
@@ -561,6 +579,7 @@
 	setInterval(() => {
 		if (document.hidden) return;
 		const data = loadData();
+		if (data.dead) return;
 		if (!data.session) {
 			if (data.cooldownUntil && Date.now() < data.cooldownUntil) {
 				const cdEl = document.querySelector('#dealerContainer .dealer-cooldown-box div');
