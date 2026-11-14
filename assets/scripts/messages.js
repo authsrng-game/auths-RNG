@@ -591,7 +591,7 @@ const messages = [
 	'YOU HAVE WON THE LOTTERY!',
 	'i will eat you.............',
 	'what if... we all stopped wars and we just let leaders 1v1 in a boxing ring',
-	'the authalings... we do not speak of them.'
+	'the authalings... we do not speak of them.',
 ];
 
 const randomIndex = Math.floor(Math.random() * messages.length);
