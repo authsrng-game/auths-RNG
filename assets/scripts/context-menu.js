@@ -42,6 +42,10 @@
 			text: 'variance is just the universe trolling you with extra steps.',
 			attr: '- statistics, explained badly',
 		},
+		{
+			text: 'i was born into this world crying while everyone smiled, and i will leave this world smiling while everyone cries.',
+			attr: 'some random youtube commenter',
+		},
 	];
 
 	function getDailyQuote() {
