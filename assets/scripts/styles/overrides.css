@@ -2109,7 +2109,8 @@ hr.sep {
 	mix-blend-mode: difference;
 	transition:
 		transform 0.148s cubic-bezier(0.68, -0.55, 0.265, 1.55),
-		box-shadow 0.3s ease-out;
+		box-shadow 0.3s ease-out,
+		opacity 0.4s ease;
 	border-radius: 50%;
 	display: block !important;
 }
@@ -2118,6 +2119,11 @@ hr.sep {
 	box-shadow: 0 0 8px 5px rgb(220 220 220 / 25%);
 }
 
+#custom-cursor.idle {
+	opacity: 0.35;
+}
+
+/* ring */
 #custom-cursor .circle {
 	position: absolute;
 	top: 50%;
@@ -2127,16 +2133,28 @@ hr.sep {
 	border: 1.5px solid var(--cursor-ring-color, rgb(220 220 220 / 30%));
 	border-radius: 50%;
 	transform: translate(-50%, -50%) rotate(0deg);
+	transition:
+		width 0.18s ease,
+		height 0.18s ease,
+		border-color 0.18s ease;
 }
 
-#custom-cursor.holding .circle {
-	animation: cursor-hold-spin 2.4s linear infinite;
+/* marker dot that rides the ring.. pause */
+#custom-cursor .circle::after {
+	content: '';
+	position: absolute;
+	top: -5px;
+	left: 50%;
+	width: 8px;
+	height: 8px;
+	margin-left: -4px;
+	border-radius: 50%;
+	background: var(--cursor-dot-color, #dcdcdc);
+	opacity: 0;
+	transition: opacity 0.2s ease;
 }
 
-#custom-cursor.rolling .circle {
-	animation: cursor-roll-spin 0.6s linear infinite;
-}
-
+/* center dot */
 #custom-cursor .dot {
 	position: absolute;
 	top: 50%;
@@ -2146,8 +2164,10 @@ hr.sep {
 	background: var(--cursor-dot-color, #dcdcdc);
 	border-radius: 50%;
 	transform: translate(-50%, -50%);
+	transition: transform 0.18s ease;
 }
 
+/* plus */
 #custom-cursor .plus {
 	position: absolute;
 	top: 50%;
@@ -2183,13 +2203,56 @@ hr.sep {
 	border-radius: 1px;
 }
 
-@keyframes cursor-hold-spin {
+/* hover / blocked */
+#custom-cursor.hovering .circle {
+	width: 38px;
+	height: 38px;
+}
+
+#custom-cursor.hovering .dot {
+	transform: translate(-50%, -50%) scale(0.6);
+}
+
+#custom-cursor.blocked .plus {
+	transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* holding: bigger ring, bright arc, spin up then loop */
+#custom-cursor.holding .circle {
+	width: 34px;
+	height: 34px;
+	border-top-color: var(--cursor-dot-color, #dcdcdc);
+	border-right-color: var(--cursor-dot-color, #dcdcdc);
+	animation:
+		cursor-hold-spin-up 0.5s cubic-bezier(0.4, 0, 1, 1) forwards,
+		cursor-hold-spin 0.8s linear 0.5s infinite;
+}
+
+#custom-cursor.rolling .circle {
+	border-top-color: var(--cursor-dot-color, #dcdcdc);
+	animation: cursor-roll-spin 0.6s linear infinite;
+}
+
+#custom-cursor.holding .circle::after,
+#custom-cursor.rolling .circle::after {
+	opacity: 1;
+}
+
+@keyframes cursor-hold-spin-up {
 	from {
 		transform: translate(-50%, -50%) rotate(0deg);
 	}
-
 	to {
-		transform: translate(-50%, -50%) rotate(360deg);
+		transform: translate(-50%, -50%) rotate(180deg);
+	}
+}
+
+@keyframes cursor-hold-spin {
+	from {
+		transform: translate(-50%, -50%) rotate(180deg);
+	}
+	to {
+		transform: translate(-50%, -50%) rotate(540deg);
 	}
 }
 
@@ -2197,12 +2260,33 @@ hr.sep {
 	from {
 		transform: translate(-50%, -50%) rotate(0deg);
 	}
-
 	to {
 		transform: translate(-50%, -50%) rotate(360deg);
 	}
 }
 
+/* click ripple */
+.cursor-ripple {
+	position: fixed;
+	width: 10px;
+	height: 10px;
+	border: 1px solid;
+	border-radius: 50%;
+	pointer-events: none;
+	z-index: 2147483646;
+	transform: translate(-50%, -50%);
+	animation: cursor-ripple 0.5s ease-out forwards;
+}
+
+@keyframes cursor-ripple {
+	to {
+		width: 48px;
+		height: 48px;
+		opacity: 0;
+	}
+}
+
+/* rare pulse */
 #custom-cursor.rare-pulse {
 	animation: cursor-rare-pulse 0.9s ease-out;
 }
@@ -2223,6 +2307,11 @@ hr.sep {
 	}
 }
 
+/* rainbow sweep */
+#custom-cursor.rainbow-active {
+	box-shadow: none !important;
+}
+
 #custom-cursor.rainbow-active .circle {
 	animation: cursor-rainbow-ring 1s linear;
 }
@@ -2241,23 +2330,18 @@ hr.sep {
 		border-color: #ffb3ba;
 		box-shadow: none;
 	}
-
 	20% {
 		border-color: #ffdfba;
 	}
-
 	40% {
 		border-color: #ffffba;
 	}
-
 	60% {
 		border-color: #baffc9;
 	}
-
 	80% {
 		border-color: #bae1ff;
 	}
-
 	100% {
 		border-color: var(--cursor-ring-color, rgb(220 220 220 / 30%));
 		box-shadow: none;
@@ -2268,23 +2352,18 @@ hr.sep {
 	0% {
 		background: #ffb3ba;
 	}
-
 	20% {
 		background: #ffdfba;
 	}
-
 	40% {
 		background: #ffffba;
 	}
-
 	60% {
 		background: #baffc9;
 	}
-
 	80% {
 		background: #bae1ff;
 	}
-
 	100% {
 		background: var(--cursor-dot-color, #dcdcdc);
 	}
@@ -2294,30 +2373,26 @@ hr.sep {
 	0% {
 		background: #ffb3ba;
 	}
-
 	20% {
 		background: #ffdfba;
 	}
-
 	40% {
 		background: #ffffba;
 	}
-
 	60% {
 		background: #baffc9;
 	}
-
 	80% {
 		background: #bae1ff;
 	}
-
 	100% {
 		background: var(--cursor-plus-color, rgb(220 220 220 / 50%));
 	}
 }
 
-#custom-cursor.rainbow-active {
-	box-shadow: none !important;
+/* reduce motion / hide */
+body.reduce-motion .cursor-ripple {
+	display: none;
 }
 
 body.reduce-motion #custom-cursor.holding .circle,

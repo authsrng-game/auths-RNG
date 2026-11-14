@@ -2505,33 +2505,45 @@ Last release date on nightly: ${nightlyRDate}`;
 				let rotatePositive = true;
 				let holdThresholdTimer = null;
 				let isPointerDown = false;
+				let idleTimer = null;
 
-				window.addEventListener('mousemove', (e) => {
-					cursor.style.left = e.clientX + 'px';
-					cursor.style.top = e.clientY + 'px';
-				});
+				function plusRest() {
+					return cursor.classList.contains('blocked')
+						? 'translate(-50%, -50%) rotate(45deg)'
+						: 'translate(-50%, -50%) rotate(0deg)';
+				}
+
+				function spawnRipple(x, y) {
+					if (document.body.classList.contains('reduce-motion')) return;
+					const r = document.createElement('div');
+					r.className = 'cursor-ripple';
+					r.style.left = x + 'px';
+					r.style.top = y + 'px';
+					r.style.borderColor = cursor.style.getPropertyValue('--cursor-dot-color') || '#dcdcdc';
+					document.body.appendChild(r);
+					r.addEventListener('animationend', () => r.remove());
+				}
 
 				function playClickFlash() {
 					cursor.style.transform = 'translate(-50%, -50%) scale(1.3)';
 					cursor.classList.add('glow');
 
-					if (rotatePositive) {
-						plus.style.transform = 'translate(-50%, -50%) rotate(15deg)';
-					} else {
-						plus.style.transform = 'translate(-50%, -50%) rotate(-15deg)';
-					}
+					plus.style.transform = rotatePositive
+						? 'translate(-50%, -50%) rotate(15deg)'
+						: 'translate(-50%, -50%) rotate(-15deg)';
 					rotatePositive = !rotatePositive;
 
 					setTimeout(() => {
 						cursor.style.transform = 'translate(-50%, -50%) scale(1)';
 						cursor.classList.remove('glow');
-						plus.style.transform = 'translate(-50%, -50%) rotate(0deg)';
+						plus.style.transform = plusRest();
 					}, 148);
 				}
 
-				function onPointerDown() {
+				function onPointerDown(e) {
 					isPointerDown = true;
 					playClickFlash();
+					spawnRipple(e.clientX, e.clientY);
 
 					clearTimeout(holdThresholdTimer);
 					holdThresholdTimer = setTimeout(() => {
@@ -2544,6 +2556,22 @@ Last release date on nightly: ${nightlyRDate}`;
 					clearTimeout(holdThresholdTimer);
 					cursor.classList.remove('holding');
 				}
+
+				window.addEventListener('mousemove', (e) => {
+					cursor.style.left = e.clientX + 'px';
+					cursor.style.top = e.clientY + 'px';
+
+					cursor.classList.remove('idle');
+					clearTimeout(idleTimer);
+					idleTimer = setTimeout(() => cursor.classList.add('idle'), 2500);
+				});
+
+				window.addEventListener('pointerover', (e) => {
+					const t = e.target.closest('button, a, select, input, label, .shop-item, .potion-item');
+					cursor.classList.toggle('hovering', !!t && !t.disabled);
+					cursor.classList.toggle('blocked', !!t && !!t.disabled);
+					plus.style.transform = plusRest();
+				});
 
 				window.addEventListener('pointerdown', onPointerDown);
 				window.addEventListener('pointerup', onPointerUp);
@@ -2608,9 +2636,6 @@ Last release date on nightly: ${nightlyRDate}`;
 					setTimeout(() => cursor.classList.remove('rainbow-active'), 1000);
 				};
 			})();
-
-			// TODO: add holding animation for when the cursor spins when holding
-			// i dont wanna do it now because its a hell fire to implement
 		</script>
 
 		<script>
