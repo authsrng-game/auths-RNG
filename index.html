@@ -665,10 +665,13 @@ Last release date on nightly: ${nightlyRDate}`;
 							<button class="small buyqty-btn" data-qty="max" onclick="setBuyQty('max')">
 								max
 							</button>
+							<button class="small" id="jumpToPotions" style="margin-left: auto">to potions</button>
 						</div>
 					</div>
 
-					<div class="shop-divider"><span class="shop-divider-label">upgrades</span></div>
+					<div class="shop-divider" id="upgradesDivider">
+						<span class="shop-divider-label">upgrades</span>
+					</div>
 
 					<div class="shop-item">
 						<div class="shop-item-header">
@@ -811,7 +814,11 @@ Last release date on nightly: ${nightlyRDate}`;
 						</div>
 					</div>
 
-					<div class="shop-divider"><span class="shop-divider-label">potions</span></div>
+					<div id="extraUpgrades"></div>
+
+					<div class="shop-divider" id="potionsDivider">
+						<span class="shop-divider-label">potions</span>
+					</div>
 
 					<div id="potionsContainer" class="potion-grid"></div>
 
@@ -1886,6 +1893,7 @@ Last release date on nightly: ${nightlyRDate}`;
 		<!-- sad fucker oh god i swear too much -->
 		<script src="assets/scripts/rarities.js" defer></script>
 		<script src="assets/scripts/rarityStyle.js" defer></script>
+		<script src="assets/scripts/extra-shop-upgrades-or-something.js" defer></script>
 		<script src="assets/scripts/main.js" defer></script>
 		<script src="assets/scripts/context-menu.js" defer></script>
 		<script src="assets/scripts/cloud-backup.js" defer></script>

@@ -6024,3 +6024,7 @@ button {
 	font-size: 0.8em;
 	color: var(--points-color, #ffb86b);
 }
+
+#extraUpgrades {
+	width: 100%;
+}

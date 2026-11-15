@@ -59,14 +59,10 @@ window.formatMult = function (n) {
 };
 
 let points = 0;
-let shopUpgrades = {
-	luck: 0,
-	speed: 0,
-	pointMult: 0,
-	magnet: 0,
-	printer: 0,
-	duplicate: 0,
-};
+const BASE_UPGRADES = { luck: 0, speed: 0, pointMult: 0, magnet: 0, printer: 0, duplicate: 0 };
+const freshUpgrades = () => Object.assign({}, BASE_UPGRADES, ShopX.zeroes());
+let shopUpgrades = freshUpgrades();
+ShopX.bind(() => shopUpgrades);
 let soldOutRarities = new Map();
 let rollSpeed = 1.0;
 let shopLuckMultiplier = 1.0;
@@ -343,7 +339,11 @@ function updateRollsSinceRare(rolledRarity) {
 
 function calculateRarityPoints(rarity) {
 	const denom = Plush.denomOf(rarity);
-	return Math.ceil((denom / pointDivisor) * (window.Lategame ? window.Lategame.sellMult() : 1));
+	return Math.ceil(
+		(denom / pointDivisor) *
+			(window.Lategame ? window.Lategame.sellMult() : 1) *
+			ShopX.val('haggler')
+	);
 }
 
 function updatePointsDisplay() {
@@ -401,6 +401,17 @@ const SHOP_ROWS = [
 	{ key: 'duplicate', level: 'dupeLevel', cost: 'dupeCost', btn: 'buyDupeBtn', pips: 'dupePips' },
 ];
 
+const shopExtraBox = document.getElementById('extraUpgrades');
+if (shopExtraBox) {
+	ShopX.build(shopExtraBox).forEach((r) => {
+		UPGRADE_DEFS[r.key] = { cost: r.cost, max: r.max };
+		SHOP_ROWS.push(r.row);
+		document
+			.getElementById(r.row.btn)
+			.addEventListener('click', () => bulkUpgrade(r.key, r.cost, r.max));
+	});
+}
+
 function updateShopUI() {
 	document.addEventListener('pointsChanged', updateShopUI);
 	for (const row of SHOP_ROWS) {
@@ -435,6 +446,18 @@ function updateShopUI() {
 				});
 			}
 		}
+
+		if (row.bar) {
+			const barEl = document.getElementById(row.bar);
+			if (barEl) barEl.style.width = (lvl / def.max) * 100 + '%';
+		}
+		if (row.now) {
+			const nowEl = document.getElementById(row.now);
+			if (nowEl) {
+				const t = 'now: ' + ShopX.describe(row.key, lvl);
+				if (nowEl.textContent !== t) nowEl.textContent = t;
+			}
+		}
 	}
 
 	const luckBarFill = document.getElementById('luckBarFill');
@@ -450,6 +473,15 @@ function updatePotionUI() {
 	}
 }
 
+function countSaved(n) {
+	const chance = ShopX.val('potionSaver');
+	if (chance <= 0) return 0;
+	if (n > 5000) return Math.floor(n * chance);
+	let saved = 0;
+	for (let i = 0; i < n; i++) if (Plush.float() < chance) saved++;
+	return saved;
+}
+
 function usePotion(potionType) {
 	const data = potionData[potionType];
 	const owned = playerPotions[potionType] || 0;
@@ -458,24 +490,25 @@ function usePotion(potionType) {
 		return;
 	}
 	const n = buyQty === 'max' ? owned : Math.min(buyQty, owned);
+	const used = n - countSaved(n);
 
 	if (potionType === 'duplicate') {
-		duplicateRollsLeft += data.rolls * n;
-		playerPotions[potionType] -= n;
+		const perPotion = ShopX.val('dupeRolls');
+		duplicateRollsLeft += perPotion * n;
+		playerPotions[potionType] -= used;
 		updatePotionUI();
 		updateActivePotionsDisplay();
 		saveAllData();
-		showAnomalyPopup(`${data.emoji} +${data.rolls * n} duplicate rolls!`);
+		showAnomalyPopup(`${data.emoji} +${perPotion * n} duplicate rolls!`);
 		return;
 	}
 
-	// stacking is additive, so n potions = one entry worth n*(mult-1)
 	activePotions.push({
 		type: potionType,
-		endTime: buffNow() + data.duration,
-		multiplier: 1 + n * (data.mult - 1),
+		endTime: buffNow() + data.duration * ShopX.val('potionDuration'),
+		multiplier: Math.round((1 + n * (data.mult - 1) * ShopX.val('potionPotency')) * 100) / 100,
 	});
-	playerPotions[potionType] -= n;
+	playerPotions[potionType] -= used;
 	recalcPotionLuck();
 	updatePotionUI();
 	updateActivePotionsDisplay();
@@ -639,12 +672,13 @@ function buyPotion(type) {
 	const data = potionData[type];
 	if (!data) return;
 	const want = buyQty === 'max' ? Infinity : buyQty;
-	const n = Math.min(want, Math.floor(points / data.cost));
+	const unit = Math.max(1, Math.floor(data.cost * ShopX.val('potionDiscount')));
+	const n = Math.min(want, Math.floor(points / unit));
 	if (n < 1) {
 		window.showAlert(`not enough points for ${data.name}!`);
 		return;
-	} //dude
-	points -= data.cost * n;
+	}
+	points -= unit * n;
 	playerPotions[type] = (playerPotions[type] || 0) + n;
 	updatePointsDisplay();
 	updateShopUI();
@@ -701,11 +735,15 @@ function showConfirmModal(title, text, onConfirm) {
 	modal.addEventListener('click', bgClickHandler);
 }
 
+function anomalyLuckMult() {
+	return 1 + anomaliesUsed * ShopX.val('anomalyResonance');
+}
+
 let globalLuckMultiplier = 1;
 
 function recalcLuckMultiplier() {
 	shopLuckMultiplier = 1 + shopUpgrades.luck * 0.1;
-	const anomalyMult = 1 + anomaliesUsed * 0.5;
+	const anomalyMult = anomalyLuckMult();
 	const starmapMult =
 		typeof window.getStarmapLuckBonus === 'function' ? window.getStarmapLuckBonus() : 1;
 	const runeTripMult =
@@ -720,9 +758,10 @@ function recalcLuckMultiplier() {
 			: 1;
 	globalLuckMultiplier =
 		shopLuckMultiplier * anomalyMult * starmapMult * runeTripMult * runeGiftMult * runeCloverMult;
-	if (luckBoostActive && !buffsPaused) globalLuckMultiplier *= 4;
+	if (luckBoostActive && !buffsPaused) globalLuckMultiplier *= ShopX.val('boostPower');
 	globalLuckMultiplier *= potionLuckMultiplier;
 	globalLuckMultiplier *= potionLuckMultiplier;
+	globalLuckMultiplier *= ShopX.val('luckMult');
 	if (window.Lategame) globalLuckMultiplier = window.Lategame.applyLuck(globalLuckMultiplier);
 	const cap = window.luckCap || 0;
 	luckWasCapped = cap > 0 && globalLuckMultiplier > cap;
@@ -1428,6 +1467,13 @@ function updateTotalRolls() {
 	totalRollsEl.textContent = `total rolls: ${formatNum(totalRolls)}`;
 }
 
+function addCopies(o, extra) {
+	const d = inventoryData.get(o.name);
+	if (!d) return;
+	d.count += extra;
+	updateItem(d);
+}
+
 function addToInventory(o, skipAutoSell = false) {
 	rarityTimestamps.set(o.name, Date.now());
 	if (typeof window.tryDropRune === 'function') window.tryDropRune(o);
@@ -1463,6 +1509,15 @@ function addToInventory(o, skipAutoSell = false) {
 			showAnomalyPopup('duplicate proc!');
 		}
 	}
+
+	const echo = ShopX.val('dupeEcho');
+	if (echo > 0 && Plush.float() < echo) addCopies(o, 1);
+	const jackpot = ShopX.val('dupeJackpot');
+	if (jackpot > 0 && Plush.float() < jackpot) {
+		addCopies(o, 9);
+		showAnomalyPopup('duplicate jackpot! +9');
+	}
+
 	if (duplicateRollsLeft > 0 && !buffsPaused) {
 		const d2 = inventoryData.get(o.name);
 		if (d2) {
@@ -1557,6 +1612,15 @@ function updatePrinterPoints() {
 				(window.Lategame ? window.Lategame.printerMult() : 1);
 			updatePointsDisplay();
 		}
+
+		const cappedSeconds = Math.min(ShopX.val('printerStorage'), elapsedSeconds);
+		window._lastPrinterTick = now - (elapsedMs % 1000);
+		points += Math.floor(
+			shopUpgrades.printer *
+				cappedSeconds *
+				ShopX.val('printerBoost') *
+				(window.Lategame ? window.Lategame.printerMult() : 1)
+		);
 	} else {
 		window._lastPrinterTick = Date.now();
 	}
@@ -1604,6 +1668,9 @@ function sellAll() {
 		showAnomalyPopup('nothing to sell');
 		return;
 	}
+	const bulkBonus = Math.floor(total * (ShopX.val('bulkSeller') - 1));
+	points += bulkBonus;
+	total += bulkBonus;
 	updatePointsDisplay();
 	updateShopUI();
 	saveAllData();
@@ -1703,6 +1770,10 @@ function awardAnomalyIfEligible(rarityObj) {
 	const denom = Plush.denomOf(rarityObj);
 	if (denom > 10000) {
 		anomalies++;
+		if (Plush.float() < ShopX.val('anomalyMagnet')) {
+			anomalies++;
+			showAnomalyPopup('+1 bonus anomaly');
+		}
 		try {
 			localStorage.setItem(ANOMALIES_KEY, String(anomalies));
 		} catch {}
@@ -1953,7 +2024,9 @@ function consumeAllAnomalies() {
 	updateAnomalyUI();
 	updateLuckDisplay();
 	saveAllData();
-	showAnomalyPopup(`CONSUMED ${count} ANOMALIES! +${(count * 0.5).toFixed(1)}x permanent luck!`);
+	showAnomalyPopup(
+		`CONSUMED ${count} ANOMALIES! +${(count * ShopX.val('anomalyResonance')).toFixed(2)}x permanent luck!`
+	);
 }
 
 // Generated code starts here on 2026-11-10T00:00:00Z:
@@ -1999,7 +2072,7 @@ if (savedPoints !== null) points = Number(savedPoints) || 0;
 const savedUpgrades = localStorage.getItem(SHOP_UPGRADES_KEY);
 if (savedUpgrades) {
 	try {
-		shopUpgrades = JSON.parse(savedUpgrades);
+		shopUpgrades = Object.assign(freshUpgrades(), JSON.parse(savedUpgrades));
 	} catch {}
 }
 
@@ -2138,14 +2211,7 @@ async function resetInventory() {
 	points = 0;
 	anomalies = 0;
 	anomaliesUsed = 0;
-	shopUpgrades = {
-		luck: 0,
-		speed: 0,
-		pointMult: 0,
-		magnet: 0,
-		printer: 0,
-		duplicate: 0,
-	};
+	shopUpgrades = freshUpgrades();
 	playerPotions = {
 		luck2x: 0,
 		luck4x: 0,
@@ -2194,7 +2260,7 @@ let _lastLuckSecondsLeft = -1;
 
 function startLuckBoost() {
 	luckBoostActive = true;
-	luckBoostEndTime = buffNow() + 60000;
+	luckBoostEndTime = buffNow() + ShopX.val('boostLength');
 	_lastLuckSecondsLeft = -1;
 	recalcLuckMultiplier();
 
@@ -2305,7 +2371,7 @@ function spinAndReveal(res) {
 		if (window.playThemeSound) window.playThemeSound('roll');
 	}
 
-	if (totalRolls > 0 && totalRolls % 100 === 0) startLuckBoost();
+	if (totalRolls > 0 && totalRolls % ShopX.val('boostCycle') === 0) startLuckBoost();
 
 	const finalize = () => {
 		document.getElementById('spinnerContainer')?.classList.remove('roll-pending');
@@ -2314,6 +2380,11 @@ function spinAndReveal(res) {
 		if (window.recheckDefaultMusicTier) window.recheckDefaultMusicTier();
 		const firstTime = !inventoryData.has(res.name);
 		addToInventory(res);
+		const bounty = ShopX.val('rollBounty');
+		if (bounty > 0) {
+			points += bounty;
+			updatePointsDisplay();
+		}
 		if (res.name === 'gone') {
 			window._goneLink = true;
 			if (window._showGoneLink) window._showGoneLink();
@@ -2738,7 +2809,7 @@ weeklyBtn.addEventListener('click', async () => {
 		newStreak = diffWeeks === 1 ? streak + 1 : 1;
 	}
 
-	const reward = 3000 + 500 * Math.min(newStreak, 10);
+	const reward = Math.floor((3000 + 500 * Math.min(newStreak, 10)) * ShopX.val('dailyBonus'));
 	points += reward;
 	playerPotions.luck4x = (playerPotions.luck4x || 0) + 1;
 
@@ -2815,7 +2886,7 @@ dailyBtn.addEventListener('click', async () => {
 		}
 	}
 
-	const reward = 100 + 50 * Math.min(newStreak, 30);
+	const reward = Math.floor((100 + 50 * Math.min(newStreak, 30)) * ShopX.val('dailyBonus'));
 	points += reward;
 
 	saveDailyData(today, newStreak);
@@ -3167,18 +3238,22 @@ function setWellAmount(amount) {
 	if (input) input.value = amount;
 }
 
+function wellCooldownMs() {
+	return WELL_COOLDOWN * ShopX.val('wellCooldown');
+}
+
 // Check if well is on cooldown
 function isWellOnCooldown() {
 	const now = Date.now();
 	const timeSinceLastThrow = now - wellData.lastThrow;
-	return timeSinceLastThrow < WELL_COOLDOWN;
+	return timeSinceLastThrow < wellCooldownMs();
 }
 
 // Get remaining cooldown time
 function getRemainingCooldown() {
 	const now = Date.now();
 	const elapsed = now - wellData.lastThrow;
-	const remaining = WELL_COOLDOWN - elapsed;
+	const remaining = wellCooldownMs() - elapsed;
 	return Math.max(0, remaining);
 }
 
@@ -3231,7 +3306,7 @@ function throwIntoWell() {
 
 	const _hr = (function (W) {
 		var P = [
-			'aG9sbG93IHJlZCBzaWxlbmNl',
+			'aG9sbG93IHJlZCBzaWxlbmNl', // FIXME: deobfuscate this
 			'eW91IFJFQUxMWSB0aG91Z2h0IHlvdSBzdHVtYmxlZCBhY3Jvc3MgYW4gYWN0dWFsIEFSRyBMTUFPT09PT09PT09P',
 		];
 		var X = (i) => atob(P[i]);
@@ -3284,14 +3359,14 @@ function throwIntoWell() {
 	updatePointsDisplay();
 	createWellRipple();
 
-	const won = Plush.float() < 0.4;
+	const won = Plush.float() < ShopX.val('wellLuck');
 
 	wellData.lastThrow = Date.now();
 	wellData.totalThrown += amount;
 	wellData.timesThrown++;
 
 	if (won) {
-		const reward = amount * 2;
+		const reward = Math.floor(amount * ShopX.val('wellPayout'));
 		points += reward;
 		wellData.totalReceived += reward;
 		wellData.successes++;
@@ -3375,6 +3450,36 @@ if (isWellOnCooldown()) {
 	// so why is there an error here? send me to hell please
 	startWellCooldownTimer();
 }
+
+(function () {
+	const btn = document.getElementById('jumpToPotions');
+	const potions = document.getElementById('potionsDivider');
+	const upgrades = document.getElementById('upgradesDivider');
+	const bar = document.querySelector('.shop-sticky');
+	if (!btn || !potions || !upgrades) return;
+
+	let pastPotions = false;
+
+	const offset = () => (bar ? bar.offsetHeight : 0) + 12;
+
+	function sync() {
+		const now = potions.getBoundingClientRect().top <= offset() + 40;
+		if (now === pastPotions) return;
+		pastPotions = now;
+		btn.textContent = now ? 'to upgrades' : 'to potions';
+	}
+
+	btn.addEventListener('click', () => {
+		const target = pastPotions ? upgrades : potions;
+		const y = target.getBoundingClientRect().top + window.scrollY - offset();
+		const reduce = document.body.classList.contains('reduce-motion');
+		window.scrollTo({ top: Math.max(0, y), behavior: reduce ? 'auto' : 'smooth' });
+	});
+
+	window.addEventListener('scroll', sync, { passive: true });
+	window.addEventListener('resize', sync);
+	sync();
+})();
 
 window.refreshAllDisplays = function () {
 	updatePointsDisplay();
