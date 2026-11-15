@@ -1,841 +1,865 @@
 (function () {
 	'use strict';
 
-	console.log(performance.now());
-
-	const RUNES_KEY = 'runesUnlocked';
-	const RUNES_DATA_KEY = 'runesData';
-	const BLOCKS_KEY = 'runeBlocks';
-	const GIFT_KEY = 'runeGift';
-	const UPGRADES_KEY = 'runeUpgrades';
-	const ELEMENTS = ['water', 'fire', 'earth', 'wizardry'];
-	const ELEMENT_EMOJI = {
-		water: '💧',
-		fire: '🔥',
-		earth: '🌍',
-		wizardry: '🔮',
+	const KEYS = {
+		unlocked: 'runesUnlocked',
+		data: 'runesData',
+		blocks: 'runeBlocks',
+		gift: 'runeGift',
+		upgrades: 'runeUpgrades',
 	};
 
-	let runesData = { counts: {}, elementals: {}, totalDropped: 0 };
-	let blocks = 0;
-	let gift = null;
-	let upgrades = {
-		tripleLuck: false,
-		moreBlocks: false,
-		anomalyMachine: false,
-		dopamineAttack: false,
-		doubleClover: false,
+	const TIERS = [
+		{ key: 'rare', label: 'rare', minDenom: 1000, drop: 1 / 30, blockMult: 10 },
+		{ key: 'mid-rare', label: 'mid-rare', minDenom: 70, drop: 1 / 70, blockMult: 3 },
+		{ key: 'common', label: 'common', minDenom: 0, drop: 1 / 140, blockMult: 1 },
+	];
+	const TIERS_ASC = TIERS.slice().reverse();
+	const TIER_BY_KEY = Object.fromEntries(TIERS.map((t) => [t.key, t]));
+
+	const ELEMENTS = [
+		{
+			id: 'water',
+			color: '#5ab0ff',
+			path: 'M12 2.5C12 2.5 5 10.5 5 15a7 7 0 0 0 14 0C19 10.5 12 2.5 12 2.5z',
+		},
+		{
+			id: 'fire',
+			color: '#ff7a45',
+			path: 'M12 2c1 3.5 5 6 5 11a5 5 0 0 1-10 0c0-2.5 1.2-4 2.5-5 0 2 .8 3 1.8 3.2C10.8 8.5 11 5 12 2z',
+		},
+		{ id: 'earth', color: '#8bbf6a', path: 'M2 20L9 7l4 7 3-4.5L22 20z' },
+		{
+			id: 'wizardry',
+			color: '#b894ff',
+			path: 'M12 2l2.2 7.8L22 12l-7.8 2.2L12 22l-2.2-7.8L2 12l7.8-2.2z',
+		},
+	];
+
+	const ELEMENTAL_CHANCE = 1 / 20;
+	const BASE_RATE = 1.25;
+	const BOOSTED_RATE = 10;
+	const BACK_RATIO = 0.85;
+	const WEALTH_PER_SEC = 200000;
+	const ANOMALY_PER_TICK = 50;
+	const ANOMALY_TICK_MS = 2000;
+	const PASSIVE_CAP_MS = 3600 * 1000;
+	const DOPAMINE_MS = Math.round(1000 / 3);
+	const DOPAMINE_MAX_CATCHUP = 1800;
+	const CLOVER_ANOMALIES = 50000000;
+
+	const GIFTS = {
+		luck: {
+			name: 'gift of luck',
+			desc: '2x your existing luck multiplier, permanently',
+			popup: 'gift of luck active: 2x permanent luck',
+		},
+		wealth: {
+			name: 'gift of wealth',
+			desc: '200,000 points per second, permanently',
+			popup: 'gift of wealth active: 200k pts/sec',
+		},
 	};
 
-	let anomalyMachineInterval = null;
-	let dopamineAttackInterval = null;
-	let giftWealthInterval = null;
-	let linkAnimationActive = false;
+	const UPGRADES = [
+		{
+			key: 'tripleLuck',
+			name: 'always triple your luck',
+			desc: 'permanent 3x luck multiplier',
+			cost: 9000,
+		},
+		{
+			key: 'moreBlocks',
+			name: 'more blocks!',
+			desc: 'exchange rate becomes 1 rune = 10 blocks',
+			cost: 15000,
+		},
+		{
+			key: 'anomalyMachine',
+			name: 'anomaly anomaly anomaly',
+			desc: '+50 anomalies every 2 seconds',
+			cost: 17000,
+		},
+		{
+			key: 'dopamineAttack',
+			name: 'dopamine attack',
+			desc: 'auto-roll 3 times per second',
+			cost: 20000,
+		},
+		{
+			key: 'doubleClover',
+			name: 'double clover',
+			desc: '50M anomalies + 4x permanent luck',
+			cost: 50000,
+		},
+	];
 
-	// Generated code starts here on 2026-09-22T00:00:00Z:
-	// In-memory cache for runes unlock state to avoid synchronous localStorage reads on every RNG roll in tryDropRune.
-	let _unlockedCache = null;
+	const state = {
+		runes: { counts: {}, elementals: {}, totalDropped: 0 },
+		blocks: 0,
+		gift: null,
+		upgrades: {},
+	};
 
-	function isUnlocked(force = false) {
-		if (force || _unlockedCache === null) {
-			_unlockedCache = localStorage.getItem(RUNES_KEY) === '1';
-		}
-		return _unlockedCache;
+	let unlockedCache = null;
+	let ui = null;
+	let dirty = false;
+	let refreshQueued = false;
+	let converging = false;
+	let autoPrompted = false;
+	let dopamineTimer = null;
+	let lastDopamine = 0;
+	const passive = { wealth: 0, anomaly: 0 };
+
+	function el(tag, cls, text) {
+		const e = document.createElement(tag);
+		if (cls) e.className = cls;
+		if (text !== undefined) e.textContent = text;
+		return e;
 	}
-	// Generated code ends here on 2026-09-22T00:00:00Z:
 
-	// Generated code starts here on 2026-11-02T10:30:40Z:
-	function loadData() {
-		_unlockedCache = localStorage.getItem(RUNES_KEY) === '1';
+	function glyphNode(element, size) {
+		const s = el('span', 'rn-glyph');
+		s.style.setProperty('--rn-c', element.color);
+		s.innerHTML =
+			'<svg viewBox="0 0 24 24" width="' +
+			size +
+			'" height="' +
+			size +
+			'" aria-hidden="true"><path d="' +
+			element.path +
+			'"/></svg>';
+		return s;
+	}
+
+	function fmt(n) {
+		if (typeof formatNum === 'function') return formatNum(n);
+		return Math.round(n).toLocaleString();
+	}
+
+	function fmtDec(n) {
+		if (n >= 1000) return fmt(n);
+		return String(Math.round(n * 100) / 100);
+	}
+
+	function popup(text) {
+		if (typeof showAnomalyPopup === 'function') showAnomalyPopup(text);
+	}
+
+	function recalcLuck() {
+		if (typeof recalcLuckMultiplier === 'function') recalcLuckMultiplier();
+	}
+
+	function roll() {
+		if (typeof Plush !== 'undefined' && typeof Plush.float === 'function') return Plush.float();
+		if (typeof Beacon !== 'undefined' && typeof Beacon.float === 'function') return Beacon.float();
+		return Math.random();
+	}
+
+	function readJSON(key) {
 		try {
-			const d = JSON.parse(localStorage.getItem(RUNES_DATA_KEY) || '{}');
-			runesData = {
-				counts: d.counts || {},
-				elementals: d.elementals || {},
-				totalDropped: d.totalDropped || 0,
-			};
+			const v = JSON.parse(localStorage.getItem(key) || '{}');
+			return v && typeof v === 'object' ? v : {};
 		} catch (e) {
-			console.warn('[runes] failed to parse runes state:', e);
+			console.warn('[runes] failed to parse ' + key + ':', e);
+			return {};
 		}
-		blocks = parseFloat(localStorage.getItem(BLOCKS_KEY) || '0');
-		gift = localStorage.getItem(GIFT_KEY) || null;
+	}
+
+	function count(v) {
+		const n = Math.floor(Number(v));
+		return Number.isFinite(n) && n > 0 ? n : 0;
+	}
+
+	function isUnlocked(force) {
+		if (force || unlockedCache === null) {
+			unlockedCache = localStorage.getItem(KEYS.unlocked) === '1';
+		}
+		return unlockedCache;
+	}
+
+	function load() {
+		const d = readJSON(KEYS.data);
+		const counts = {};
+		TIERS.forEach((t) => {
+			counts[t.key] = count(d.counts && d.counts[t.key]);
+		});
+		const elementals = {};
+		ELEMENTS.forEach((e) => {
+			elementals[e.id] = count(d.elementals && d.elementals[e.id]);
+		});
+		state.runes = { counts, elementals, totalDropped: count(d.totalDropped) };
+
+		const b = parseFloat(localStorage.getItem(KEYS.blocks) || '0');
+		state.blocks = Number.isFinite(b) && b > 0 ? b : 0;
+
+		const g = localStorage.getItem(KEYS.gift);
+		state.gift = g && Object.hasOwn(GIFTS, g) ? g : null;
+
+		const u = readJSON(KEYS.upgrades);
+		state.upgrades = {};
+		UPGRADES.forEach((x) => {
+			state.upgrades[x.key] = u[x.key] === true;
+		});
+
+		unlockedCache = localStorage.getItem(KEYS.unlocked) === '1';
+	}
+
+	function save() {
 		try {
-			const u = JSON.parse(localStorage.getItem(UPGRADES_KEY) || '{}');
-			upgrades = Object.assign(
-				{
-					tripleLuck: false,
-					moreBlocks: false,
-					anomalyMachine: false,
-					dopamineAttack: false,
-					doubleClover: false,
-				},
-				u
-			);
+			localStorage.setItem(KEYS.data, JSON.stringify(state.runes));
+			localStorage.setItem(KEYS.blocks, String(state.blocks));
+			if (state.gift) localStorage.setItem(KEYS.gift, state.gift);
+			localStorage.setItem(KEYS.upgrades, JSON.stringify(state.upgrades));
 		} catch (e) {
-			console.warn('[runes] failed to parse upgrades state:', e);
+			console.warn('[runes] failed to save:', e);
 		}
 	}
-	// Generated code ends here on 2026-11-02T10:30:40Z:
 
-	function saveData() {
-		localStorage.setItem(RUNES_DATA_KEY, JSON.stringify(runesData));
-		localStorage.setItem(BLOCKS_KEY, String(blocks));
-		if (gift) localStorage.setItem(GIFT_KEY, gift);
-		localStorage.setItem(UPGRADES_KEY, JSON.stringify(upgrades));
+	function tierOf(rarity) {
+		const denom = Math.round(1 / rarity.chance);
+		return TIERS.find((t) => denom >= t.minDenom);
 	}
 
-	function getRarityTier(rarityObj) {
-		const denom = Math.round(1 / rarityObj.chance);
-		if (denom >= 1000) return 'rare';
-		if (denom >= 70) return 'mid-rare';
-		return 'common';
+	function allCollected() {
+		return ELEMENTS.every((e) => state.runes.elementals[e.id] > 0);
 	}
 
-	function getDropChance(tier) {
-		if (tier === 'rare') return 1 / 30;
-		if (tier === 'mid-rare') return 1 / 70;
-		return 1 / 140;
+	function collectedCount() {
+		return ELEMENTS.filter((e) => state.runes.elementals[e.id] > 0).length;
 	}
 
-	function rng() {
-		return typeof Beacon !== 'undefined' ? Beacon.float() : Math.random();
+	function blockValue(tier) {
+		return (state.upgrades.moreBlocks ? BOOSTED_RATE : BASE_RATE) * tier.blockMult;
 	}
 
-	function tryDropRune(rarityObj) {
-		if (!isUnlocked()) return;
-		const tier = getRarityTier(rarityObj);
-		const chance = getDropChance(tier);
-		if (rng() > chance) return;
+	function buyCost(tier, n) {
+		return Math.ceil((n * blockValue(tier)) / BACK_RATIO);
+	}
 
-		const isElemental = rng() < 1 / 20;
+	function maxBuy(tier) {
+		let n = Math.floor((state.blocks * BACK_RATIO) / blockValue(tier));
+		while (n > 0 && buyCost(tier, n) > state.blocks) n--;
+		return Math.max(0, n);
+	}
 
-		if (isElemental) {
-			const el = ELEMENTS[Math.floor(rng() * ELEMENTS.length)];
-			runesData.elementals[el] = (runesData.elementals[el] || 0) + 1;
-			runesData.totalDropped++;
-			saveData();
-			if (typeof showAnomalyPopup === 'function')
-				showAnomalyPopup(`${ELEMENT_EMOJI[el]} elemental rune: ${el}!`);
-			checkElementalCompletion();
+	function grantPoints(n) {
+		if (typeof points === 'undefined') return;
+		points += n;
+		if (typeof updatePointsDisplay === 'function') updatePointsDisplay();
+	}
+
+	function grantAnomalies(n) {
+		if (typeof anomalies === 'undefined') return;
+		anomalies += n;
+		if (typeof updateAnomalyUI === 'function') updateAnomalyUI();
+	}
+
+	function markDirty() {
+		dirty = true;
+		if (refreshQueued || !ui) return;
+		refreshQueued = true;
+		requestAnimationFrame(() => {
+			refreshQueued = false;
+			if (dirty) refresh();
+		});
+	}
+
+	function tryDropRune(rarity) {
+		if (!isUnlocked() || !rarity) return;
+		const tier = tierOf(rarity);
+		if (!tier || roll() >= tier.drop) return;
+
+		state.runes.totalDropped++;
+
+		if (roll() < ELEMENTAL_CHANCE) {
+			const element = ELEMENTS[Math.floor(roll() * ELEMENTS.length)];
+			state.runes.elementals[element.id]++;
+			save();
+			popup(element.id + ' rune found');
+			markDirty();
+			checkConvergence();
+			return;
+		}
+
+		state.runes.counts[tier.key]++;
+		save();
+		popup(tier.label + ' rune dropped');
+		markDirty();
+	}
+
+	function sellRunes(tierKey, n) {
+		const tier = TIER_BY_KEY[tierKey];
+		if (!tier || n < 1 || state.runes.counts[tier.key] < n) return false;
+		state.runes.counts[tier.key] -= n;
+		state.blocks += n * blockValue(tier);
+		save();
+		return true;
+	}
+
+	function buyRunes(tierKey, n) {
+		const tier = TIER_BY_KEY[tierKey];
+		if (!tier || n < 1) return false;
+		const cost = buyCost(tier, n);
+		if (state.blocks < cost) return false;
+		state.blocks -= cost;
+		state.runes.counts[tier.key] += n;
+		save();
+		return true;
+	}
+
+	function buyUpgrade(key) {
+		const u = UPGRADES.find((x) => x.key === key);
+		if (!u || state.upgrades[key] || state.blocks < u.cost) return;
+		state.blocks -= u.cost;
+		state.upgrades[key] = true;
+		save();
+		activate(key);
+		refresh();
+	}
+
+	function activate(key) {
+		if (key === 'tripleLuck') {
+			recalcLuck();
+			popup('triple luck active');
+		}
+		if (key === 'anomalyMachine') {
+			passive.anomaly = Date.now();
+		}
+		if (key === 'dopamineAttack') {
+			startDopamine();
+		}
+		if (key === 'doubleClover') {
+			grantAnomalies(CLOVER_ANOMALIES);
+			if (typeof saveAllData === 'function') saveAllData();
+			recalcLuck();
+			popup('double clover: 50M anomalies + 4x luck!');
+		}
+	}
+
+	function applyGift() {
+		if (state.gift === 'luck') recalcLuck();
+		if (state.gift === 'wealth') passive.wealth = Date.now();
+		if (state.gift) popup(GIFTS[state.gift].popup);
+	}
+
+	function advance(key, unitMs) {
+		const now = Date.now();
+		const elapsed = now - passive[key];
+		const units = Math.floor(elapsed / unitMs);
+		if (units <= 0) return 0;
+		passive[key] = now - (elapsed % unitMs);
+		return Math.min(units, Math.floor(PASSIVE_CAP_MS / unitMs));
+	}
+
+	function tick() {
+		if (state.gift === 'wealth') {
+			const n = advance('wealth', 1000);
+			if (n) grantPoints(WEALTH_PER_SEC * n);
 		} else {
-			runesData.counts[tier] = (runesData.counts[tier] || 0) + 1;
-			runesData.totalDropped++;
-			saveData();
-			if (typeof showAnomalyPopup === 'function') showAnomalyPopup(`🔷 ${tier} rune dropped!`);
+			passive.wealth = Date.now();
 		}
 
-		renderRunes();
+		if (state.upgrades.anomalyMachine) {
+			const n = advance('anomaly', ANOMALY_TICK_MS);
+			if (n) grantAnomalies(ANOMALY_PER_TICK * n);
+		} else {
+			passive.anomaly = Date.now();
+		}
 	}
 
-	function checkElementalCompletion() {
-		const collected = ELEMENTS.filter((el) => (runesData.elementals[el] || 0) > 0);
-		if (collected.length < 4 || gift || linkAnimationActive) return;
-		linkAnimationActive = true;
-		playLinkAnimation();
+	function withHidden(fn) {
+		Object.defineProperty(document, 'hidden', { get: () => true, configurable: true });
+		try {
+			fn();
+		} finally {
+			delete document.hidden;
+		}
 	}
 
-	function playLinkAnimation() {
-		const overlay = document.createElement('div');
-		overlay.id = 'runeLinkOverlay';
-		overlay.style.cssText =
-			'position:fixed;inset:0;background:#000;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;';
+	function rollReady() {
+		const btn = document.getElementById('rollBtn');
+		if (!btn || btn.disabled) return false;
+		if (typeof isCutscenePlaying !== 'undefined' && isCutscenePlaying) return false;
+		return typeof window.performRoll === 'function';
+	}
 
-		const title = document.createElement('div');
-		title.style.cssText =
-			'font-family:monospace;font-size:1.4em;color:#fff;opacity:0;transition:opacity 1s;';
-		title.textContent = 'the elements converge...';
-		overlay.appendChild(title);
+	function dopamineTick() {
+		if (!state.upgrades.dopamineAttack) {
+			lastDopamine = Date.now();
+			return;
+		}
+		const now = Date.now();
+		const elapsed = now - lastDopamine;
+		const n = Math.min(DOPAMINE_MAX_CATCHUP, Math.floor(elapsed / DOPAMINE_MS));
+		if (n < 1) return;
+		lastDopamine = now - (elapsed % DOPAMINE_MS);
 
-		const runeRow = document.createElement('div');
-		runeRow.style.cssText = 'display:flex;gap:32px;font-size:3em;';
-		overlay.appendChild(runeRow);
+		for (let i = 0; i < n; i++) {
+			if (!rollReady()) break;
+			if (typeof window._resetNextRollAllowedAt === 'function') window._resetNextRollAllowedAt();
+			if (i < n - 1 && !document.hidden) withHidden(window.performRoll);
+			else window.performRoll();
+		}
+	}
 
-		document.body.appendChild(overlay);
+	function startDopamine() {
+		if (dopamineTimer) return;
+		lastDopamine = Date.now();
+		dopamineTimer = setInterval(dopamineTick, DOPAMINE_MS);
+	}
 
-		setTimeout(() => {
-			title.style.opacity = '1';
-		}, 200);
+	function checkConvergence() {
+		if (!allCollected() || state.gift || converging || autoPrompted) return;
+		autoPrompted = true;
+		converging = true;
+		playConvergence().then(() => {
+			converging = false;
+			openGiftChoice();
+		});
+	}
 
-		let i = 0;
-		const interval = setInterval(() => {
-			const el = ELEMENTS[i];
-			const span = document.createElement('span');
-			span.textContent = ELEMENT_EMOJI[el];
-			span.style.cssText = 'opacity:0;transition:opacity 0.6s,transform 0.6s;transform:scale(0.5);';
-			runeRow.appendChild(span);
-			setTimeout(() => {
-				span.style.opacity = '1';
-				span.style.transform = 'scale(1)';
-			}, 50);
-			i++;
-			if (i >= 4) {
-				clearInterval(interval);
+	function playConvergence() {
+		return new Promise((resolve) => {
+			const overlay = el('div', 'rn-converge');
+			const title = el('div', 'rn-converge-title', 'the elements converge...');
+			const row = el('div', 'rn-converge-row');
+			overlay.append(title, row);
+			document.body.appendChild(overlay);
+			setTimeout(() => title.classList.add('on'), 200);
+
+			let i = 0;
+			const step = () => {
+				if (i < ELEMENTS.length) {
+					const g = glyphNode(ELEMENTS[i], 56);
+					g.classList.add('rn-converge-glyph');
+					row.appendChild(g);
+					setTimeout(() => g.classList.add('on'), 50);
+					i++;
+					setTimeout(step, 800);
+					return;
+				}
 				setTimeout(() => {
-					overlay.style.transition = 'background 1.5s';
-					overlay.style.background = '#fff';
+					overlay.classList.add('flash');
 					setTimeout(() => {
-						document.body.removeChild(overlay);
-						linkAnimationActive = false;
-						showGiftChoice();
+						overlay.remove();
+						resolve();
 					}, 1800);
-				}, 1200);
-			}
-		}, 800);
+				}, 400);
+			};
+			setTimeout(step, 600);
+		});
 	}
 
-	function generateConfirmString() {
+	function makeConfirmString() {
 		const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
 		let s = '';
 		for (let i = 0; i < 8; i++) s += chars[Math.floor(Math.random() * chars.length)];
 		return s;
 	}
 
-	function showGiftChoice() {
-		const modal = document.createElement('div');
-		modal.style.cssText =
-			'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;';
+	function openGiftChoice() {
+		if (state.gift || document.getElementById('rnGiftModal')) return;
 
-		const panel = document.createElement('div');
-		panel.style.cssText =
-			'background:var(--panel-bg);border:1px solid var(--border-color);padding:32px;border-radius:4px;max-width:480px;width:90%;font-family:monospace;color:var(--text-color);text-align:center;';
+		const confirmStr = makeConfirmString();
+		const modal = el('div', 'rn-modal');
+		modal.id = 'rnGiftModal';
+		const panel = el('div', 'rn-modal-panel');
+		panel.append(
+			el('div', 'rn-modal-title', 'choose your gift'),
+			el('div', 'rn-modal-sub', 'this decision is permanent. it defines your run until SUMMER.')
+		);
 
-		const confirmStr = generateConfirmString();
+		let selected = null;
+		const options = el('div', 'rn-gift-options');
+		const optionButtons = Object.keys(GIFTS).map((id) => {
+			const b = el('button', 'rn-gift-opt');
+			b.append(
+				el('div', 'rn-gift-name', GIFTS[id].name),
+				el('div', 'rn-gift-desc', GIFTS[id].desc)
+			);
+			options.appendChild(b);
+			return { id, b };
+		});
 
-		panel.innerHTML = `
-      <div style="font-size:1.3em;margin-bottom:8px;">choose your gift</div>
-      <div style="font-size:0.8em;opacity:0.5;margin-bottom:24px;">this decision is permanent. it defines your run until SUMMER.</div>
-      <div id="giftOptions" style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
-        <button class="gift-opt" data-gift="luck" style="background:var(--button-bg);border:1px solid var(--border-color);color:var(--text-color);padding:16px;font-family:monospace;font-size:0.95em;border-radius:2px;cursor:pointer;">
-          <div style="font-size:1.1em;margin-bottom:4px;">⚡ gift of luck</div>
-          <div style="font-size:0.75em;opacity:0.6;">2x your existing luck multiplier - permanently</div>
-        </button>
-        <button class="gift-opt" data-gift="wealth" style="background:var(--button-bg);border:1px solid var(--border-color);color:var(--text-color);padding:16px;font-family:monospace;font-size:0.95em;border-radius:2px;cursor:pointer;">
-          <div style="font-size:1.1em;margin-bottom:4px;">💰 gift of wealth</div>
-          <div style="font-size:0.75em;opacity:0.6;">200,000 points per second - permanently</div>
-        </button>
-      </div>
-      <div id="giftConfirmArea" style="display:none;">
-        <div style="font-size:0.8em;opacity:0.6;margin-bottom:8px;">type <strong id="confirmStrDisplay"></strong> to confirm</div>
-        <input id="giftConfirmInput" type="text" autocomplete="off" spellcheck="false" style="width:100%;padding:8px;font-family:monospace;background:var(--input-bg);border:1px solid var(--border-color);color:var(--text-color);border-radius:2px;margin-bottom:10px;box-sizing:border-box;">
-        <button id="giftConfirmBtn" style="background:var(--button-bg);border:1px solid var(--border-color);color:var(--text-color);padding:8px 20px;font-family:monospace;cursor:pointer;border-radius:2px;opacity:0.5;" disabled>confirm</button>
-        <button id="giftCancelBtn" style="background:transparent;border:none;color:var(--text-color);padding:8px 16px;font-family:monospace;cursor:pointer;opacity:0.4;margin-left:8px;">cancel</button>
-      </div>
-    `;
+		const confirmArea = el('div', 'rn-confirm');
+		confirmArea.hidden = true;
+		const prompt = el('div', 'rn-confirm-text');
+		prompt.append('type ', el('strong', '', confirmStr), ' to confirm');
+		const input = el('input', 'rn-input rn-input-wide');
+		input.type = 'text';
+		input.autocomplete = 'off';
+		input.spellcheck = false;
+		const confirmBtn = el('button', '', 'confirm');
+		confirmBtn.disabled = true;
+		const cancelBtn = el('button', 'rn-ghost', 'cancel');
+		const laterBtn = el('button', 'rn-ghost', 'decide later');
+		const actions = el('div', 'rn-confirm-actions');
+		actions.append(confirmBtn, cancelBtn);
+		confirmArea.append(prompt, input, actions);
 
+		panel.append(options, confirmArea, laterBtn);
 		modal.appendChild(panel);
 		document.body.appendChild(modal);
 
-		let selectedGift = null;
-		const confirmArea = panel.querySelector('#giftConfirmArea');
-		const confirmStrEl = panel.querySelector('#confirmStrDisplay');
-		const confirmInput = panel.querySelector('#giftConfirmInput');
-		const confirmBtn = panel.querySelector('#giftConfirmBtn');
-		const cancelBtn = panel.querySelector('#giftCancelBtn');
+		const clearSelection = () => {
+			selected = null;
+			confirmArea.hidden = true;
+			optionButtons.forEach((o) => o.b.classList.remove('dim', 'sel'));
+		};
 
-		panel.querySelectorAll('.gift-opt').forEach((btn) => {
-			btn.addEventListener('click', () => {
-				selectedGift = btn.dataset.gift;
-				panel.querySelectorAll('.gift-opt').forEach((b) => (b.style.opacity = '0.4'));
-				btn.style.opacity = '1';
-				btn.style.borderColor = 'var(--text-color)';
-				confirmStrEl.textContent = confirmStr;
-				confirmArea.style.display = 'block';
-				confirmInput.value = '';
+		optionButtons.forEach((o) => {
+			o.b.addEventListener('click', () => {
+				selected = o.id;
+				optionButtons.forEach((x) => {
+					x.b.classList.toggle('sel', x === o);
+					x.b.classList.toggle('dim', x !== o);
+				});
+				confirmArea.hidden = false;
+				input.value = '';
 				confirmBtn.disabled = true;
-				confirmBtn.style.opacity = '0.5';
-				confirmInput.focus();
+				input.focus();
 			});
 		});
 
-		confirmInput.addEventListener('input', () => {
-			const match = confirmInput.value === confirmStr;
-			confirmBtn.disabled = !match;
-			confirmBtn.style.opacity = match ? '1' : '0.5';
+		input.addEventListener('input', () => {
+			confirmBtn.disabled = input.value !== confirmStr;
 		});
 
 		confirmBtn.addEventListener('click', () => {
-			if (!selectedGift) return;
-			gift = selectedGift;
-			saveData();
-			document.body.removeChild(modal);
+			if (!selected) return;
+			state.gift = selected;
+			save();
+			modal.remove();
 			applyGift();
-			renderRunes();
+			refresh();
 		});
 
-		cancelBtn.addEventListener('click', () => {
-			selectedGift = null;
-			confirmArea.style.display = 'none';
-			panel.querySelectorAll('.gift-opt').forEach((b) => {
-				b.style.opacity = '1';
-				b.style.borderColor = 'var(--border-color)';
-			});
-		});
+		cancelBtn.addEventListener('click', clearSelection);
+		laterBtn.addEventListener('click', () => modal.remove());
 	}
 
-	function applyGift() {
-		if (gift === 'luck') {
-			if (typeof recalcLuckMultiplier === 'function') recalcLuckMultiplier();
-			if (typeof showAnomalyPopup === 'function')
-				showAnomalyPopup('⚡ gift of luck active: 2x permanent luck!');
-		}
-		if (gift === 'wealth') {
-			startWealthGift();
-			if (typeof showAnomalyPopup === 'function')
-				showAnomalyPopup('💰 gift of wealth active: 200k pts/sec!');
-		}
+	function amountOf(x) {
+		return Math.max(0, parseInt(x.input.value, 10) || 0);
 	}
 
-	// Generated code starts here on 2026-03-31T22:00:00Z:
-	window._lastRuneWealthTick = Date.now();
-	function updateRuneWealth() {
-		if (gift !== 'wealth') {
-			window._lastRuneWealthTick = Date.now();
+	function maxAmount(x) {
+		const tier = TIER_BY_KEY[x.select.value];
+		return x.kind === 'sell' ? state.runes.counts[tier.key] : maxBuy(tier);
+	}
+
+	function refreshExchange(x) {
+		const tier = TIER_BY_KEY[x.select.value];
+		const n = amountOf(x);
+		const value = blockValue(tier);
+
+		if (x.kind === 'sell') {
+			const have = state.runes.counts[tier.key];
+			x.max.disabled = have < 1;
+			if (n < 1) {
+				x.preview.textContent =
+					'you have ' + fmt(have) + ' ' + tier.label + ' (' + fmtDec(value) + ' blocks each)';
+				x.go.disabled = true;
+			} else if (n > have) {
+				x.preview.textContent = 'you only have ' + fmt(have);
+				x.go.disabled = true;
+			} else {
+				x.preview.textContent = 'gives ' + fmtDec(n * value) + ' blocks';
+				x.go.disabled = false;
+			}
 			return;
 		}
-		const now = Date.now();
-		const elapsedMs = now - (window._lastRuneWealthTick || now);
-		const elapsedSeconds = Math.floor(elapsedMs / 1000);
-		if (elapsedSeconds > 0) {
-			const cappedSeconds = Math.min(3600, elapsedSeconds);
-			window._lastRuneWealthTick = now - (elapsedMs % 1000);
-			if (typeof points !== 'undefined' && typeof updatePointsDisplay === 'function') {
-				points += 200000 * cappedSeconds;
-				updatePointsDisplay();
-				if (typeof saveAllData === 'function') saveAllData();
-			}
+
+		const most = maxBuy(tier);
+		x.max.disabled = most < 1;
+		if (n < 1) {
+			x.preview.textContent =
+				'each ' + tier.label + ' rune costs about ' + fmtDec(buyCost(tier, 1)) + ' blocks';
+			x.go.disabled = true;
+		} else {
+			const cost = buyCost(tier, n);
+			x.preview.textContent = 'costs ' + fmtDec(cost) + ' blocks';
+			x.go.disabled = state.blocks < cost;
 		}
 	}
 
-	function startWealthGift() {
-		if (giftWealthInterval) clearInterval(giftWealthInterval);
-		if (gift !== 'wealth') return;
-		window._lastRuneWealthTick = Date.now();
-		giftWealthInterval = setInterval(updateRuneWealth, 1000);
-	}
-	// Generated code ends here on 2026-03-31T22:00:00Z:
-
-	function getGiftLuckMultiplier() {
-		return gift === 'luck' ? 2 : 1;
-	}
-	window.getRuneGiftLuckMultiplier = getGiftLuckMultiplier;
-
-	function totalRunes() {
-		return (
-			(runesData.counts.rare || 0) +
-			(runesData.counts['mid-rare'] || 0) +
-			(runesData.counts.common || 0)
+	function makeExchange(kind) {
+		const root = el('div', 'rn-ex');
+		root.appendChild(
+			el('div', 'rn-ex-title', kind === 'sell' ? 'runes to blocks' : 'blocks to runes (lossy)')
 		);
+
+		const select = el('select', 'rn-select');
+		TIERS_ASC.forEach((t) => {
+			const o = el('option', '', t.label);
+			o.value = t.key;
+			select.appendChild(o);
+		});
+		select.value = 'common';
+
+		const input = el('input', 'rn-input');
+		input.type = 'number';
+		input.min = '1';
+		input.placeholder = kind === 'sell' ? 'runes' : 'runes out';
+
+		const max = el('button', 'small', 'max');
+		const go = el('button', 'small', 'exchange');
+		const row = el('div', 'rn-ex-row');
+		row.append(select, input, max, go);
+
+		const preview = el('div', 'rn-preview');
+		root.append(row, preview);
+
+		const x = { kind, root, select, input, max, go, preview };
+		const sync = () => refreshExchange(x);
+		select.addEventListener('change', sync);
+		input.addEventListener('input', sync);
+		max.addEventListener('click', () => {
+			input.value = String(maxAmount(x));
+			sync();
+		});
+		go.addEventListener('click', () => {
+			const n = amountOf(x);
+			const ok = kind === 'sell' ? sellRunes(select.value, n) : buyRunes(select.value, n);
+			if (ok) input.value = '';
+			refresh();
+		});
+		return x;
 	}
 
-	function getExchangeRate() {
-		return upgrades.moreBlocks ? 10 : 1.25;
+	function buildLocked(container) {
+		container.textContent = '';
+		const root = el('div', 'rn-locked');
+		root.append(
+			glyphNode(ELEMENTS[3], 40),
+			el('div', '', 'complete the abyss gauntlet to unlock runes')
+		);
+		container.appendChild(root);
+		return { mode: 'locked', container, root, refs: {} };
 	}
 
-	function exchangeRunesToBlocks(count) {
-		if (totalRunes() < count) return;
-		let remaining = count;
-		for (const tier of ['common', 'mid-rare', 'rare']) {
-			const use = Math.min(runesData.counts[tier] || 0, remaining);
-			runesData.counts[tier] = (runesData.counts[tier] || 0) - use;
-			remaining -= use;
-			if (remaining <= 0) break;
+	function buildMain(container) {
+		container.textContent = '';
+		const root = el('div', 'rn-root');
+		const refs = { tiers: {}, elements: {} };
+
+		const banner = el('div', 'rn-banner');
+		const bannerText = el('span', '');
+		const bannerBtn = el('button', 'small', 'choose your gift');
+		bannerBtn.addEventListener('click', openGiftChoice);
+		banner.append(bannerText, bannerBtn);
+		refs.banner = { root: banner, text: bannerText, btn: bannerBtn };
+		root.appendChild(banner);
+
+		const stats = el('div', 'rn-grid2');
+		TIERS.forEach((t) => {
+			const card = el('div', 'rn-card');
+			const value = el('div', 'rn-card-value');
+			const sub = el('div', 'rn-card-sub');
+			card.append(el('div', 'rn-card-label', t.label + ' runes'), value, sub);
+			refs.tiers[t.key] = { value, sub };
+			stats.appendChild(card);
+		});
+		const totalCard = el('div', 'rn-card');
+		refs.total = el('div', 'rn-card-value');
+		totalCard.append(el('div', 'rn-card-label', 'total dropped'), refs.total);
+		stats.appendChild(totalCard);
+		root.appendChild(stats);
+
+		root.appendChild(el('div', 'rn-label', 'elementals'));
+		const elements = el('div', 'rn-elements');
+		ELEMENTS.forEach((e) => {
+			const card = el('div', 'rn-el');
+			card.style.setProperty('--rn-c', e.color);
+			const countEl = el('div', 'rn-el-count');
+			card.append(glyphNode(e, 28), el('div', 'rn-el-name', e.id), countEl);
+			refs.elements[e.id] = { root: card, count: countEl };
+			elements.appendChild(card);
+		});
+		root.appendChild(elements);
+
+		const blocksLabel = el('div', 'rn-label');
+		blocksLabel.append('blocks: ');
+		refs.blocks = el('span', '');
+		blocksLabel.appendChild(refs.blocks);
+		root.appendChild(blocksLabel);
+
+		const utm = el('div', 'rn-panel');
+		utm.appendChild(el('div', 'rn-panel-title', 'UTM, universal transaction machine'));
+		refs.sell = makeExchange('sell');
+		refs.buy = makeExchange('buy');
+		utm.append(refs.sell.root, refs.buy.root);
+		root.appendChild(utm);
+
+		root.appendChild(el('div', 'rn-label rn-label-gap', 'block upgrades'));
+		const list = el('div', 'rn-upgrades');
+		refs.upgrades = {};
+		UPGRADES.forEach((u) => {
+			const row = el('div', 'rn-up');
+			const left = el('div', 'rn-up-left');
+			left.append(el('div', 'rn-up-name', u.name), el('div', 'rn-up-desc', u.desc));
+			const right = el('div', 'rn-up-right');
+			const cost = el('div', 'rn-up-cost', fmt(u.cost) + ' blocks');
+			const btn = el('button', 'small', 'buy');
+			const owned = el('span', 'rn-up-owned', 'owned');
+			btn.addEventListener('click', () => buyUpgrade(u.key));
+			right.append(cost, btn, owned);
+			row.append(left, right);
+			refs.upgrades[u.key] = { row, cost, btn, owned };
+			list.appendChild(row);
+		});
+		root.appendChild(list);
+
+		container.appendChild(root);
+		return { mode: 'main', container, root, refs };
+	}
+
+	function refresh() {
+		dirty = false;
+		if (!ui || ui.mode !== 'main') return;
+		const r = ui.refs;
+
+		TIERS.forEach((t) => {
+			r.tiers[t.key].value.textContent = fmt(state.runes.counts[t.key]);
+			r.tiers[t.key].sub.textContent = fmtDec(blockValue(t)) + ' blocks each';
+		});
+		r.total.textContent = fmt(state.runes.totalDropped);
+
+		ELEMENTS.forEach((e) => {
+			const c = state.runes.elementals[e.id];
+			r.elements[e.id].count.textContent = String(c);
+			r.elements[e.id].root.classList.toggle('on', c > 0);
+		});
+
+		r.blocks.textContent = fmt(Math.floor(state.blocks));
+
+		const b = r.banner;
+		if (state.gift) {
+			b.root.className = 'rn-banner rn-banner-on';
+			b.text.textContent = GIFTS[state.gift].name + ' active';
+			b.btn.hidden = true;
+		} else if (allCollected()) {
+			b.root.className = 'rn-banner rn-banner-ready';
+			b.text.textContent = 'all four elementals collected';
+			b.btn.hidden = false;
+		} else {
+			b.root.className = 'rn-banner';
+			b.text.textContent = 'elementals collected: ' + collectedCount() + ' / ' + ELEMENTS.length;
+			b.btn.hidden = true;
 		}
-		blocks += count * getExchangeRate();
-		saveData();
-		renderRunes();
-	}
 
-	// Generated code starts here on 2026-11-01T00:00:00Z:
-	// Calculate block cost relative to getExchangeRate() to enforce a lossy ~0.85 conversion ratio and prevent positive arbitrage loops.
-	function exchangeBlocksToRunes(count) {
-		// Block cost scales with getExchangeRate() to maintain the lossy 0.85 conversion ratio relative to rune value and prevent infinite block generation loops.
-		const cost = Math.ceil((count * getExchangeRate()) / 0.85);
-		if (blocks < cost) return;
-		blocks -= cost;
-		runesData.counts.common = (runesData.counts.common || 0) + count;
-		saveData();
-		renderRunes();
-	}
-	// Generated code ends here on 2026-11-01T00:00:00Z:
+		refreshExchange(r.sell);
+		refreshExchange(r.buy);
 
-	function buyUpgrade(key) {
-		if (upgrades[key]) return;
-		const costs = {
-			tripleLuck: 9000,
-			moreBlocks: 15000,
-			anomalyMachine: 17000,
-			dopamineAttack: 20000,
-			doubleClover: 50000,
-		};
-		const cost = costs[key];
-		if (blocks < cost) {
-			if (typeof window.showAlert === 'function')
-				window.showAlert(`need ${formatNum(cost)} blocks!`);
-			return;
-		}
-		blocks -= cost;
-		upgrades[key] = true;
-		saveData();
-		activateUpgrade(key);
-		renderRunes();
-	}
-
-	function activateUpgrade(key) {
-		if (key === 'tripleLuck') {
-			if (typeof recalcLuckMultiplier === 'function') recalcLuckMultiplier();
-			if (typeof showAnomalyPopup === 'function') showAnomalyPopup('🔺 triple luck active!');
-		}
-		if (key === 'anomalyMachine') {
-			startAnomalyMachine();
-		}
-		if (key === 'dopamineAttack') {
-			startDopamineAttack();
-		}
-		if (key === 'doubleClover') {
-			// Generated code starts here on 2026-06-18T03:00:00Z:
-			if (typeof anomalies !== 'undefined') {
-				anomalies += 50000000;
-				if (typeof updateAnomalyUI === 'function') updateAnomalyUI();
-				if (typeof saveAllData === 'function') saveAllData();
-			}
-			// Generated code ends here on 2026-06-18T03:00:00Z:
-			if (typeof recalcLuckMultiplier === 'function') recalcLuckMultiplier();
-			if (typeof showAnomalyPopup === 'function')
-				showAnomalyPopup('🍀 double clover: 50M anomalies + 4x luck!');
-		}
-	}
-
-	// Generated code starts here on 2026-03-31T22:00:00Z:
-	window._lastRuneAnomalyMachineTick = Date.now();
-	function updateRuneAnomalyMachine() {
-		if (!upgrades.anomalyMachine) {
-			window._lastRuneAnomalyMachineTick = Date.now();
-			return;
-		}
-		const now = Date.now();
-		const elapsedMs = now - (window._lastRuneAnomalyMachineTick || now);
-		const elapsedTicks = Math.floor(elapsedMs / 2000);
-		if (elapsedTicks > 0) {
-			const cappedTicks = Math.min(1800, elapsedTicks);
-			window._lastRuneAnomalyMachineTick = now - (elapsedMs % 2000);
-			if (typeof anomalies !== 'undefined') {
-				anomalies += 50 * cappedTicks;
-				if (typeof updateAnomalyUI === 'function') updateAnomalyUI();
-				if (typeof saveAllData === 'function') saveAllData();
-			}
-		}
-	}
-
-	function startAnomalyMachine() {
-		if (anomalyMachineInterval) clearInterval(anomalyMachineInterval);
-		window._lastRuneAnomalyMachineTick = Date.now();
-		anomalyMachineInterval = setInterval(updateRuneAnomalyMachine, 2000);
-	}
-
-	document.addEventListener('visibilitychange', () => {
-		if (!document.hidden) {
-			if (gift === 'wealth') updateRuneWealth();
-			if (upgrades.anomalyMachine) updateRuneAnomalyMachine();
-			if (upgrades.dopamineAttack) updateDopamineAttack();
-		}
-	});
-	// Generated code ends here on 2026-03-31T22:00:00Z:
-
-	// Generated code starts here on 2026-10-23T16:20:00Z:
-	const MAX_DOPAMINE_CATCHUP_ROLLS = 1800;
-	window._lastDopamineAttackTick = Date.now();
-
-	function updateDopamineAttack() {
-		if (!upgrades.dopamineAttack) {
-			window._lastDopamineAttackTick = Date.now();
-			return;
-		}
-		const now = Date.now();
-		const last = window._lastDopamineAttackTick || now;
-		const elapsedMs = now - last;
-		const rollInterval = Math.round(1000 / 3);
-		const elapsedRolls = Math.floor(elapsedMs / rollInterval);
-
-		if (elapsedRolls > 0) {
-			let cappedRolls = elapsedRolls;
-			if (cappedRolls > MAX_DOPAMINE_CATCHUP_ROLLS) {
-				console.debug(
-					`[runes] dopamine attack catch-up capped at ${MAX_DOPAMINE_CATCHUP_ROLLS} rolls`
-				);
-				cappedRolls = MAX_DOPAMINE_CATCHUP_ROLLS;
-			}
-			window._lastDopamineAttackTick = now - (elapsedMs % rollInterval);
-
-			for (let i = 0; i < cappedRolls; i++) {
-				const btn = document.getElementById('rollBtn');
-				if (
-					!btn ||
-					btn.disabled ||
-					(typeof isCutscenePlaying !== 'undefined' && isCutscenePlaying)
-				) {
-					break;
-				}
-
-				if (typeof window._resetNextRollAllowedAt === 'function') {
-					window._resetNextRollAllowedAt();
-				}
-
-				const isCatchUp = i < cappedRolls - 1;
-				if (isCatchUp && !document.hidden) {
-					const origHidden = document.hidden;
-					try {
-						Object.defineProperty(document, 'hidden', { value: true, configurable: true });
-						btn.click();
-					} finally {
-						Object.defineProperty(document, 'hidden', { value: origHidden, configurable: true });
-					}
-				} else {
-					btn.click();
-				}
-			}
-		}
-	}
-
-	function startDopamineAttack() {
-		if (dopamineAttackInterval) clearInterval(dopamineAttackInterval);
-		if (!upgrades.dopamineAttack) return;
-		window._lastDopamineAttackTick = Date.now();
-		const rollEvery = Math.round(1000 / 3);
-		dopamineAttackInterval = setInterval(updateDopamineAttack, rollEvery);
-	}
-	// Generated code ends here on 2026-10-23T16:20:00Z:
-
-	function getTripleLuckMultiplier() {
-		return upgrades.tripleLuck ? 3 : 1;
-	}
-	window.getRuneTripleLuckMultiplier = getTripleLuckMultiplier;
-
-	function getDoubleCloverLuckMultiplier() {
-		return upgrades.doubleClover ? 4 : 1;
-	}
-	window.getRuneDoubleCloverLuckMultiplier = getDoubleCloverLuckMultiplier;
-
-	function formatBlocks(n) {
-		if (typeof formatNum === 'function') return formatNum(n);
-		return Math.round(n).toLocaleString();
+		UPGRADES.forEach((u) => {
+			const row = r.upgrades[u.key];
+			const own = state.upgrades[u.key];
+			row.row.classList.toggle('rn-up-has', own);
+			row.cost.hidden = own;
+			row.btn.hidden = own;
+			row.owned.hidden = !own;
+			row.btn.disabled = state.blocks < u.cost;
+		});
 	}
 
 	function renderRunes() {
 		const container = document.getElementById('runesContainer');
 		if (!container) return;
-
-		if (!isUnlocked(true)) {
-			container.innerHTML = `
-        <div style="text-align:center;opacity:0.4;margin-top:48px;">
-          <div style="font-size:2.2em;margin-bottom:14px;">🔷</div>
-          <div style="font-size:0.9em;">complete the abyss gauntlet to unlock runes</div>
-        </div>`;
-			return;
+		const mode = isUnlocked(true) ? 'main' : 'locked';
+		if (!ui || ui.container !== container || ui.mode !== mode || !container.contains(ui.root)) {
+			ui = mode === 'main' ? buildMain(container) : buildLocked(container);
 		}
-
-		const allElementsCollected = ELEMENTS.every((el) => (runesData.elementals[el] || 0) > 0);
-		const exchangeRate = getExchangeRate();
-
-		const upgradeList = [
-			{
-				key: 'tripleLuck',
-				name: 'always triple your luck',
-				cost: 9000,
-				desc: 'permanent 3x luck multiplier',
-				emoji: '🔺',
-			},
-			{
-				// yay more f-ing blocks! fufk fuck fuck fuck ruck
-				key: 'moreBlocks',
-				name: 'more blocks!',
-				cost: 15000,
-				desc: 'exchange rate becomes 1 rune = 10 blocks',
-				emoji: '📦',
-			},
-			{
-				key: 'anomalyMachine',
-				name: 'anomaly anomaly anomaly',
-				cost: 17000,
-				desc: '+50 anomalies every 2 seconds',
-				emoji: '⚗️',
-			},
-			{
-				key: 'dopamineAttack',
-				name: 'dopamine attack',
-				cost: 20000,
-				desc: 'auto-roll 3 times per second',
-				emoji: '⚡',
-			},
-			{
-				key: 'doubleClover',
-				name: 'double clover',
-				cost: 50000,
-				desc: '50M anomalies + 4x permanent luck',
-				emoji: '🍀',
-			},
-		];
-
-		container.innerHTML = `
-      <div class="runes-panel">
-        <div style="font-size:1.1em;margin-bottom:4px;">🔷 runes</div>
-        <div style="font-size:0.8em;opacity:0.5;margin-bottom:20px;">runes drop while rolling. collect all 4 elementals for a gift. (THIS MECHANIC IS EXTREMELY RUSHED BEWARE)</div>
-
-        ${
-					gift
-						? `<div class="rune-gift-banner">
-          <span>${gift === 'luck' ? '⚡' : '💰'} gift of ${gift} active</span>
-        </div>`
-						: ''
-				}
-
-        <div class="rune-stat-grid">
-          <div class="rune-stat-card">
-            <div class="rune-stat-label">rare runes</div>
-            <div class="rune-stat-value">${runesData.counts.rare || 0}</div>
-          </div>
-          <div class="rune-stat-card">
-            <div class="rune-stat-label">mid-rare runes</div>
-            <div class="rune-stat-value">${runesData.counts['mid-rare'] || 0}</div>
-          </div>
-          <div class="rune-stat-card">
-            <div class="rune-stat-label">common runes</div>
-            <div class="rune-stat-value">${runesData.counts.common || 0}</div>
-          </div>
-          <div class="rune-stat-card">
-            <div class="rune-stat-label">total dropped</div>
-            <div class="rune-stat-value">${runesData.totalDropped}</div>
-          </div>
-        </div>
-
-        <div class="rune-section-label">elementals</div>
-        <div class="rune-elemental-grid">
-          ${ELEMENTS.map((el) => {
-						const count = runesData.elementals[el] || 0;
-						const hasOne = count > 0;
-						return `<div class="rune-elemental-card ${hasOne ? 'rune-el-collected' : ''}">
-              <div class="rune-el-emoji">${ELEMENT_EMOJI[el]}</div>
-              <div class="rune-el-name">${el}</div>
-              <div class="rune-el-count">${count}</div>
-            </div>`;
-					}).join('')}
-        </div>
-        ${allElementsCollected && !gift ? '<div style="font-size:0.8em;opacity:0.6;text-align:center;margin-bottom:16px;">all elements collected - gift already granted</div>' : ''}
-
-        <div class="rune-section-label">blocks - ${formatBlocks(Math.floor(blocks))}</div>
-        <div class="rune-utm-panel">
-          <div style="font-size:0.8em;opacity:0.5;margin-bottom:12px;">UTM - universal transaction machine</div>
-          <div class="rune-utm-row">
-            <div style="flex:1;">
-              <div style="font-size:0.75em;opacity:0.6;margin-bottom:4px;">runes → blocks (rate: 1 = ${exchangeRate})</div>
-              <div style="display:flex;gap:6px;align-items:center;">
-                <input id="runeToBlockInput" type="number" min="1" placeholder="runes" style="width:80px;padding:4px 6px;background:var(--input-bg);border:1px solid var(--border-color);color:var(--text-color);font-family:monospace;border-radius:2px;">
-                <button id="runeToBlockBtn" class="small">exchange →</button>
-              </div>
-            </div>
-            <div style="flex:1;">
-              <div style="font-size:0.75em;opacity:0.6;margin-bottom:4px;">blocks → runes (rate: 1 = 0.85, lossy)</div>
-              <div style="display:flex;gap:6px;align-items:center;">
-                <input id="blockToRuneInput" type="number" min="1" placeholder="runes out" style="width:80px;padding:4px 6px;background:var(--input-bg);border:1px solid var(--border-color);color:var(--text-color);font-family:monospace;border-radius:2px;">
-                <button id="blockToRuneBtn" class="small">← exchange</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="rune-section-label" style="margin-top:20px;">block upgrades</div>
-        <div class="rune-upgrades-list">
-          ${upgradeList
-						.map(
-							(u) => `
-            <div class="rune-upgrade-item ${upgrades[u.key] ? 'rune-upgrade-owned' : ''}">
-              <div class="rune-upgrade-left">
-                <div class="rune-upgrade-name">${u.emoji} ${u.name}</div>
-                <div class="rune-upgrade-desc">${u.desc}</div>
-              </div>
-              <div class="rune-upgrade-right">
-                ${
-									upgrades[u.key]
-										? '<span style="font-size:0.8em;color:#4a4;">owned</span>'
-										: `<div style="font-size:0.75em;color:#ffb86b;margin-bottom:4px;">${formatBlocks(u.cost)} blocks</div>
-                     <button class="small rune-buy-btn" data-key="${u.key}">buy</button>`
-								}
-              </div>
-            </div>
-          `
-						)
-						.join('')}
-        </div>
-      </div>
-    `;
-
-		const r2b = container.querySelector('#runeToBlockBtn');
-		if (r2b)
-			r2b.addEventListener('click', () => {
-				const val = parseInt(container.querySelector('#runeToBlockInput').value) || 0;
-				if (val > 0) exchangeRunesToBlocks(val);
-			});
-
-		const b2r = container.querySelector('#blockToRuneBtn');
-		if (b2r)
-			b2r.addEventListener('click', () => {
-				const val = parseInt(container.querySelector('#blockToRuneInput').value) || 0;
-				if (val > 0) exchangeBlocksToRunes(val);
-			});
-
-		container.querySelectorAll('.rune-buy-btn').forEach((btn) => {
-			btn.addEventListener('click', () => buyUpgrade(btn.dataset.key));
-		});
+		if (mode === 'main') refresh();
 	}
 
 	function injectStyles() {
 		if (document.getElementById('runesStyles')) return;
 		const style = document.createElement('style');
-		style.id = 'runesStyles'; // oh CSS my beloved my ass
+		style.id = 'runesStyles';
 		style.textContent = `
-.runes-panel {
-  max-width: 540px;
-  width: 100%;
-  font-family: monospace;
-  color: var(--text-color);
-}
-.rune-stat-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-.rune-stat-card {
-  background: var(--overlay-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 2px;
-  padding: 10px 12px;
-  text-align: center;
-}
-.rune-stat-label {
-  font-size: 0.72em;
-  opacity: 0.45;
-  margin-bottom: 4px;
-}
-.rune-stat-value {
-  font-size: 1.1em;
-}
-.rune-section-label {
-  font-size: 0.72em;
-  opacity: 0.38;
-  text-transform: lowercase;
-  letter-spacing: 0.07em;
-  margin-bottom: 10px;
-}
-.rune-elemental-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.rune-elemental-card {
-  background: var(--overlay-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 2px;
-  padding: 10px 6px;
-  text-align: center;
-  opacity: 0.4;
-  transition: opacity 0.3s, border-color 0.3s;
-}
-.rune-elemental-card.rune-el-collected {
-  opacity: 1;
-  border-color: #5a8a5a;
-  background: rgba(40, 90, 40, 0.1);
-}
-.rune-el-emoji {
-  font-size: 1.6em;
-  margin-bottom: 4px;
-}
-.rune-el-name {
-  font-size: 0.72em;
-  opacity: 0.7;
-  margin-bottom: 2px;
-}
-.rune-el-count {
-  font-size: 0.9em;
-}
-.rune-utm-panel {
-  background: var(--overlay-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 2px;
-  padding: 14px;
-}
-.rune-utm-row {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.rune-upgrades-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.rune-upgrade-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: var(--overlay-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 2px;
-  padding: 12px;
-  gap: 12px;
-}
-.rune-upgrade-item.rune-upgrade-owned {
-  border-color: #3a5a3a;
-  background: rgba(40, 90, 40, 0.08);
-}
-.rune-upgrade-left {
-  flex: 1;
-  min-width: 0;
-}
-.rune-upgrade-name {
-  font-size: 0.88em;
-  margin-bottom: 2px;
-}
-.rune-upgrade-desc {
-  font-size: 0.75em;
-  opacity: 0.5;
-}
-.rune-upgrade-right {
-  flex-shrink: 0;
-  text-align: right;
-}
-.rune-gift-banner {
-  background: rgba(40, 90, 40, 0.12);
-  border: 1px solid #3a5a3a;
-  border-radius: 2px;
-  padding: 8px 12px;
-  margin-bottom: 16px;
-  font-size: 0.85em;
-  text-align: center;
-  color: #88cc88;
-}
-    `;
+.rn-root { width: 100%; max-width: 540px; font-family: monospace; color: var(--text-color); }
+.rn-root [hidden], .rn-modal [hidden] { display: none !important; }
+.rn-locked { text-align: center; opacity: 0.4; margin-top: 48px; font-size: 0.9em; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.rn-glyph { display: inline-flex; color: var(--rn-c, currentColor); }
+.rn-glyph svg { display: block; fill: currentColor; }
+.rn-banner { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--overlay-bg); border: 1px solid var(--border-color); border-radius: 2px; padding: 8px 12px; margin-bottom: 16px; font-size: 0.82em; min-height: 40px; }
+.rn-banner-on { background: rgba(40, 90, 40, 0.12); border-color: #3a5a3a; color: #88cc88; justify-content: center; }
+.rn-banner-ready { border-color: #6a5a2a; }
+.rn-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+.rn-card { background: var(--overlay-bg); border: 1px solid var(--border-color); border-radius: 2px; padding: 10px 12px; text-align: center; }
+.rn-card-label { font-size: 0.72em; opacity: 0.45; margin-bottom: 4px; }
+.rn-card-value { font-size: 1.1em; }
+.rn-card-sub { font-size: 0.68em; opacity: 0.35; margin-top: 2px; }
+.rn-label { font-size: 0.72em; opacity: 0.38; letter-spacing: 0.07em; margin-bottom: 10px; }
+.rn-label-gap { margin-top: 20px; }
+.rn-elements { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
+.rn-el { display: flex; flex-direction: column; align-items: center; gap: 4px; background: var(--overlay-bg); border: 1px solid var(--border-color); border-radius: 2px; padding: 10px 6px; opacity: 0.4; transition: opacity 0.3s, border-color 0.3s; }
+.rn-el .rn-glyph { color: var(--rn-c); }
+.rn-el.on { opacity: 1; border-color: var(--rn-c); }
+.rn-el-name { font-size: 0.72em; opacity: 0.7; }
+.rn-el-count { font-size: 0.9em; }
+.rn-panel { background: var(--overlay-bg); border: 1px solid var(--border-color); border-radius: 2px; padding: 14px; }
+.rn-panel-title { font-size: 0.8em; opacity: 0.5; margin-bottom: 12px; }
+.rn-ex { margin-bottom: 16px; }
+.rn-ex:last-child { margin-bottom: 0; }
+.rn-ex-title { font-size: 0.75em; opacity: 0.6; margin-bottom: 6px; }
+.rn-ex-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.rn-select { padding: 4px 6px; }
+.rn-input { width: 90px; padding: 4px 6px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); font-family: monospace; border-radius: 2px; }
+.rn-input-wide { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; }
+.rn-preview { font-size: 0.72em; opacity: 0.55; margin-top: 6px; min-height: 1.2em; }
+.rn-upgrades { display: flex; flex-direction: column; gap: 8px; }
+.rn-up { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--overlay-bg); border: 1px solid var(--border-color); border-radius: 2px; padding: 12px; }
+.rn-up-has { border-color: #3a5a3a; background: rgba(40, 90, 40, 0.08); }
+.rn-up-left { flex: 1; min-width: 0; }
+.rn-up-name { font-size: 0.88em; margin-bottom: 2px; }
+.rn-up-desc { font-size: 0.75em; opacity: 0.5; }
+.rn-up-right { flex-shrink: 0; text-align: right; }
+.rn-up-cost { font-size: 0.75em; color: var(--points-color, #ffb86b); margin-bottom: 4px; }
+.rn-up-owned { font-size: 0.8em; color: #4a4; }
+.rn-converge { position: fixed; inset: 0; background: #000; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; transition: background 1.5s; }
+.rn-converge.flash { background: #fff; }
+.rn-converge-title { font-family: monospace; font-size: 1.4em; color: #fff; opacity: 0; transition: opacity 1s; }
+.rn-converge-title.on { opacity: 1; }
+.rn-converge-row { display: flex; gap: 32px; }
+.rn-converge-glyph { opacity: 0; transform: scale(0.5); transition: opacity 0.6s, transform 0.6s; }
+.rn-converge-glyph.on { opacity: 1; transform: scale(1); }
+.rn-modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.92); z-index: 99999; display: flex; align-items: center; justify-content: center; }
+.rn-modal-panel { background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 32px; max-width: 480px; width: 90%; font-family: monospace; color: var(--text-color); text-align: center; }
+.rn-modal-title { font-size: 1.3em; margin-bottom: 8px; }
+.rn-modal-sub { font-size: 0.8em; opacity: 0.5; margin-bottom: 24px; }
+.rn-gift-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+.rn-gift-opt { padding: 16px; text-align: center; }
+.rn-gift-opt.dim { opacity: 0.4; }
+.rn-gift-opt.sel { opacity: 1; border-color: var(--text-color); }
+.rn-gift-name { font-size: 1.05em; margin-bottom: 4px; }
+.rn-gift-desc { font-size: 0.75em; opacity: 0.6; }
+.rn-confirm-text { font-size: 0.8em; opacity: 0.7; margin-bottom: 8px; }
+.rn-confirm-actions { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+.rn-ghost { background: transparent; border-color: transparent; opacity: 0.5; }
+`;
 		document.head.appendChild(style);
 	}
 
 	function init() {
 		injectStyles();
-		loadData();
-
-		if (gift === 'wealth') startWealthGift();
-		if (upgrades.anomalyMachine) startAnomalyMachine();
-		if (upgrades.dopamineAttack) startDopamineAttack();
-
-		renderRunes();
-
-		document.addEventListener('click', (e) => {
-			const dot = e.target.closest('.page-dot');
-			const next = e.target.closest('#nextPage');
-			const prev = e.target.closest('#prevPage');
-			if (dot || next || prev) setTimeout(renderRunes, 80);
+		load();
+		recalcLuck();
+		passive.wealth = Date.now();
+		passive.anomaly = Date.now();
+		if (state.upgrades.dopamineAttack) startDopamine();
+		setInterval(tick, 1000);
+		document.addEventListener('visibilitychange', () => {
+			if (document.hidden) return;
+			tick();
+			dopamineTick();
 		});
+		renderRunes();
 	}
 
+	window.getRuneGiftLuckMultiplier = () => (state.gift === 'luck' ? 2 : 1);
+	window.getRuneTripleLuckMultiplier = () => (state.upgrades.tripleLuck ? 3 : 1);
+	window.getRuneDoubleCloverLuckMultiplier = () => (state.upgrades.doubleClover ? 4 : 1);
 	window.tryDropRune = tryDropRune;
 	window.renderRunes = renderRunes;
 
