@@ -33,20 +33,29 @@ const SOLD_OUT_KEY = 'soldOutRarities';
 const RARITY_TIMESTAMPS_KEY = 'rarityTimestamps';
 let rarityTimestamps = new Map();
 
+const NUM_SUFFIXES = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc']; // thats a lot of suffixes!
+
+function formatBig(n) {
+	if (!Number.isFinite(n)) return n > 0 ? 'inf' : String(n);
+	let tier = Math.floor(Math.log10(Math.abs(n)) / 3);
+	if (tier >= NUM_SUFFIXES.length) return n.toExponential(2).replace('e+', 'e');
+	let scaled = n / Math.pow(10, tier * 3);
+	if (Math.round(scaled * 10) / 10 >= 1000 && tier + 1 < NUM_SUFFIXES.length) {
+		tier++;
+		scaled = n / Math.pow(10, tier * 3);
+	}
+	return scaled.toFixed(1).replace(/\.0$/, '') + NUM_SUFFIXES[tier];
+}
+
 window.formatNum = function (n) {
 	if (window.rawNumbers) return String(Math.round(n));
-	if (n >= 1e9) return (n / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
-	if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
-	if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
-	return String(Math.round(n));
+	if (Math.abs(n) < 1e3) return String(Math.round(n));
+	return formatBig(n);
 };
 
 window.formatMult = function (n) {
-	if (window.rawNumbers) return n.toFixed(1);
-	if (n >= 1e9) return (n / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
-	if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
-	if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
-	return n.toFixed(1);
+	if (window.rawNumbers || Math.abs(n) < 1e3) return n.toFixed(1);
+	return formatBig(n);
 };
 
 let points = 0;
@@ -334,7 +343,7 @@ function updateRollsSinceRare(rolledRarity) {
 
 function calculateRarityPoints(rarity) {
 	const denom = Plush.denomOf(rarity);
-	return Math.ceil(denom / pointDivisor);
+	return Math.ceil((denom / pointDivisor) * (window.Lategame ? window.Lategame.sellMult() : 1));
 }
 
 function updatePointsDisplay() {
@@ -347,7 +356,7 @@ window.getPoints = function () {
 };
 
 window.spendPoints = function (amount) {
-	if (!Number.isSafeInteger(amount) || amount <= 0) {
+	if (!Number.isFinite(amount) || amount < 1) {
 		console.warn('[addon] spendPoints expects a positive integer, got:', amount);
 		return false;
 	}
@@ -360,7 +369,7 @@ window.spendPoints = function (amount) {
 };
 
 window.awardPoints = function (amount) {
-	if (!Number.isSafeInteger(amount) || amount <= 0) {
+	if (!Number.isFinite(amount) || amount < 1) {
 		console.warn('[addon] awardPoints expects a positive integer, got:', amount);
 		return false;
 	}
@@ -713,6 +722,8 @@ function recalcLuckMultiplier() {
 		shopLuckMultiplier * anomalyMult * starmapMult * runeTripMult * runeGiftMult * runeCloverMult;
 	if (luckBoostActive && !buffsPaused) globalLuckMultiplier *= 4;
 	globalLuckMultiplier *= potionLuckMultiplier;
+	globalLuckMultiplier *= potionLuckMultiplier;
+	if (window.Lategame) globalLuckMultiplier = window.Lategame.applyLuck(globalLuckMultiplier);
 	const cap = window.luckCap || 0;
 	luckWasCapped = cap > 0 && globalLuckMultiplier > cap;
 	if (luckWasCapped) globalLuckMultiplier = cap;
@@ -757,6 +768,8 @@ function updateLuckDisplay() {
 				: JSON.parse(localStorage.getItem('starmapData') || '{}').constellations?.length || 0;
 		parts.push(`starmap: +${formatMult(starmapMult - 1)}x (${constCount} constellations)`);
 	}
+
+	if (window.Lategame) parts.push(...window.Lategame.breakdown());
 
 	const breakdownText = parts.length ? parts.join(' • ') : 'base luck (no modifiers active)';
 	if (_breakdownEl.textContent !== breakdownText) {
@@ -1538,7 +1551,10 @@ function updatePrinterPoints() {
 		if (elapsedSeconds > 0) {
 			const cappedSeconds = Math.min(3600, elapsedSeconds);
 			window._lastPrinterTick = now - (elapsedMs % 1000);
-			points += shopUpgrades.printer * cappedSeconds;
+			points +=
+				shopUpgrades.printer *
+				cappedSeconds *
+				(window.Lategame ? window.Lategame.printerMult() : 1);
 			updatePointsDisplay();
 		}
 	} else {
@@ -2095,6 +2111,7 @@ async function resetInventory() {
 	localStorage.removeItem('expeditionsUnlocked');
 	localStorage.removeItem('dealerData');
 	localStorage.removeItem('dealerUnlocked');
+	localStorage.removeItem('lategameData');
 	// Generated code starts here on 2026-03-29T12:00:00Z:
 	localStorage.removeItem('catShrineUnlocked');
 	localStorage.removeItem('catShrineEquipped');

@@ -63,6 +63,7 @@
 		'startAnimConfig',
 		'_plush_v3',
 		'infoTipsRead',
+		'lategameData',
 	];
 	const PREFIXES = ['voidUnlock_', 'cosmeticUnlock_'];
 	const VOLATILE = new Set([
