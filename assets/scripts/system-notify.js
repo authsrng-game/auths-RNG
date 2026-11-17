@@ -13,6 +13,13 @@
 			.replace(/'/g, '&#39;');
 	}
 
+	function linkify(escaped) {
+		return escaped.replace(
+			/\bhttps?:\/\/[^\s<]+/g,
+			(u) => `<a href="${u}" target="_blank" rel="noopener noreferrer">${u}</a>`
+		);
+	}
+
 	async function apiCall(path, options) {
 		const opts = options || {};
 		const token = window.AuthAccount && window.AuthAccount.getToken();
@@ -58,7 +65,7 @@
 				(m) => `<div class="sysmsg-item${m.read ? '' : ' unread'}" data-id="${escHtml(m.id)}">
 				<div class="sysmsg-from">${escHtml(m.from)}</div>
 				<div class="sysmsg-subject">${escHtml(m.subject)}</div>
-				<div class="sysmsg-body">${escHtml(m.body)}</div>
+				<div class="sysmsg-body">${linkify(escHtml(m.body))}</div>
 				<div class="sysmsg-ts">${new Date(m.ts).toLocaleString()}</div>
 			</div>`
 			)
