@@ -2029,22 +2029,39 @@ function consumeAllAnomalies() {
 	);
 }
 
-// Generated code starts here on 2026-11-10T00:00:00Z:
-// Batch sorted inventory DOM element insertions with DocumentFragment to prevent repeated browser style recalculations and layout reflows during inventory renders.
+let inventoryFilter = '';
+
+function inventoryMatches(d, q) {
+	if (d.rarityObj.name.toLowerCase().includes(q)) return true;
+	return ('1/' + Plush.denomOf(d.rarityObj)).includes(q);
+}
+
 function renderSortedInventory(mode) {
 	const savedScroll = inventoryList.scrollTop;
 	inventoryList.innerHTML = '';
 
 	let items = Array.from(inventoryData.values());
 
-	if (items.length === 0) {
+	const showMessage = (text) => {
 		const emptyEl = document.createElement('li');
 		emptyEl.className = 'empty-inventory';
 		emptyEl.style.cssText =
 			'padding: 24px 10px; text-align: center; opacity: 0.45; font-size: 0.85em; list-style: none; pointer-events: none;';
-		emptyEl.textContent = 'your inventory is empty... click roll to start collecting!';
+		emptyEl.textContent = text;
 		inventoryList.appendChild(emptyEl);
+	};
+
+	if (items.length === 0) {
+		showMessage('your inventory is empty... click roll to start collecting!');
 		return;
+	}
+
+	if (inventoryFilter) {
+		items = items.filter((d) => inventoryMatches(d, inventoryFilter));
+		if (items.length === 0) {
+			showMessage('no rarities match your search');
+			return;
+		}
 	}
 
 	if (mode === 'rare') {
@@ -2064,7 +2081,6 @@ function renderSortedInventory(mode) {
 	inventoryList.appendChild(fragment);
 	inventoryList.scrollTop = savedScroll;
 }
-// Generated code ends here on 2026-11-10T00:00:00Z:
 
 const savedPoints = localStorage.getItem(POINTS_KEY);
 if (savedPoints !== null) points = Number(savedPoints) || 0;
@@ -2668,6 +2684,21 @@ document.addEventListener('visibilitychange', () => {
 if (sortSelect) {
 	sortSelect.addEventListener('change', () => {
 		renderSortedInventory(sortSelect.value);
+	});
+}
+
+const inventorySearch = document.getElementById('inventorySearch');
+if (inventorySearch) {
+	const applyInventoryFilter = () => {
+		inventoryFilter = inventorySearch.value.trim().toLowerCase();
+		renderSortedInventory(sortSelect ? sortSelect.value : 'rare');
+	};
+	inventorySearch.addEventListener('input', applyInventoryFilter);
+	inventorySearch.addEventListener('keydown', (e) => {
+		if (e.key !== 'Escape' || !inventorySearch.value) return;
+		e.stopPropagation();
+		inventorySearch.value = '';
+		applyInventoryFilter();
 	});
 }
 

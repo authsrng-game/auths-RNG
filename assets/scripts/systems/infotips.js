@@ -90,20 +90,23 @@
 		return wrap;
 	}
 
-	// Generated code starts here on 2026-10-27T00:00:00Z:
-	// Cache tip icon elements, avoid redundant getComputedStyle layout flushes, and guard display style assignment to eliminate DOM style write overhead on periodic scans.
 	function tryPlace(tip) {
 		const container = tip.container();
 		if (!container) return;
 
 		let icon = tip._icon;
-		if (!icon || !container.contains(icon)) {
+		if (!icon || tip._host !== container) {
+			if (tip._obs) {
+				tip._obs.disconnect();
+				tip._obs = null;
+			}
 			icon = container.querySelector(`:scope > .info-tip[data-tip-id="${tip.id}"]`);
 			if (!icon) {
 				icon = createIcon(tip);
 				container.appendChild(icon);
 			}
 			tip._icon = icon;
+			tip._host = container;
 			if (
 				tip.pos !== 'inline' &&
 				container.style.position !== 'relative' &&
@@ -111,14 +114,19 @@
 			) {
 				container.style.position = 'relative';
 			}
+			tip._obs = new MutationObserver(() => {
+				if (!container.contains(icon)) container.appendChild(icon);
+			});
+			tip._obs.observe(container, { childList: true });
 		}
+
+		if (!container.contains(icon)) container.appendChild(icon);
 
 		const desiredDisplay = isVisible(container) ? '' : 'none';
 		if (icon.style.display !== desiredDisplay) {
 			icon.style.display = desiredDisplay;
 		}
 	}
-	// Generated code ends here on 2026-10-27T00:00:00Z:
 
 	// Generated code starts here on 2026-11-20T00:00:00Z:
 	// Early-return when document.hidden is true to avoid redundant DOM queries and layout geometry checks (offsetWidth/offsetHeight) in background tabs, and reconcile immediately on visibilitychange.

@@ -7,15 +7,15 @@
 	const style = document.createElement('style');
 	style.textContent = `
 	  #jukebox {
-	    position: fixed;
-	    top: 14px;
-	    left: 14px;
-	    z-index: 10001;
-	    display: flex;
-	    align-items: center;
-	    pointer-events: none;
-	  }
-	
+			position: fixed;
+			top: 14px;
+			left: 14px;
+			z-index: 10001;
+			display: flex;
+			align-items: flex-start;
+			pointer-events: none;
+		}
+
 	  #jb-disc {
 	    width: 38px;
 	    height: 38px;
@@ -261,7 +261,7 @@
 	    top: 52px;
 	  }
 	`;
-	document.head.appendChild(style); // FIXME: fix positioning of disc, too low
+	document.head.appendChild(style);
 
 	// -- DOM ----------------------------------------------------------------
 	// Using a sibling div for eq bars so they don't rotate with the disc
