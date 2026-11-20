@@ -6084,7 +6084,31 @@ button {
 	font-family: monospace;
 }
 
-.inventory-search {
+.inventory-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
 	margin-bottom: 8px;
-	font-size: 0.85em;
+}
+
+.inventory-toolbar #collectedCounter {
+	margin: 0;
+	white-space: nowrap;
+}
+
+.inventory-actions {
+	display: flex;
+	gap: 6px;
+	margin-left: auto;
+}
+
+.inventory-actions #indexBtn {
+	margin-left: 0;
+}
+
+.inventory-toolbar .inventory-search {
+	order: 1;
+	flex: 1 1 100%;
+	margin: 0;
 }

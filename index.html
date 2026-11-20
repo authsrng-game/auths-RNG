@@ -590,14 +590,7 @@ Last release date on nightly: ${nightlyRDate}`;
 						</div>
 
 						<div id="inventoryContainer">
-							<div
-								style="
-									display: flex;
-									justify-content: space-between;
-									align-items: center;
-									margin-bottom: 0.5em;
-								"
-							>
+							<div class="inventory-toolbar">
 								<div id="collectedCounter">0/0 collected</div>
 								<input
 									type="text"
@@ -608,9 +601,7 @@ Last release date on nightly: ${nightlyRDate}`;
 									autocomplete="off"
 									spellcheck="false"
 								/>
-								<ul id="inventoryList"></ul>
-								<!-- Generated code starts here on 2026-11-10T00:00:00Z: -->
-								<div>
+								<div class="inventory-actions">
 									<button
 										id="sellAllBtn"
 										class="small"
@@ -626,7 +617,6 @@ Last release date on nightly: ${nightlyRDate}`;
 										view index
 									</button>
 								</div>
-								<!-- Generated code ends here on 2026-11-10T00:00:00Z: -->
 							</div>
 							<ul id="inventoryList"></ul>
 						</div>
