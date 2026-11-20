@@ -25,6 +25,8 @@ const rarities = [
       wait: 0.1
       switch color: #FFFF00
     }
+		glow: #FFCC00 12
+		outline: #FF6600
   `,
 	},
 	{
