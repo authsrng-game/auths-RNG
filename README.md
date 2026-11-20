@@ -43,6 +43,7 @@ Join us at our Discord server and/or IRC channel at #authsrng!
 | Nightly | https://nightly.authsrng.xyz | Bleeding edge dev branch, updated on every commit (the name is just a vibe, it doesn't actually build nightly sadly). |
 | Native | https://native.authsrng.xyz | Maintained separately as the website client for the mobile apps. Built for speed and privacy, plus more addicting features. |
 | Nosave | https://nosave.authsrng.xyz | Maintained separately as well, does not save game data at all, used for tournaments and events. |
+| Free | https://free.authsrng.xyz | Temporary branch used as the Galaxy version of auth's RNG with copyright-free music used. Once auth's RNG does not use copyrighted material, this will be irrelevant. |
 
 ---
 
