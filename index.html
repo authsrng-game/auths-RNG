@@ -1165,6 +1165,19 @@ Last release date on nightly: ${nightlyRDate}`;
 									<span class="pill-track"></span>
 								</label>
 							</div>
+							<div class="setting-row" id="dogShrineSettingRow">
+								<div class="setting-info">
+									<span class="setting-name">enable the dog shrine</span>
+									<span class="setting-desc" id="dogShrineSettingDesc"
+										>good boys for your gambling time.. do NOT take that out of context (unlock at
+										500 rolls)</span
+									>
+								</div>
+								<label class="pill-toggle">
+									<input type="checkbox" id="dogShrineEnabled" disabled />
+									<span class="pill-track"></span>
+								</label>
+							</div>
 						</div>
 
 						<div class="settings-group">
@@ -1823,6 +1836,25 @@ Last release date on nightly: ${nightlyRDate}`;
 					</button>
 					<div id="catShrineGrid" class="cat-grid"></div>
 				</div>
+
+				<div class="page" id="page-13">
+					<h2 style="margin-top: 0">dog shrine</h2>
+					<p style="font-size: 0.8em; opacity: 0.5; margin: -6px 0 12px">
+						summon dogs with your sheer aura
+					</p>
+					<div id="dogShrineCount" style="font-size: 0.78em; opacity: 0.5; margin-bottom: 14px">
+						0/50 dogs saved
+					</div>
+					<button
+						id="dogShrineSummonBtn"
+						style="margin-bottom: 20px"
+						aria-label="Summon a dog"
+						title="Summon a random emotional support dog"
+					>
+						summon a dog
+					</button>
+					<div id="dogShrineGrid" class="cat-grid"></div>
+				</div>
 			</div>
 		</div>
 
@@ -1845,10 +1877,12 @@ Last release date on nightly: ${nightlyRDate}`;
 			<button class="page-dot" data-page="9" aria-label="Page 10"></button>
 			<button class="page-dot" data-page="10" aria-label="Page 11"></button>
 			<button class="page-dot" data-page="11" aria-label="Page 12"></button>
+			<button class="page-dot" data-page="12" aria-label="Page 13"></button>
 		</div>
 		<!-- Generated code ends here on 2026-06-18T00:35:00Z: -->
 
 		<script src="assets/scripts/cat-shrine.js" defer></script>
+		<script src="assets/scripts/dog-shrine.js" defer></script>
 
 		<!-- Generated code starts here on 2026-06-18T00:30:00Z: -->
 		<button
@@ -2710,7 +2744,7 @@ Last release date on nightly: ${nightlyRDate}`;
 				const swipeIndicator = document.querySelector('.swipe-indicator');
 
 				let currentPage = 0;
-				const totalPages = 12;
+				const totalPages = 13;
 				const lockedPages = new Set();
 
 				let visitCount = parseInt(localStorage.getItem('pageVisitCount') || '0');
@@ -4552,6 +4586,7 @@ container.addEventListener('click', () => {
 			if (localStorage.getItem('starmapUnlocked') !== '1') hidePageDot(6); // was 4
 			if (localStorage.getItem('runesUnlocked') !== '1') hidePageDot(7); // was 5
 			if (localStorage.getItem('catShrineUnlocked') !== '1') hidePageDot(11); // was 9
+			if (localStorage.getItem('dogShrineUnlocked') !== '1') hidePageDot(12);
 			if (localStorage.getItem('expeditionsUnlocked') !== '1') hidePageDot(3);
 			if (localStorage.getItem('dealerUnlocked') !== '1') hidePageDot(4);
 

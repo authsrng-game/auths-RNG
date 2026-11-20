@@ -5283,7 +5283,8 @@ altcha-widget:empty::before {
 	padding: 3px 0;
 }
 
-#catShrinePin {
+#catShrinePin,
+#dogShrinePin {
 	display: none;
 	position: fixed;
 	bottom: 70px;
@@ -5298,13 +5299,15 @@ altcha-widget:empty::before {
 	box-shadow: 0 2px 10px rgb(0 0 0 / 40%);
 }
 
-#catShrinePin img {
+#catShrinePin img,
+#dogShrinePin img {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
 }
 
-body.cat-shrine-off #catShrinePin {
+body.cat-shrine-off #catShrinePin,
+body.dog-shrine-off #dogShrinePin {
 	display: none !important;
 }
 

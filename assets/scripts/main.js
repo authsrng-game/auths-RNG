@@ -2205,6 +2205,9 @@ async function resetInventory() {
 	localStorage.removeItem('catShrineUnlocked');
 	localStorage.removeItem('catShrineEquipped');
 	localStorage.removeItem('catShrineToggle');
+	localStorage.removeItem('dogShrineUnlocked');
+	localStorage.removeItem('dogShrineEquipped');
+	localStorage.removeItem('dogShrineToggle');
 	localStorage.removeItem('infoTipsRead');
 	// Generated code ends here on 2026-03-29T12:00:00Z:
 	// Generated code starts here on 2026-10-30T00:00:00Z:

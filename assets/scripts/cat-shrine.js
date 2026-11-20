@@ -236,6 +236,22 @@
 		return localStorage.getItem('catShrineToggle') !== '0';
 	}
 
+	function setShrineEnabled(on) {
+		const toggle = document.getElementById('catShrineEnabled');
+		if (toggle) toggle.checked = on;
+		localStorage.setItem('catShrineToggle', on ? '1' : '0');
+		document.body.classList.toggle('cat-shrine-off', !on);
+		if (on) {
+			const equipped = localStorage.getItem(EQUIP_KEY);
+			if (equipped) equipCat(equipped);
+		} else {
+			const pin = document.getElementById('catShrinePin');
+			if (pin) pin.style.display = 'none';
+		}
+	}
+
+	window.catShrineSetEnabled = setShrineEnabled;
+
 	function bindShrineToggle() {
 		const toggle = document.getElementById('catShrineEnabled');
 		if (!toggle) return;
@@ -243,14 +259,8 @@
 		toggle.checked = on;
 		document.body.classList.toggle('cat-shrine-off', !on);
 		toggle.addEventListener('change', () => {
-			localStorage.setItem('catShrineToggle', toggle.checked ? '1' : '0');
-			document.body.classList.toggle('cat-shrine-off', !toggle.checked);
-			const equipped = localStorage.getItem(EQUIP_KEY);
-			if (toggle.checked && equipped) equipCat(equipped);
-			if (!toggle.checked) {
-				const pin = document.getElementById('catShrinePin');
-				if (pin) pin.style.display = 'none';
-			}
+			setShrineEnabled(toggle.checked);
+			if (toggle.checked && window.dogShrineSetEnabled) window.dogShrineSetEnabled(false);
 		});
 	}
 
