@@ -1,7 +1,13 @@
 console.log(performance.now());
 
 // cleanup.js
-// cleanup shit because im too damn lazy to patch stupid memory leaks
+/**
+ * Used as a service file that keeps auth's RNG smooth when left idle for a long
+ * time. Since auth's RNG is mostly an idle game but with tons of elements to it,
+ * it may degrade performance over time and needs a refresh to get it back on speed,
+ * but this file prevents that, allowing auth's RNG to be ran as how much the player
+ * desires.
+ */
 
 (function () {
 	'use strict';
