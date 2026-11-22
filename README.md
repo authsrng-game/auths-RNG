@@ -9,6 +9,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/authsrng-game/auths-RNG/autofix.yml?branch=nightly&label=autofix&color=5BCEFA)](https://github.com/authsrng-game/auths-RNG/actions/workflows/autofix.yml)
 ![Status](https://img.shields.io/badge/status-actively%20developed-5BCEFA)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15178/badge)](https://www.bestpractices.dev/projects/15178)
+[![auth's RNG status page](https://badge.uptimerobot.com/psp/b6fed5395dfdda5e96981523fe63c243.svg?style=logo&theme=dark)](https://stats.uptimerobot.com/TAmAzlTA1g?utm_source=status_badge&utm_medium=referral)
 
 <!-- RELEASE-NOTES:START -->
 <!-- RELEASE-NOTES:END -->
