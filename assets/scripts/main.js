@@ -484,6 +484,7 @@ function countSaved(n) {
 
 function usePotion(potionType) {
 	const data = potionData[potionType];
+	if (!data) return;
 	const owned = playerPotions[potionType] || 0;
 	if (owned <= 0) {
 		window.showAlert(`you don't have any ${data.name} potions!`);
@@ -663,10 +664,15 @@ function updateActivePotionsDisplay() {
 	_activePotionsListEl.appendChild(fragment);
 }
 // Update potion timers
-setInterval(() => {
-	recalcPotionLuck(); // handles filter + multiplier reset internally
-	updateActivePotionsDisplay();
-}, 1000);
+// Deferred past script evaluation: the 1s interval can otherwise tick while
+// the script is still loading and hit `let` declarations below in their
+// temporal dead zone (isCutscenePlaying, globalLuckMultiplier, ...).
+setTimeout(() => {
+	setInterval(() => {
+		recalcPotionLuck(); // handles filter + multiplier reset internally
+		updateActivePotionsDisplay();
+	}, 1000);
+}, 0);
 
 function buyPotion(type) {
 	const data = potionData[type];
